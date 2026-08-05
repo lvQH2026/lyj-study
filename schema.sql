@@ -66,8 +66,9 @@ begin
   ) x;
 
   -- 最近 30 道错题详情（跨所有测验，按时间倒序）
-  select coalesce(json_agg(w order by ca desc), '[]'::json) into wrong_json from (
-    select sr.created_at as ca, json_array_elements(sr.wrong_json) as w
+  -- 注意：wrong_json 是 jsonb，需用 jsonb_array_elements；并把元素转 json 以便与 '[]'::json 聚合一致
+  select coalesce(json_agg(w::json order by ca desc), '[]'::json) into wrong_json from (
+    select sr.created_at as ca, jsonb_array_elements(sr.wrong_json) as w
     from study_records sr
     where sr.learning_id = p_learning_id and sr.wrong_json is not null
     order by sr.created_at desc
