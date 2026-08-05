@@ -33,7 +33,11 @@ async function ensureChild() {
 async function pushStudyRecords() {
   const c = sbClient(); if (!c) return;
   const data = loadData();
-  const rows = (data.history || []).map(h => ({
+  const hist = data.history || [];
+  // 只同步尚未上传过的记录（增量同步，避免每次全量重插导致批次过大失败）
+  const pending = hist.filter(h => !h.synced);
+  if (!pending.length) return;
+  const toRow = (h) => ({
     learning_id: getLearningId(),
     grade: h.grade,
     unit_name: h.unitName,
@@ -53,18 +57,19 @@ async function pushStudyRecords() {
         svg: (w.question && w.question.svg) || ''
       }
     }))
-  }));
-  if (!rows.length) return;
+  });
+  const mark = (h) => { h.synced = true; };
   try {
-    await c.from('study_records').insert(rows);
+    await c.from('study_records').insert(pending.map(toRow));
+    pending.forEach(mark);
   } catch (e) {
-    // 列 wrong_json 可能尚未添加：去掉该列重试，保证分数等基础数据仍能同步
-    console.warn('pushStudyRecords (with wrong_json) failed, retry without:', e);
-    try {
-      const fallback = rows.map(({ wrong_json, ...r }) => r);
-      await c.from('study_records').insert(fallback);
-    } catch (e2) { console.warn('pushStudyRecords fallback failed:', e2); }
+    console.warn('pushStudyRecords 批次失败，改为逐条写入：', e);
+    for (const h of pending) {
+      try { await c.from('study_records').insert(toRow(h)); mark(h); }
+      catch (e2) { console.warn('跳过一条记录：', h.unitName, e2); }
+    }
   }
+  saveData(data);
 }
 
 // 数据驱动的单元生成器（用于 content 覆盖层中的 questions 数组）

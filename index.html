@@ -7188,7 +7188,7 @@ function g2_length() {
     { q: '操场一圈大约长多少？', a: 200, unit: '米', ds: [2, 20, 2000] },
   ];
   let item = pick(items);
-  return makeChoice(`${item.q}`, item.a, item.ds.map(d => d));
+  return makeChoice(`${item.q}`, `${item.a}${item.unit}`, item.ds.map(d => `${d}${item.unit}`));
 }
 
 function g100_add() {
@@ -8408,7 +8408,8 @@ function recordHistory(grade, unitName, score, total, wrong) {
     total: total,
     accuracy: Math.round(score / total * 100),
     time: Date.now(),
-    wrong: Array.isArray(wrong) ? wrong : []
+    wrong: Array.isArray(wrong) ? wrong : [],
+    synced: false
   });
   if (data.history.length > 50) data.history = data.history.slice(0, 50);
 

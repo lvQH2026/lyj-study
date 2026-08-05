@@ -1,5 +1,5 @@
 // 吕泳冀学习站 Service Worker
-const CACHE = 'lyj-shell-v1';
+const CACHE = 'lyj-shell-v2';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './config.js', './supabase.js', './parent.js',
