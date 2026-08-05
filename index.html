@@ -1323,6 +1323,7 @@ body {
   <div class="exam-paper-header" id="examPaperHeader" style="display:none">
     <div class="exam-title" id="examPaperTitle"></div>
     <div class="exam-sub" id="examPaperSub"></div>
+    <div style="text-align:center;font-size:18px;font-weight:700;color:#cf1322;margin-top:4px" id="examTimer">⏱ 70:00</div>
   </div>
   <div class="quiz-header">
     <div class="quiz-progress" id="quizProgress">第 1 / 10 题</div>
@@ -1368,6 +1369,10 @@ body {
       <button class="btn btn-outline" onclick="goHome()">返回首页</button>
       <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()">再练一次</button>
     </div>
+  </div>
+  <div class="card" id="examAnswerKey" style="display:none;text-align:left">
+    <div class="section-title">📋 参考答案</div>
+    <div id="examAnswerKeyBody"></div>
   </div>
 </div>
 
@@ -7039,1183 +7044,316 @@ function makeFill(question, answer, inputType = 'number') {
   };
 }
 
-// --- 1年级 ---
-function g1_5_addsub() {
-  let a = ri(1, 5), b = ri(1, 5);
-  if (Math.random() > 0.5) {
-    return makeChoice(`${a} + ${b} = ?`, a + b, [Math.abs(a+b-1), a+b+1, Math.abs(a-b)]);
-  } else {
-    let big = Math.max(a, b), small = Math.min(a, b);
-    return makeChoice(`${big} - ${small} = ?`, big - small, [big-small+1, Math.abs(big-small-1), big+small]);
-  }
+// ===== 新题库生成器（人教版 + 试卷配图）=====
+function svgR(x,y,w,h,f,sw){sw=sw||2;return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f||'#BBDEFB'}" stroke="#333" stroke-width="${sw}"/>`}
+function svgC(cx,cy,r,f){return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${f||'#FFB74D'}" stroke="#333" stroke-width="2"/>`}
+function svgL(x1,y1,x2,y2,s,w){w=w||2;return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${s||'#333'}" stroke-width="${w}" stroke-linecap="round"/>`}
+function svgTri(x1,y1,x2,y2,x3,y3,f){return `<polygon points="${x1},${y1} ${x2},${y2} ${x3},${y3}" fill="${f||'#81C784'}" stroke="#333" stroke-width="2"/>`}
+function svgTxt(x,y,txt,sz,c){sz=sz||12;c=c||'#333';return `<text x="${x}" y="${y}" text-anchor="middle" font-size="${sz}" fill="${c}">${txt}</text>`}
+function svgClock(h,m){
+  let ha=(h%12)*30+m*0.5, ma=m*6, s='';
+  s+=`<circle cx="60" cy="60" r="50" fill="#fff" stroke="#333" stroke-width="2"/>`;
+  for(let i=1;i<=12;i++){let a=i*30*Math.PI/180; s+=`<text x="${60+38*Math.sin(a)}" y="${60-38*Math.cos(a)+4}" text-anchor="middle" font-size="10">${i}</text>`}
+  s+=`<line x1="60" y1="60" x2="${60+25*Math.sin(ha*Math.PI/180)}" y2="${60-25*Math.cos(ha*Math.PI/180)}" stroke="#333" stroke-width="3" stroke-linecap="round"/>`;
+  s+=`<line x1="60" y1="60" x2="${60+40*Math.sin(ma*Math.PI/180)}" y2="${60-40*Math.cos(ma*Math.PI/180)}" stroke="#E57373" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="60" cy="60" r="3" fill="#333"/>`;
+  return s;
+}
+function svgAngle(deg){
+  let r=35, rad=Math.PI*(180-deg)/180, ex=60+r*Math.cos(rad), ey=60-r*Math.sin(rad);
+  let s=svgL(60,60,60+r,60)+svgL(60,60,ex,ey);
+  for(let i=0;i<=15;i++){let a=Math.PI*(180-(deg*i/15))/180; s+=`<line x1="${60+10*Math.cos(a)}" y1="${60-10*Math.sin(a)}" x2="${60+10*Math.cos(a+Math.PI*deg/15/180)}" y2="${60-10*Math.sin(a+Math.PI*deg/15/180)}" stroke="#E57373" stroke-width="1"/>`}
+  s+=svgTxt(43,50,deg+'°',11,'#E57373'); return s;
+}
+function svgRuler(){let s='';for(let i=0;i<=10;i++){let h=(i%5==0)?10:5;s+=`<line x1="${5+i*11}" y1="35" x2="${5+i*11}" y2="${35-h}" stroke="#333" stroke-width="1"/>`;if(i%2==0)s+=svgTxt(5+i*11,48,i,8)} return svgR(2,30,115,30,'#fff',1)+s;}
+
+// ---- 选择题/填空题工厂 ----
+function mc(q,a,d){
+  let o=[fmt(a),...d.map(d=>fmt(d))].filter((v,i,A)=>A.indexOf(v)===i).slice(0,4);
+  while(o.length<4){let n=parseFloat(a); if(!isNaN(n)){let x=n+ri(-8,8); if(x>=0&&o.indexOf(fmt(x))<0)o.push(fmt(x))}else o.push('选项'+String.fromCharCode(65+o.length))}
+  o.sort(()=>Math.random()-0.5);
+  return {type:'choice',question:q,options:o,answer:fmt(a)};
+}
+function mf(q,a){return {type:'fill',question:q,answer:fmt(a)}}
+function msc(q,svg,a,d){
+  let o=[fmt(a),...d.map(d=>fmt(d))].filter((v,i,A)=>A.indexOf(v)===i).slice(0,4);
+  o.sort(()=>Math.random()-0.5);
+  return {type:'shape_choice',question:q,svg:svg,options:o,answer:fmt(a)};
 }
 
-function g6_10_addsub() {
-  let a = ri(1, 9), b = ri(1, 9);
-  if (a + b <= 10) {
-    return makeChoice(`${a} + ${b} = ?`, a + b, [a+b+1, Math.abs(a+b-1), a+b+2]);
-  } else {
-    let big = ri(6, 10), small = ri(1, big);
-    return makeChoice(`${big} - ${small} = ?`, big - small, [big-small+1, big-small-1 >= 0 ? big-small-1 : 0, big-small+2]);
-  }
-}
+// ===== 1年级上册 =====
+function g1_5_addsub(){let a=ri(1,4),b=ri(1,5-a); if(Math.random()<0.4) return mf(`${a}+${b}=?`,a+b); return mc(`${a}+${b}=?`,a+b,[a+b-1,a+b+1,a+b+2])}
+function g6_10_addsub(){let a=ri(3,7),b=ri(1,10-a); if(Math.random()<0.3) return mf(`${a}+${b}=?`,a+b); return mc(`${a}+${b}=?`,a+b,[a+b-1,a+b+1,a+b+1])}
+function g11_20_count(){let n=ri(10,19); return mc(`${n}是由几个十和几个一组成的？`,`1个十和${n-10}个一`,[`2个十`,`${n-10}个十`,`1个十和${n-9}个一`])}
+function g20_carry_add(){let a=ri(7,9),b=ri(a>8?2:3,9); return mc(`${a}+${b}=?`,a+b,[a+b-1,a+b+1,a+b+2])}
 
-function g11_20_count() {
-  let n = ri(11, 20);
-  return makeFill(`写出数字：${'🔟'.repeat(Math.floor(n/10))}${'•'.repeat(n%10)} = ?`, n);
-}
-
-function g20_carry_add() {
-  let a = ri(2, 9), b = ri(2, 9);
-  if (a + b <= 10) { a = ri(6, 9); b = ri(2, 9); }
-  if (a + b > 20) { a = ri(2, 9); b = ri(2, 11 - a); }
-  let sum = a + b;
-  return makeChoice(`${a} + ${b} = ?`, sum, [sum+1, sum-1, sum+2]);
-}
-
-function g1_shape() {
-  const shapes = [
-    { name: '球体', svg: '<circle cx="50" cy="50" r="35" fill="#FFB74D"/>' },
-    { name: '正方体', svg: '<rect x="25" y="25" width="50" height="50" fill="#64B5F6"/>' },
-    { name: '圆柱', svg: '<rect x="30" y="20" width="40" height="60" fill="#81C784" rx="5"/><ellipse cx="50" cy="20" rx="20" ry="6" fill="#A5D6A7"/>' },
-    { name: '长方体', svg: '<rect x="20" y="30" width="60" height="40" fill="#E57373" rx="3"/>' },
+function g1_shape(){
+  let items=[
+    {n:'球体',s:svgC(60,45,35,'#FFB74D')},
+    {n:'正方体',s:svgR(25,25,50,50,'#64B5F6')},
+    {n:'长方体',s:svgR(20,25,60,40,'#E57373')},
+    {n:'圆柱',s:svgR(28,16,44,52,'#81C784')+`<ellipse cx="50" cy="16" rx="22" ry="7" fill="#A5D6A7" stroke="#333" stroke-width="2"/>`},
   ];
-  let s = pick(shapes);
-  let wrong = shapes.filter(x => x.name !== s.name).map(x => x.name);
-  return {
-    type: 'shape_choice',
-    question: '这是什么图形？',
-    svg: s.svg,
-    options: [s.name, ...wrong.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5),
-    answer: s.name
-  };
+  let it=pick(items), wr=items.filter(x=>x.n!==it.n).slice(0,3).map(x=>x.n);
+  return msc('这是什么图形？',it.s,it.n,wr);
 }
 
-function g1_clock() {
-  let h = ri(1, 12);
-  let m = pick([0, 15, 30, 45]);
-  let mStr = m === 0 ? '整' : m === 15 ? '一刻' : m === 30 ? '半' : '三刻';
-  let answer = m === 0 ? `${h}点${mStr}` : `${h}点${mStr}`;
-  let hourAngle = (h % 12) * 30 + m * 0.5;
-  let minAngle = m * 6;
-  let svg = `<circle cx="60" cy="60" r="50" fill="none" stroke="#333" stroke-width="3"/>`;
-  for (let i = 1; i <= 12; i++) {
-    let a = i * 30 * Math.PI / 180;
-    svg += `<text x="${60 + 38 * Math.sin(a)}" y="${60 - 38 * Math.cos(a) + 4}" text-anchor="middle" font-size="10">${i}</text>`;
-  }
-  svg += `<line x1="60" y1="60" x2="${60 + 25 * Math.sin(hourAngle * Math.PI / 180)}" y2="${60 - 25 * Math.cos(hourAngle * Math.PI / 180)}" stroke="#333" stroke-width="3" stroke-linecap="round"/>`;
-  svg += `<line x1="60" y1="60" x2="${60 + 40 * Math.sin(minAngle * Math.PI / 180)}" y2="${60 - 40 * Math.cos(minAngle * Math.PI / 180)}" stroke="#4A90D9" stroke-width="2" stroke-linecap="round"/>`;
-  svg += `<circle cx="60" cy="60" r="3" fill="#333"/>`;
-  let wrongs = [];
-  let allTimes = [];
-  for (let hh = 1; hh <= 12; hh++) {
-    for (let mm of [0, 15, 30, 45]) {
-      let str = mm === 0 ? `${hh}点整` : mm === 15 ? `${hh}点一刻` : mm === 30 ? `${hh}点半` : `${hh}点三刻`;
-      if (str !== answer) allTimes.push(str);
-    }
-  }
-  wrongs = allTimes.sort(() => Math.random() - 0.5).slice(0, 3);
-  return {
-    type: 'shape_choice',
-    question: '钟表上显示的时间是？',
-    svg: svg,
-    options: [answer, ...wrongs].sort(() => Math.random() - 0.5),
-    answer: answer
-  };
+function g1_clock(){
+  let h=ri(1,12), m=pick([0,15,30,45]);
+  let lbl=m===0?`${h}点整`:m===15?`${h}点一刻`:m===30?`${h}点半`:`${h}点三刻`;
+  let d=[`${(h%12+1)+1>12?1:h%12+1}点整`,`${h}点${m===0?'半':'整'}`];
+  if(h>1)d.push(`${h-1}点整`);else d.push('12点整');
+  return msc('钟面显示的是几点？',svgClock(h,m),lbl,d);
 }
 
-// --- 1年级下册 ---
-function g20_subtraction() {
-  let a = ri(11, 18), b = ri(2, 9);
-  if (a - b < 0) { [a, b] = [b, a]; }
-  let diff = a - b;
-  return makeChoice(`${a} - ${b} = ?`, diff, [diff+1, Math.abs(diff-1), diff+2]);
+function g_app_shopping(){let item=pick(['苹果','橘子','糖果']),p=ri(2,8),n=ri(1,4);return mc(`${item}每个${p}元，买${n}个要多少钱？`,p*n,[p*n-p,p*n+p,p*n+n])}
+function g_shape_compose(){return msc('下图中有几个小正方体？',svgR(10,10,80,80,'none',1)+svgR(10,10,35,35,'#64B5F6')+svgR(48,10,35,35,'#90CAF9')+svgR(10,48,35,35,'#90CAF9')+svgR(48,48,35,35,'#64B5F6'),'4个',['2个','3个','5个'])}
+
+// ===== 1年级下册 =====
+function g20_subtraction(){let a=ri(11,18),b=ri(2,9);if(a-b<0)[a,b]=[b,a];return mc(`${a}-${b}=?`,a-b,[a-b+2,a-b-1,a-b+3])}
+function g100_count(){let n=ri(20,99);return mf(`在计数器上拨出${n}，这个数是由几个十和几个一组成的？`, `${Math.floor(n/10)}个十和${n%10}个一`)}
+function g100_addsub_nocarry(){let a=ri(20,80),b=ri(10,99-a);return mc(`${a}+${b}=？`,a+b,[a+b-5,a+b+5,a+b+10])}
+function g100_addsub_carry(){let a=ri(15,40),b=ri(10,80-a);if((a%10)+(b%10)<10){b+=10-((a%10)+(b%10))%10+ri(1,3)}return mc(`竖式计算：${a}+${b}=？`,a+b,[a+b-3,a+b+2])}
+
+function g_money(){
+  let items=[{q:'1元等于多少角？',a:'10角',d:['5角','20角','1角']},
+    {q:'50角等于多少元？',a:'5元',d:['10元','3元','1元']},
+    {q:'一支铅笔8角，买2支要多少钱？',a:'16角',d:['10角','12角','20角']},
+    {q:'1角等于多少分？',a:'10分',d:['5分','1分','20分']},
+    {q:'小明有1元5角，他有多少角？',a:'15角',d:['10角','25角','5角']}];
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
 
-function g100_count() {
-  let n = ri(20, 100);
-  return makeFill(`读出这个数：${n} = ?（用中文）`, n);
-}
-
-function g100_addsub_nocarry() {
-  let a = ri(10, 99), b = ri(1, 9);
-  let aOnes = a % 10;
-  if (aOnes + b >= 10) { a = a - aOnes + ri(0, 9 - b); }
-  return makeChoice(`${a} + ${b} = ?`, a + b, [a+b+1, a+b-1, a+b+10]);
-}
-
-function g100_addsub_carry() {
-  let a = ri(25, 80), b = ri(15, 50);
-  let sum = a + b;
-  if (sum > 100) { a = ri(20, 50); b = ri(15, 50); sum = a + b; }
-  return makeChoice(`${a} + ${b} = ?`, sum, [sum+1, sum-1, sum+10]);
-}
-
-function g_money() {
-  let price = ri(1, 20);
-  let pay = pick([5, 10, 20, 50]);
-  if (pay < price) pay = price + pick([5, 10]);
-  return makeChoice(`买一支笔${price}元，付了${pay}元，应找回多少元？`, pay - price, [pay-price+1, pay-price-1, pay-price+5]);
-}
-
-function g1_shape2() {
-  const shapes = ['三角形', '正方形', '长方形', '圆形', '平行四边形'];
-  let s = pick(shapes);
-  let svgMap = {
-    '三角形': '<polygon points="50,15 90,85 10,85" fill="#FFD54F" stroke="#F57F17" stroke-width="2"/>',
-    '正方形': '<rect x="20" y="20" width="60" height="60" fill="#64B5F6" stroke="#1565C0" stroke-width="2"/>',
-    '长方形': '<rect x="15" y="30" width="70" height="40" fill="#81C784" stroke="#2E7D32" stroke-width="2"/>',
-    '圆形': '<circle cx="50" cy="50" r="35" fill="#E57373" stroke="#C62828" stroke-width="2"/>',
-    '平行四边形': '<polygon points="20,30 85,30 75,75 10,75" fill="#BA68C8" stroke="#6A1B9A" stroke-width="2"/>',
-  };
-  let wrong = shapes.filter(x => x !== s).sort(() => Math.random() - 0.5).slice(0, 3);
-  return {
-    type: 'shape_choice',
-    question: '这是什么图形？',
-    svg: svgMap[s],
-    options: [s, ...wrong].sort(() => Math.random() - 0.5),
-    answer: s
-  };
-}
-
-// --- 2年级 ---
-function g2_length() {
-  let items = [
-    { q: '一支铅笔大约长多少？', a: 15, unit: '厘米', ds: [1.5, 150, 5] },
-    { q: '一张课桌大约高多少？', a: 70, unit: '厘米', ds: [7, 700, 15] },
-    { q: '教室的门大约高多少？', a: 2, unit: '米', ds: [20, 200, 50] },
-    { q: '一本数学书大约厚多少？', a: 8, unit: '毫米', ds: [80, 8, 0.8] },
-    { q: '操场一圈大约长多少？', a: 200, unit: '米', ds: [2, 20, 2000] },
+function g1_shape2(){
+  let items=[
+    {n:'三角形',s:svgTri(60,10,15,80,105,80,'#FFB74D')},
+    {n:'正方形',s:svgR(15,15,70,70,'#64B5F6')},
+    {n:'长方形',s:svgR(8,22,88,46,'#E57373')},
+    {n:'圆形',s:svgC(60,45,35,'#81C784')},
   ];
-  let item = pick(items);
-  return makeChoice(`${item.q}`, `${item.a}${item.unit}`, item.ds.map(d => `${d}${item.unit}`));
+  let it=pick(items), wr=items.filter(x=>x.n!==it.n).slice(0,3).map(x=>x.n);
+  return msc('这是什么图形？',it.s,it.n,wr);
 }
 
-function g100_add() {
-  let a = ri(20, 80), b = ri(15, 50);
-  let sum = a + b;
-  if (sum > 100) { a = ri(20, 50); b = ri(15, 40); sum = a + b; }
-  return makeChoice(`${a} + ${b} = ?`, sum, [sum+1, sum-1, sum+10]);
-}
-
-function g100_sub() {
-  let a = ri(50, 100), b = ri(10, 49);
-  let diff = a - b;
-  return makeChoice(`${a} - ${b} = ?`, diff, [diff+1, diff-1, diff+10]);
-}
-
-function g_mul_1() {
-  let a = ri(2, 6), b = ri(2, 6);
-  return makeChoice(`${a} × ${b} = ?`, a * b, [a*b+1, a*b-1, a*b+a]);
-}
-
-function g_mul_2() {
-  let a = ri(7, 9), b = ri(2, 9);
-  return makeChoice(`${a} × ${b} = ?`, a * b, [a*b+1, a*b-1, a*b+a]);
-}
-
-function g2_time() {
-  let h = ri(1, 12);
-  let m = pick([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
-  let answer = `${h}时${m}分`;
-  let wrongs = [];
-  while (wrongs.length < 3) {
-    let wh = ri(1, 12), wm = pick([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
-    let w = `${wh}时${wm}分`;
-    if (w !== answer && !wrongs.includes(w)) wrongs.push(w);
-  }
-  let hourAngle = (h % 12) * 30 + m * 0.5;
-  let minAngle = m * 6;
-  let svg = `<circle cx="60" cy="60" r="50" fill="white" stroke="#333" stroke-width="3"/>`;
-  for (let i = 0; i < 12; i++) {
-    let a = i * 30 * Math.PI / 180;
-    svg += `<line x1="${60 + 48 * Math.sin(a)}" y1="${60 - 48 * Math.cos(a)}" x2="${60 + 45 * Math.sin(a)}" y2="${60 - 45 * Math.cos(a)}" stroke="#333" stroke-width="2"/>`;
-  }
-  svg += `<line x1="60" y1="60" x2="${60 + 25 * Math.sin(hourAngle * Math.PI / 180)}" y2="${60 - 25 * Math.cos(hourAngle * Math.PI / 180)}" stroke="#333" stroke-width="4" stroke-linecap="round"/>`;
-  svg += `<line x1="60" y1="60" x2="${60 + 40 * Math.sin(minAngle * Math.PI / 180)}" y2="${60 - 40 * Math.cos(minAngle * Math.PI / 180)}" stroke="#4A90D9" stroke-width="2" stroke-linecap="round"/>`;
-  svg += `<circle cx="60" cy="60" r="3" fill="#333"/>`;
-  return {
-    type: 'shape_choice',
-    question: '钟表上显示的时间是？',
-    svg: svg,
-    options: [answer, ...wrongs].sort(() => Math.random() - 0.5),
-    answer: answer
-  };
-}
-
-function g_div_1() {
-  let b = ri(2, 6), q = ri(2, 6);
-  let a = b * q;
-  return makeChoice(`${a} ÷ ${b} = ?`, q, [q+1, q-1, q+2]);
-}
-
-function g_div_2() {
-  let b = ri(7, 9), q = ri(2, 9);
-  let a = b * q;
-  return makeChoice(`${a} ÷ ${b} = ?`, q, [q+1, q-1, q+2]);
-}
-
-function g_remainder() {
-  let b = ri(3, 9), q = ri(2, 8), r = ri(1, b - 1);
-  let a = b * q + r;
-  return makeChoice(`${a} ÷ ${b} = ? 余 ?`, `${q} 余 ${r}`, [`${q+1} 余 ${r}`, `${q} 余 ${r+1 < b ? r+1 : 0}`, `${q-1} 余 ${r+b}`]);
-}
-
-function g2_mixed() {
-  let a = ri(3, 9), b = ri(3, 9), c = ri(2, 9);
-  let ops = pick(['+', '-']);
-  let result, expr;
-  if (ops === '+') {
-    result = a * b + c;
-    expr = `${a} × ${b} + ${c}`;
-  } else {
-    result = a * b - c;
-    expr = `${a} × ${b} - ${c}`;
-    if (result < 0) { result = a * b + c; expr = `${a} × ${b} + ${c}`; }
-  }
-  return makeChoice(`${expr} = ?`, result, [result+1, result-1, result+a]);
-}
-
-function g2_weight() {
-  let items = [
-    { q: '一个苹果大约重多少？', a: 200, unit: '克', ds: [2, 2000, 20] },
-    { q: '一个西瓜大约重多少？', a: 4, unit: '千克', ds: [400, 40, 4000] },
-    { q: '一枚硬币大约重多少？', a: 5, unit: '克', ds: [50, 500, 0.5] },
-    { q: '一只鸡大约重多少？', a: 2, unit: '千克', ds: [200, 20, 2000] },
-    { q: '一袋大米大约重多少？', a: 10, unit: '千克', ds: [100, 1000, 10000] },
+function g_app_time(){
+  let items=[
+    {s:svgClock(7,0),q:'小红早上几点起床？',a:'7点整',d:['6点整','8点整']},
+    {s:svgClock(12,0),q:'中午几点吃饭？',a:'12点整',d:['11点整','1点整']},
+    {s:svgClock(8,15),q:'第一节课8:15开始，钟面显示是几点？',a:'8点一刻',d:['8点整','8点半']},
+    {s:svgClock(4,30),q:'放学时4:30，钟面显示？',a:'4点半',d:['4点整','5点整']},
   ];
-  let item = pick(items);
-  return makeChoice(`${item.q}`, `${item.a}${item.unit}`, item.ds.map(d => `${d}${item.unit}`));
+  let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
 
-function g2_shape() {
-  const shapes = ['锐角', '直角', '钝角'];
-  let s = pick(shapes);
-  let angle = s === '锐角' ? ri(10, 80) : s === '直角' ? 90 : ri(100, 170);
-  let rad = (angle - 90) * Math.PI / 180;
-  let svg = `<line x1="20" y1="80" x2="90" y2="80" stroke="#333" stroke-width="2"/>`;
-  svg += `<line x1="20" y1="80" x2="${20 + 70 * Math.cos(rad)}" y2="${80 - 70 * Math.sin(rad)}" stroke="#4A90D9" stroke-width="2"/>`;
-  svg += `<path d="M 35 80 A 15 15 0 0 ${angle > 90 ? 1 : 0} ${35 + 15 * Math.cos(rad)} ${80 - 15 * Math.sin(rad)}" fill="none" stroke="#FF6B6B" stroke-width="1.5"/>`;
-  svg += `<text x="45" y="70" font-size="12" fill="#FF6B6B">${angle}°</text>`;
-  let wrong = shapes.filter(x => x !== s);
-  return {
-    type: 'shape_choice',
-    question: '这个角是什么角？',
-    svg: svg,
-    options: [s, ...wrong].sort(() => Math.random() - 0.5),
-    answer: s
-  };
-}
-
-// --- 3年级 ---
-function g3_time() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let h1 = ri(1, 10), m1 = pick([0, 15, 30, 45]), h2 = h1 + ri(1, 3), m2 = pick([0, 15, 30, 45]);
-    let t1 = h1 * 60 + m1, t2 = h2 * 60 + m2;
-    let diff = t2 - t1;
-    let h = Math.floor(diff / 60), m = diff % 60;
-    let answer = m === 0 ? `${h}小时` : `${h}小时${m}分`;
-    return makeChoice(`从${h1}时${m1}分到${h2}时${m2}分，经过多长时间？`, answer, [`${h+1}小时`, `${h}小时${(m+15)%60}分`, `${h-1>0?h-1:1}小时${m}分`]);
-  } else if (type === 1) {
-    let s = ri(60, 300);
-    return makeChoice(`${s}秒 = ? 分 ? 秒`, `${Math.floor(s/60)}分${s%60}秒`, [`${Math.floor(s/60)+1}分${s%60}秒`, `${Math.floor(s/60)}分${(s%60)+15}秒`, `${Math.floor(s/60)-1}分${s%60+60}秒`]);
-  } else {
-    let m = ri(60, 300);
-    let h = Math.floor(m / 60), mm = m % 60;
-    return makeChoice(`${m}分 = ? 时 ? 分`, mm === 0 ? `${h}时` : `${h}时${mm}分`, [`${h+1}时`, `${h}时${mm+10}分`, `${h-1>0?h-1:1}时${mm+60}分`]);
-  }
-}
-
-function g3_add() {
-  let a = ri(100, 5000), b = ri(100, 5000);
-  let sum = a + b;
-  return makeChoice(`${a} + ${b} = ?`, sum, [sum+10, sum-10, sum+100]);
-}
-
-function g3_sub() {
-  let a = ri(1000, 9999), b = ri(100, a - 1);
-  let diff = a - b;
-  return makeChoice(`${a} - ${b} = ?`, diff, [diff+10, diff-10, diff+100]);
-}
-
-function g3_mul() {
-  let a = ri(100, 999), b = ri(2, 9);
-  return makeChoice(`${a} × ${b} = ?`, a * b, [a*b+10, a*b-10, a*b+100]);
-}
-
-function g3_fraction() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let num = ri(1, 5), den = ri(6, 10);
-    return makeFill(`写出分数：阴影部分占几分之几？\n（分子/分母）`, `${num}/${den}`);
-  } else if (type === 1) {
-    let den = ri(2, 8), n1 = ri(1, den-1), n2 = ri(1, den-1);
-    let sum = n1 + n2;
-    if (sum >= den) { n1 = ri(1, Math.floor((den-1)/2)); n2 = ri(1, den-1-n1); sum = n1 + n2; }
-    return makeChoice(`${n1}/${den} + ${n2}/${den} = ?`, `${sum}/${den}`, [`${sum+1}/${den}`, `${sum}/${den+1}`, `${sum-1}/${den}`]);
-  } else {
-    let den = ri(2, 8), n1 = ri(1, den-1), n2 = ri(1, n1);
-    let diff = n1 - n2;
-    return makeChoice(`${n1}/${den} - ${n2}/${den} = ?`, `${diff}/${den}`, [`${diff+1}/${den}`, `${diff}/${den+1}`, `${diff+1}/${den+1}`]);
-  }
-}
-
-function g3_rect() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let l = ri(3, 15), w = ri(2, l);
-    return makeChoice(`长方形长${l}厘米，宽${w}厘米，周长是多少？`, (l + w) * 2, [(l+w)*2+2, l+w, l*w]);
-  } else {
-    let s = ri(3, 12);
-    return makeChoice(`正方形边长${s}厘米，周长是多少？`, s * 4, [s*4+4, s*2, s*s]);
-  }
-}
-
-function g3_direction() {
-  let dirs = ['东', '南', '西', '北'];
-  let d = pick(dirs);
-  let opposite = { '东': '西', '南': '北', '西': '东', '北': '南' };
-  return makeChoice(`面向${d}，你的后面是哪个方向？`, opposite[d], dirs.filter(x => x !== opposite[d]));
-}
-
-function g3_div() {
-  let b = ri(2, 9), q = ri(20, 111);
-  let a = b * q; // 确保整除
-  return makeChoice(`${a} ÷ ${b} = ?`, q, [q+1, q-1, q+10]);
-}
-
-function g3_mul2() {
-  let a = ri(10, 99), b = ri(10, 99);
-  return makeChoice(`${a} × ${b} = ?`, a * b, [a*b+10, a*b-10, a*b+100]);
-}
-
-function g3_area() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let l = ri(3, 12), w = ri(2, l);
-    return makeChoice(`长方形长${l}米，宽${w}米，面积是多少平方米？`, l * w, [l*w+2, (l+w)*2, l+w]);
-  } else {
-    let s = ri(3, 10);
-    return makeChoice(`正方形边长${s}米，面积是多少平方米？`, s * s, [s*4, s*s+2, s*2]);
-  }
-}
-
-function g3_decimal() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let a = (ri(1, 99) / 10).toFixed(1), b = (ri(1, 99) / 10).toFixed(1);
-    let sum = (parseFloat(a) + parseFloat(b)).toFixed(1);
-    return makeChoice(`${a} + ${b} = ?`, sum, [(parseFloat(sum)+0.1).toFixed(1), (parseFloat(sum)-0.1).toFixed(1), (parseFloat(sum)+1).toFixed(1)]);
-  } else {
-    let n = (ri(11, 99) / 10).toFixed(1);
-    return makeFill(`${n} 元 = ? 角`, parseFloat(n) * 10);
-  }
-}
-
-function g3_date() {
-  let months31 = [1,3,5,7,8,10,12];
-  let months30 = [4,6,9,11];
-  let m = pick([...months31, ...months30]);
-  let days = months31.includes(m) ? 31 : 30;
-  return makeChoice(`${m}月有多少天？`, days, [days === 31 ? 30 : 31, 28, 29]);
-}
-
-// --- 4年级 ---
-function g4_bignum() {
-  let n = ri(10000, 999999999);
-  let wan = Math.floor(n / 10000);
-  return makeChoice(`读数：${n.toLocaleString()}，等于多少万？`, wan, [wan+1, wan-1, wan+10]);
-}
-
-function g4_angle() {
-  let angle = ri(20, 170);
-  let complement = 90 - angle;
-  let supplement = 180 - angle;
-  let type = ri(0, 1);
-  if (type === 0 && angle < 90) {
-    return makeChoice(`${angle}°的余角是多少度？`, complement, [complement+10, 180-angle, 90+angle]);
-  } else {
-    return makeChoice(`${angle}°的补角是多少度？`, supplement, [supplement+10, 90-angle, 180+angle]);
-  }
-}
-
-function g4_mul() {
-  let a = ri(100, 999), b = ri(10, 99);
-  return makeChoice(`${a} × ${b} = ?`, a * b, [a*b+100, a*b-100, a*b+1000]);
-}
-
-function g4_div() {
-  let b = ri(10, 99), q = ri(10, 99);
-  let a = b * q;
-  return makeChoice(`${a} ÷ ${b} = ?`, q, [q+1, q-1, q+10]);
-}
-
-function g4_parallel() {
-  let concepts = [
-    { q: '两组对边分别平行的四边形叫什么？', a: '平行四边形', ds: ['梯形', '长方形', '三角形'] },
-    { q: '只有一组对边平行的四边形叫什么？', a: '梯形', ds: ['平行四边形', '正方形', '圆形'] },
-    { q: '平行四边形的高有多少条？', a: '无数条', ds: ['1条', '2条', '4条'] },
+// ===== 2年级上册 =====
+function g2_length(){
+  let items=[
+    {q:'一支铅笔大约长多少？',a:'15厘米',d:['5厘米','50厘米','150厘米']},
+    {q:'教室的黑板大约长多少？',a:'3米',d:['30厘米','30米','300厘米']},
+    {q:'1米等于多少厘米？',a:'100厘米',d:['10厘米','1000厘米','50厘米']},
+    {q:'小朋友的身高大约是？',a:'130厘米',d:['13厘米','13米','130米']},
+    {q:'课桌的高度大约是？',a:'70厘米',d:['7厘米','7米','700厘米']},
+    {q:'操场跑道一圈约？',a:'200米',d:['200厘米','20米','2000米']},
+    {q:'橡皮长大约？',a:'3厘米',d:['3米','30厘米','3毫米']},
+    {q:'一个图钉大约长？',a:'1厘米',d:['1米','10厘米','1毫米']},
+    {q:'一层楼大约高？',a:'3米',d:['3厘米','30厘米','30米']},
+    {q: svgRuler()+'<br>图中尺子上的物体长度是多少？',a:'4厘米',d:['3厘米','5厘米','6厘米']},
   ];
-  let item = pick(concepts);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
 
-function g4_bar() {
-  let a = ri(10, 50), b = ri(10, 50);
-  return makeChoice(`条形统计图中，A班有${a}人，B班有${b}人，两班共多少人？`, a + b, [a+b+5, Math.abs(a-b), a*b]);
-}
+function g100_add(){let a=ri(20,70),b=ri(10,99-a);return mc(`竖式计算：${a}+${b}=？`,a+b,[a+b-2,a+b+2,a+b-1])}
+function g100_sub(){let a=ri(40,99),b=ri(10,a);return mc(`竖式计算：${a}-${b}=？`,a-b,[a-b+2,a-b-1,a-b+3])}
+function g_mul_1(){let a=ri(2,5),b=ri(1,9); if(a*b>36)return g_mul_1(); return mc(`${a}×${b}=？`,a*b,[a*b-1,a*b+1,a*b+a])}
+function g_mul_2(){let a=ri(6,9),b=ri(1,9); if(a*b<20)return g_mul_2(); return mc(`${a}×${b}=？`,a*b,[a*b-2,a*b+2])}
 
-function g4_mixed() {
-  let a = ri(10, 50), b = ri(10, 50), c = ri(2, 9);
-  let expr = `${a} + ${b} × ${c}`;
-  return makeChoice(`${expr} = ?（先乘后加）`, a + b * c, [a*b+c, (a+b)*c, a+b*c+10]);
-}
-
-function g4_law() {
-  let a = ri(2, 9), b = ri(2, 9), c = ri(2, 9);
-  let type = ri(0, 1);
-  if (type === 0) {
-    return makeChoice(`用乘法分配律计算：${a} × (${b} + ${c}) = ?`, a*b + a*c, [a*b*c, a+b*c, a*(b*c)]);
-  } else {
-    return makeChoice(`用乘法结合律计算：(${a} × ${b}) × ${c} = ?`, a*b*c, [a+b+c, a*(b+c), a*b+c]);
-  }
-}
-
-function g4_decimal() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let n = (ri(100, 9999) / 100).toFixed(2);
-    return makeFill(`${n} 保留一位小数 = ?`, parseFloat(n).toFixed(1));
-  } else if (type === 1) {
-    let n = ri(100, 9999) / 100;
-    return makeChoice(`${n.toFixed(2)} 的小数部分是？`, (n.toFixed(2)).split('.')[1], [n.toFixed(0), Math.floor(n).toString(), (n * 100).toString()]);
-  } else {
-    let n = ri(100, 9999) / 100;
-    return makeChoice(`${n.toFixed(2)} 扩大到原来的100倍是？`, n * 100, [n * 10, n / 100, n + 100]);
-  }
-}
-
-function g4_decimal_calc() {
-  let a = (ri(100, 999) / 10).toFixed(1), b = (ri(100, 999) / 10).toFixed(1);
-  let sum = (parseFloat(a) + parseFloat(b)).toFixed(1);
-  return makeChoice(`${a} + ${b} = ?`, sum, [(parseFloat(sum)+0.1).toFixed(1), (parseFloat(sum)-0.1).toFixed(1), (parseFloat(sum)+1).toFixed(1)]);
-}
-
-function g4_triangle() {
-  let concepts = [
-    { q: '三角形内角和是多少度？', a: '180°', ds: ['360°', '90°', '270°'] },
-    { q: '等边三角形每个角是多少度？', a: '60°', ds: ['90°', '45°', '30°'] },
-    { q: '有一个角是钝角的三角形叫什么？', a: '钝角三角形', ds: ['锐角三角形', '直角三角形', '等腰三角形'] },
-    { q: '三角形任意两边之和第三边？', a: '大于', ds: ['等于', '小于', '不大于'] },
-    { q: '三角形具有什么特性？', a: '稳定性', ds: ['不稳定性', '伸缩性', '可变性'] },
+function g2_time(){
+  let items=[
+    {s:svgClock(3,15),a:'3时15分',d:['3时30分','4时15分'],q:'钟面上显示的时间是？'},
+    {s:svgClock(6,45),a:'6时45分',d:['6时15分','7时45分'],q:'钟面上显示的时间是？'},
+    {s:svgClock(9,10),a:'9时10分',d:['9时50分','10时10分'],q:'钟面上显示的时间是？'},
+    {s:svgClock(11,50),a:'11时50分',d:['11时10分','12时50分'],q:'钟面上显示的时间是？'},
+    {s:svgClock(4,25),a:'4时25分',d:['4时5分','5时25分'],q:'钟面上显示的时间是？'},
   ];
-  let item = pick(concepts);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
 
-function g4_shape2() {
-  let angle = ri(20, 170);
-  let type = angle < 90 ? '锐角' : angle === 90 ? '直角' : '钝角';
-  let rad = (angle - 90) * Math.PI / 180;
-  let svg = `<line x1="20" y1="80" x2="90" y2="80" stroke="#333" stroke-width="2"/>`;
-  svg += `<line x1="20" y1="80" x2="${20 + 70 * Math.cos(rad)}" y2="${80 - 70 * Math.sin(rad)}" stroke="#4A90D9" stroke-width="2"/>`;
-  svg += `<text x="40" y="70" font-size="14" fill="#FF6B6B">${angle}°</text>`;
-  let options = ['锐角', '直角', '钝角'];
-  let wrong = options.filter(x => x !== type);
-  return {
-    type: 'shape_choice',
-    question: `上图为${angle}°，这是什么角？`,
-    svg: svg,
-    options: [type, ...wrong].sort(() => Math.random() - 0.5),
-    answer: type
-  };
-}
-
-// --- 5年级 ---
-function g5_mul() {
-  let a = (ri(11, 99) / 10).toFixed(1), b = ri(2, 9);
-  let product = (parseFloat(a) * b).toFixed(1);
-  return makeChoice(`${a} × ${b} = ?`, product, [(parseFloat(product)+0.1).toFixed(1), (parseFloat(product)-0.1).toFixed(1), (parseFloat(product)+1).toFixed(1)]);
-}
-
-function g5_div() {
-  let b = ri(2, 9), q = (ri(11, 99) / 10).toFixed(1);
-  let a = (parseFloat(q) * b).toFixed(1);
-  return makeChoice(`${a} ÷ ${b} = ?`, q, [(parseFloat(q)+0.1).toFixed(1), (parseFloat(q)-0.1).toFixed(1), (parseFloat(q)+1).toFixed(1)]);
-}
-
-function g5_equation() {
-  let x = ri(2, 20), b = ri(1, 20);
-  let a = ri(2, 9);
-  let c = a * x + b;
-  return makeChoice(`解方程：${a}x + ${b} = ${c}，x = ?`, x, [x+1, x-1, x+2]);
-}
-
-function g5_area() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let b = ri(4, 15), h = ri(3, 10);
-    return makeChoice(`平行四边形底${b}厘米，高${h}厘米，面积是多少？`, b * h, [b*h+2, b+h, b*2*h]);
-  } else if (type === 1) {
-    let b = ri(4, 15), h = ri(3, 10);
-    return makeChoice(`三角形底${b}厘米，高${h}厘米，面积是多少？`, b * h / 2, [b*h, b*h/2+1, b+h]);
-  } else {
-    let a = ri(3, 10), b = ri(a+1, a+8), h = ri(3, 8);
-    return makeChoice(`梯形上底${a}厘米，下底${b}厘米，高${h}厘米，面积是多少？`, (a + b) * h / 2, [(a+b)*h, (a+b)*h/2+2, a*b*h/2]);
-  }
-}
-
-function g5_prob() {
-  let items = [
-    { q: '抛一枚硬币，正面朝上的可能性是？', a: '1/2', ds: ['1/3', '1/4', '1'] },
-    { q: '掷骰子，出现6的可能性是？', a: '1/6', ds: ['1/2', '1/3', '1/4'] },
-    { q: '从1-10中随机选一个数，选到偶数的可能性是？', a: '1/2', ds: ['1/5', '2/5', '3/5'] },
+function g_shape_identify(){
+  let items=[
+    {n:'三角形',s:svgTri(60,10,15,80,105,80,'#FFB74D')},
+    {n:'正方形',s:svgR(15,15,70,70,'#64B5F6')},
+    {n:'长方形',s:svgR(8,22,88,46,'#E57373')},
+    {n:'圆形',s:svgC(60,45,35,'#81C784')},
+    {n:'平行四边形',s:`<polygon points="30,60 80,60 95,20 45,20" fill="#CE93D8" stroke="#333" stroke-width="2"/>`},
   ];
-  let item = pick(items);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items), wr=items.filter(x=>x.n!==it.n).slice(0,3).map(x=>x.n);
+  return msc('这是什么图形？有几个角？',it.s,it.n,wr);
 }
 
-function g5_tree() {
-  let len = ri(20, 100), interval = ri(2, 10);
-  if (len % interval !== 0) { len = Math.ceil(len / interval) * interval; }
-  let count = len / interval + 1;
-  return makeChoice(`在${len}米长的路的一边种树，每隔${interval}米种一棵（两端都种），共需多少棵树？`, count, [count-1, count+1, len/interval]);
-}
+function g_app_age(){let a=ri(6,12),d=ri(20,40);return mc(`小明今年${a}岁，爸爸比他大${d}岁，爸爸多少岁？`,a+d,[a+d-3,a+d+2,a+d-5])}
 
-function g5_observe() {
-  let concepts = [
-    { q: '从正面看是正方形的立体图形可能是？', a: '正方体', ds: ['球', '圆锥', '圆柱'] },
-    { q: '从上面看是圆形的图形可能是？', a: '圆柱', ds: ['正方体', '长方体', '三棱柱'] },
-    { q: '一个正方体从任何方向看都是什么形状？', a: '正方形', ds: ['圆形', '三角形', '长方形'] },
+// ===== 2年级下册 =====
+function g_div_1(){let a=ri(2,6)*ri(2,6); let b=ri(2,6); while(a%b!==0){a=ri(2,6)*ri(2,6);b=ri(2,6)} return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1,b])}
+function g_div_2(){let a=ri(4,9)*ri(4,9); let b=ri(4,9); while(a%b!==0){a=ri(4,9)*ri(4,9);b=ri(4,9)} return mc(`${a}÷${b}=？`,a/b,[a/b-2,a/b+2])}
+function g_remainder(){let a=ri(11,50),b=ri(3,9); if(a%b===0)a+=1;return mc(`${a}÷${b}=？（商和余数）`,`${Math.floor(a/b)}余${a%b}`,[`${Math.floor(a/b)-1}余${a%b+1}`,`${Math.floor(a/b)+1}`,`${Math.floor(a/b)}余${a%b-1}`])}
+function g2_mixed(){let a=ri(2,6),b=ri(2,6),c=ri(5,20);return mc(`${a}×${b}+${c}=？`,a*b+c,[a*b+c-1,a*b+c+1,a*(b+c)])}
+
+function g2_weight(){
+  let items=[
+    {q:'1千克等于多少克？',a:'1000克',d:['100克','10克','500克']},
+    {q:'一个苹果大约多重？',a:'200克',d:['2克','2千克','20克']},
+    {q:'一袋大米大约是？',a:'10千克',d:['100克','1千克','100千克']},
+    {q:'一只鸡大约多重？',a:'2千克',d:['20克','200克','20千克']},
+    {q:'2千克等于多少克？',a:'2000克',d:['200克','20克','500克']},
+    {q:'一瓶矿泉水约重？',a:'500克',d:['5克','5千克','50克']},
+    {q:'一头牛大约重？',a:'500千克',d:['50千克','5000千克','5千克']},
+    {q:`${ri(2,5)}千克+${ri(1,3)}千克=？`,a:`${ri(2,5)+ri(1,3)}千克`,d:[]},
   ];
-  let item = pick(concepts);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items); if(!it.d.length){let n=parseInt(it.a);it.d=[String(n-1)+'千克',String(n+1)+'千克']} return mc(it.q,it.a,it.d);
 }
 
-function g5_factor() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let n = pick([12, 18, 24, 36, 48]);
-    let factors = [];
-    for (let i = 1; i <= n; i++) if (n % i === 0) factors.push(i);
-    return makeChoice(`${n}的因数有多少个？`, factors.length, [factors.length+1, factors.length-1, factors.length+2]);
-  } else if (type === 1) {
-    let n = pick([6, 12, 18, 24, 30]);
-    return makeChoice(`下列哪个是合数？`, n, [2, 3, 5, 7].slice(0, 3));
-  } else {
-    let n = pick([2, 3, 5, 7, 11]);
-    return makeChoice(`下列哪个是质数？`, n, [4, 6, 8, 9].slice(0, 3));
-  }
-}
-
-function g5_fraction() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let den = ri(2, 9), num = ri(den + 1, den * 3);
-    let g = gcd(num, den);
-    return makeChoice(`将 ${num}/${den} 约分到最简`, `${num/g}/${den/g}`, [`${num/g+1}/${den/g}`, `${num/g}/${den/g+1}`, `${num}/${den/g}`]);
-  } else {
-    let a = ri(2, 9), b = ri(2, 9);
-    let lcm_val = lcm(a, b);
-    return makeChoice(`${a}和${b}的最小公倍数是？`, lcm_val, [lcm_val+1, a*b, lcm_val-1 > 0 ? lcm_val-1 : 1]);
-  }
-}
-
-function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
-function lcm(a, b) { return a * b / gcd(a, b); }
-
-function g5_fraction_calc() {
-  let a = ri(1, 5), b = ri(2, 8), c = ri(1, 5), d = ri(2, 8);
-  let lcm_val = lcm(b, d);
-  let sum_n = a * (lcm_val / b) + c * (lcm_val / d);
-  let g = gcd(sum_n, lcm_val);
-  let ans = g === lcm_val ? `${sum_n / g}` : `${sum_n / g}/${lcm_val / g}`;
-  return makeChoice(`${a}/${b} + ${c}/${d} = ?`, ans, [`${sum_n+1}/${lcm_val}`, `${sum_n}/${lcm_val}`, `${sum_n}/${lcm_val+1}`]);
-}
-
-function g5_shape3() {
-  let concepts = [
-    { q: '图形旋转后，什么改变了？', a: '位置', ds: ['大小', '形状', '颜色'] },
-    { q: '图形旋转多少度后与原图形重合（正方形）？', a: '90°', ds: ['60°', '45°', '180°'] },
-    { q: '平移不改变图形的？', a: '大小和形状', ds: ['位置', '方向', '角度'] },
+function g2_shape(){
+  let items=[
+    {n:'平移后的图形大小不变',q:'平移后，图形的什么不变？',a:'大小和形状',d:['位置','颜色','大小和形状都变']},
+    {n:'对称轴',q:'下面哪个是轴对称图形？',a:'长方形',d:['平行四边形','一般三角形','一般的梯形']},
   ];
-  let item = pick(concepts);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
 
-function g5_line() {
-  let concepts = [
-    { q: '折线统计图能清楚地反映什么？', a: '数据变化趋势', ds: ['数据总量', '数据占比', '数据分布'] },
-    { q: '要反映气温变化，最好用什么统计图？', a: '折线统计图', ds: ['条形统计图', '扇形统计图', '统计表'] },
+function g_app_capacity(){let a=ri(2,8),b=ri(1,5);return mc(`${a}千克+${b}千克=？`,`${a+b}千克`,[`${a+b-1}千克`,`${a*b}千克`,`${a+b+1}千克`])}
+function g_shape_count(){return mc('一个正方形被分成4个小正方形，一共有多少个正方形？','5个',['4个','3个','6个'])}
+
+// ===== 3年级上册 =====
+function g3_time(){
+  let items=[
+    {s:svgClock(2,10),q:'现在是几点几分？',a:'2时10分',d:['2时50分','3时10分']},
+    {s:svgClock(5,25),q:'现在是几点几分？',a:'5时25分',d:['5时5分','6时25分']},
+    {s:svgClock(9,40),q:'现在是几点几分？',a:'9时40分',d:['9时20分','10时40分']},
+    {q:'1小时等于多少分钟？',a:'60分钟',d:['30分钟','100分钟','90分钟']},
+    {q:'1分钟等于多少秒？',a:'60秒',d:['30秒','100秒','90秒']},
+    {q:'小明9:00-9:30做作业，用了多久？',a:'30分钟',d:['20分钟','1小时','40分钟']},
   ];
-  let item = pick(concepts);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 
-// --- 6年级 ---
-function g6_mul() {
-  let a = ri(1, 5), b = ri(2, 9), c = ri(2, 9);
-  let result_num = a * c, result_den = b;
-  let g = gcd(result_num, result_den);
-  let ans = g === result_den ? `${result_num / g}` : `${result_num / g}/${result_den / g}`;
-  return makeChoice(`${a}/${b} × ${c} = ?`, ans, [`${result_num+1}/${result_den}`, `${result_num}/${result_den}`, `${result_num+1}/${result_den+1}`]);
-}
-
-function g6_div() {
-  let a = ri(1, 5), b = ri(2, 9), c = ri(2, 9);
-  let result_num = a * c, result_den = b;
-  let g = gcd(result_num, result_den);
-  let ans = g === result_den ? `${result_num / g}` : `${result_num / g}/${result_den / g}`;
-  return makeChoice(`${a}/${b} ÷ ${c} = ?`, ans, [`${result_num+1}/${result_den}`, `${result_num}/${result_den+1}`, `${result_num+1}/${result_den+1}`]);
-}
-
-function g6_ratio() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let a = ri(2, 10), b = ri(2, 10);
-    let g = gcd(a, b);
-    return makeChoice(`${a}:${b} 化简为最简比`, `${a/g}:${b/g}`, [`${a/g+1}:${b/g}`, `${a/g}:${b/g+1}`, `${a+1}:${b}`]);
-  } else {
-    let total = pick([10, 12, 15, 20, 30]), ratio_a = ri(1, 3), ratio_b = ri(1, 3);
-    let sum_r = ratio_a + ratio_b;
-    let part_a = total * ratio_a / sum_r;
-    return makeChoice(`把${total}按${ratio_a}:${ratio_b}分配，第一份是多少？`, part_a, [total * ratio_b / sum_r, total / sum_r, total]);
-  }
-}
-
-function g6_circle() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let r = ri(1, 10);
-    return makeChoice(`圆的半径是${r}厘米，周长是多少？(π≈3.14)`, (2 * 3.14 * r).toFixed(2), [(2*3.14*r+1).toFixed(2), (3.14*r).toFixed(2), (2*3.14*r+6.28).toFixed(2)]);
-  } else if (type === 1) {
-    let r = ri(1, 10);
-    return makeChoice(`圆的半径是${r}厘米，面积是多少？(π≈3.14)`, (3.14 * r * r).toFixed(2), [(3.14*r*r+1).toFixed(2), (3.14*r*2).toFixed(2), (3.14*(r+1)*(r+1)).toFixed(2)]);
-  } else {
-    let d = ri(2, 20);
-    return makeChoice(`圆的直径是${d}厘米，半径是多少？`, d / 2, [d, d * 2, d - 1]);
-  }
-}
-
-function g6_percent() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let den = pick([4, 5, 8, 10, 20, 25]), num = ri(1, den - 1);
-    let pct = (num / den * 100);
-    return makeChoice(`${num}/${den} 用百分数表示是？`, `${pct}%`, [`${pct+10}%`, `${pct-10}%`, `${pct*10}%`]);
-  } else {
-    let total = pick([100, 200, 50, 80]), pct = pick([10, 20, 25, 50, 75]);
-    return makeChoice(`${total}的${pct}%是多少？`, total * pct / 100, [total * pct / 100 + 5, total * (100-pct) / 100, total + pct]);
-  }
-}
-
-function g6_pie() {
-  let concepts = [
-    { q: '扇形统计图能清楚地反映什么？', a: '各部分占整体的百分比', ds: ['数据变化趋势', '数据总量', '数据排序'] },
-    { q: '扇形统计图中，所有扇形的百分比之和是？', a: '100%', ds: ['50%', '200%', '不确定'] },
-    { q: '要反映班级同学最喜欢的运动占比，用哪种统计图？', a: '扇形统计图', ds: ['折线统计图', '条形统计图', '统计表'] },
+function g3_add(){let a=ri(1000,5000),b=ri(1000,5000);return mc(`${a}+${b}=？`,a+b,[a+b-50,a+b+50])}
+function g3_sub(){let a=ri(3000,9000),b=ri(1000,a);return mc(`${a}-${b}=？`,a-b,[a-b+20,a-b-30])}
+function g3_mul(){let a=ri(100,500),b=ri(3,8);return mc(`${a}×${b}=？`,a*b,[a*b-20,a*b+15])}
+function g3_fraction(){
+  let items=[
+    {q:'1/4表示把一个整体平均分成几份？',a:'4份',d:['1份','2份','3份']},
+    {q:'1/2和1/4哪个大？',a:'1/2',d:['1/4','一样大','无法比较']},
+    {q:'3/8的分子是？',a:'3',d:['8','5','11']},
   ];
-  let item = pick(concepts);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
-
-function g6_negative() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let t = ri(1, 10);
-    return makeChoice(`零下${t}℃记作？`, `-${t}℃`, [`${t}℃`, `+${t}℃`, `0℃`]);
-  } else {
-    let a = ri(1, 10);
-    return makeChoice(`${a}的相反数是？`, -a, [a, 0, 1/a]);
-  }
+function g3_rect(){
+  let w=ri(3,10),h=ri(2,8);
+  return msc(`下面长方形的周长是多少？(长${w}cm 宽${h}cm)`,
+    svgR(5,10,w*15,Math.max(h*10,20),'#BBDEFB')+svgTxt(5+w*15/2,8,w+'cm',9)+svgTxt(2,25,h+'cm',9),
+    String(2*(w+h)),[String(w+h),String(w*h),String(2*(w+h)-1)]);
 }
-
-function g6_percent2() {
-  let price = ri(50, 500), discount = pick([8, 8.5, 9, 9.5]);
-  let result = (price * discount / 10).toFixed(1);
-  return makeChoice(`一件商品原价${price}元，打${discount}折，现价多少？`, result, [(parseFloat(result)+5).toFixed(1), (price * (10 - discount) / 10).toFixed(1), (price * discount).toFixed(1)]);
+function g3_direction(){return mc('指南针红色箭头指向什么方向？','南',['东','西','北'])}
+function g3_div(){let a=ri(200,800),b=ri(2,9);if(a%b!==0)a+=b-a%b;return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1])}
+function g3_mul2(){let a=ri(15,50),b=ri(15,30);return mc(`${a}×${b}=？`,a*b,[a*b-5,a*b+5])}
+function g3_area(){
+  let w=ri(3,10),h=ri(2,8);
+  return msc(`下面长方形的面积是多少？(长${w}cm 宽${h}cm)`,
+    svgR(5,10,w*15,h*10,'#BBDEFB')+svgTxt(5+w*15/2,8,w+'cm',9)+svgTxt(2,15+h*5,w+'cm',9),
+    String(w*h),[String(w+h),String(2*(w+h)),String(w*h-1)]);
 }
-
-function g6_cylinder() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let r = ri(1, 5), h = ri(3, 10);
-    return makeChoice(`圆柱底面半径${r}厘米，高${h}厘米，体积是多少？(π≈3.14)`, (3.14 * r * r * h).toFixed(2), [(3.14*r*r*h+1).toFixed(2), (3.14*r*h).toFixed(2), (3.14*2*r*h).toFixed(2)]);
-  } else if (type === 1) {
-    let r = ri(1, 5), h = ri(3, 10);
-    return makeChoice(`圆柱底面半径${r}厘米，高${h}厘米，侧面积是多少？(π≈3.14)`, (2 * 3.14 * r * h).toFixed(2), [(3.14*r*r*h).toFixed(2), (3.14*r*h).toFixed(2), (2*3.14*r*r).toFixed(2)]);
-  } else {
-    let r = ri(1, 5), h = ri(3, 10);
-    return makeChoice(`圆锥底面半径${r}厘米，高${h}厘米，体积是多少？(π≈3.14)`, (3.14 * r * r * h / 3).toFixed(2), [(3.14*r*r*h).toFixed(2), (3.14*r*r*h*2/3).toFixed(2), (3.14*r*h/3).toFixed(2)]);
-  }
-}
-
-function g6_proportion() {
-  let type = ri(0, 1);
-  if (type === 0) {
-    let a = ri(2, 10), b = ri(2, 10), c = ri(2, 10);
-    let d = b * c / a;
-    if (!Number.isInteger(d)) { a = ri(2, 5); b = a * ri(2, 5); c = ri(2, 5); d = b * c / a; }
-    return makeChoice(`求比例中的未知数：${a}:${b} = ${c}:?，? = ?`, d, [d+1, d-1, d+a]);
-  } else {
-    let type2 = ri(0, 1);
-    let a = ri(2, 10), b = ri(2, 10);
-    if (type2 === 0) {
-      // 正比例
-      return makeChoice(`如果 a:b = ${a}:${b}，当a扩大2倍时，b应该？`, '扩大2倍', ['缩小2倍', '不变', '扩大4倍']);
-    } else {
-      return makeChoice(`如果 ab = ${a*b}（一定），a和b成什么比例？`, '反比例', ['正比例', '不成比例', '无法确定']);
-    }
-  }
-}
-
-function g6_stats() {
-  let concepts = [
-    { q: '一组数据中出现次数最多的数叫什么？', a: '众数', ds: ['中位数', '平均数', '最大值'] },
-    { q: '一组数据从小到大排列，中间的数叫什么？', a: '中位数', ds: ['众数', '平均数', '最小值'] },
-    { q: '反映数据集中趋势的统计量是？', a: '平均数', ds: ['极差', '方差', '频数'] },
+function g3_decimal(){return mc('0.5等于几分之几？','5/10',['1/2','5/100','1/5'])}
+function g3_date(){
+  let items=[
+    {q:'一年有多少个月？',a:'12个月',d:['10个月','24个月','6个月']},
+    {q:'哪个月有28天？',a:'2月',d:['1月','3月','12月']},
+    {q:'7月有多少天？',a:'31天',d:['30天','28天','29天']},
   ];
-  let item = pick(concepts);
-  return makeChoice(item.q, item.a, item.ds);
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
-
-function g6_review() {
-  // 综合复习，随机出题
-  const reviewGens = [g6_mul, g6_div, g6_ratio, g6_circle, g6_percent, g6_cylinder, g6_proportion, g_app_speed, g_app_shopping, g_app工程];
-  return pick(reviewGens)();
+function g_app_area(){
+  let w=ri(10,50),h=ri(5,30);
+  return mc(`一块长方形菜地长${w}米宽${h}米，面积是多少平方米？`,w*h,[w+h,(w+h)*2,w*h-1]);
 }
-
-// ============================================================
-// 扩展应用题生成函数（跨年级通用）
-// ============================================================
-
-// --- 购物应用题 ---
-function g_app_shopping() {
-  // 一二年级降低数据规模，避免超纲
-  let g = (typeof state !== 'undefined' && state.currentGrade) ? state.currentGrade : 3;
-  if (g <= 1) {
-    let t = ri(0, 2);
-    if (t === 0) {
-      let a = ri(3, 9), b = ri(2, 9);
-      return makeChoice(`小明有${a}个苹果，妈妈又买来${b}个，一共有多少个？`, a + b, [a + b + 1, a + b - 1, Math.abs(a - b)]);
-    } else if (t === 1) {
-      let a = ri(10, 20), b = ri(2, 9);
-      return makeChoice(`小红有${a}元，买铅笔花了${b}元，还剩多少元？`, a - b, [a - b + 1, a - b - 1, a + b]);
-    } else {
-      let price = ri(2, 5), qty = ri(2, 4);
-      return makeChoice(`一本本子${price}元，买${qty}本一共要多少元？`, price * qty, [price * qty + 1, price * qty - 1, price + qty]);
-    }
-  }
-  if (g === 2) {
-    let t = ri(0, 2);
-    if (t === 0) {
-      let price = ri(2, 9), qty = ri(2, 9);
-      return makeChoice(`小明买了${qty}本练习本，每本${price}元，一共需要多少元？`, price * qty, [price * qty + 1, price * qty - 1, price + qty]);
-    } else if (t === 1) {
-      let a = ri(20, 90), b = ri(10, 20);
-      return makeChoice(`商店有${a}个气球，卖出${b}个，还剩多少个？`, a - b, [a - b + 1, a - b - 10, a + b]);
-    } else {
-      let price = ri(3, 9), pay = pick([20, 50]);
-      return makeChoice(`一支钢笔${price}元，付出${pay}元，应找回多少元？`, pay - price, [pay - price + 1, pay - price - 1, pay + price]);
-    }
-  }
-  let type = ri(0, 3);
-  if (type === 0) {
-    let price = ri(3, 15), qty = ri(2, 8);
-    return makeChoice(`小明买了${qty}个笔记本，每个${price}元，一共需要多少元？`, price * qty, [price*qty+1, price*qty-1, price+qty]);
-  } else if (type === 1) {
-    let total = ri(20, 100), price = ri(2, 10);
-    let qty = Math.floor(total / price);
-    return makeChoice(`小红有${total}元，每个本子${price}元，她最多能买多少个？`, qty, [qty+1, qty-1, Math.ceil(total/price)]);
-  } else if (type === 2) {
-    let price = ri(5, 20), pay = pick([10, 20, 50, 100]);
-    if (pay < price) pay = price + pick([5, 10]);
-    return makeChoice(`一支钢笔${price}元，付出${pay}元，应找回多少元？`, pay - price, [pay-price+1, pay-price-1, pay+price]);
-  } else {
-    let a = ri(3, 8), b = ri(3, 8), pa = ri(2, 6), pb = ri(2, 6);
-    return makeChoice(`买${a}个苹果每个${pa}元，买${b}个橘子每个${pb}元，共花多少元？`, a*pa + b*pb, [a*pa+b*pb+1, a*pa+b*pb-1, a*b+pa*pb]);
-  }
-}
-
-// --- 行程应用题 ---
-function g_app_speed() {
-  let type = ri(0, 3);
-  if (type === 0) {
-    let speed = pick([60, 70, 80, 90]), time = ri(2, 6);
-    return makeChoice(`一辆汽车每小时行驶${speed}千米，${time}小时行驶多少千米？`, speed * time, [speed*time+10, speed*time-10, speed+time]);
-  } else if (type === 1) {
-    let speed = pick([50, 60, 70, 80]), distance = pick([speed*2, speed*3, speed*4, speed*5]);
-    let time = distance / speed;
-    return makeChoice(`甲乙两地相距${distance}千米，一辆车每小时行驶${speed}千米，需要几小时？`, time, [time+1, time-1, speed*distance]);
-  } else if (type === 2) {
-    let s1 = pick([60, 70, 80]), s2 = pick([50, 60, 70]), t = ri(2, 5);
-    return makeChoice(`两车从两地相向而行，甲车每小时${s1}千米，乙车每小时${s2}千米，${t}小时后相遇，两地相距多少千米？`, (s1+s2)*t, [(s1+s2)*t+10, s1*t+s2, s1*s2*t]);
-  } else {
-    let speed = pick([40, 50, 60]), chaseSpeed = pick([70, 80, 90]), t = ri(1, 4);
-    let gap = (chaseSpeed - speed) * t;
-    return makeChoice(`甲车每小时行驶${speed}千米，乙车每小时行驶${chaseSpeed}千米，甲车先出发，乙车追${t}小时后能追上多少千米？`, gap, [gap+10, gap-10, speed*chaseSpeed*t]);
-  }
-}
-
-// --- 工程应用题 ---
-function g_app工程() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    // 预设能整除的组合
-    let pairs = [[3,6],[4,12],[5,20],[6,12],[6,30],[4,4],[3,3],[5,5]];
-    let [a, b] = pick(pairs);
-    let total = a * b;
-    let days = total / (a + b);
-    return makeChoice(`一项工程，甲单独做${a}天完成，乙单独做${b}天完成，两人合作几天完成？`, days, [days+1, days-1, a+b]);
-  } else if (type === 1) {
-    let workers = pick([3, 4, 5, 6]), days = pick([8, 10, 12, 15, 20, 30, 40, 60]);
-    let total = workers * days; // 确保整除
-    return makeChoice(`修一条${total}米长的路，每天修${workers}米，需要多少天？`, days, [days+1, days-1, total+workers]);
-  } else {
-    let per = ri(5, 15), days = ri(3, 8);
-    return makeChoice(`一个工厂每天生产${per}个零件，${days}天共生产多少个？`, per * days, [per*days+5, per*days-5, per+days]);
-  }
-}
-
-// --- 分配/比例应用题 ---
-function g_app_ratio() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let total = pick([30, 40, 60, 80, 100]), r1 = ri(1, 3), r2 = ri(1, 3);
-    let rs = r1 + r2;
-    // 确保 total % rs === 0，最多尝试10次
-    let tries = 0;
-    while (total % rs !== 0 && tries < 10) { total = pick([30, 40, 60, 80, 100]); tries++; }
-    if (total % rs !== 0) { total = rs * Math.ceil(total / rs); } // 最终兜底
-    return makeChoice(`把${total}个苹果按${r1}:${r2}分给甲乙两人，甲分到多少个？`, total * r1 / rs, [total*r2/rs, total/rs, total]);
-  } else if (type === 1) {
-    let total = pick([12, 18, 24, 30]), boys = ri(5, total - 2);
-    let girls = total - boys;
-    return makeChoice(`班上有${total}人，其中男生${boys}人，女生和男生的比是多少？`, `${girls}:${boys}`, [`${boys}:${girls}`, `${girls}:${total}`, `${total}:${boys}`]);
-  } else {
-    let total = pick([40, 60, 80, 100]), r1 = ri(2, 4), r2 = ri(1, 3), r3 = ri(1, 2);
-    let rs = r1 + r2 + r3;
-    let tries = 0;
-    while (total % rs !== 0 && tries < 10) { total = pick([40, 60, 80, 100]); tries++; }
-    if (total % rs !== 0) { total = rs * Math.ceil(total / rs); }
-    return makeChoice(`${total}元按${r1}:${r2}:${r3}分给三人，第二个人分到多少元？`, total * r2 / rs, [total*r1/rs, total*r3/rs, total/rs]);
-  }
-}
-
-// --- 年龄应用题 ---
-function g_app_age() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let child = ri(6, 12), diff = ri(25, 35);
-    return makeChoice(`小明今年${child}岁，爸爸比小明大${diff}岁，爸爸今年多少岁？`, child + diff, [child+diff+1, diff-child, child*diff]);
-  } else if (type === 1) {
-    let now = ri(8, 12), after = ri(5, 15);
-    return makeChoice(`小红今年${now}岁，${after}年后她多少岁？`, now + after, [now*after, after-now, now+after+1]);
-  } else {
-    let child = ri(6, 10), times = ri(3, 5);
-    return makeChoice(`小华今年${child}岁，妈妈的年龄是小华的${times}倍，妈妈今年多少岁？`, child * times, [child+times, child*times+1, times-child]);
-  }
-}
-
-// --- 面积/周长应用题 ---
-function g_app_area() {
-  let type = ri(0, 3);
-  if (type === 0) {
-    let l = ri(5, 20), w = ri(3, l);
-    return makeChoice(`一块长方形菜地长${l}米、宽${w}米，四周修篱笆，需要多少米？`, (l+w)*2, [l*w, l+w, l*2+w]);
-  } else if (type === 1) {
-    let l = ri(5, 15), w = ri(3, l);
-    return makeChoice(`一块长方形花圃长${l}米、宽${w}米，面积是多少平方米？`, l * w, [(l+w)*2, l+w, l*2*w]);
-  } else if (type === 2) {
-    let s = ri(4, 12);
-    return makeChoice(`正方形桌布边长${s}分米，面积是多少平方分米？`, s * s, [s*4, s*2, s+s]);
-  } else {
-    let r = ri(2, 8);
-    return makeChoice(`圆形花坛半径${r}米，周长是多少米？（π≈3.14）`, (2*3.14*r).toFixed(2), [(3.14*r*r).toFixed(2), (3.14*r).toFixed(2), (2*3.14*r+1).toFixed(2)]);
-  }
-}
-
-// --- 分数/百分数应用题 ---
-function g_app_fraction() {
-  let type = ri(0, 3);
-  if (type === 0) {
-    let total = pick([20, 30, 40, 50, 60]), num = ri(1, 5), den = ri(num+1, 10);
-    // 确保 total % den === 0
-    let tries = 0;
-    while (total % den !== 0 && tries < 10) { total = pick([20, 30, 40, 50, 60]); tries++; }
-    if (total % den !== 0) { total = den * Math.ceil(total / den); }
-    let result = total * num / den;
-    return makeChoice(`一堆苹果有${total}个，吃了${num}/${den}，吃了多少个？`, result, [total-result, total/den, total*num]);
-  } else if (type === 1) {
-    let total = pick([100, 200, 300, 500]), pct = pick([10, 20, 25, 30, 40, 50]);
-    return makeChoice(`图书馆有${total}本书，其中${pct}%是故事书，故事书有多少本？`, total * pct / 100, [total*(100-pct)/100, total+pct, total/pct]);
-  } else if (type === 2) {
-    let original = pick([50, 80, 100, 120, 200]), discount = pick([8, 8.5, 9, 9.5]);
-    return makeChoice(`一件衣服原价${original}元，打${discount}折，现价多少元？`, (original * discount / 10).toFixed(1), [(original*(10-discount)/10).toFixed(1), (original*discount).toFixed(1), (original+discount).toFixed(1)]);
-  } else {
-    let cost = pick([20, 30, 40, 50]), price = pick([cost+10, cost+15, cost+20, cost+25]);
-    let profit = price - cost;
-    let pct = Math.round(profit / cost * 100);
-    return makeChoice(`进价${cost}元的商品售价${price}元，利润率是多少？`, pct + '%', [(pct+10)+'%', (pct-10)+'%', Math.round(cost/price*100)+'%']);
-  }
-}
-
-// --- 鸡兔同笼应用题 ---
-function g_app_chicken_rabbit() {
-  let chickens = ri(3, 10), rabbits = ri(2, 8);
-  let totalHeads = chickens + rabbits;
-  let totalLegs = chickens * 2 + rabbits * 4;
-  let type = ri(0, 1);
-  if (type === 0) {
-    return makeChoice(`笼子里有鸡和兔，共${totalHeads}个头，${totalLegs}条腿，鸡有多少只？`, chickens, [rabbits, chickens+1, chickens-1]);
-  } else {
-    return makeChoice(`笼子里有鸡和兔，共${totalHeads}个头，${totalLegs}条腿，兔有多少只？`, rabbits, [chickens, rabbits+1, rabbits-1]);
-  }
-}
-
-// --- 植树/间隔应用题 ---
-function g_app_planting() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let interval = ri(2, 10), count = ri(3, 10);
-    let len = interval * count; // 确保整除
-    return makeChoice(`在${len}米长的路一侧种树，每隔${interval}米种一棵（两端都种），需要多少棵树？`, count + 1, [count, count+2, count-1]);
-  } else if (type === 1) {
-    let n = ri(5, 15), interval = ri(2, 6);
-    return makeChoice(`从第1棵树到第${n}棵树，每隔${interval}米种一棵，这段路有多长？`, (n-1) * interval, [n*interval, (n-1)*(interval+1), n+interval]);
-  } else {
-    let interval = ri(3, 10), count = ri(3, 10);
-    let len = interval * count; // 确保整除
-    return makeChoice(`在周长${len}米的圆形花坛边种树，每隔${interval}米种一棵，需要多少棵树？`, count, [count+1, count-1, count+2]);
-  }
-}
-
-// --- 容量/重量应用题 ---
-function g_app_capacity() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let big = pick([500, 800, 1000]), small = pick([100, 200, 250]);
-    let times = Math.floor(big / small);
-    return makeChoice(`一瓶${big}毫升的果汁，倒入${small}毫升的杯子中，能倒多少杯？`, times, [times+1, times-1, big+small]);
-  } else if (type === 1) {
-    let per = pick([50, 100, 200]), boxes = ri(3, 8);
-    return makeChoice(`每箱苹果重${per}克，${boxes}箱共重多少克？`, per * boxes, [per*boxes+10, per+boxes, per*boxes-10]);
-  } else {
-    let total = pick([1, 2, 3, 5]), unit = pick([1000]);
-    return makeChoice(`${total}千克等于多少克？`, total * 1000, [total*100, total*10000, total*10]);
-  }
-}
-
-// --- 时间应用题 ---
-function g_app_time() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let h1 = ri(7, 10), m1 = pick([0, 15, 30, 45]);
-    let duration = ri(40, 90);
-    let totalMin = h1 * 60 + m1 + duration;
-    let h2 = Math.floor(totalMin / 60), m2 = totalMin % 60;
-    let answer = m2 === 0 ? `${h2}时` : `${h2}时${m2}分`;
-    return makeChoice(`电影${h1}时${m1}分开始，放映${duration}分钟，几点结束？`, answer, [`${h2+1}时${m2}分`, `${h2}时${(m2+15)%60}分`, `${h2-1}时${m2}分`]);
-  } else if (type === 1) {
-    let days = ri(3, 20);
-    return makeChoice(`${days}天等于多少小时？`, days * 24, [days*12, days*48, days*60]);
-  } else {
-    let h1 = ri(1, 10), h2 = ri(2, 12);
-    let diff = h2 - h1;
-    if (diff <= 0) { h2 = h1 + ri(1, 5); diff = h2 - h1; }
-    return makeChoice(`从${h1}时到${h2}时，经过了多少小时？`, diff, [diff+1, diff-1, h1+h2]);
-  }
-}
-
-// ============================================================
-// 扩展图形题生成函数
-// ============================================================
-
-// 图形识别：平面图形
-function g_shape_identify() {
-  const shapes = [
-    { name: '三角形', svg: '<polygon points="60,15 100,85 20,85" fill="#FFD54F" stroke="#F57F17" stroke-width="2"/>' },
-    { name: '正方形', svg: '<rect x="25" y="25" width="60" height="60" fill="#64B5F6" stroke="#1565C0" stroke-width="2"/>' },
-    { name: '长方形', svg: '<rect x="15" y="30" width="80" height="40" fill="#81C784" stroke="#2E7D32" stroke-width="2"/>' },
-    { name: '圆形', svg: '<circle cx="60" cy="50" r="35" fill="#E57373" stroke="#C62828" stroke-width="2"/>' },
-    { name: '平行四边形', svg: '<polygon points="25,30 90,30 75,75 10,75" fill="#BA68C8" stroke="#6A1B9A" stroke-width="2"/>' },
-    { name: '梯形', svg: '<polygon points="25,30 85,30 100,75 15,75" fill="#4DD0E1" stroke="#006064" stroke-width="2"/>' },
-    { name: '五边形', svg: '<polygon points="60,15 100,45 85,90 35,90 20,45" fill="#FFB74D" stroke="#E65100" stroke-width="2"/>' },
-    { name: '六边形', svg: '<polygon points="60,15 95,35 95,75 60,95 25,75 25,35" fill="#AED581" stroke="#33691E" stroke-width="2"/>' },
+function g_shape_angle_calc(){
+  let items=[
+    {s:svgAngle(45),q:'这个角是什么角？',a:'锐角',d:['直角','钝角','平角']},
+    {s:svgAngle(90),q:'这个角是什么角？',a:'直角',d:['锐角','钝角','平角']},
+    {s:svgAngle(135),q:'这个角是什么角？',a:'钝角',d:['锐角','直角','平角']},
   ];
-  let s = pick(shapes);
-  let wrong = shapes.filter(x => x.name !== s.name).map(x => x.name).sort(() => Math.random() - 0.5).slice(0, 3);
-  return {
-    type: 'shape_choice',
-    question: '这个图形的名称是？',
-    svg: s.svg,
-    options: [s.name, ...wrong].sort(() => Math.random() - 0.5),
-    answer: s.name
-  };
+  let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
 
-// 图形计数
-function g_shape_count() {
-  let type = ri(0, 3);
-  if (type === 0) {
-    let triangles = ri(2, 6);
-    let svg = '';
-    for (let i = 0; i < triangles; i++) {
-      let x = 10 + i * 20;
-      svg += `<polygon points="${x+10},20 ${x+20},60 ${x},60" fill="#FFD54F" stroke="#F57F17" stroke-width="1.5"/>`;
-    }
-    return {
-      type: 'shape_choice',
-      question: '图中有多少个三角形？',
-      svg: svg,
-      options: [String(triangles), String(triangles+1), String(triangles-1), String(triangles+2)].sort(() => Math.random() - 0.5),
-      answer: String(triangles)
-    };
-  } else if (type === 1) {
-    let squares = ri(2, 5);
-    let svg = '';
-    for (let i = 0; i < squares; i++) {
-      let x = 10 + i * 25;
-      svg += `<rect x="${x}" y="20" width="20" height="20" fill="#64B5F6" stroke="#1565C0" stroke-width="1.5"/>`;
-    }
-    return {
-      type: 'shape_choice',
-      question: '图中有多少个正方形？',
-      svg: svg,
-      options: [String(squares), String(squares+1), String(squares-1), String(squares+2)].sort(() => Math.random() - 0.5),
-      answer: String(squares)
-    };
-  } else if (type === 2) {
-    let circles = ri(3, 7);
-    let svg = '';
-    for (let i = 0; i < circles; i++) {
-      let cx = 15 + i * 17, cy = 40 + (i % 2) * 15;
-      svg += `<circle cx="${cx}" cy="${cy}" r="10" fill="#E57373" stroke="#C62828" stroke-width="1.5"/>`;
-    }
-    return {
-      type: 'shape_choice',
-      question: '图中有多少个圆形？',
-      svg: svg,
-      options: [String(circles), String(circles+1), String(circles-1), String(circles+2)].sort(() => Math.random() - 0.5),
-      answer: String(circles)
-    };
-  } else {
-    let total = ri(4, 8), tri = ri(1, total - 1), rect = total - tri;
-    let svg = '';
-    for (let i = 0; i < tri; i++) {
-      let x = 10 + i * 20;
-      svg += `<polygon points="${x+10},20 ${x+20},60 ${x},60" fill="#FFD54F" stroke="#F57F17" stroke-width="1.5"/>`;
-    }
-    for (let i = 0; i < rect; i++) {
-      let x = 10 + (tri + i) * 22;
-      svg += `<rect x="${x}" y="25" width="18" height="30" fill="#81C784" stroke="#2E7D32" stroke-width="1.5"/>`;
-    }
-    return {
-      type: 'shape_choice',
-      question: '图中有多少个三角形？',
-      svg: svg,
-      options: [String(tri), String(tri+1), String(tri-1), String(rect)].sort(() => Math.random() - 0.5),
-      answer: String(tri)
-    };
-  }
-}
-
-// 对称图形判断
-function g_shape_symmetry() {
-  const sym = [
-    { name: '正方形', svg: '<rect x="25" y="25" width="50" height="50" fill="#64B5F6" stroke="#1565C0" stroke-width="2"/>' },
-    { name: '圆形', svg: '<circle cx="50" cy="50" r="35" fill="#E57373" stroke="#C62828" stroke-width="2"/>' },
-    { name: '等边三角形', svg: '<polygon points="50,15 85,80 15,80" fill="#FFD54F" stroke="#F57F17" stroke-width="2"/>' },
-    { name: '长方形', svg: '<rect x="20" y="30" width="60" height="40" fill="#81C784" stroke="#2E7D32" stroke-width="2"/>' },
+// ===== 4年级上册 =====
+function g4_bignum(){return mc('100个一万是？','一百万',['十万','一千万','一亿'])}
+function g4_angle(){
+  let items=[
+    {s:svgAngle(45),q:'这个角是多少度？',a:'45°',d:['30°','60°','90°']},
+    {s:svgAngle(120),q:'这个角是多少度？',a:'120°',d:['90°','150°','60°']},
+    {s:svgAngle(150),q:'这个角是多少度？',a:'150°',d:['120°','180°','90°']},
+    {s:svgAngle(30),q:'这个角是多少度？',a:'30°',d:['45°','60°','15°']},
   ];
-  const asym = [
-    { name: '平行四边形', svg: '<polygon points="20,30 85,30 70,75 5,75" fill="#BA68C8" stroke="#6A1B9A" stroke-width="2"/>' },
-  ];
-  let isSym = Math.random() > 0.3;
-  let s = isSym ? pick(sym) : pick(asym);
-  let answer = isSym ? '是轴对称图形' : '不是轴对称图形';
-  let wrong = isSym ? ['不是轴对称图形', '无法确定', '是旋转对称但不是轴对称'] : ['是轴对称图形', '有4条对称轴', '有2条对称轴'];
-  return {
-    type: 'shape_choice',
-    question: `下面的${s.name}是否为轴对称图形？`,
-    svg: s.svg,
-    options: [answer, ...wrong].sort(() => Math.random() - 0.5),
-    answer: answer
-  };
+  let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
+function g4_mul(){let a=ri(100,500),b=ri(20,50);return mf(`${a}×${b}=？`,a*b)}
+function g4_div(){let a=ri(200,600),b=ri(10,30);if(a%b!==0)a+=b-a%b;return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1])}
+function g4_parallel(){return mc('平行四边形有几组对边平行？','2组',['1组','3组','0组'])}
+function g4_bar(){return mc('条形统计图用于？','比较数量的多少',['表示变化趋势','表示比例','表示时间'])}
+function g_app_speed(){let v=ri(40,80),t=ri(2,5);return mc(`汽车每小时行${v}千米，${t}小时行多少千米？`,v*t,[v*t-v,v*t+v,v*t*2])}
+function g4_mixed(){let a=ri(3,8),b=ri(4,8),c=ri(10,50);return mc(`${a}×${b}+${c}=？`,a*b+c,[a*(b+c),a*b+c-1])}
+function g4_law(){return mc('a+b=b+a 是什么运算定律？','加法交换律',['加法结合律','乘法交换律','乘法分配律'])}
+function g4_decimal(){return mc('0.01等于几分之几？','1/100',['1/10','1/1000','1/1'])}
+function g4_decimal_calc(){let a=ri(1,9)+ri(1,9)/10,b=ri(1,5)+ri(1,9)/10;return mc(`${fmt(a)}+${fmt(b)}=？`,fmt(+(a+b).toFixed(2)),[fmt(+(a+b-0.1).toFixed(2)),fmt(+(a+b+0.1).toFixed(2))])}
+function g4_triangle(){return mc('三角形的内角和是多少度？','180°',['90°','360°','270°'])}
+function g4_shape2(){return mc('平移后图形的什么不变？','大小和形状',['位置','方向','颜色'])}
+function g_app工程(){return mc('一项工程甲队独做10天完成，每天完成工程的几分之几？','1/10',['1/5','10','1/100'])}
+function g_shape_symmetry(){return mc('等腰三角形有几条对称轴？','1条',['2条','3条','0条'])}
 
-// 立体图形识别
-function g_shape_3d() {
-  const shapes = [
-    { name: '正方体', svg: '<polygon points="30,20 60,20 60,50 30,50" fill="#64B5F6" stroke="#1565C0" stroke-width="2"/><polygon points="60,20 80,30 80,60 60,50" fill="#42A5F5" stroke="#1565C0" stroke-width="2"/><polygon points="30,50 50,60 80,60 60,50" fill="#90CAF9" stroke="#1565C0" stroke-width="2"/>' },
-    { name: '长方体', svg: '<polygon points="20,25 60,25 60,55 20,55" fill="#81C784" stroke="#2E7D32" stroke-width="2"/><polygon points="60,25 80,35 80,65 60,55" fill="#66BB6A" stroke="#2E7D32" stroke-width="2"/><polygon points="20,55 40,65 80,65 60,55" fill="#A5D6A7" stroke="#2E7D32" stroke-width="2"/>' },
-    { name: '圆柱', svg: '<rect x="25" y="25" width="50" height="50" fill="#FFB74D" stroke="#E65100" stroke-width="2"/><ellipse cx="50" cy="25" rx="25" ry="6" fill="#FFCC80" stroke="#E65100" stroke-width="2"/><ellipse cx="50" cy="75" rx="25" ry="6" fill="#FFCC80" stroke="#E65100" stroke-width="2"/>' },
-    { name: '圆锥', svg: '<polygon points="50,15 80,75 20,75" fill="#BA68C8" stroke="#6A1B9A" stroke-width="2"/><ellipse cx="50" cy="75" rx="30" ry="7" fill="#CE93D8" stroke="#6A1B9A" stroke-width="2"/>' },
-    { name: '球', svg: '<circle cx="50" cy="50" r="35" fill="#4FC3F7" stroke="#0277BD" stroke-width="2"/><ellipse cx="50" cy="50" rx="35" ry="12" fill="none" stroke="#0277BD" stroke-width="1" opacity="0.5"/>' },
-  ];
-  let s = pick(shapes);
-  let wrong = shapes.filter(x => x.name !== s.name).map(x => x.name).sort(() => Math.random() - 0.5).slice(0, 3);
-  return {
-    type: 'shape_choice',
-    question: '这个立体图形的名称是？',
-    svg: s.svg,
-    options: [s.name, ...wrong].sort(() => Math.random() - 0.5),
-    answer: s.name
-  };
-}
+// ===== 5年级 =====
+function g5_mul(){let a=ri(1,5)+ri(1,9)/10,b=ri(2,5);return mf(`${fmt(a)}×${b}=？`,fmt(+(a*b).toFixed(2)))}
+function g5_div(){let a=ri(5,20),b=ri(2,5);return mc(`${fmt(a)}÷${b}=？`,fmt(+(a/b).toFixed(2)),[fmt(+(a/b+0.5).toFixed(1)),fmt(+(a/b-0.3).toFixed(1))])}
+function g5_equation(){let a=ri(10,30),b=ri(3,9);return mf(`解方程：3x+${b}=${a}, x=？`,(a-b)/3)}
+function g5_area(){let b=ri(5,12),h=ri(4,8);return mc(`三角形底${b}cm高${h}cm，面积是多少？`,fmt(b*h/2),[fmt(b*h),fmt(b*h/3)])}
+function g5_prob(){return mc('袋子里有3个红球1个蓝球，摸到红球的可能性？','较大',['较小','一样大','无法判断'])}
+function g5_tree(){let l=ri(50,120),g=ri(4,8);return mc(`一条路长${l}米，每隔${g}米种一棵（两端都种），共几棵？`,l/g+1,[l/g,l/g-1,l/g+2])}
+function g5_observe(){return mc('从正面看正方体看到的是？','正方形',['长方形','三角形','圆形'])}
+function g5_factor(){return mc('12的因数有几个？','6个',['4个','5个','8个'])}
+function g5_fraction(){return mc('3/9约分后等于？','1/3',['3/9','2/3','1/9'])}
+function g5_fraction_calc(){let a=ri(1,4);return mc(`1/${a}+1/${a}=？`,`2/${a}`,[`1/${a}`,`2/${a*2}`])}
+function g5_shape3(){return mc('一个图形旋转90度后什么不变？','大小和形状',['位置','方向','大小不变但位置变'])}
+function g5_line(){return mc('折线统计图适合表示？','变化趋势',['比例','绝对数值'])}
+function g_app_fraction(){let n=ri(3,6),k=ri(2,4);return mc(`总数的1/${k}是${n}，总数是多少？`,n*k,[n/k,n+k,n*(k+1)])}
+function g5_factor2(){return mc('既是2的倍数又是3的倍数的是？','6',['5','7','9'])}
+function g_shape_3d(){return mc('正方体有几个面？','6个',['4个','8个','12个'])}
 
-// 图形拼组
-function g_shape_compose() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    return makeChoice('两个完全一样的三角形可以拼成什么图形？', '平行四边形', ['圆形', '梯形', '五边形']);
-  } else if (type === 1) {
-    return makeChoice('两个完全一样的直角三角形可以拼成什么图形？', '长方形', ['圆形', '梯形', '正方体']);
-  } else {
-    return makeChoice('一个正方形可以分成几个完全一样的三角形？', 4, [2, 3, 6]);
-  }
+// ===== 6年级 =====
+function g6_mul(){let a=ri(1,4),b=ri(2,5);return mf(`${a}/${b}×${ri(2,5)}=？`,fmt(+(a/b*ri(2,5)).toFixed(1)))}
+function g6_div(){let n=ri(6,15);return mc(`${n}÷(1/3)=？`,n*3,[n/3,n*2,n+3])}
+function g6_ratio(){return mc('6:8化简后是？','3:4',['2:3','4:5','6:8'])}
+function g6_circle(){return mc('圆的周长公式是？','C=2πr',['C=πr²','C=πd/2'])}
+function g6_percent(){return mc('50%等于几分之几？','1/2',['1/5','1/10','1/50'])}
+function g6_pie(){return mc('扇形统计图适合表示？','各部分占整体的百分比',['变化趋势','绝对数值','时间序列'])}
+function g6_negative(){return mc('比0小5的数是？','-5',['5','0','-4'])}
+function g6_percent2(){let p=ri(10,40);return mc(`${p}% = 几分之几？(约分)`,`${p/10}/${100/10}`,[]);}
+function g6_cylinder(){return mc('圆柱有几个底面？','2个',['1个','3个','0个'])}
+function g6_proportion(){return mc('若a:b=c:d，则ad=?','bc',['ac','bd','ab'])}
+function g6_stats(){return mc('平均数反映数据的？','集中趋势',['离散程度','最大值','最小值'])}
+function g6_review(){
+  let items=[{q:'48和36的最大公因数是？',a:'12',d:['6','8','18']},{q:'100以内最大的质数是？',a:'97',d:['99','91','95']}];
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
+function g_app_ratio(){let x=ri(3,12);return mc(`3:4=x:${x*4/3}, x=？`,x,[x-1,x+2,x*2])}
+function g_app_chicken_rabbit(){
+  let heads=ri(8,15),rabbitFeet=ri(1,heads-1)*4,chickFeet=(heads-ri(1,heads-1))*2;
+  return mc(`鸡兔同笼，共${heads}个头${rabbitFeet+chickFeet}只脚，兔有几只？`,rabbitFeet/4,[3,heads-3,4]);
+}
+function g_app_planting(){let l=ri(30,100),g=ri(3,8);return mc(`一条路长${l}米，每隔${g}米种一棵树，共几棵？`,l/g+1,[l/g,l/g-1])}
+function g_shape_expand(){return mc('正方体的展开图由几个正方形组成？','6个',['4个','8个','12个'])}
+function g_shape_view(){return mc('从上面看正方体看到的是？','正方形',['长方形','三角形','圆形'])}
 
-// 角度计算题
-function g_shape_angle_calc() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    let a1 = ri(30, 80), a2 = ri(30, 80);
-    return makeChoice(`三角形中两个角分别是${a1}°和${a2}°，第三个角是多少度？`, 180 - a1 - a2, [180-a1-a2+10, 90, a1+a2]);
-  } else if (type === 1) {
-    let angle = ri(30, 150);
-    return makeChoice(`${angle}°的角是什么角？`, angle < 90 ? '锐角' : angle === 90 ? '直角' : angle < 180 ? '钝角' : '平角', [angle < 90 ? '钝角' : '锐角', '周角', '平角']);
-  } else {
-    let a = ri(3, 6);
-    let total = (a - 2) * 180;
-    return makeChoice(`${a}边形的内角和是多少度？`, total, [total + 180, total + 360, a * 180]);
-  }
-}
+// ===== 巧数三角形专项（保留原逻辑，已经很好） =====
+// g_triangle_count 保持原样（在 index.html 中已定义）
 
-// 图形展开图
-function g_shape_expand() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    return makeChoice('正方体的展开图由几个正方形组成？', 6, [4, 5, 8]);
-  } else if (type === 1) {
-    return makeChoice('圆柱的侧面展开图是什么形状？', '长方形', ['圆形', '三角形', '梯形']);
-  } else {
-    return makeChoice('圆锥的侧面展开图是什么形状？', '扇形', ['圆形', '三角形', '长方形']);
-  }
-}
-
-// 视图题
-function g_shape_view() {
-  let type = ri(0, 2);
-  if (type === 0) {
-    return makeChoice('从正面观察一个正方体，看到的是什么图形？', '正方形', ['圆形', '三角形', '长方形']);
-  } else if (type === 1) {
-    return makeChoice('从上面观察一个圆柱，看到的是什么图形？', '圆形', ['正方形', '三角形', '长方形']);
-  } else {
-    return makeChoice('从侧面观察一个圆锥，看到的是什么图形？', '三角形', ['圆形', '正方形', '长方形']);
-  }
-}
 
 // --- 快速练习生成器 ---
 function quickBasicGen() {
@@ -8460,6 +7598,7 @@ function switchTab(tab) {
 function goBack() {
   if (state.quizMode === 'exam') {
     if (confirm('确定要交卷并退出本次考试吗？')) {
+      if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
       switchTab('exam');
       state.quizMode = null;
       state.quizQuestions = [];
@@ -8491,6 +7630,7 @@ function goHome() {
   state.answered = false;
   state.examPaper = null;
   state.quizMode = null;
+  if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
   document.getElementById('examPaperHeader').style.display = 'none';
   switchTab('home');
 }
@@ -9378,7 +8518,60 @@ function getSectionScorer(key) {
 }
 
 // 生成整份试卷
-function generateExamPaper() {
+// 自动生成解题步骤（计算题/应用题）
+function generateSteps(q) {
+  let t = (q.question || '').replace(/\s/g,'');
+  let ans = q.answer !== undefined ? String(q.answer) : '';
+  // 提取算式数字
+  let nums = (t.match(/(\d+\.?\d*)/g) || []).map(Number).filter(n => !isNaN(n));
+  let hasPlus = /\+/.test(t), hasMinus = /-/.test(t), hasMul = /[×xX\*]/.test(t), hasDiv = /[÷\/]/.test(t);
+
+  // 应用题：提取核心算式 + 答
+  if (q.sectionTitle && q.sectionTitle.includes('应用')) {
+    let steps = [];
+    if (hasPlus) steps.push(`由题意可知，需要做加法：${nums[0]} + ${nums[1]} = ${Number(nums[0]) + Number(nums[1])}`);
+    else if (hasMinus) steps.push(`由题意可知，需要做减法：${Math.max(...nums)} - ${Math.min(...nums)} = ${Number(Math.max(...nums)) - Number(Math.min(...nums))}`);
+    else if (hasMul) {
+      let [a,b] = nums.slice(0,2);
+      steps.push(`由题意可知，需要做乘法：${a} × ${b} = ${a*b}`);
+    } else if (hasDiv) {
+      let [a,b] = nums.slice(0,2);
+      steps.push(`由题意可知，需要做除法：${a} ÷ ${b} = ${a/b}`);
+    } else {
+      steps.push(`根据题意计算得出结果：${ans}`);
+    }
+    steps.push(`答：${ans}`);
+    return steps;
+  }
+
+  // 计算题
+  if (q.sectionTitle && q.sectionTitle.includes('计算')) {
+    if (hasMul) {
+      return [`竖式笔算：${nums.slice(0,2).join(' × ')}`, `结果：${ans}`];
+    } else if (hasDiv) {
+      return [`竖式笔算：${nums[0]} ÷ ${nums[1]}`, `结果：${ans}`];
+    } else if (hasPlus) {
+      return [`位数对齐，从个位加起`, `${nums.slice(0,3).join(' + ')} = ${ans}`];
+    } else if (hasMinus) {
+      return [`位数对齐，从个位减起`, `${nums.slice(0,3).join(' - ')} = ${ans}`];
+    }
+  }
+
+  // 填空题
+  if (q.sectionTitle && q.sectionTitle.includes('填空')) {
+    return [`答案：${ans}`];
+  }
+
+  // 选择题
+  if (q.sectionTitle && q.sectionTitle.includes('选择')) {
+    return [`正确答案：${ans}`];
+  }
+
+  // fallback
+  return [`答案：${ans}`];
+}
+
+
   let { units, all, rangeText } = getExamUnits();
   if (!units || units.length === 0) return null;
 
@@ -9425,6 +8618,12 @@ function generateExamPaper() {
     });
   });
 
+  // 为每道题生成解题步骤
+  questions.forEach((q, i) => {
+    q.num = i + 1;
+    if (!q.steps) q.steps = generateSteps(q);
+  });
+
   let typeName = (EXAM_TYPES.find(t => t.key === examState.type) || {}).name.replace(/\s/g, '');
   let cnGrade = ['一', '二', '三', '四', '五', '六'][examState.grade - 1];
   let semName = examState.semester === 1 ? '上册' : '下册';
@@ -9460,6 +8659,17 @@ function startExam() {
     state.quizCorrect = 0;
     state.quizWrong = 0;
     state.quizWrongQuestions = [];
+
+    // 考试计时器（70分钟）
+    if (state.examTimer) clearInterval(state.examTimer);
+    state.examEndTime = Date.now() + 70 * 60 * 1000;
+    state.examTimer = setInterval(() => {
+      let remain = Math.max(0, Math.ceil((state.examEndTime - Date.now()) / 1000));
+      let m = Math.floor(remain / 60), s = remain % 60;
+      let timerEl = document.getElementById('examTimer');
+      if (timerEl) timerEl.textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+      if (remain <= 0) { clearInterval(state.examTimer); state.examTimer = null; finishQuiz(); }
+    }, 1000);
 
     showPage('quiz');
     document.getElementById('backBtn').style.display = 'block';
@@ -9637,6 +8847,7 @@ function submitAnswer() {
       feedback.innerHTML = `❌ 再想想！正确答案是：<span class="correct-answer">${q.answer}</span>`;
       // 加入错题
       state.quizWrongQuestions.push({
+        index: state.quizIndex,
         question: q,
         userAnswer: userAnswer,
         unitName: state.quizTitle,
@@ -9658,6 +8869,8 @@ function submitAnswer() {
 }
 
 function finishQuiz() {
+  // 停止计时器
+  if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
   // 记录错题
   state.quizWrongQuestions.forEach(w => {
     addToWrongBank(w.question, w.userAnswer, w.unitName, w.grade);
@@ -9730,11 +8943,45 @@ function finishQuiz() {
     : '🎉 全部答对，没有错题！';
   document.getElementById('wrongAddedInfo').textContent = wrongInfo;
 
+  // 考试模式：展示参考答案
+  const akDiv = document.getElementById('examAnswerKey');
+  const akBody = document.getElementById('examAnswerKeyBody');
+  if (isExam && state.examPaper) {
+    let secs = {};
+    state.quizQuestions.forEach((q, i) => {
+      let key = q.sectionTitle || '题目';
+      if (!secs[key]) secs[key] = [];
+      secs[key].push(Object.assign({}, q, { idx: i }));
+    });
+    let html = '';
+    for (let [title, qs] of Object.entries(secs)) {
+      html += `<div style="font-weight:700;font-size:14px;margin:12px 0 6px;color:var(--primary);border-bottom:1px solid #e8e8e8;padding-bottom:4px">${title}</div>`;
+      qs.forEach(q => {
+        let userQ = state.quizWrongQuestions.find(w => w.index === q.idx);
+        let isWrong = !!userQ;
+        let bg = isWrong ? '#fff1f0' : '#f6ffed';
+        let ur=userQ?String(userQ.userAnswer||''):'';
+        let stepsHtml = (q.steps && q.steps.length) ? `<div style="font-size:12px;color:var(--text-light);margin-top:2px">${q.steps.map((s,i)=>`<div>${i>0?'→ ':''}${s}</div>`).join('')}</div>` : '';
+        html += `<div style="background:${bg};border-radius:6px;padding:8px;margin:6px 0;font-size:13px">
+          <div style="font-weight:600">第${q.num||(q.idx+1)}题 ${isWrong?'<span style="color:#cf1322">❌ 答错</span>':'<span style="color:var(--success)">✅</span>'} ${q.score||'?'}分</div>
+          <div style="color:var(--text-light);margin:2px 0">${(q.question||'').substring(0,80)}${(q.question||'').length>80?'…':''}</div>
+          <div>正确答案：<b>${q.answer}</b> ${ur ? '｜ 你的答案：<b style="color:#cf1322">'+ur+'</b>' : ''}</div>
+          ${stepsHtml}
+        </div>`;
+      });
+    }
+    akBody.innerHTML = html;
+    akDiv.style.display = 'block';
+  } else {
+    akDiv.style.display = 'none';
+  }
+
   showPage('result');
   document.getElementById('backBtn').style.display = 'none';
 }
 
 function retryQuiz() {
+  document.getElementById('examAnswerKey').style.display = 'none';
   if (state.quizMode === 'exam') {
     // 重新组一份同类型试卷
     startExam();
