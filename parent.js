@@ -1,5 +1,28 @@
 // ===== 家长后台 =====
 
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// 把本地/云端的错题对象统一成 {unitName, grade, userAnswer, question:{question,options,answer,explain,svg}}
+function normalizeWrong(rawList) {
+  return (rawList || []).map(w => {
+    const q = w.question || {};
+    return {
+      unitName: w.unitName || '',
+      grade: w.grade,
+      userAnswer: w.userAnswer,
+      question: {
+        question: q.question || q.stem || '',
+        options: q.options || [],
+        answer: q.answer,
+        explain: q.explain || '',
+        svg: q.svg || ''
+      }
+    };
+  });
+}
+
 function getLocalStats() {
   const data = loadData();
   const history = data.history || [];
@@ -24,7 +47,7 @@ function getLocalStats() {
   });
   const trend = Object.keys(byDay).sort().map(d => ({ date: d, count: byDay[d] }));
   const avg = history.length ? Math.round(history.reduce((s, h) => s + (h.accuracy || 0), 0) / history.length) : 0;
-  return { total: history.length, avg, units, weak, trend, wrong: (data.wrong || []).slice(-8) };
+  return { total: history.length, avg, units, weak, trend, wrong: normalizeWrong((data.wrong || []).slice(-8)) };
 }
 
 function renderParent() {
@@ -88,7 +111,16 @@ function renderDashboard(s) {
     ? s.trend.map(t => `<div style="font-size:12px;color:var(--text-light)">${t.date}：练习 ${t.count} 题</div>`).join('')
     : '<div style="font-size:12px;color:var(--text-lighter)">暂无每日数据</div>';
   const wrongHtml = (s.wrong && s.wrong.length)
-    ? s.wrong.map(w => `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid #f0f0f0">${w.unitName || ''}：${w.question && w.question.stem ? w.question.stem.slice(0, 24) : ''}…</div>`).join('')
+    ? s.wrong.map(w => {
+        const q = w.question || {};
+        return `<div style="padding:8px 0;border-bottom:1px solid #f0f0f0">
+          <div style="font-size:12px;color:var(--text-light)">${esc(w.unitName)}${w.grade ? ' · ' + esc(String(w.grade)) + '年级' : ''}</div>
+          <div style="font-size:14px;font-weight:600;margin:3px 0">${esc(q.question)}</div>
+          ${q.svg ? `<div style="margin:4px 0">${q.svg}</div>` : ''}
+          <div style="font-size:13px;margin-top:2px">你的答案：<b style="color:var(--accent)">${esc(w.userAnswer)}</b>　正确答案：<b style="color:var(--success)">${esc(q.answer)}</b></div>
+          ${q.explain ? `<div style="font-size:12px;color:var(--text-light);margin-top:2px">解析：${esc(q.explain)}</div>` : ''}
+        </div>`;
+      }).join('')
     : '<div style="font-size:12px;color:var(--text-lighter)">暂无错题记录</div>';
   return `
     <div style="display:flex;gap:8px;margin-bottom:12px">

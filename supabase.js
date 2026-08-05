@@ -40,10 +40,31 @@ async function pushStudyRecords() {
     correct: h.score,
     total: h.total,
     accuracy: h.accuracy,
-    created_at: new Date(h.time || Date.now()).toISOString()
+    created_at: new Date(h.time || Date.now()).toISOString(),
+    wrong_json: (h.wrong || []).map(w => ({
+      unitName: w.unitName,
+      grade: w.grade,
+      userAnswer: (w.userAnswer === undefined || w.userAnswer === null) ? '' : String(w.userAnswer),
+      question: {
+        question: (w.question && w.question.question) || '',
+        options: (w.question && w.question.options) || [],
+        answer: (w.question && w.question.answer) || '',
+        explain: (w.question && w.question.explain) || '',
+        svg: (w.question && w.question.svg) || ''
+      }
+    }))
   }));
   if (!rows.length) return;
-  try { await c.from('study_records').insert(rows); } catch (e) { console.warn('pushStudyRecords', e); }
+  try {
+    await c.from('study_records').insert(rows);
+  } catch (e) {
+    // 列 wrong_json 可能尚未添加：去掉该列重试，保证分数等基础数据仍能同步
+    console.warn('pushStudyRecords (with wrong_json) failed, retry without:', e);
+    try {
+      const fallback = rows.map(({ wrong_json, ...r }) => r);
+      await c.from('study_records').insert(fallback);
+    } catch (e2) { console.warn('pushStudyRecords fallback failed:', e2); }
+  }
 }
 
 // 数据驱动的单元生成器（用于 content 覆盖层中的 questions 数组）

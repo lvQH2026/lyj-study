@@ -20,6 +20,7 @@ create table if not exists study_records (
   correct int,
   total int,
   accuracy int,
+  wrong_json jsonb default '[]'::jsonb,   -- 本次测验的逐题错题详情（供家长端查看）
   created_at timestamptz default now()
 );
 create index if not exists idx_study_records_learning on study_records(learning_id, created_at);
@@ -48,6 +49,7 @@ declare
   ok boolean;
   rec record;
   res json;
+  wrong_json json;
 begin
   select (password = p_pw) into ok from children where learning_id = p_learning_id;
   if not ok or not found then return null; end if;
@@ -63,6 +65,15 @@ begin
     group by unit_name order by avg(accuracy) asc
   ) x;
 
+  -- 最近 30 道错题详情（跨所有测验，按时间倒序）
+  select coalesce(json_agg(w order by ca desc), '[]'::json) into wrong_json from (
+    select sr.created_at as ca, json_array_elements(sr.wrong_json) as w
+    from study_records sr
+    where sr.learning_id = p_learning_id and sr.wrong_json is not null
+    order by sr.created_at desc
+    limit 30
+  ) t;
+
   return json_build_object(
     'total', rec.total,
     'avg', rec.avg,
@@ -75,7 +86,8 @@ begin
     'trend', coalesce((select json_agg(t) from (
         select to_char(created_at, 'YYYY-MM-DD') as date, sum(total) as count
         from study_records where learning_id = p_learning_id
-        group by 1 order by 1) t), '[]'::json)
+        group by 1 order by 1) t), '[]'::json),
+    'wrong', coalesce(wrong_json, '[]'::json)
   );
 end;
 $$;

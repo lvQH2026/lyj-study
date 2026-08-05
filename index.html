@@ -8398,7 +8398,7 @@ function clearWrongBank() {
   saveData(data);
 }
 
-function recordHistory(grade, unitName, score, total) {
+function recordHistory(grade, unitName, score, total, wrong) {
   let data = loadData();
   if (!data.history) data.history = [];
   data.history.unshift({
@@ -8407,7 +8407,8 @@ function recordHistory(grade, unitName, score, total) {
     score: score,
     total: total,
     accuracy: Math.round(score / total * 100),
-    time: Date.now()
+    time: Date.now(),
+    wrong: Array.isArray(wrong) ? wrong : []
   });
   if (data.history.length > 50) data.history = data.history.slice(0, 50);
 
@@ -9661,8 +9662,21 @@ function finishQuiz() {
     addToWrongBank(w.question, w.userAnswer, w.unitName, w.grade);
   });
 
+  // 组装本次错题详情（供云端/家长端查看）
+  const quizWrongDetails = state.quizWrongQuestions.map(w => ({
+    unitName: w.unitName,
+    grade: w.grade,
+    userAnswer: (w.userAnswer === undefined || w.userAnswer === null) ? '' : String(w.userAnswer),
+    question: {
+      question: w.question.question,
+      options: w.question.options || [],
+      answer: (w.question.answer === undefined || w.question.answer === null) ? '' : String(w.question.answer),
+      explain: w.question.explain || '',
+      svg: w.question.svg || ''
+    }
+  }));
   // 记录历史
-  recordHistory(state.currentGrade, state.quizTitle, state.quizCorrect, state.quizQuestions.length);
+  recordHistory(state.currentGrade, state.quizTitle, state.quizCorrect, state.quizQuestions.length, quizWrongDetails);
   if (typeof syncAfterQuiz === 'function') { syncAfterQuiz(); }
 
   // 显示结果
