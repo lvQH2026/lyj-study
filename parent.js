@@ -71,17 +71,19 @@ function renderParent() {
       }
     } catch (e) {}
   }
-  if (cloud) {
-    box.style.display = 'block';
-    const s = getLocalStats();
-    result.innerHTML = renderDashboard(s) + '<div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
-  } else {
-    box.style.display = 'none';
-    const s = getLocalStats();
-    result.innerHTML =
-      '<div class="pp-note">当前为「本机预览」模式（数据存在这台手机本地）。部署到云端并填入 Supabase 后，家长可在自己手机上用学习ID+口令远程查看。</div>' +
-      renderDashboard(s);
-  }
+  // 默认：直接展示本机数据，无需口令；远程查看改为可选折叠
+  box.style.display = 'none';
+  const s = getLocalStats();
+  const remoteHint = cloud
+    ? '<div class="pp-note">本机数据已直接展示，查看无需口令。如需查看其他设备，点下方「在其他设备查看孩子的学习情况（可选）」并输入学习ID与口令即可。</div>'
+    : '<div class="pp-note">当前为「本机预览」模式（数据存在这台手机本地），无需口令即可查看。部署到云端并填入 Supabase 后，家长可在自己手机上远程查看其他设备。</div>';
+  result.innerHTML = remoteHint + renderDashboard(s);
+}
+
+function toggleParentRemote() {
+  const box = document.getElementById('parentLogin');
+  if (!box) return;
+  box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
 }
 
 async function parentLogin() {
@@ -90,8 +92,8 @@ async function parentLogin() {
   if (!id || !pw) { alert('请填写学习ID和口令'); return; }
   const stats = await getChildStats(id, pw);
   const result = document.getElementById('parentResult');
-  if (!stats) { result.innerHTML = '<p style="color:#cf1322">未找到该学习ID，或口令不正确。</p>'; return; }
-  result.innerHTML = renderDashboard(stats, true);
+  if (!stats) { result.innerHTML = '<p class="pp-bad">未找到该学习ID，或口令不正确。</p>'; return; }
+  result.innerHTML = '<button class="btn btn-ghost" style="width:100%;margin-bottom:12px;background:rgba(255,255,255,.06);border:1px solid var(--pp-border);color:var(--pp-text);padding:10px;border-radius:10px;font-size:14px;cursor:pointer" onclick="renderParent()">← 返回本机数据</button>' + renderDashboard(stats, true);
 }
 
 function renderDashboard(s) {
@@ -105,7 +107,7 @@ function renderDashboard(s) {
   }).join('');
   const weakHtml = (s.weak && s.weak.length)
     ? s.weak.map(u => `<span class="pp-weak">${u.unit}（${u.accuracy}%）</span>`).join('')
-    : '<span class="pp-good">暂无明显薄弱点 🎉</span>';
+    : '<span class="pp-good">暂无明显薄弱点</span>';
   const trendHtml = (s.trend && s.trend.length)
     ? s.trend.map(t => `<div class="pp-dim">${t.date}：练习 ${t.count} 题</div>`).join('')
     : '<div class="pp-dim">暂无每日数据</div>';
@@ -127,9 +129,9 @@ function renderDashboard(s) {
       <div class="pp-stat"><div class="v" style="color:var(--success)">${s.avg || 0}%</div><div class="l">平均正确率</div></div>
       <div class="pp-stat"><div class="v" style="color:var(--accent)">${s.weak ? s.weak.length : 0}</div><div class="l">薄弱单元</div></div>
     </div>
-    <div class="card" style="margin-bottom:12px"><div class="section-title">📅 每日练习量</div>${trendHtml}</div>
-    <div class="card" style="margin-bottom:12px"><div class="section-title">📊 各单元正确率</div>${unitBars || '<div class="pp-dim">暂无数据</div>'}</div>
-    <div class="card" style="margin-bottom:12px"><div class="section-title">🎯 薄弱点</div><div>${weakHtml}</div></div>
-    <div class="card"><div class="section-title">❌ 最近错题</div>${wrongHtml}</div>
+    <div class="card" style="margin-bottom:12px"><div class="section-title">每日练习量</div>${trendHtml}</div>
+    <div class="card" style="margin-bottom:12px"><div class="section-title">各单元正确率</div>${unitBars || '<div class="pp-dim">暂无数据</div>'}</div>
+    <div class="card" style="margin-bottom:12px"><div class="section-title">薄弱点</div><div>${weakHtml}</div></div>
+    <div class="card"><div class="section-title">最近错题</div>${wrongHtml}</div>
   `;
 }
