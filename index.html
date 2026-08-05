@@ -1252,6 +1252,202 @@ body {
   padding: 5px 10px;
   font-size: 13px;
 }
+/* =========================================================
+   高级感主题（首页=清爽通透 A / 家长页=深色玻璃拟态 B）
+   仅改视觉层，业务逻辑/交互完全不变。
+   ========================================================= */
+:root{
+  --bg:#F4F6FB;
+  --primary:#3B6FE0;
+  --primary-light:#6E9BF0;
+  --primary-dark:#2E56B8;
+  --accent:#F76E6E;
+  --success:#2FB37E;
+  --warning:#F2A33C;
+  --card-bg:#FFFFFF;
+  --text:#1F2733;
+  --text-light:#5B6678;
+  --text-lighter:#97A1B3;
+  --border:#ECEFF5;
+  --radius:18px;
+  --radius-sm:13px;
+  --shadow:0 10px 30px rgba(18,28,45,.06);
+  --shadow-sm:0 4px 14px rgba(18,28,45,.05);
+  /* 家长页深色玻璃令牌 */
+  --pp-bg1:#0E1220;
+  --pp-bg2:#171D33;
+  --pp-glass:rgba(255,255,255,.06);
+  --pp-glass-strong:rgba(255,255,255,.09);
+  --pp-border:rgba(255,255,255,.12);
+  --pp-text:#E8EBF5;
+  --pp-text-dim:#9AA3BD;
+  --pp-neon:#56E0C8;
+  --pp-neon2:#7C8CFF;
+}
+
+/* ---- 全局基础提升 ---- */
+body{background:var(--bg);color:var(--text);}
+.card{
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  border-radius:var(--radius);
+  transition:box-shadow .25s ease, transform .25s ease;
+}
+.btn{border-radius:var(--radius-sm);font-weight:600;transition:all .2s ease;}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  border:none;color:#fff;
+  box-shadow:0 8px 18px rgba(59,111,224,.28);
+}
+.btn-primary:active{transform:scale(.97);box-shadow:0 4px 10px rgba(59,111,224,.25);}
+input,textarea,select{
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  transition:border-color .2s, box-shadow .2s;
+}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,111,224,.12);outline:none;
+}
+.section-title{letter-spacing:.3px;}
+.section-title::before{
+  content:'';display:inline-block;width:4px;height:15px;border-radius:3px;
+  background:linear-gradient(var(--primary),var(--primary-light));
+  margin-right:6px;vertical-align:-2px;
+}
+.progress-bar{background:#ECEFF5;border-radius:999px;height:8px;overflow:hidden;}
+.progress-bar-fill{background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:999px;}
+.exam-mode .progress-bar{background:rgba(255,255,255,.18);}
+
+/* 选项按钮精致化 */
+.option-btn{
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  background:#fff;box-shadow:var(--shadow-sm);transition:all .18s ease;
+}
+.option-btn:active{transform:scale(.98);}
+.option-btn.selected{border-color:var(--primary);background:rgba(59,111,224,.08);box-shadow:0 6px 16px rgba(59,111,224,.18);}
+.option-btn.correct{border-color:var(--success);background:rgba(47,179,126,.10);}
+.option-btn.wrong{border-color:var(--accent);background:rgba(247,110,110,.10);}
+.option-label{font-weight:600;}
+
+/* ---- 首页 A：hero + 年级卡片（浮起卡片 + 序号徽标） ---- */
+.welcome-banner{
+  background:linear-gradient(135deg,#3B6FE0,#6E9BF0);
+  box-shadow:0 14px 34px rgba(59,111,224,.28);
+  border-radius:var(--radius);
+}
+.welcome-banner::after{
+  width:120px;height:120px;
+  background:radial-gradient(circle, rgba(255,255,255,.22), transparent 70%);
+}
+.grade-grid{gap:14px;}
+.grade-card{
+  background:linear-gradient(160deg,#FFFFFF,#F6F9FF);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  border-radius:var(--radius);
+  padding:22px 12px 18px;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.grade-card:active{transform:scale(.97);}
+.grade-card .grade-icon{
+  font-size:28px;width:54px;height:54px;margin:0 auto 8px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:16px;background:rgba(59,111,224,.08);
+}
+.grade-card .grade-name{color:var(--text);font-size:17px;}
+.grade-card .grade-sub{color:var(--text-lighter);}
+.grade-card::after{
+  content:attr(data-grade);
+  position:absolute;top:12px;right:12px;
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:14px;color:#fff;
+  box-shadow:0 4px 10px rgba(0,0,0,.18);
+}
+.grade-card[data-grade="1"]{background:linear-gradient(160deg,#FFFFFF,#FFF1F4);}
+.grade-card[data-grade="1"] .grade-icon{background:rgba(255,143,163,.16);}
+.grade-card[data-grade="1"]::after{background:#FF8FA3;}
+.grade-card[data-grade="2"]{background:linear-gradient(160deg,#FFFFFF,#EFF9FB);}
+.grade-card[data-grade="2"] .grade-icon{background:rgba(79,176,198,.16);}
+.grade-card[data-grade="2"]::after{background:#4FB0C6;}
+.grade-card[data-grade="3"]{background:linear-gradient(160deg,#FFFFFF,#EEFBF4);}
+.grade-card[data-grade="3"] .grade-icon{background:rgba(54,179,126,.16);}
+.grade-card[data-grade="3"]::after{background:#36B37E;}
+.grade-card[data-grade="4"]{background:linear-gradient(160deg,#FFFFFF,#FFF6EC);}
+.grade-card[data-grade="4"] .grade-icon{background:rgba(242,163,60,.16);}
+.grade-card[data-grade="4"]::after{background:#F2A33C;}
+.grade-card[data-grade="5"]{background:linear-gradient(160deg,#FFFFFF,#F0F4FF);}
+.grade-card[data-grade="5"] .grade-icon{background:rgba(91,141,239,.16);}
+.grade-card[data-grade="5"]::after{background:#5B8DEF;}
+.grade-card[data-grade="6"]{background:linear-gradient(160deg,#FFFFFF,#F6F1FF);}
+.grade-card[data-grade="6"] .grade-icon{background:rgba(160,124,224,.16);}
+.grade-card[data-grade="6"]::after{background:#A07CE0;}
+.grade-card[data-grade] .grade-name{color:var(--text);}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.grade-card{animation:cardIn .35s ease both;}
+#recentList .card{display:flex;}
+
+/* ---- 家长页 B：深色玻璃拟态 ---- */
+#page-parent{
+  background:
+    radial-gradient(900px 480px at 85% -8%, rgba(124,140,255,.20), transparent 60%),
+    radial-gradient(700px 420px at -5% 10%, rgba(86,224,200,.12), transparent 55%),
+    linear-gradient(160deg,var(--pp-bg1),var(--pp-bg2));
+  color:var(--pp-text);
+  min-height:100vh;
+}
+#page-parent .navbar{
+  background:rgba(14,18,32,.6);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--pp-border);
+  box-shadow:none;color:var(--pp-text);
+}
+#page-parent .navbar h1{color:var(--pp-text);}
+#page-parent .section-title{color:var(--pp-text);}
+#page-parent .section-title::before{background:linear-gradient(var(--pp-neon),var(--pp-neon2));}
+#page-parent .card{
+  background:var(--pp-glass);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--pp-border);
+  box-shadow:0 12px 32px rgba(0,0,0,.38);
+  color:var(--pp-text);
+}
+#page-parent .empty-state .empty-text{color:var(--pp-text-dim);}
+#page-parent #deviceCred,
+#page-parent #parentLogin{
+  background:var(--pp-glass)!important;
+  border:1px solid var(--pp-border)!important;
+  color:var(--pp-text)!important;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+#page-parent #deviceCred *{color:var(--pp-text-dim)!important;}
+#page-parent #deviceCred b{color:var(--pp-text)!important;}
+#page-parent input{
+  border:1px solid var(--pp-border)!important;
+  background:rgba(255,255,255,.06)!important;
+  color:var(--pp-text)!important;
+}
+#page-parent .pp-note{
+  background:rgba(242,163,60,.12);border:1px solid rgba(242,163,60,.28);
+  color:#E0B36B;padding:8px 10px;border-radius:10px;font-size:12px;margin-bottom:10px;
+}
+#page-parent .pp-stat-row{display:flex;gap:8px;margin-bottom:12px;}
+#page-parent .pp-stat{
+  flex:1;background:var(--pp-glass-strong);border:1px solid var(--pp-border);
+  border-radius:12px;padding:12px 8px;text-align:center;
+}
+#page-parent .pp-stat .v{font-size:22px;font-weight:800;}
+#page-parent .pp-stat .l{font-size:12px;color:var(--pp-text-dim);}
+#page-parent .pp-bar{margin:8px 0;}
+#page-parent .pp-bar-top{display:flex;justify-content:space-between;font-size:13px;color:var(--pp-text);margin-bottom:4px;}
+#page-parent .pp-bar-track{height:8px;background:rgba(255,255,255,.10);border-radius:4px;overflow:hidden;}
+#page-parent .pp-bar-fill{height:100%;border-radius:4px;}
+#page-parent .pp-weak{display:inline-block;background:rgba(247,110,110,.16);color:#FF9B9B;border:1px solid rgba(247,110,110,.32);padding:3px 9px;border-radius:10px;font-size:12px;margin:3px;}
+#page-parent .pp-wrong-row{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08);}
+#page-parent .pp-wrong-q{font-size:14px;font-weight:600;margin:3px 0;color:var(--pp-text);}
+#page-parent .pp-dim{font-size:12px;color:var(--pp-text-dim);}
+#page-parent .pp-bad{color:#FF9B9B;}
+#page-parent .pp-good{color:#7CE0B0;}
+
 </style>
 </head>
 <body>

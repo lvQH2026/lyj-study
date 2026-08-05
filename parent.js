@@ -74,13 +74,12 @@ function renderParent() {
   if (cloud) {
     box.style.display = 'block';
     const s = getLocalStats();
-    result.innerHTML = renderDashboard(s) + '<div style="margin-top:14px;font-size:12px;color:var(--text-lighter);text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
+    result.innerHTML = renderDashboard(s) + '<div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
   } else {
     box.style.display = 'none';
     const s = getLocalStats();
     result.innerHTML =
-      '<div style="background:#fff7e6;border:1px solid #ffd591;padding:8px 10px;border-radius:8px;font-size:12px;color:#874d00;margin-bottom:10px">' +
-      '当前为「本机预览」模式（数据存在这台手机本地）。部署到云端并填入 Supabase 后，家长可在自己手机上用学习ID+口令远程查看。</div>' +
+      '<div class="pp-note">当前为「本机预览」模式（数据存在这台手机本地）。部署到云端并填入 Supabase 后，家长可在自己手机上用学习ID+口令远程查看。</div>' +
       renderDashboard(s);
   }
 }
@@ -99,37 +98,37 @@ function renderDashboard(s) {
   const unitBars = (s.units || []).slice(0, 12).map(u => {
     const w = Math.max(0, Math.min(100, u.accuracy));
     const color = u.accuracy >= 80 ? 'var(--success)' : u.accuracy >= 60 ? 'var(--warning)' : 'var(--accent)';
-    return `<div style="margin:6px 0">
-      <div style="display:flex;justify-content:space-between;font-size:13px"><span>${u.unit}</span><span>${u.accuracy}% · ${u.count}次</span></div>
-      <div style="height:8px;background:#eee;border-radius:4px;overflow:hidden"><div style="width:${w}%;height:100%;background:${color}"></div></div>
+    return `<div class="pp-bar">
+      <div class="pp-bar-top"><span>${u.unit}</span><span>${u.accuracy}% · ${u.count}次</span></div>
+      <div class="pp-bar-track"><div class="pp-bar-fill" style="width:${w}%;background:${color}"></div></div>
     </div>`;
   }).join('');
   const weakHtml = (s.weak && s.weak.length)
-    ? s.weak.map(u => `<span style="display:inline-block;background:#fff1f0;color:#cf1322;border:1px solid #ffccc7;padding:3px 8px;border-radius:10px;font-size:12px;margin:3px">${u.unit}（${u.accuracy}%）</span>`).join('')
-    : '<span style="color:var(--success)">暂无明显薄弱点 🎉</span>';
+    ? s.weak.map(u => `<span class="pp-weak">${u.unit}（${u.accuracy}%）</span>`).join('')
+    : '<span class="pp-good">暂无明显薄弱点 🎉</span>';
   const trendHtml = (s.trend && s.trend.length)
-    ? s.trend.map(t => `<div style="font-size:12px;color:var(--text-light)">${t.date}：练习 ${t.count} 题</div>`).join('')
-    : '<div style="font-size:12px;color:var(--text-lighter)">暂无每日数据</div>';
+    ? s.trend.map(t => `<div class="pp-dim">${t.date}：练习 ${t.count} 题</div>`).join('')
+    : '<div class="pp-dim">暂无每日数据</div>';
   const wrongHtml = (s.wrong && s.wrong.length)
     ? s.wrong.map(w => {
         const q = w.question || {};
-        return `<div style="padding:8px 0;border-bottom:1px solid #f0f0f0">
-          <div style="font-size:12px;color:var(--text-light)">${esc(w.unitName)}${w.grade ? ' · ' + esc(String(w.grade)) + '年级' : ''}</div>
-          <div style="font-size:14px;font-weight:600;margin:3px 0">${esc(q.question)}</div>
+        return `<div class="pp-wrong-row">
+          <div class="pp-dim">${esc(w.unitName)}${w.grade ? ' · ' + esc(String(w.grade)) + '年级' : ''}</div>
+          <div class="pp-wrong-q">${esc(q.question)}</div>
           ${q.svg ? `<div style="margin:4px 0">${q.svg}</div>` : ''}
-          <div style="font-size:13px;margin-top:2px">你的答案：<b style="color:var(--accent)">${esc(w.userAnswer)}</b>　正确答案：<b style="color:var(--success)">${esc(q.answer)}</b></div>
-          ${q.explain ? `<div style="font-size:12px;color:var(--text-light);margin-top:2px">解析：${esc(q.explain)}</div>` : ''}
+          <div class="pp-dim" style="margin-top:2px">你的答案：<b class="pp-bad">${esc(w.userAnswer)}</b>　正确答案：<b class="pp-good">${esc(q.answer)}</b></div>
+          ${q.explain ? `<div class="pp-dim" style="margin-top:2px">解析：${esc(q.explain)}</div>` : ''}
         </div>`;
       }).join('')
-    : '<div style="font-size:12px;color:var(--text-lighter)">暂无错题记录</div>';
+    : '<div class="pp-dim">暂无错题记录</div>';
   return `
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <div style="flex:1;background:#e6f0ff;border-radius:10px;padding:10px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--primary)">${s.total || 0}</div><div style="font-size:12px;color:var(--text-light)">练习次数</div></div>
-      <div style="flex:1;background:#e8f7e8;border-radius:10px;padding:10px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--success)">${s.avg || 0}%</div><div style="font-size:12px;color:var(--text-light)">平均正确率</div></div>
-      <div style="flex:1;background:#fff1f0;border-radius:10px;padding:10px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--accent)">${s.weak ? s.weak.length : 0}</div><div style="font-size:12px;color:var(--text-light)">薄弱单元</div></div>
+    <div class="pp-stat-row">
+      <div class="pp-stat"><div class="v" style="color:var(--primary)">${s.total || 0}</div><div class="l">练习次数</div></div>
+      <div class="pp-stat"><div class="v" style="color:var(--success)">${s.avg || 0}%</div><div class="l">平均正确率</div></div>
+      <div class="pp-stat"><div class="v" style="color:var(--accent)">${s.weak ? s.weak.length : 0}</div><div class="l">薄弱单元</div></div>
     </div>
     <div class="card" style="margin-bottom:12px"><div class="section-title">📅 每日练习量</div>${trendHtml}</div>
-    <div class="card" style="margin-bottom:12px"><div class="section-title">📊 各单元正确率</div>${unitBars || '<div style="font-size:12px;color:var(--text-lighter)">暂无数据</div>'}</div>
+    <div class="card" style="margin-bottom:12px"><div class="section-title">📊 各单元正确率</div>${unitBars || '<div class="pp-dim">暂无数据</div>'}</div>
     <div class="card" style="margin-bottom:12px"><div class="section-title">🎯 薄弱点</div><div>${weakHtml}</div></div>
     <div class="card"><div class="section-title">❌ 最近错题</div>${wrongHtml}</div>
   `;
