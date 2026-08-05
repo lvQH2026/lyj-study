@@ -6929,7 +6929,7 @@ const KNOWLEDGE_BASE = {
       { name: '小数的加法和减法', type: 'basic', gen: g4_decimal_calc },
       { name: '三角形', type: 'shape', gen: g4_triangle },
       { name: '图形的运动（二）', type: 'shape', gen: g4_shape2 },
-      { name: '工程应用题', type: 'application', gen: g_app工程 },
+      { name: '价格应用', type: 'application', gen: g_app_price },
       { name: '对称图形', type: 'shape', gen: g_shape_symmetry },
       { name: '巧数三角形（专项30题）', type: 'shape', gen: g_triangle_count, introImg: TRIANGLE_METHOD_IMG },
     ]
@@ -7229,9 +7229,11 @@ function g3_time(){
     {s:svgClock(2,10),q:'现在是几点几分？',a:'2时10分',d:['2时50分','3时10分']},
     {s:svgClock(5,25),q:'现在是几点几分？',a:'5时25分',d:['5时5分','6时25分']},
     {s:svgClock(9,40),q:'现在是几点几分？',a:'9时40分',d:['9时20分','10时40分']},
+    {s:svgClock(7,55),q:'分针快到12，这是几点几分？',a:'7时55分',d:['7时5分','8时55分']},
     {q:'1小时等于多少分钟？',a:'60分钟',d:['30分钟','100分钟','90分钟']},
     {q:'1分钟等于多少秒？',a:'60秒',d:['30秒','100秒','90秒']},
     {q:'小明9:00-9:30做作业，用了多久？',a:'30分钟',d:['20分钟','1小时','40分钟']},
+    {q:'一节课40分钟，从8:20开始，几时几分结束？',a:'9时00分',d:['8时60分','9时20分','8时40分']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -7244,6 +7246,9 @@ function g3_fraction(){
     {q:'1/4表示把一个整体平均分成几份？',a:'4份',d:['1份','2份','3份']},
     {q:'1/2和1/4哪个大？',a:'1/2',d:['1/4','一样大','无法比较']},
     {q:'3/8的分子是？',a:'3',d:['8','5','11']},
+    {q:'把一个披萨平均分成8块，吃了3块，吃了这个披萨的几分之几？',a:'3/8',d:['5/8','1/8','8/3']},
+    {q:'下面哪个分数最大？',a:'1/3',d:['1/5','1/6','1/9']},
+    {q:'5/9里面有( )个1/9？',a:'5',d:['9','4','1']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -7262,12 +7267,24 @@ function g3_area(){
     svgR(5,10,w*15,h*10,'#BBDEFB')+svgTxt(5+w*15/2,8,w+'cm',9)+svgTxt(2,15+h*5,w+'cm',9),
     String(w*h),[String(w+h),String(2*(w+h)),String(w*h-1)]);
 }
-function g3_decimal(){return mc('0.5等于几分之几？','5/10',['1/2','5/100','1/5'])}
+function g3_decimal(){
+  let items=[
+    {q:'0.5等于几分之几？',a:'5/10',d:['1/2','5/100','1/5']},
+    {q:'0.3等于几分之几？',a:'3/10',d:['3/100','1/3','3/1']},
+    {q:'0.07等于几分之几？',a:'7/100',d:['7/10','70/100','7/1000']},
+    {q:'零点八写作小数是？',a:'0.8',d:['8.0','0.08','80']},
+    {q:'3分米用米作单位是多少？',a:'0.3米',d:['3米','0.03米','30米']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
 function g3_date(){
   let items=[
     {q:'一年有多少个月？',a:'12个月',d:['10个月','24个月','6个月']},
-    {q:'哪个月有28天？',a:'2月',d:['1月','3月','12月']},
+    {q:'平年2月有多少天？',a:'28天',d:['29天','30天','31天']},
     {q:'7月有多少天？',a:'31天',d:['30天','28天','29天']},
+    {q:'下面哪个月是大月（31天）？',a:'1月',d:['4月','6月','9月']},
+    {q:'一年有几个季度？',a:'4个',d:['2个','3个','12个']},
+    {q:'教师节是9月10日，在第几个季度？',a:'第三季度',d:['第一季度','第二季度','第四季度']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -7285,29 +7302,109 @@ function g_shape_angle_calc(){
 }
 
 // ===== 4年级上册 =====
-function g4_bignum(){return mc('100个一万是？','一百万',['十万','一千万','一亿'])}
+function g4_bignum(){
+  let items=[
+    {q:'100个一万是？',a:'一百万',d:['十万','一千万','一亿']},
+    {q:'10个十万是？',a:'一百万',d:['十万','一千万','一亿']},
+    {q:'一亿里面有多少个一千万？',a:'10个',d:['100个','1个','1000个']},
+    {q:'从个位起，第5位是？',a:'万位',d:['千位','十万位','百万位']},
+    {q:'万级的数位包括万、十万、百万和？',a:'千万',d:['亿','百','十']},
+    {q:'最小的六位数是？',a:'100000',d:['99999','111111','10000']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
 function g4_angle(){
   let items=[
     {s:svgAngle(45),q:'这个角是多少度？',a:'45°',d:['30°','60°','90°']},
     {s:svgAngle(120),q:'这个角是多少度？',a:'120°',d:['90°','150°','60°']},
     {s:svgAngle(150),q:'这个角是多少度？',a:'150°',d:['120°','180°','90°']},
     {s:svgAngle(30),q:'这个角是多少度？',a:'30°',d:['45°','60°','15°']},
+    {s:svgAngle(165),q:'这个角是多少度？',a:'165°',d:['155°','175°','150°']},
   ];
   let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
 function g4_mul(){let a=ri(100,500),b=ri(20,50);return mf(`${a}×${b}=？`,a*b)}
 function g4_div(){let a=ri(200,600),b=ri(10,30);if(a%b!==0)a+=b-a%b;return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1])}
-function g4_parallel(){return mc('平行四边形有几组对边平行？','2组',['1组','3组','0组'])}
-function g4_bar(){return mc('条形统计图用于？','比较数量的多少',['表示变化趋势','表示比例','表示时间'])}
+function g4_parallel(){
+  let items=[
+    {q:'平行四边形有几组对边平行？',a:'2组',d:['1组','3组','0组']},
+    {q:'梯形有几组对边平行？',a:'1组',d:['2组','0组','3组']},
+    {q:'长方形有几组对边平行？',a:'2组',d:['1组','4组','0组']},
+    {q:'下面哪个图形有两组对边分别平行？',a:'平行四边形',d:['梯形','三角形','五边形']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g4_bar(){
+  let items=[
+    {q:'条形统计图用于？',a:'比较数量的多少',d:['表示变化趋势','表示比例','表示时间']},
+    {q:'要看出数量的增减变化，一般用什么统计图？',a:'折线统计图',d:['条形统计图','扇形统计图','统计表']},
+    {q:'条形统计图中，直条越长表示数量？',a:'越多',d:['越少','不变','无关']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
 function g_app_speed(){let v=ri(40,80),t=ri(2,5);return mc(`汽车每小时行${v}千米，${t}小时行多少千米？`,v*t,[v*t-v,v*t+v,v*t*2])}
 function g4_mixed(){let a=ri(3,8),b=ri(4,8),c=ri(10,50);return mc(`${a}×${b}+${c}=？`,a*b+c,[a*(b+c),a*b+c-1])}
-function g4_law(){return mc('a+b=b+a 是什么运算定律？','加法交换律',['加法结合律','乘法交换律','乘法分配律'])}
-function g4_decimal(){return mc('0.01等于几分之几？','1/100',['1/10','1/1000','1/1'])}
+function g4_law(){
+  let items=[
+    {q:'a+b=b+a 是什么运算定律？',a:'加法交换律',d:['加法结合律','乘法交换律','乘法分配律']},
+    {q:'(a×b)×c=a×(b×c) 是什么运算定律？',a:'乘法结合律',d:['乘法交换律','加法结合律','乘法分配律']},
+    {q:'a×(b+c)=a×b+a×c 是什么运算定律？',a:'乘法分配律',d:['乘法交换律','加法结合律','乘法结合律']},
+    {q:'25×4×25×8 用简便计算可运用？',a:'乘法结合律',d:['加法交换律','乘法分配律','加法结合律']},
+    {q:'交换两个因数的位置，积不变，这是？',a:'乘法交换律',d:['加法交换律','乘法分配律','乘法结合律']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g4_decimal(){
+  let items=[
+    {q:'0.01等于几分之几？',a:'1/100',d:['1/10','1/1000','1/1']},
+    {q:'0.1等于几分之几？',a:'1/10',d:['1/100','1/1','10/1']},
+    {q:'0.001等于几分之几？',a:'1/1000',d:['1/100','1/10','1/1']},
+    {q:'小数的计数单位有0.1、0.01和？',a:'0.001',d:['0.0001','0.01','1']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
 function g4_decimal_calc(){let a=ri(1,9)+ri(1,9)/10,b=ri(1,5)+ri(1,9)/10;return mc(`${fmt(a)}+${fmt(b)}=？`,fmt(+(a+b).toFixed(2)),[fmt(+(a+b-0.1).toFixed(2)),fmt(+(a+b+0.1).toFixed(2))])}
-function g4_triangle(){return mc('三角形的内角和是多少度？','180°',['90°','360°','270°'])}
-function g4_shape2(){return mc('平移后图形的什么不变？','大小和形状',['位置','方向','颜色'])}
-function g_app工程(){return mc('一项工程甲队独做10天完成，每天完成工程的几分之几？','1/10',['1/5','10','1/100'])}
-function g_shape_symmetry(){return mc('等腰三角形有几条对称轴？','1条',['2条','3条','0条'])}
+function g4_triangle(){
+  let triAcute=`<polygon points="60,18 22,82 98,82" fill="#FFE0B2" stroke="#333" stroke-width="2"/>`;
+  let triRight=`<polygon points="22,18 22,82 92,82" fill="#FFE0B2" stroke="#333" stroke-width="2"/><rect x="22" y="68" width="14" height="14" fill="#fff" stroke="#333" stroke-width="1.5"/>`;
+  let items=[
+    {q:'三角形的内角和是多少度？',a:'180°',d:['90°','360°','270°']},
+    {q:'等边三角形的每个角是几度？',a:'60°',d:['90°','45°','30°']},
+    {q:'直角三角形的一个锐角是30°，另一个锐角是？',a:'60°',d:['90°','30°','150°']},
+    {q:'三角形任意两边之和( )第三边？',a:'大于',d:['小于','等于','不大于']},
+    {s:triAcute,q:'下面哪个是锐角三角形？',a:'锐角三角形',d:['直角三角形','钝角三角形','不是三角形']},
+    {s:triRight,q:'下图中的三角形是什么三角形？',a:'直角三角形',d:['锐角三角形','钝角三角形','等边三角形']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+function g4_shape2(){
+  let items=[
+    {q:'平移后图形的什么不变？',a:'大小和形状',d:['位置','方向','颜色']},
+    {q:'图形平移时，什么发生了变化？',a:'位置',d:['大小','形状','颜色']},
+    {q:'风车转动属于什么运动？',a:'旋转',d:['平移','轴对称','缩放']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g_app_price(){let a=ri(2,9)+ri(1,9)/10,b=ri(2,6);return mc(`一个笔记本${fmt(a)}元，买${b}个需要多少元？`,fmt(+(a*b).toFixed(2)),[fmt(+(a*b-1).toFixed(2)),fmt(+(a*b+1).toFixed(2))])}
+function g_app工程(){
+  let items=[
+    {q:'一项工程甲队独做10天完成，每天完成工程的几分之几？',a:'1/10',d:['1/5','10','1/100']},
+    {q:'一项工程甲队独做8天完成，乙队独做12天完成，两队合做每天完成工程的几分之几？',a:'5/24',d:['1/20','7/24','1/4']},
+    {q:'一项工程甲单独做12天完成，甲每天完成几分之几？',a:'1/12',d:['1/6','12','1/24']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g_shape_symmetry(){
+  let symRect=`<rect x="30" y="25" width="60" height="50" fill="#BBDEFB" stroke="#333" stroke-width="2"/><line x1="60" y1="18" x2="60" y2="82" stroke="#E53935" stroke-width="2" stroke-dasharray="4"/>`;
+  let items=[
+    {q:'等腰三角形有几条对称轴？',a:'1条',d:['2条','3条','0条']},
+    {q:'正方形有几条对称轴？',a:'4条',d:['2条','3条','1条']},
+    {q:'圆有几条对称轴？',a:'无数条',d:['1条','4条','2条']},
+    {q:'长方形有几条对称轴？',a:'2条',d:['1条','4条','0条']},
+    {s:symRect,q:'红色虚线是它的什么？',a:'对称轴',d:['边','高','中线']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
 
 // ===== 5年级 =====
 function g5_mul(){let a=ri(1,5)+ri(1,9)/10,b=ri(2,5);return mf(`${fmt(a)}×${b}=？`,fmt(+(a*b).toFixed(2)))}
@@ -8623,6 +8720,30 @@ function generateExamPaper() {
     q.num = i + 1;
     if (!q.steps) q.steps = generateSteps(q);
   });
+
+  // 配图保底：每套卷至少含 MIN_IMG 张配图题（真实试卷均有图形/图表题）。
+  // 当考查范围本身不含图形题单元时，从同册"全册题池"补充，替换选择题区里的非配图题。
+  const MIN_IMG = 4;
+  let imgNow = questions.filter(q => String(q.svg || '').includes('<')).length;
+  if (imgNow < MIN_IMG && all && all.length > units.length) {
+    let imgPool = buildQuestionPool(all, 50, seen, false)
+      .filter(q => String(q.svg || '').includes('<') && !questions.some(x => x.question === q.question && x.answer === q.answer));
+    let replSlots = questions.map((q, i) => ({ q, i }))
+      .filter(o => o.q.sectionTitle && o.q.sectionTitle.includes('选择') && !String(o.q.svg || '').includes('<'));
+    let pi = 0, si = 0;
+    while (imgNow < MIN_IMG && pi < imgPool.length && si < replSlots.length) {
+      let cand = imgPool[pi++];
+      let slot = replSlots[si++];
+      let item = Object.assign({}, cand);
+      item.score = slot.q.score;
+      item.sectionTitle = slot.q.sectionTitle;
+      item.forceFill = false;
+      if (slot.q.sectionTitle.includes('选择') && (!item.options || item.options.length < 2)) item.forceFill = true;
+      if (!item.steps) item.steps = generateSteps(item);
+      questions[slot.i] = item;
+      imgNow++;
+    }
+  }
 
   let typeName = (EXAM_TYPES.find(t => t.key === examState.type) || {}).name.replace(/\s/g, '');
   let cnGrade = ['一', '二', '三', '四', '五', '六'][examState.grade - 1];
