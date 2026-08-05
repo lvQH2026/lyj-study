@@ -83,6 +83,7 @@ async function loadAndApplyContent() {
     } catch (e) { console.warn('loadContent', e); }
   }
   if (typeof renderSpecialSection === 'function') { try { renderSpecialSection(); } catch (e) {} }
+  if (c) { ensureChild(); }   // 云端模式：打开即注册本机学习ID，家长可立即远程查看
 }
 
 async function getChildStats(learningId, pw) {

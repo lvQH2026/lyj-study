@@ -32,6 +32,23 @@ function renderParent() {
   const cloud = cfg && cfg.USE_CLOUD;
   const box = document.getElementById('parentLogin');
   const result = document.getElementById('parentResult');
+  // 显示本机学习凭证（供家长远程查看用）
+  const cred = document.getElementById('deviceCred');
+  if (cred) {
+    try {
+      const cid = (typeof getLearningId === 'function') ? getLearningId() : null;
+      const cpw = (typeof getLearningPw === 'function') ? getLearningPw() : null;
+      const body = document.getElementById('deviceCredBody');
+      if (body) {
+        if (cid && cpw) {
+          body.innerHTML = '学习ID：<b>' + cid + '</b> &nbsp;&nbsp; 口令：<b>' + cpw + '</b>' +
+            (cloud ? '' : ' <span style="color:#874d00">（开启云端后可远程查看）</span>');
+        } else {
+          body.textContent = '（未获取到凭证）';
+        }
+      }
+    } catch (e) {}
+  }
   if (cloud) {
     box.style.display = 'block';
     result.innerHTML = '<p style="color:var(--text-lighter);font-size:13px">输入孩子的学习ID与口令，即可远程查看学习情况。</p>';
