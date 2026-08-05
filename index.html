@@ -9,22 +9,49 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    corePlugins: { preflight: false },
+    theme: {
+      extend: {
+        colors: {
+          ink: '#23262E', muted: '#5C6370', faint: '#9AA0AB',
+          primary: '#3E4A63', 'primary-lt': '#6B7894', 'primary-dk': '#2C354A',
+          gold: '#B4945A', success: '#4E8C6E', warning: '#C08A3E', danger: '#C2554F',
+          paper: '#F7F6F2', surface: '#FFFFFF', line: '#ECEAE4'
+        },
+        fontFamily: { sans: ['Inter','"PingFang SC"','"Hiragino Sans GB"','"Microsoft YaHei"','system-ui','sans-serif'] },
+        borderRadius: { xl: '16px', '2xl': '20px', '3xl': '28px' },
+        boxShadow: {
+          soft: '0 1px 2px rgba(28,32,48,.04), 0 8px 24px rgba(28,32,48,.06)',
+          lift: '0 10px 30px rgba(28,32,48,.10)',
+          glass: '0 12px 32px rgba(0,0,0,.38)'
+        },
+        keyframes: { 'fade-up': { '0%': { opacity:'0', transform:'translateY(10px)' }, '100%': { opacity:'1', transform:'translateY(0)' } } },
+        animation: { 'fade-up': 'fade-up .4s ease both' }
+      }
+    }
+  };
+</script>
 <style>
 :root {
-  --primary: #4A90D9;
-  --primary-light: #6BB0EE;
-  --primary-dark: #3A7BC8;
-  --accent: #FF6B6B;
-  --success: #52C41A;
-  --warning: #FAAD14;
-  --bg: #F0F4F8;
+  --primary: #3E4A63;
+  --primary-light: #6B7894;
+  --primary-dark: #2C354A;
+  --gold: #B4945A;
+  --accent: #C2554F;
+  --success: #4E8C6E;
+  --warning: #C08A3E;
+  --bg: #F7F6F2;
   --card-bg: #FFFFFF;
-  --text: #333333;
-  --text-light: #666666;
-  --text-lighter: #999999;
-  --border: #E8E8E8;
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --radius: 16px;
+  --text: #23262E;
+  --text-light: #5C6370;
+  --text-lighter: #9AA0AB;
+  --border: #ECEAE4;
+  --shadow: 0 1px 2px rgba(28,32,48,.04), 0 8px 24px rgba(28,32,48,.06);
+  --shadow-lift: 0 10px 30px rgba(28,32,48,.10);
+  --radius: 18px;
 }
 
 * {
@@ -1330,58 +1357,48 @@ input:focus,textarea:focus,select:focus{
 
 /* ---- 首页 A：hero + 年级卡片（浮起卡片 + 序号徽标） ---- */
 .welcome-banner{
-  background:linear-gradient(135deg,#3B6FE0,#6E9BF0);
-  box-shadow:0 14px 34px rgba(59,111,224,.28);
+  background:var(--card-bg);
+  color:var(--text);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  text-align:left;
+  padding:22px 24px;
   border-radius:var(--radius);
+  position:relative;overflow:hidden;
 }
-.welcome-banner::after{
-  width:120px;height:120px;
-  background:radial-gradient(circle, rgba(255,255,255,.22), transparent 70%);
+.welcome-banner::after{display:none;}
+.welcome-banner::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold),#D8C39A);
 }
+.welcome-banner h2{font-size:22px;font-weight:800;letter-spacing:.5px;}
+.welcome-banner p{font-size:13px;color:var(--text-light);margin-top:4px;}
 .grade-grid{gap:14px;}
 .grade-card{
-  background:linear-gradient(160deg,#FFFFFF,#F6F9FF);
+  background:var(--card-bg);
   border:1px solid var(--border);
   box-shadow:var(--shadow);
   border-radius:var(--radius);
   padding:22px 12px 18px;
-  transition:transform .2s ease, box-shadow .2s ease;
+  transition:transform .25s ease, box-shadow .25s ease;
+  text-align:center;
 }
-.grade-card:active{transform:scale(.97);}
-.grade-card .grade-icon{
-  font-size:28px;width:54px;height:54px;margin:0 auto 8px;
+.grade-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);}
+.grade-card:active{transform:scale(.98);}
+.grade-badge{
+  width:46px;height:46px;border-radius:14px;margin:0 auto 10px;
   display:flex;align-items:center;justify-content:center;
-  border-radius:16px;background:rgba(59,111,224,.08);
+  font-size:20px;font-weight:800;color:#fff;
+  box-shadow:0 6px 16px rgba(28,32,48,.12);
 }
-.grade-card .grade-name{color:var(--text);font-size:17px;}
-.grade-card .grade-sub{color:var(--text-lighter);}
-.grade-card::after{
-  content:attr(data-grade);
-  position:absolute;top:12px;right:12px;
-  width:30px;height:30px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:14px;color:#fff;
-  box-shadow:0 4px 10px rgba(0,0,0,.18);
-}
-.grade-card[data-grade="1"]{background:linear-gradient(160deg,#FFFFFF,#FFF1F4);}
-.grade-card[data-grade="1"] .grade-icon{background:rgba(255,143,163,.16);}
-.grade-card[data-grade="1"]::after{background:#FF8FA3;}
-.grade-card[data-grade="2"]{background:linear-gradient(160deg,#FFFFFF,#EFF9FB);}
-.grade-card[data-grade="2"] .grade-icon{background:rgba(79,176,198,.16);}
-.grade-card[data-grade="2"]::after{background:#4FB0C6;}
-.grade-card[data-grade="3"]{background:linear-gradient(160deg,#FFFFFF,#EEFBF4);}
-.grade-card[data-grade="3"] .grade-icon{background:rgba(54,179,126,.16);}
-.grade-card[data-grade="3"]::after{background:#36B37E;}
-.grade-card[data-grade="4"]{background:linear-gradient(160deg,#FFFFFF,#FFF6EC);}
-.grade-card[data-grade="4"] .grade-icon{background:rgba(242,163,60,.16);}
-.grade-card[data-grade="4"]::after{background:#F2A33C;}
-.grade-card[data-grade="5"]{background:linear-gradient(160deg,#FFFFFF,#F0F4FF);}
-.grade-card[data-grade="5"] .grade-icon{background:rgba(91,141,239,.16);}
-.grade-card[data-grade="5"]::after{background:#5B8DEF;}
-.grade-card[data-grade="6"]{background:linear-gradient(160deg,#FFFFFF,#F6F1FF);}
-.grade-card[data-grade="6"] .grade-icon{background:rgba(160,124,224,.16);}
-.grade-card[data-grade="6"]::after{background:#A07CE0;}
-.grade-card[data-grade] .grade-name{color:var(--text);}
+.grade-card[data-grade="1"] .grade-badge{background:#3E4A63;}
+.grade-card[data-grade="2"] .grade-badge{background:#4E8C6E;}
+.grade-card[data-grade="3"] .grade-badge{background:#B4945A;}
+.grade-card[data-grade="4"] .grade-badge{background:#6B5B8E;}
+.grade-card[data-grade="5"] .grade-badge{background:#4A6B7C;}
+.grade-card[data-grade="6"] .grade-badge{background:#B4706A;}
+.grade-card .grade-name{color:var(--text);font-size:17px;font-weight:700;}
+.grade-card .grade-sub{color:var(--text-lighter);font-size:11px;margin-top:2px;}
 @keyframes cardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 .grade-card{animation:cardIn .35s ease both;}
 #recentList .card{display:flex;}
@@ -1449,6 +1466,36 @@ input:focus,textarea:focus,select:focus{
 #page-parent .pp-good{color:#7CE0B0;}
 
 </style>
+<style type="text/tailwindcss">
+  /* 轻奢极简 · 全局精致化层（在 Tailwind 设计令牌之上叠加，仅改外观，不动逻辑） */
+  body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',system-ui,sans-serif; }
+  .navbar{ box-shadow:0 2px 10px rgba(28,32,48,.08); }
+  .section-title{ font-weight:700; color:var(--text); letter-spacing:.3px; display:flex; align-items:center; }
+  .section-title::before{
+    content:''; width:4px; height:16px; border-radius:2px; margin-right:8px;
+    background:linear-gradient(var(--primary),var(--primary-light)); display:inline-block;
+  }
+  .card{ transition:box-shadow .25s ease, transform .25s ease; }
+  .card:hover{ box-shadow:var(--shadow-lift); }
+  .btn{ border-radius:var(--radius); transition:transform .15s ease, box-shadow .2s ease, background .2s ease; }
+  .btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-lift); }
+  .btn:active{ transform:translateY(0) scale(.98); }
+  .btn-primary{ background:var(--primary); border-color:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-dark); border-color:var(--primary-dark); }
+  .option-btn{ transition:all .2s ease; border:1px solid var(--border); }
+  .option-btn:hover{ border-color:var(--primary-light); box-shadow:var(--shadow); transform:translateY(-1px); }
+  .option-btn.selected{ border-color:var(--primary); background:rgba(62,74,99,.06); }
+  .option-btn.correct{ border-color:var(--success); background:rgba(78,140,110,.10); }
+  .option-btn.wrong{ border-color:var(--danger); background:rgba(194,85,79,.10); }
+  .progress-bar{ background:var(--border); border-radius:99px; overflow:hidden; }
+  .progress-bar-fill{ background:linear-gradient(90deg,var(--primary),var(--primary-light)); border-radius:99px; }
+  .unit-item{ transition:all .2s ease; border:1px solid transparent; border-radius:var(--radius); }
+  .unit-item:hover{ background:var(--card-bg); border-color:var(--border); box-shadow:var(--shadow); transform:translateY(-1px); }
+  .result-stat .num.wrong{ color:var(--danger); }
+  .nav-icon-btn .badge{ background:var(--gold); }
+  .exam-type-card{ transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .exam-type-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-lift); }
+</style>
 </head>
 <body>
 
@@ -1467,10 +1514,10 @@ input:focus,textarea:focus,select:focus{
     <p>人教版 · 1-6年级 · 让学习变得有趣</p>
   </div>
 
-  <div class="section-title">📚 选择年级</div>
+  <div class="section-title">选择年级</div>
   <div class="grade-grid" id="gradeGrid"></div>
 
-  <div class="section-title">⚡ 快速练习</div>
+  <div class="section-title">快速练习</div>
   <div class="card">
     <div class="btn-group">
       <button class="btn btn-outline" onclick="startQuickPractice('basic')">基础运算</button>
@@ -1478,18 +1525,18 @@ input:focus,textarea:focus,select:focus{
     </div>
   </div>
 
-  <div class="section-title">🎯 专项练习</div>
+  <div class="section-title">专项练习</div>
   <div class="card">
     <div class="special-list" id="specialList"></div>
   </div>
 
-  <div class="section-title">📷 拍图上传试题</div>
+  <div class="section-title">拍图上传试题</div>
   <div class="card" style="text-align:center;padding:20px">
     <p style="color:var(--text-light);font-size:13px;margin-bottom:12px">拍照或选择图片，自动识别题目并生成练习</p>
-    <button class="btn btn-primary" onclick="showPage('upload');document.getElementById('backBtn').style.display='block';document.getElementById('backBtn').onclick=()=>goHome();" style="max-width:200px;margin:0 auto">📷 拍照/选择图片</button>
+    <button class="btn btn-primary" onclick="showPage('upload');document.getElementById('backBtn').style.display='block';document.getElementById('backBtn').onclick=()=>goHome();" style="max-width:200px;margin:0 auto">拍照 / 选择图片</button>
   </div>
 
-  <div class="section-title">📊 最近练习</div>
+  <div class="section-title">最近练习</div>
   <div id="recentList"></div>
 </div>
 
@@ -1497,7 +1544,7 @@ input:focus,textarea:focus,select:focus{
 <!-- ===== 专项练习方法图 ===== -->
 <div class="page" id="page-special-intro">
   <div class="card" style="text-align:center;padding:20px">
-    <div style="font-size:22px;margin-bottom:8px">🎯 专项练习</div>
+    <div style="font-size:22px;margin-bottom:8px">专项练习</div>
     <h2 id="specialIntroTitle" style="margin-bottom:6px"></h2>
     <p style="color:var(--text-light);font-size:13px;margin-bottom:12px">请仔细观察下图中的计数方法，然后答题。</p>
     <img id="specialIntroImg" src="" alt="" style="max-width:100%;border-radius:10px;display:block;margin:0 auto;border:1px solid var(--line);">
@@ -1523,7 +1570,7 @@ input:focus,textarea:focus,select:focus{
   </div>
   <div class="quiz-header">
     <div class="quiz-progress" id="quizProgress">第 1 / 10 题</div>
-    <div class="quiz-score" id="quizScore">⭐ 0</div>
+    <div class="quiz-score" id="quizScore">★ 0</div>
   </div>
   <div class="progress-bar">
     <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
@@ -1574,7 +1621,7 @@ input:focus,textarea:focus,select:focus{
 
 <!-- ===== 错题库页 ===== -->
 <div class="page" id="page-wrong">
-  <div class="section-title">❌ 错题库</div>
+  <div class="section-title">错题库</div>
   <div class="btn-group" style="margin-bottom:16px">
     <button class="btn btn-primary" onclick="startWrongReview()">开始错题重练</button>
     <button class="btn btn-outline" onclick="clearAllWrong()">清空错题</button>
@@ -1584,13 +1631,13 @@ input:focus,textarea:focus,select:focus{
 
 <!-- ===== 统计页 ===== -->
 <div class="page" id="page-stats">
-  <div class="section-title">📊 学习统计</div>
+  <div class="section-title">学习统计</div>
   <div class="stats-overview" id="statsOverview"></div>
   <div class="section-title">📋 各年级详情</div>
   <div class="card">
     <table class="grade-stats-table" id="gradeStatsTable"></table>
   </div>
-  <div class="section-title">🏆 近期成绩</div>
+  <div class="section-title">近期成绩</div>
   <div id="recentScores"></div>
 
   <div class="section-title">💾 数据备份与同步</div>
@@ -1607,10 +1654,10 @@ input:focus,textarea:focus,select:focus{
 
 <!-- ===== 拍图上传页 ===== -->
 <div class="page" id="page-upload">
-  <div class="section-title">📷 拍图上传试题</div>
+  <div class="section-title">拍图上传试题</div>
   <div class="card" style="text-align:center">
     <div id="uploadArea" style="border:2px dashed var(--border);border-radius:12px;padding:32px 16px;cursor:pointer;transition:all 0.2s" onclick="document.getElementById('fileInput').click()">
-      <div style="font-size:48px;margin-bottom:8px">📷</div>
+      <div style="font-size:48px;margin-bottom:8px;color:var(--primary)"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg></div>
       <div style="font-size:15px;font-weight:600;color:var(--text)">点击拍照或选择图片</div>
       <div style="font-size:12px;color:var(--text-lighter);margin-top:4px">支持拍照、相册选择</div>
     </div>
@@ -1619,7 +1666,7 @@ input:focus,textarea:focus,select:focus{
 
   <div id="uploadPreview" style="display:none">
     <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:8px">📷 图片预览</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px">图片预览</div>
       <img id="previewImg" style="width:100%;border-radius:8px;margin-bottom:12px" />
       <div id="recognizeStatus" style="text-align:center;padding:16px 0"></div>
       <div id="recognizedQuestions"></div>
@@ -1638,7 +1685,7 @@ input:focus,textarea:focus,select:focus{
   </div>
 
   <div class="card">
-    <div style="font-size:14px;font-weight:600;margin-bottom:8px">📝 手动输入题目</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:8px">手动输入题目</div>
     <p style="font-size:12px;color:var(--text-lighter);margin-bottom:10px">如果识别不准确，可以手动输入</p>
     <textarea id="manualInput" placeholder="输入题目，如：&#10;3 + 5 = ?&#10;8 × 7 = ?&#10;小明有5个苹果，吃了2个，还剩几个？" style="width:100%;min-height:100px;border:2px solid var(--border);border-radius:10px;padding:10px;font-size:14px;resize:vertical;outline:none;font-family:inherit" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
     <button class="btn btn-primary" style="margin-top:10px" onclick="parseManualInput()">生成练习</button>
@@ -1649,7 +1696,7 @@ input:focus,textarea:focus,select:focus{
 
 <!-- ===== 考试中心页 ===== -->
 <div class="page" id="page-exam">
-  <div class="section-title">📝 考试中心</div>
+  <div class="section-title">考试中心</div>
 
   <div class="card">
     <div style="font-size:14px;font-weight:600;margin-bottom:10px">选择考试类型</div>
@@ -1700,15 +1747,15 @@ input:focus,textarea:focus,select:focus{
     <span class="tab-label">首页</span>
   </button>
   <button class="nav-tab" data-page="exam" onclick="switchTab('exam')">
-    <span class="tab-icon">📝</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></span>
     <span class="tab-label">考试</span>
   </button>
   <button class="nav-tab" data-page="wrong" onclick="switchTab('wrong')">
-    <span class="tab-icon">❌</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
     <span class="tab-label">错题库</span>
   </button>
   <button class="nav-tab" data-page="stats" onclick="switchTab('stats')">
-    <span class="tab-icon">📊</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></span>
     <span class="tab-label">统计</span>
   </button>
   <button class="nav-tab" data-page="parent" onclick="switchTab('parent')">
@@ -8106,7 +8153,7 @@ function handleImageUpload(event) {
     uploadedImageDataURL = e.target.result;
     document.getElementById('previewImg').src = uploadedImageDataURL;
     document.getElementById('uploadPreview').style.display = 'block';
-    document.getElementById('recognizeStatus').innerHTML = '<div style="color:var(--primary);font-size:14px">⏳ 正在识别题目...</div>';
+    document.getElementById('recognizeStatus').innerHTML = '<div style="color:var(--primary);font-size:14px">正在识别题目...</div>';
     document.getElementById('recognizedQuestions').innerHTML = '';
 
     // 调用AI识别
@@ -8164,13 +8211,13 @@ async function callAIRecognize(base64Data, mimeType) {
       await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
     }
 
-    document.getElementById('recognizeStatus').innerHTML = '<div style="color:var(--primary);font-size:13px">⏳ 正在加载识别引擎...</div>';
+    document.getElementById('recognizeStatus').innerHTML = '<div style="color:var(--primary);font-size:13px">正在加载识别引擎...</div>';
 
     const worker = await Tesseract.createWorker('chi_sim+eng', 1, {
       logger: m => {
         if (m.status === 'recognizing text') {
           let pct = Math.round(m.progress * 100);
-          document.getElementById('recognizeStatus').innerHTML = `<div style="color:var(--primary);font-size:13px">⏳ 识别中... ${pct}%</div>`;
+          document.getElementById('recognizeStatus').innerHTML = `<div style="color:var(--primary);font-size:13px">识别中... ${pct}%</div>`;
         }
       }
     });
@@ -8221,7 +8268,7 @@ function parseRecognizedText(text) {
 // 显示识别到的题目
 function displayRecognizedQuestions(questions) {
   let status = document.getElementById('recognizeStatus');
-  status.innerHTML = `<div style="color:var(--success);font-size:14px;font-weight:600">✅ 识别到 ${questions.length} 道题目</div>`;
+  status.innerHTML = `<div style="color:var(--success);font-size:14px;font-weight:600">识别到 ${questions.length} 道题目</div>`;
 
   let html = '<div style="text-align:left;margin-top:12px">';
   questions.forEach((q, i) => {
@@ -8372,14 +8419,14 @@ function renderHome() {
     1: '一年级', 2: '二年级', 3: '三年级',
     4: '四年级', 5: '五年级', 6: '六年级'
   };
-  let gradeIcons = { 1: '1️⃣', 2: '2️⃣', 3: '3️⃣', 4: '4️⃣', 5: '5️⃣', 6: '6️⃣' };
+
   grid.innerHTML = '';
   for (let g = 1; g <= 6; g++) {
     let card = document.createElement('div');
     card.className = 'grade-card';
     card.dataset.grade = g;
     card.innerHTML = `
-      <div class="grade-icon">${gradeIcons[g]}</div>
+      <div class="grade-badge">${g}</div>
       <div class="grade-name">${gradeNames[g]}</div>
       <div class="grade-sub">人教版 上下册</div>
     `;
@@ -8392,13 +8439,13 @@ function renderHome() {
   let recent = (data.history || []).slice(0, 3);
   let recentEl = document.getElementById('recentList');
   if (recent.length === 0) {
-    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">还没有练习记录，快开始吧！</div></div>`;
+    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon" style="color:var(--text-lighter)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></div><div class="empty-text">还没有练习记录，快开始吧！</div></div>`;
   } else {
     recentEl.innerHTML = recent.map(r => {
       let gradeNames2 = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
-      let emoji = r.accuracy >= 90 ? '🌟' : r.accuracy >= 60 ? '👍' : '💪';
+      let rateLabel = r.accuracy >= 90 ? '优秀' : r.accuracy >= 60 ? '良好' : '加油';
       return `<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 16px">
-        <div style="font-size:24px">${emoji}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--success);background:rgba(78,140,110,.12);padding:3px 10px;border-radius:99px">${rateLabel}</div>
         <div style="flex:1">
           <div style="font-weight:600;font-size:14px">${gradeNames2[r.grade]} · ${r.unitName}</div>
           <div style="font-size:12px;color:var(--text-lighter)">${r.score}/${r.total} · 正确率${r.accuracy}%</div>
@@ -8698,7 +8745,7 @@ const EXAM_TYPES = [
   { key: 'unit',  icon: '📖', name: '单元考试', desc: '针对单个单元的达标检测 · 100分' },
   { key: 'month', icon: '🗓️', name: '月　考',   desc: '阶段性综合测试（累计单元）· 100分' },
   { key: 'mid',   icon: '📗', name: '期中考试', desc: '半册内容综合测试 · 100分' },
-  { key: 'final', icon: '🏆', name: '期末考试', desc: '整册内容综合测试 · 100分' },
+  { key: 'final', icon: '', name: '期末考试', desc: '整册内容综合测试 · 100分' },
 ];
 
 // 试卷结构：30题 = 100分
@@ -9159,7 +9206,7 @@ function renderQuestion() {
   // 更新进度
   document.getElementById('quizProgress').textContent = `第 ${state.quizIndex + 1} / ${state.quizQuestions.length} 题`;
   let isExam = state.quizMode === 'exam';
-  document.getElementById('quizScore').textContent = isExam ? `📊 ${state.quizScore}分` : `⭐ ${state.quizScore}`;
+  document.getElementById('quizScore').textContent = isExam ? ('得分 ' + state.quizScore) : ('正确 ' + state.quizScore);
 
   // 考试模式：整页启用紧凑排版
   document.getElementById('page-quiz').classList.toggle('exam-mode', isExam);
@@ -9247,8 +9294,8 @@ function renderQuestion() {
 function getQuestionTypeTag(q) {
   if (q.type === 'fill') return '✏️ 填空题';
   if (q.type === 'shape_choice') return '📐 图形题';
-  if (q.type === 'choice') return '📝 选择题';
-  return '📝 练习题';
+  if (q.type === 'choice') return '选择题';
+  return '练习题';
 }
 
 function selectOption(idx) {
@@ -9313,11 +9360,11 @@ function submitAnswer() {
       state.quizCorrect++;
       feedback.className = 'feedback correct show bounce';
       let praises = ['答对了！太棒了！', '真厉害！继续加油！', '完美！你真聪明！', '不错不错！'];
-      feedback.innerHTML = `✅ ${pick(praises)}`;
+      feedback.innerHTML = `✓ ${pick(praises)}`;
     } else {
       state.quizWrong++;
       feedback.className = 'feedback wrong show shake';
-      feedback.innerHTML = `❌ 再想想！正确答案是：<span class="correct-answer">${q.answer}</span>`;
+      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>`;
       // 加入错题
       state.quizWrongQuestions.push({
         index: state.quizIndex,
@@ -9381,30 +9428,30 @@ function finishQuiz() {
     // 考试：按百分制评定等级
     let paperName = state.examPaper ? state.examPaper.title : '考试';
     if (accuracy >= 90) {
-      emoji = '🏆'; title = `${paperName}｜等级：优秀（${state.quizScore}分）`;
-      stars = '<span class="star-active">⭐⭐⭐</span>';
+      emoji = ''; title = `${paperName}｜等级：优秀（${state.quizScore}分）`;
+      stars = '<span class="star-active">★★★</span>';
     } else if (accuracy >= 80) {
       emoji = '🎉'; title = `${paperName}｜等级：良好（${state.quizScore}分）`;
-      stars = '<span class="star-active">⭐⭐</span><span class="star-inactive">⭐</span>';
+      stars = '<span class="star-active">★★</span><span class="star-inactive">★</span>';
     } else if (accuracy >= 60) {
       emoji = '😊'; title = `${paperName}｜等级：及格（${state.quizScore}分）`;
-      stars = '<span class="star-active">⭐</span><span class="star-inactive">⭐⭐</span>';
+      stars = '<span class="star-active">★</span><span class="star-inactive">★★</span>';
     } else {
-      emoji = '📚'; title = `${paperName}｜等级：待努力（${state.quizScore}分）`;
-      stars = '<span class="star-inactive">⭐⭐⭐</span>';
+      emoji = ''; title = `${paperName}｜等级：待努力（${state.quizScore}分）`;
+      stars = '<span class="star-inactive">★★★</span>';
     }
   } else if (accuracy >= 90) {
     emoji = '🎉'; title = '太棒了！你是数学小达人！';
-    stars = '<span class="star-active">⭐⭐⭐</span>';
+    stars = '<span class="star-active">★★★</span>';
   } else if (accuracy >= 70) {
     emoji = '😊'; title = '做得不错！继续加油！';
-    stars = '<span class="star-active">⭐⭐</span><span class="star-inactive">⭐</span>';
+    stars = '<span class="star-active">★★</span><span class="star-inactive">★</span>';
   } else if (accuracy >= 50) {
-    emoji = '💪'; title = '还需要多练习哦！';
-    stars = '<span class="star-active">⭐</span><span class="star-inactive">⭐⭐</span>';
+    emoji = ''; title = '还需要多练习哦！';
+    stars = '<span class="star-active">★</span><span class="star-inactive">★★</span>';
   } else {
-    emoji = '📚'; title = '别灰心，多练几遍就会了！';
-    stars = '<span class="star-inactive">⭐⭐⭐</span>';
+    emoji = ''; title = '别灰心，多练几遍就会了！';
+    stars = '<span class="star-inactive">★★★</span>';
   }
 
   document.getElementById('resultEmoji').textContent = emoji;
@@ -9412,7 +9459,7 @@ function finishQuiz() {
   document.getElementById('resultStars').innerHTML = stars;
 
   let wrongInfo = state.quizWrongQuestions.length > 0
-    ? `📝 ${state.quizWrongQuestions.length} 道错题已加入错题库`
+    ? `${state.quizWrongQuestions.length} 道错题已加入错题库`
     : '🎉 全部答对，没有错题！';
   document.getElementById('wrongAddedInfo').textContent = wrongInfo;
 
@@ -9595,22 +9642,22 @@ function renderStats() {
   let overview = document.getElementById('statsOverview');
   overview.innerHTML = `
     <div class="stat-card highlight">
-      <div class="stat-icon">📝</div>
+      <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></div>
       <div class="stat-value">${totalExercises}</div>
       <div class="stat-label">练习次数</div>
     </div>
     <div class="stat-card success">
-      <div class="stat-icon">✓</div>
+      <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
       <div class="stat-value">${totalCorrect}</div>
       <div class="stat-label">答对题数</div>
     </div>
     <div class="stat-card danger">
-      <div class="stat-icon">❌</div>
+      <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
       <div class="stat-value">${wrongBank.length}</div>
       <div class="stat-label">错题数量</div>
     </div>
     <div class="stat-card warning">
-      <div class="stat-icon">📊</div>
+      <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></div>
       <div class="stat-value">${overallAccuracy}%</div>
       <div class="stat-label">总正确率</div>
     </div>
@@ -9637,15 +9684,15 @@ function renderStats() {
   let recent = history.slice(0, 10);
   let recentEl = document.getElementById('recentScores');
   if (recent.length === 0) {
-    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">还没有练习记录</div></div>`;
+    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon" style="color:var(--text-lighter)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></div><div class="empty-text">还没有练习记录</div></div>`;
   } else {
     recentEl.innerHTML = recent.map(r => {
-      let emoji = r.accuracy >= 90 ? '🌟' : r.accuracy >= 60 ? '👍' : '💪';
+      let rateLabel = r.accuracy >= 90 ? '优秀' : r.accuracy >= 60 ? '良好' : '加油';
       let accColor = r.accuracy >= 80 ? 'var(--success)' : r.accuracy >= 60 ? 'var(--warning)' : 'var(--accent)';
       let date = new Date(r.time);
       let dateStr = `${date.getMonth()+1}/${date.getDate()}`;
       return `<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 16px">
-        <div style="font-size:24px">${emoji}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--success);background:rgba(78,140,110,.12);padding:3px 10px;border-radius:99px">${rateLabel}</div>
         <div style="flex:1">
           <div style="font-weight:600;font-size:14px">${gradeNames[r.grade]} · ${r.unitName}</div>
           <div style="font-size:12px;color:var(--text-lighter)">${dateStr} · ${r.score}/${r.total}题</div>
