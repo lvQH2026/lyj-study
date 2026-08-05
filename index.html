@@ -1523,6 +1523,15 @@ body {
       <div style="font-weight:700;margin-bottom:6px">📱 本机学习凭证</div>
       <div id="deviceCredBody">…</div>
       <div style="font-size:12px;color:#475569;margin-top:6px">家长在自己手机打开本应用 → 点「家长」→ 输入上面的「学习ID」和「口令」，即可远程查看学习情况。</div>
+      <div style="margin-top:8px;border-top:1px solid #b3d4ff;padding-top:8px">
+        <div id="bindToggle" style="cursor:pointer;font-weight:700;color:#1d4ed8" onclick="toggleBind()">💻 在其他设备登录（展开）</div>
+        <div id="deviceBind" style="display:none;margin-top:8px">
+          <input id="bindId" placeholder="输入另一台设备的学习ID" style="width:100%;padding:8px;margin-bottom:6px;border:1px solid #b3d4ff;border-radius:6px;font-size:13px;box-sizing:border-box">
+          <input id="bindPw" type="text" placeholder="输入口令" style="width:100%;padding:8px;margin-bottom:6px;border:1px solid #b3d4ff;border-radius:6px;font-size:13px;box-sizing:border-box">
+          <button class="btn btn-primary" style="width:100%;font-size:13px;padding:8px" onclick="bindCredential()">将此设备绑定到以上学习凭证</button>
+          <div id="bindMsg" style="font-size:12px;margin-top:6px;display:none"></div>
+        </div>
+      </div>
     </div>
     <div id="parentLogin" style="display:none;background:#fff;border-radius:10px;padding:12px;margin-bottom:12px">
       <div style="font-size:14px;font-weight:700;margin-bottom:8px">查看孩子的学习情况</div>

@@ -74,7 +74,8 @@ function renderParent() {
   }
   if (cloud) {
     box.style.display = 'block';
-    result.innerHTML = '<p style="color:var(--text-lighter);font-size:13px">输入孩子的学习ID与口令，即可远程查看学习情况。</p>';
+    const s = getLocalStats();
+    result.innerHTML = renderDashboard(s) + '<div style="margin-top:14px;font-size:12px;color:var(--text-lighter);text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
   } else {
     box.style.display = 'none';
     const s = getLocalStats();
@@ -133,4 +134,40 @@ function renderDashboard(s) {
     <div class="card" style="margin-bottom:12px"><div class="section-title">🎯 薄弱点</div><div>${weakHtml}</div></div>
     <div class="card"><div class="section-title">❌ 最近错题</div>${wrongHtml}</div>
   `;
+}
+
+// ===== 多设备绑定 =====
+function toggleBind() {
+  const area = document.getElementById('deviceBind');
+  const toggle = document.getElementById('bindToggle');
+  if (!area || !toggle) return;
+  if (area.style.display === 'none' || !area.style.display) {
+    area.style.display = 'block';
+    toggle.textContent = '💻 在其他设备登录（收起）';
+  } else {
+    area.style.display = 'none';
+    toggle.textContent = '💻 在其他设备登录（展开）';
+  }
+}
+
+async function bindCredential() {
+  const id = document.getElementById('bindId').value.trim();
+  const pw = document.getElementById('bindPw').value.trim();
+  const msg = document.getElementById('bindMsg');
+  if (!id || !pw) { msg.style.display = 'block'; msg.style.color = '#cf1322'; msg.textContent = '请填写学习ID和口令'; return; }
+  msg.style.display = 'block'; msg.style.color = '#475569'; msg.textContent = '验证中…';
+  try {
+    const stats = typeof getChildStats === 'function' ? await getChildStats(id, pw) : null;
+    if (!stats) { msg.style.color = '#cf1322'; msg.textContent = '验证失败：学习ID或口令不正确'; return; }
+    // 覆盖本机凭证 → 两台设备共享同一学习身份
+    localStorage.setItem('lyj_learning_id', id);
+    localStorage.setItem('lyj_learning_pw', pw);
+    msg.style.color = '#1aab6b'; msg.textContent = '绑定成功！学习ID：' + id + '，数据将自动合并同步。';
+    // 立即将本机未同步的记录推到新 ID
+    if (typeof ensureChild === 'function') { try { await ensureChild(); } catch(e){} }
+    if (typeof pushStudyRecords === 'function') { try { await pushStudyRecords(); } catch(e){} }
+    setTimeout(function() { renderParent(); document.getElementById('bindMsg').style.display = 'none'; }, 1200);
+  } catch(e) {
+    msg.style.color = '#cf1322'; msg.textContent = '绑定失败：' + (e.message || '网络错误');
+  }
 }
