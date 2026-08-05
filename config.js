@@ -4,6 +4,8 @@ window.APP_CONFIG = {
   SUPABASE_URL: "https://wrgupojuxnkgwbiddbsv.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_o_iwC9uN6eB9eLFcILeqvw_gwvaUd1v",
   USE_CLOUD: true,           // 已启用云端同步（家长可远程查看）
+  LEARNING_ID: "LYJ-YONGJI", // 固定学习ID（吕泳冀专属，所有设备通用）
+  LEARNING_PW: "202506",     // 固定口令（家长记住，远程查看用）
   CONTENT_ROW_ID: "override",
 
   // 内容更新机制（二选一）：

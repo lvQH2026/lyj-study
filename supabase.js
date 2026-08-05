@@ -12,11 +12,15 @@ function sbClient() {
 }
 
 function getLearningId() {
+  const cfg = window.APP_CONFIG;
+  if (cfg && cfg.LEARNING_ID) return cfg.LEARNING_ID;
   let id = localStorage.getItem('lyj_learning_id');
   if (!id) { id = 'LYJ' + Math.random().toString(36).slice(2, 8).toUpperCase(); localStorage.setItem('lyj_learning_id', id); }
   return id;
 }
 function getLearningPw() {
+  const cfg = window.APP_CONFIG;
+  if (cfg && cfg.LEARNING_PW) return cfg.LEARNING_PW;
   let pw = localStorage.getItem('lyj_learning_pw');
   if (!pw) { pw = Math.random().toString(36).slice(2, 8).toUpperCase(); localStorage.setItem('lyj_learning_pw', pw); }
   return pw;
