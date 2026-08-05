@@ -1,7 +1,10 @@
 // 吕泳冀学习站 Service Worker
-const CACHE = 'lyj-shell-v2';
+// v3：多文件重构（样式/引擎外置 + 英语模块内置），必须升版本以清理旧缓存
+const CACHE = 'lyj-shell-v3';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
+  './css/style.css', './css/english.css',
+  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/main.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'
 ];

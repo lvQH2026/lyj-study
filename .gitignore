@@ -1,0 +1,16 @@
+# ===== 凭据：绝不可提交到公开仓库 =====
+cos_cred.json
+
+# ===== 一次性构建 / 临时脚本（本地保留，不入库、不部署）=====
+_concat_check.js
+_check.js
+build_index.js
+extract_data.js
+emoji_fix*.js
+gen_new.js
+test_g34.js
+test_runtime.js
+verify_parent.js
+verify_pp.js
+
+# 说明：verify_refactor.js / verify_flow.js 为回归测试，保留入库
