@@ -7410,43 +7410,199 @@ function g_shape_symmetry(){
 function g5_mul(){let a=ri(1,5)+ri(1,9)/10,b=ri(2,5);return mf(`${fmt(a)}×${b}=？`,fmt(+(a*b).toFixed(2)))}
 function g5_div(){let a=ri(5,20),b=ri(2,5);return mc(`${fmt(a)}÷${b}=？`,fmt(+(a/b).toFixed(2)),[fmt(+(a/b+0.5).toFixed(1)),fmt(+(a/b-0.3).toFixed(1))])}
 function g5_equation(){let a=ri(10,30),b=ri(3,9);return mf(`解方程：3x+${b}=${a}, x=？`,(a-b)/3)}
-function g5_area(){let b=ri(5,12),h=ri(4,8);return mc(`三角形底${b}cm高${h}cm，面积是多少？`,fmt(b*h/2),[fmt(b*h),fmt(b*h/3)])}
-function g5_prob(){return mc('袋子里有3个红球1个蓝球，摸到红球的可能性？','较大',['较小','一样大','无法判断'])}
+function g5_area(){
+  let b=ri(5,12),h=ri(4,8);
+  let tri=`<polygon points="10,${14+h*8} 10,14 ${10+b*8},${14+h*8}" fill="#FFE0B2" stroke="#333" stroke-width="2"/>`+svgTxt(10+b*4,14+h*8+12,b+'cm',9)+svgTxt(3,14+h*4,h+'cm',9);
+  let items=[
+    {s:tri,q:`图中直角三角形底${b}cm、高${h}cm，面积是多少？`,a:fmt(b*h/2),d:[fmt(b*h),fmt(b*h/3)]},
+    {q:`三角形底${b}cm、高${h}cm，面积是多少？`,a:fmt(b*h/2),d:[fmt(b*h),fmt(b*h/3)]},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+function g5_prob(){
+  let items=[
+    {q:'袋子里有3个红球1个蓝球，摸到红球的可能性？',a:'较大',d:['较小','一样大','无法判断']},
+    {q:'袋子里有1个红球3个蓝球，摸到蓝球的可能性？',a:'较大',d:['较小','一样大','无法判断']},
+    {q:'抛一枚硬币，正面朝上的可能性是？',a:'1/2',d:['1','0','1/3']},
+    {q:'盒子里全是白球，摸到黑球的可能性？',a:'0（不可能）',d:['1','1/2','较大']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
 function g5_tree(){let l=ri(50,120),g=ri(4,8);return mc(`一条路长${l}米，每隔${g}米种一棵（两端都种），共几棵？`,l/g+1,[l/g,l/g-1,l/g+2])}
-function g5_observe(){return mc('从正面看正方体看到的是？','正方形',['长方形','三角形','圆形'])}
-function g5_factor(){return mc('12的因数有几个？','6个',['4个','5个','8个'])}
-function g5_fraction(){return mc('3/9约分后等于？','1/3',['3/9','2/3','1/9'])}
+function g5_observe(){
+  let items=[
+    {q:'从正面看一个正方体，看到的形状是？',a:'正方形',d:['长方形','三角形','圆形']},
+    {q:'从上面看一个圆柱，看到的形状是？',a:'圆形',d:['长方形','正方形','三角形']},
+    {q:'从侧面看一个球体，看到的形状是？',a:'圆形',d:['正方形','长方形','三角形']},
+    {q:'从正面看一个长方体，通常看到的是？',a:'长方形',d:['正方形','圆形','三角形']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g5_factor(){
+  let items=[
+    {q:'12的因数有几个？',a:'6个',d:['4个','5个','8个']},
+    {q:'15的因数有几个？',a:'4个',d:['3个','5个','6个']},
+    {q:'下面哪个数是质数？',a:'7',d:['9','15','21']},
+    {q:'下面哪个数是合数？',a:'9',d:['2','7','11']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g5_fraction(){
+  let items=[
+    {q:'3/9约分后等于？',a:'1/3',d:['3/9','2/3','1/9']},
+    {q:'4/10约分后等于？',a:'2/5',d:['4/10','1/5','4/5']},
+    {q:'与1/2相等的分数是？',a:'2/4',d:['1/3','3/4','1/4']},
+    {q:'5/8和3/8比较，哪个大？',a:'5/8',d:['3/8','一样大','无法比较']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
 function g5_fraction_calc(){let a=ri(1,4);return mc(`1/${a}+1/${a}=？`,`2/${a}`,[`1/${a}`,`2/${a*2}`])}
-function g5_shape3(){return mc('一个图形旋转90度后什么不变？','大小和形状',['位置','方向','大小不变但位置变'])}
-function g5_line(){return mc('折线统计图适合表示？','变化趋势',['比例','绝对数值'])}
+function g5_shape3(){
+  let items=[
+    {q:'一个图形旋转90度后，什么不变？',a:'大小和形状',d:['位置','方向','颜色']},
+    {q:'图形平移时，什么发生了变化？',a:'位置',d:['大小','形状','颜色']},
+    {q:'平移和旋转都不改变图形的什么？',a:'大小和形状',d:['位置','方向','颜色']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g5_line(){
+  let lineSvg=`<polyline points="10,80 30,60 50,65 70,40 90,30" fill="none" stroke="#E53935" stroke-width="2"/><line x1="10" y1="85" x2="95" y2="85" stroke="#333"/><line x1="10" y1="10" x2="10" y2="85" stroke="#333"/>`;
+  let items=[
+    {q:'折线统计图适合表示？',a:'变化趋势',d:['比例','绝对数值']},
+    {s:lineSvg,q:'上图折线统计图呈上升趋势，说明数量在？',a:'不断增加',d:['不断减少','保持不变','忽高忽低']},
+    {q:'要反映一周气温变化，一般用什么统计图？',a:'折线统计图',d:['条形统计图','扇形统计图','统计表']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
 function g_app_fraction(){let n=ri(3,6),k=ri(2,4);return mc(`总数的1/${k}是${n}，总数是多少？`,n*k,[n/k,n+k,n*(k+1)])}
-function g5_factor2(){return mc('既是2的倍数又是3的倍数的是？','6',['5','7','9'])}
-function g_shape_3d(){return mc('正方体有几个面？','6个',['4个','8个','12个'])}
+function g5_factor2(){
+  let items=[
+    {q:'既是2的倍数又是3的倍数的是？',a:'6',d:['5','7','9']},
+    {q:'下面哪个数是3的倍数？',a:'12',d:['11','13','14']},
+    {q:'2、3、5的最小公倍数是？',a:'30',d:['15','60','10']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g_shape_3d(){
+  let cube=`<rect x="35" y="30" width="40" height="40" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`+svgTxt(55,75,'正方体',9);
+  let items=[
+    {q:'正方体有几个面？',a:'6个',d:['4个','8个','12个']},
+    {q:'正方体有几条棱？',a:'12条',d:['6条','8条','10条']},
+    {s:cube,q:'上图立体图形是什么？',a:'正方体',d:['长方体','圆柱','球']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
 
 // ===== 6年级 =====
 function g6_mul(){let a=ri(1,4),b=ri(2,5);return mf(`${a}/${b}×${ri(2,5)}=？`,fmt(+(a/b*ri(2,5)).toFixed(1)))}
 function g6_div(){let n=ri(6,15);return mc(`${n}÷(1/3)=？`,n*3,[n/3,n*2,n+3])}
-function g6_ratio(){return mc('6:8化简后是？','3:4',['2:3','4:5','6:8'])}
-function g6_circle(){return mc('圆的周长公式是？','C=2πr',['C=πr²','C=πd/2'])}
-function g6_percent(){return mc('50%等于几分之几？','1/2',['1/5','1/10','1/50'])}
-function g6_pie(){return mc('扇形统计图适合表示？','各部分占整体的百分比',['变化趋势','绝对数值','时间序列'])}
-function g6_negative(){return mc('比0小5的数是？','-5',['5','0','-4'])}
-function g6_percent2(){let p=ri(10,40);return mc(`${p}% = 几分之几？(约分)`,`${p/10}/${100/10}`,[]);}
-function g6_cylinder(){return mc('圆柱有几个底面？','2个',['1个','3个','0个'])}
-function g6_proportion(){return mc('若a:b=c:d，则ad=?','bc',['ac','bd','ab'])}
-function g6_stats(){return mc('平均数反映数据的？','集中趋势',['离散程度','最大值','最小值'])}
+function g6_ratio(){
+  let items=[
+    {q:'6:8化简后是？',a:'3:4',d:['2:3','4:5','6:8']},
+    {q:'0.2:0.4化成最简整数比是？',a:'1:2',d:['2:4','2:1','1:4']},
+    {q:'甲数是乙数的2倍，甲:乙=？',a:'2:1',d:['1:2','1:1','2:2']},
+    {q:'把10:15化简后是？',a:'2:3',d:['5:15','10:3','3:2']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g6_circle(){
+  let r=ri(2,6);
+  let circ=`<circle cx="60" cy="50" r="${r*8}" fill="#FFE0B2" stroke="#333" stroke-width="2"/><line x1="${60-r*8}" y1="50" x2="${60+r*8}" y2="50" stroke="#E53935" stroke-width="1.5"/><text x="60" y="46" text-anchor="middle" font-size="9" fill="#333">r=${r}</text>`;
+  let items=[
+    {q:'圆的周长公式是？',a:'C=2πr',d:['C=πr²','C=πd/2','C=πd']},
+    {s:circ,q:`图中圆的半径r=${r}，它的周长约是多少？(π取3.14)`,a:fmt(+(2*3.14*r).toFixed(2)),d:[fmt(+(3.14*r*r).toFixed(2)),fmt(+(3.14*r).toFixed(2)),fmt(+(4*3.14*r).toFixed(2))]},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+function g6_percent(){
+  let items=[
+    {q:'50%等于几分之几？',a:'1/2',d:['1/5','1/10','1/50']},
+    {q:'25%等于几分之几？',a:'1/4',d:['1/25','25/100','1/5']},
+    {q:'一件衣服打八折出售，现价是原价的？',a:'80%',d:['8%','20%','18%']},
+    {q:'出勤率表示？',a:'出勤人数占总人数的百分比',d:['出勤人数','总人数','缺勤人数']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g6_pie(){
+  let pie=`<circle cx="60" cy="50" r="38" fill="#fff" stroke="#333" stroke-width="2"/><path d="M60,50 L60,12 A38,38 0 0,1 96,70 Z" fill="#EF5350"/><path d="M60,50 L96,70 A38,38 0 0,1 40,86 Z" fill="#42A5F5"/><path d="M60,50 L40,86 A38,38 0 0,1 60,12 Z" fill="#FFCA28"/>`;
+  let items=[
+    {q:'扇形统计图适合表示？',a:'各部分占整体的百分比',d:['变化趋势','绝对数值','时间序列']},
+    {s:pie,q:'从扇形统计图中能直接看出？',a:'各部分占整体的百分比',d:['各部分的具体数量','数量的变化趋势','最大值是多少']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+function g6_negative(){
+  let items=[
+    {q:'比0小5的数是？',a:'-5',d:['5','0','-4']},
+    {q:'海拔-100米表示？',a:'低于海平面100米',d:['高于海平面100米','海平面上100米','平地']},
+    {q:'温度从3℃下降到-2℃，下降了？',a:'5℃',d:['1℃','2℃','3℃']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g6_percent2(){
+  let items=[
+    {q:'25% = 几分之几（约分）？',a:'1/4',d:['25/100','1/25','1/5']},
+    {q:'75% = 几分之几（约分）？',a:'3/4',d:['75/100','3/10','1/4']},
+    {q:'40% = 几分之几（约分）？',a:'2/5',d:['40/100','4/10','1/5']},
+    {q:'60% = 几分之几（约分）？',a:'3/5',d:['60/100','6/10','2/5']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g6_cylinder(){
+  let cyl=`<rect x="35" y="35" width="50" height="40" fill="#BBDEFB" stroke="#333" stroke-width="2"/><ellipse cx="60" cy="35" rx="25" ry="8" fill="#E3F2FD" stroke="#333" stroke-width="2"/><ellipse cx="60" cy="75" rx="25" ry="8" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`;
+  let items=[
+    {q:'圆柱有几个底面？',a:'2个',d:['1个','3个','0个']},
+    {s:cyl,q:'上图立体图形是什么？',a:'圆柱',d:['圆锥','长方体','球']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+function g6_proportion(){
+  let items=[
+    {q:'若a:b=c:d，则ad=?',a:'bc',d:['ac','bd','ab']},
+    {q:'比例的基本性质是？',a:'两外项之积=两内项之积',d:['两外项之和=两内项之和','两外项之差=两内项之差','两外项之积=两内项之差']},
+    {q:'2:3=4:x，则x=?',a:'6',d:['5','8','9']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g6_stats(){
+  let items=[
+    {q:'平均数反映数据的？',a:'总体一般水平（集中趋势）',d:['最大值','最小值','离散程度']},
+    {q:'要表示一组数据的多数情况，一般用？',a:'众数',d:['平均数','最大数','最小数']},
+    {q:'一组数据按大小排列，处在最中间位置的数叫？',a:'中位数',d:['平均数','众数','最大数']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
 function g6_review(){
-  let items=[{q:'48和36的最大公因数是？',a:'12',d:['6','8','18']},{q:'100以内最大的质数是？',a:'97',d:['99','91','95']}];
+  let items=[
+    {q:'48和36的最大公因数是？',a:'12',d:['6','8','18']},
+    {q:'100以内最大的质数是？',a:'97',d:['99','91','95']},
+    {q:'一个圆的半径扩大2倍，面积扩大？',a:'4倍',d:['2倍','3倍','不变']},
+    {q:'把3/4化成小数是？',a:'0.75',d:['0.34','0.25','0.5']},
+  ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g_app_ratio(){let x=ri(3,12);return mc(`3:4=x:${x*4/3}, x=？`,x,[x-1,x+2,x*2])}
 function g_app_chicken_rabbit(){
-  let heads=ri(8,15),rabbitFeet=ri(1,heads-1)*4,chickFeet=(heads-ri(1,heads-1))*2;
-  return mc(`鸡兔同笼，共${heads}个头${rabbitFeet+chickFeet}只脚，兔有几只？`,rabbitFeet/4,[3,heads-3,4]);
+  let heads=ri(8,15),r=ri(1,heads-2),c=heads-r,feet=r*4+c*2;
+  return mc(`鸡兔同笼，共${heads}个头${feet}只脚，兔有几只？`,r,[c,r+1,heads-r+1]);
 }
 function g_app_planting(){let l=ri(30,100),g=ri(3,8);return mc(`一条路长${l}米，每隔${g}米种一棵树，共几棵？`,l/g+1,[l/g,l/g-1])}
-function g_shape_expand(){return mc('正方体的展开图由几个正方形组成？','6个',['4个','8个','12个'])}
-function g_shape_view(){return mc('从上面看正方体看到的是？','正方形',['长方形','三角形','圆形'])}
+function g_shape_expand(){
+  let net=`<rect x="40" y="10" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="22" y="28" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="40" y="28" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="58" y="28" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="40" y="46" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="40" y="64" width="18" height="18" fill="#BBDEFB" stroke="#333"/>`;
+  let items=[
+    {q:'正方体的展开图由几个正方形组成？',a:'6个',d:['4个','8个','12个']},
+    {s:net,q:'上图（6个正方形组成的十字形）可能是哪个立体图形的展开图？',a:'正方体',d:['长方体','圆锥','圆柱']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+function g_shape_view(){
+  let top=`<rect x="35" y="35" width="40" height="40" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`;
+  let items=[
+    {q:'从上面看一个正方体，看到的形状是？',a:'正方形',d:['长方形','三角形','圆形']},
+    {s:top,q:'从上往下看一个正方体，看到的是？',a:'正方形',d:['长方形','圆形','三角形']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
 
 // ===== 巧数三角形专项（保留原逻辑，已经很好） =====
 // g_triangle_count 保持原样（在 index.html 中已定义）
