@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v11：位置与方向题干多样化——5大类题型+每类多套措辞+防连续重复，20题文字明显不同；强制刷新缓存
-const CACHE = 'lyj-shell-v11';
+// v12：位置与方向图形补全箭头头部——新增 svgArrow(线段+三角箭头)，方向标指针/地图北箭头/两地连线均带箭头
+const CACHE = 'lyj-shell-v12';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

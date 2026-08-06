@@ -5506,6 +5506,15 @@ function svgC(cx,cy,r,f){return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${
 function svgL(x1,y1,x2,y2,s,w){w=w||2;return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${s||'#333'}" stroke-width="${w}" stroke-linecap="round"/>`}
 function svgTri(x1,y1,x2,y2,x3,y3,f){return `<polygon points="${x1},${y1} ${x2},${y2} ${x3},${y3}" fill="${f||'#81C784'}" stroke="#333" stroke-width="2"/>`}
 function svgTxt(x,y,txt,sz,c){sz=sz||12;c=c||'#333';return `<text x="${x}" y="${y}" text-anchor="middle" font-size="${sz}" fill="${c}">${txt}</text>`}
+// 带箭头的线段：在 (x2,y2) 处绘制三角箭头头部
+function svgArrow(x1,y1,x2,y2,col,w){
+  col=col||'#E53935'; w=w||4;
+  const ang=Math.atan2(y2-y1,x2-x1), hl=9, ha=Math.PI/7;
+  const p1x=x2-hl*Math.cos(ang-ha), p1y=y2-hl*Math.sin(ang-ha);
+  const p2x=x2-hl*Math.cos(ang+ha), p2y=y2-hl*Math.sin(ang+ha);
+  return `<line x1="${x1}" y1="${y1}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`
+    +`<polygon points="${x2.toFixed(1)},${y2.toFixed(1)} ${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}" fill="${col}"/>`;
+}
 function svgClock(h,m){
   let ha=(h%12)*30+m*0.5, ma=m*6, s='';
   s+=`<circle cx="60" cy="60" r="50" fill="#fff" stroke="#333" stroke-width="2"/>`;
@@ -5724,7 +5733,7 @@ function svgCompassArrow(pointDir){
   const a=D[pointDir]*Math.PI/180, r=32;
   const tx=60+r*Math.sin(a), ty=50-r*Math.cos(a);
   const ox=60-r*Math.sin(a), oy=50+r*Math.cos(a);
-  s+=svgL(ox,oy,tx,ty,'#E53935',4)+svgC(60,50,3,'#333');
+  s+=svgArrow(ox,oy,tx,ty,'#E53935',4)+svgC(60,50,3,'#333');
   return s;
 }
 // 8 向玫瑰图（仅标 4 个基本方向），★ 标记在答案方向
@@ -5742,9 +5751,9 @@ function svgMap4(ans,name1,name2){
   const off={东:[34,0],南:[0,30],西:[-34,0],北:[0,-30]};
   const dx=off[ans][0], dy=off[ans][1];
   let s=svgR(8,8,104,84,'#fff',1);
-  s+=svgL(100,18,100,42,'#E53935',2)+svgTxt(100,14,'北',10,'#E53935');
+  s+=svgArrow(100,42,100,18,'#E53935',3)+svgTxt(100,14,'北',10,'#E53935');
   s+=svgTxt(60,52,name1,9,'#1565C0')+svgTxt(60+dx,52+dy,name2,9,'#E57373');
-  if(dx||dy) s+=svgL(60,50,60+dx,50+dy,'#90A4AE',1);
+  if(dx||dy) s+=svgArrow(60,50,60+dx,50+dy,'#90A4AE',2);
   return s;
 }
 function g3_dir_compass(){
