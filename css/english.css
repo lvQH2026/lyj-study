@@ -27,16 +27,20 @@
    .unit-item / .unit-number / .unit-info / .unit-name / .unit-meta / .unit-arrow
    等均由 style.css 定义），仅在英语专属元素上做作用域补充，避免双份定义漂移。 */
 
-/* 单元列表左侧序号圆形图标（仅英语板块作用域）：藏蓝→墨蓝哑光渐变 + 极淡弥散阴影 + 纯白纤细数字，
-   低调轻奢商务风；卡片结构 / 圆角 / 字体 / 布局全部沿用 style.css 原样，不做任何改动。
-   仅覆盖 background / color / 字号字重 / 字距 / 阴影，width·height·border-radius·flex 等保持原定义。 */
+/* 单元列表左侧序号图标（仅英语板块作用域）：与数学首页年级卡片徽标统一风格——
+   统一深色圆角徽标 #3B4A63 + 纯白数字 + 柔和弥散阴影，取消原来藏蓝墨蓝渐变；
+   卡片结构 / 圆角 / 字体 / 布局全部沿用 style.css 原样，仅覆盖背景与数字着色。
+   注：靠 #englishRoot 作用域隔离，数学模块序号图标维持原渐变不受影响。 */
 #englishRoot .unit-number {
-  background: linear-gradient(140deg, #35496E 0%, #1C2A47 100%);
+  background: #3B4A63;
   color: #FFFFFF;
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: .6px;
-  box-shadow: 0 4px 14px rgba(18,28,52,.16), 0 1px 2px rgba(18,28,52,.10);
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(28,32,48,.12);
+}
+/* 沿用「专项」图标标红惯例（与数学一致）：英语中若单元名含「专项」则保持红色徽标 */
+#englishRoot .unit-item.special-unit .unit-number {
+  background: linear-gradient(135deg, #e53935, #ff6f60);
+  box-shadow: 0 2px 10px rgba(229,57,53,.35);
 }
 
 /* 顶部导航（下移 48px，避让顶部「数学｜英语」切换条；渐变与数学一致） */

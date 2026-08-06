@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v14：数学首页年级卡片按参考图风格调整——统一深色圆角序号徽标、去边框、副标题变白、渐变更柔和
-const CACHE = 'lyj-shell-v14';
+// v15：英语单元列表序号图标对齐数学年级卡片徽标风格——统一深色 #3B4A63 实心 + 纯白数字 + 柔和弥散阴影
+const CACHE = 'lyj-shell-v15';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
