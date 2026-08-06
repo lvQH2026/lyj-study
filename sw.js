@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v9：修复图形题"答案显示在图上"——svgAngle 默认不画度数（仅角度分类题作为前提显示），立体图形 cube 去掉"正方体"文字标签
-const CACHE = 'lyj-shell-v9';
+// v10：三年级下册「位置与方向」题库补全——新增方向标箭头图/8向玫瑰图+★/4向地图(北箭头+两地相对方向)/相对方向推理，全部带 SVG 图片，答案不泄露在图上
+const CACHE = 'lyj-shell-v10';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

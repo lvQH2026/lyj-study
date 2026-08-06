@@ -5715,7 +5715,69 @@ function g3_rect(){
     svgR(5,10,w*15,Math.max(h*10,20),'#BBDEFB')+svgTxt(5+w*15/2,8,w+'cm',9)+svgTxt(2,25,h+'cm',9),
     String(2*(w+h)),[String(w+h),String(w*h),String(2*(w+h)-1)]);
 }
-function g3_direction(){return mc('指南针红色箭头指向什么方向？','南',['东','西','北'])}
+// ---- 三年级下册·位置与方向（含方向图） ----
+// 方向标箭头图：读红色箭头指向
+function svgCompassArrow(pointDir){
+  const D={东:90,南:180,西:270,北:0};
+  let s=svgR(12,8,96,84,'#ECEFF1',1);
+  s+=svgTxt(60,22,'北',11,'#37474F')+svgTxt(60,90,'南',11,'#37474F')+svgTxt(106,52,'东',11,'#37474F')+svgTxt(14,52,'西',11,'#37474F');
+  const a=D[pointDir]*Math.PI/180, r=32;
+  const tx=60+r*Math.sin(a), ty=50-r*Math.cos(a);
+  const ox=60-r*Math.sin(a), oy=50+r*Math.cos(a);
+  s+=svgL(ox,oy,tx,ty,'#E53935',4)+svgC(60,50,3,'#333');
+  return s;
+}
+// 8 向玫瑰图（仅标 4 个基本方向），★ 标记在答案方向
+function svgRose4(markDir){
+  const D={东:90,南:180,西:270,北:0,东北:45,东南:135,西南:225,西北:315};
+  let s=svgR(8,6,104,88,'#fff',1);
+  s+=svgL(60,10,60,90,'#B0BEC5',1)+svgL(10,50,110,50,'#B0BEC5',1);
+  s+=svgTxt(60,20,'北',10,'#37474F')+svgTxt(60,88,'南',10,'#37474F')+svgTxt(105,52,'东',10,'#37474F')+svgTxt(15,52,'西',10,'#37474F');
+  s+=svgTxt(60,50,'中心',8,'#1565C0');
+  if(markDir){ const a=D[markDir]*Math.PI/180, r=30; s+=svgTxt(60+r*Math.sin(a),50-r*Math.cos(a),'★',15,'#E53935'); }
+  return s;
+}
+// 4 向地图：北箭头 + 两地相对方向
+function svgMap4(ans,name1,name2){
+  const off={东:[34,0],南:[0,30],西:[-34,0],北:[0,-30]};
+  const dx=off[ans][0], dy=off[ans][1];
+  let s=svgR(8,8,104,84,'#fff',1);
+  s+=svgL(100,18,100,42,'#E53935',2)+svgTxt(100,14,'北',10,'#E53935');
+  s+=svgTxt(60,52,name1,9,'#1565C0')+svgTxt(60+dx,52+dy,name2,9,'#E57373');
+  if(dx||dy) s+=svgL(60,50,60+dx,50+dy,'#90A4AE',1);
+  return s;
+}
+function g3_dir_compass(){
+  const dirs=['东','南','西','北'];
+  const ans=pick(dirs);
+  return msc('图中红色箭头指向（　）方向', svgCompassArrow(ans), ans, dirs.filter(d=>d!==ans));
+}
+function g3_dir_rose(){
+  const dirs=['东','南','西','北','东北','东南','西南','西北'];
+  const ans=pick(dirs);
+  return msc('图中 ★ 在中心的（　）方向', svgRose4(ans), ans, dirs.filter(d=>d!==ans).slice(0,3));
+}
+function g3_dir_map(){
+  const card=['东','南','西','北'];
+  const a=pick(['小明家','学校','公园']); let b;
+  do{ b=pick(['书店','邮局','医院','超市']); }while(b===a);
+  const ans=pick(card);
+  return msc(`${b}在${a}的（　）方向`, svgMap4(ans,a,b), ans, card.filter(d=>d!==ans));
+}
+function g3_dir_rel(){
+  const items=[
+    {q:'面向北，后面是（　）方向',a:'南',d:['东','西','北']},
+    {q:'面向东，后面是（　）方向',a:'西',d:['东','南','北']},
+    {q:'面向南，左面是（　）方向',a:'东',d:['西','南','北']},
+    {q:'面向北，右面是（　）方向',a:'东',d:['西','南','北']},
+    {q:'面向西，右面是（　）方向',a:'北',d:['南','东','西']},
+    {q:'太阳从（　）方升起',a:'东',d:['西','南','北']},
+    {q:'傍晚，太阳从（　）方落下',a:'西',d:['东','南','北']},
+    {q:'树的年轮较疏的一面向着（　）方',a:'南',d:['北','东','西']},
+  ];
+  const it=pick(items); return mc(it.q,it.a,it.d);
+}
+function g3_direction(){ return pick([g3_dir_compass,g3_dir_rose,g3_dir_map,g3_dir_rel])(); }
 function g3_div(){let a=ri(200,800),b=ri(2,9);if(a%b!==0)a+=b-a%b;return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1])}
 function g3_mul2(){let a=ri(15,50),b=ri(15,30);return mc(`${a}×${b}=？`,a*b,[a*b-5,a*b+5])}
 function g3_area(){
