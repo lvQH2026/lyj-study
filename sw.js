@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v8：数学单元/专项练习每次随机出 20 题（UNIT_QUIZ_LENGTH=20）；考试保持实时随机组卷
-const CACHE = 'lyj-shell-v8';
+// v9：修复图形题"答案显示在图上"——svgAngle 默认不画度数（仅角度分类题作为前提显示），立体图形 cube 去掉"正方体"文字标签
+const CACHE = 'lyj-shell-v9';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

@@ -5515,11 +5515,12 @@ function svgClock(h,m){
   s+=`<circle cx="60" cy="60" r="3" fill="#333"/>`;
   return s;
 }
-function svgAngle(deg){
+function svgAngle(deg, showDeg){
   let r=35, rad=Math.PI*(180-deg)/180, ex=60+r*Math.cos(rad), ey=60-r*Math.sin(rad);
   let s=svgL(60,60,60+r,60)+svgL(60,60,ex,ey);
   for(let i=0;i<=15;i++){let a=Math.PI*(180-(deg*i/15))/180; s+=`<line x1="${60+10*Math.cos(a)}" y1="${60-10*Math.sin(a)}" x2="${60+10*Math.cos(a+Math.PI*deg/15/180)}" y2="${60-10*Math.sin(a+Math.PI*deg/15/180)}" stroke="#E57373" stroke-width="1"/>`}
-  s+=svgTxt(43,50,deg+'°',11,'#E57373'); return s;
+  if (showDeg) s+=svgTxt(43,50,deg+'°',11,'#E57373');
+  return s;
 }
 function svgRuler(){let s='';for(let i=0;i<=10;i++){let h=(i%5==0)?10:5;s+=`<line x1="${5+i*11}" y1="35" x2="${5+i*11}" y2="${35-h}" stroke="#333" stroke-width="1"/>`;if(i%2==0)s+=svgTxt(5+i*11,48,i,8)} return svgR(2,30,115,30,'#fff',1)+s;}
 
@@ -5750,9 +5751,9 @@ function g_app_area(){
 }
 function g_shape_angle_calc(){
   let items=[
-    {s:svgAngle(45),q:'这个角是什么角？',a:'锐角',d:['直角','钝角','平角']},
-    {s:svgAngle(90),q:'这个角是什么角？',a:'直角',d:['锐角','钝角','平角']},
-    {s:svgAngle(135),q:'这个角是什么角？',a:'钝角',d:['锐角','直角','平角']},
+    {s:svgAngle(45,true),q:'这个角是什么角？',a:'锐角',d:['直角','钝角','平角']},
+    {s:svgAngle(90,true),q:'这个角是什么角？',a:'直角',d:['锐角','钝角','平角']},
+    {s:svgAngle(135,true),q:'这个角是什么角？',a:'钝角',d:['锐角','直角','平角']},
   ];
   let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
@@ -5775,7 +5776,7 @@ function g4_angle(){
     {s:svgAngle(120),q:'这个角是多少度？',a:'120°',d:['90°','150°','60°']},
     {s:svgAngle(150),q:'这个角是多少度？',a:'150°',d:['120°','180°','90°']},
     {s:svgAngle(30),q:'这个角是多少度？',a:'30°',d:['45°','60°','15°']},
-    {s:svgAngle(165),q:'这个角是多少度？',a:'165°',d:['155°','175°','150°']},
+    {s:svgAngle(135),q:'这个角是多少度？',a:'135°',d:['120°','150°','90°']},
   ];
   let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
@@ -5940,7 +5941,11 @@ function g5_factor2(){
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g_shape_3d(){
-  let cube=`<rect x="35" y="30" width="40" height="40" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`+svgTxt(55,75,'正方体',9);
+  let cube=`<rect x="35" y="35" width="34" height="34" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`+
+    `<rect x="47" y="23" width="34" height="34" fill="#90CAF9" stroke="#333" stroke-width="2"/>`+
+    `<line x1="35" y1="35" x2="47" y2="23" stroke="#333" stroke-width="2"/>`+
+    `<line x1="69" y1="35" x2="81" y2="23" stroke="#333" stroke-width="2"/>`+
+    `<line x1="69" y1="69" x2="81" y2="57" stroke="#333" stroke-width="2"/>`;
   let items=[
     {q:'正方体有几个面？',a:'6个',d:['4个','8个','12个']},
     {q:'正方体有几条棱？',a:'12条',d:['6条','8条','10条']},
