@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v4：修复移动端 TTS 发音 / 麦克风识别（english.js speak/startRecog）
-const CACHE = 'lyj-shell-v4';
+// v5：修复 Android Chrome voices 异步加载致 TTS 无声（english.js preloadVoices）；startRecog 错误提示强化
+const CACHE = 'lyj-shell-v5';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

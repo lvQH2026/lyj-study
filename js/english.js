@@ -32,13 +32,22 @@ const HY3 = {
 };
 
 /* 发音 / 识别 工具 */
+let _voicesReady = false;
+
 function speak(text, lang) {
   const synth = window.speechSynthesis;
   if (!synth) return;
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang || 'en-US'; u.rate = 0.9; u.pitch = 1; u.volume = 1;
+  // 选一个英文语音（Android Chrome key fix：不选则无声）
+  try {
+    const voices = synth.getVoices();
+    if (voices.length > 0) { _voicesReady = true; }
+    const en = voices.find(v => v.lang && v.lang.startsWith('en'));
+    if (en) u.voice = en;
+  } catch (e) {}
   const fire = () => { try { synth.speak(u); } catch (e) {} };
-  // 移动端修复：cancel 紧跟 speak 会吞掉首个音频；若正在播放则取消后延迟再播
+  // cancel 紧跟 speak 会吞掉首个音频；若正在播放则取消后延迟再播
   if (synth.speaking || synth.pending) {
     try { synth.cancel(); } catch (e) {}
     setTimeout(fire, 60);
@@ -78,10 +87,14 @@ function startRecog(expected, cb) {
   r.onend = () => {};
   const safety = setTimeout(() => { try { r.stop(); } catch (_) {} finish({ supported: true, error: '识别超时，请再试一次' }); }, 9000);
   try { r.start(); }
-  catch (e) {
-    // 上次会话未正常结束：先停再试
+  catch (e1) {
+    // 上次会话未正常结束：先停再试，带原始错误供排查
     try { r.stop(); } catch (_) {}
-    setTimeout(() => { try { r.start(); } catch (_) { finish({ supported: false }); } }, 120);
+    const eMsg = e1 && (e1.message || String(e1)).slice(0, 50);
+    setTimeout(() => {
+      try { r.start(); }
+      catch (e2) { finish({ supported: true, error: '启动失败(' + eMsg + ')，请刷新页面重试' }); }
+    }, 120);
   }
 }
 function scoreRead(alts, expected) {
@@ -516,3 +529,16 @@ window.clearStats = clearStats;
 
 /* 启动：渲染英语首页到隐藏的 engBody（切到英语模块时即显示） */
 switchMain('phonics');
+
+/* ============ 语音预加载（Android Chrome 关键修复） ============ */
+// Android Chrome 的 voices 异步加载，未加载完就 speak 会无声；放在末尾以免干扰声明顺序
+(function preloadVoices() {
+  if (typeof speechSynthesis === 'undefined') return;
+  try {
+    const v = speechSynthesis.getVoices();
+    if (v && v.length > 0) { _voicesReady = true; return; }
+    speechSynthesis.addEventListener('voiceschanged', () => { _voicesReady = true; }, { once: true });
+    // 兜底：部分 Android Chrome 不触发 voiceschanged
+    setTimeout(() => { if (!_voicesReady) { speechSynthesis.getVoices(); _voicesReady = true; } }, 1500);
+  } catch (e) { /* 静默降级 */ }
+})();
