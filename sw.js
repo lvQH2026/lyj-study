@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v13：英语板块单元列表左侧序号圆形图标改藏蓝墨蓝哑光渐变 + 极淡弥散阴影 + 纯白纤细数字（仅作用域 english.css，其余元素不变）
-const CACHE = 'lyj-shell-v13';
+// v14：数学首页年级卡片按参考图风格调整——统一深色圆角序号徽标、去边框、副标题变白、渐变更柔和
+const CACHE = 'lyj-shell-v14';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
