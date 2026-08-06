@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v5：修复 Android Chrome voices 异步加载致 TTS 无声（english.js preloadVoices）；startRecog 错误提示强化
-const CACHE = 'lyj-shell-v5';
+// v6：英语板块 UI 对齐数学（令牌/组件统一），首页课程列表改 unit-item 行样式，TTS 语速降至 0.7
+const CACHE = 'lyj-shell-v6';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

@@ -222,7 +222,7 @@ try {
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/main.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级', !/lyj-shell-v[34]/.test(sw) && /lyj-shell-v5/.test(sw));
+ok('SW 版本号已升级', !/lyj-shell-v[345]/.test(sw) && /lyj-shell-v6/.test(sw));
 
 // ============ 四点五、CSS 隔离守卫 ============
 const engCss = fs.readFileSync(path.join(ROOT, 'css', 'english.css'), 'utf8');
@@ -245,6 +245,12 @@ ok('CSS：数学导航避让切换条 .navbar{top:48px}', /\.navbar\s*\{\s*top:\
   const bad = new RegExp('(^|\\n)\\s*\\' + cls + '[.\\s{]', 'm').test(engCss);
   ok('CSS：共用类名 ' + cls + ' 已作用域隔离', !bad);
 });
+
+// ============ 四又六、英语 UI 对齐数学守卫 ============
+ok('对齐：english.css 不再覆盖 .card（继承数学全局）', !/#englishRoot\s+\.card\s*\{/.test(engCss));
+ok('对齐：english.css 不再覆盖 .section-title（继承数学全局）', !/#englishRoot\s+\.section-title\s*\{/.test(engCss));
+ok('对齐：english.css 不再覆盖 .btn-primary（继承数学全局）', !/#englishRoot\s+\.btn-primary\s*\{/.test(engCss));
+ok('对齐：english.js 首页使用数学 .unit-item 行样式', /class="unit-item"/.test(fs.readFileSync(path.join(ROOT, 'js', 'english.js'), 'utf8')));
 
 // ============ 五、文件存在性 ============
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/main.js']

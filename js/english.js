@@ -38,7 +38,7 @@ function speak(text, lang) {
   const synth = window.speechSynthesis;
   if (!synth) return;
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang || 'en-US'; u.rate = 0.9; u.pitch = 1; u.volume = 1;
+  u.lang = lang || 'en-US'; u.rate = 0.7; u.pitch = 1; u.volume = 1;
   // 选一个英文语音（Android Chrome key fix：不选则无声）
   try {
     const voices = synth.getVoices();
@@ -140,16 +140,18 @@ function renderPhonicsHome() {
   viewStack.length = 0;
   setView(d.title, () => {
     let lessonCount = 0; d.levels.forEach(l => lessonCount += l.lessons.length);
-    let html = '<div class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff">'
-      + '<div style="font-size:17px;font-weight:700">自然拼读 Phonics</div>'
-      + '<div style="font-size:13px;opacity:.9;margin-top:4px">四级体系 · 共 ' + d.levels.length + ' 级 ' + lessonCount + ' 课 · 每课 5 步闭环 + 20 个单词 · 关卡全开放</div></div>';
+    let html = '<div class="card">'
+      + '<div style="font-weight:700;font-size:18px;color:var(--primary)">自然拼读 Phonics</div>'
+      + '<div class="unit-meta" style="margin-top:4px">四级体系 · 共 ' + d.levels.length + ' 级 ' + lessonCount + ' 课 · 每课 5 步闭环，20 个单词</div></div>';
     d.levels.forEach((lv, li) => {
-      html += '<div class="section-title">' + lv.no + ' · ' + lv.name + '</div><div class="lesson-grid">';
+      html += '<div class="section-title">' + lv.no + ' · ' + lv.name + '</div><div class="unit-list">';
       lv.lessons.forEach((ls) => {
-        html += '<div class="lesson-card" onclick="openPhonicsLesson(' + li + ',\'' + ls.id + '\')">'
-          + '<div class="lesson-no">' + ls.id.toUpperCase() + '</div>'
-          + '<div class="lesson-name">' + ls.title + '</div>'
-          + '<div class="lesson-sub">' + ls.sub + '</div></div>';
+        const done = isLessonDone(ls.id);
+        html += '<div class="unit-item" onclick="openPhonicsLesson(' + li + ',\'' + ls.id + '\')">'
+          + '<div class="unit-number">' + ls.id.toUpperCase().slice(0, 2) + '</div>'
+          + '<div class="unit-info"><div class="unit-name">' + ls.title + '</div>'
+          + '<div class="unit-meta">' + ls.sub + (done ? ' · <span style="color:var(--success)">已学 ✓</span>' : '') + '</div></div>'
+          + '<div class="unit-arrow">›</div></div>';
       });
       html += '</div>';
     });
@@ -255,7 +257,7 @@ function renderPhonicsDis() {
   const others = shuffle(phDis.ls.words.map(w => w.w).filter(w => w !== target)).slice(0, 3);
   const opts = shuffle([target].concat(others));
   box.innerHTML = '<p class="muted-note">第 ' + (phDis.idx + 1) + ' / ' + phDis.total + ' 题 · 点击播放，选出你听到的单词</p>'
-    + '<button class="btn-gold" style="width:100%;margin:8px 0" onclick="speak(\'' + target + '\')">▶ 播放单词</button>'
+    + '<button class="btn-primary" style="width:100%;margin:8px 0" onclick="speak(\'' + target + '\')">▶ 播放单词</button>'
     + '<div id="optWrap"></div>'
     + '<div id="disFeedback" class="feedback" style="display:none"></div>';
   const wrap = box.querySelector('#optWrap');
@@ -290,15 +292,17 @@ function renderIpaHome() {
   const d = DATA.ipa;
   viewStack.length = 0;
   setView(d.title, () => {
-    let html = '<div class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff">'
-      + '<div style="font-size:17px;font-weight:700">国际音标 IPA</div>'
-      + '<div style="font-size:13px;opacity:.9;margin-top:4px">标准 44 音素 · 共 8 课 · 每课 5 步闭环</div></div>'
-      + '<div class="section-title">课程列表</div><div class="lesson-grid">';
+    let html = '<div class="card">'
+      + '<div style="font-weight:700;font-size:18px;color:var(--primary)">国际音标 IPA</div>'
+      + '<div class="unit-meta" style="margin-top:4px">标准 44 音素 · 共 ' + d.lessons.length + ' 课 · 每课 5 步闭环</div></div>'
+      + '<div class="section-title">课程列表</div><div class="unit-list">';
     d.lessons.forEach((ls) => {
-      html += '<div class="lesson-card" onclick="openIpaLesson(\'' + ls.id + '\')">'
-        + '<div class="lesson-no">' + ls.id.toUpperCase() + '</div>'
-        + '<div class="lesson-name">' + ls.title + '</div>'
-        + '<div class="lesson-sub">' + ls.sub + '</div></div>';
+      const done = isLessonDone(ls.id);
+      html += '<div class="unit-item" onclick="openIpaLesson(\'' + ls.id + '\')">'
+        + '<div class="unit-number">' + ls.id.toUpperCase().slice(0, 2) + '</div>'
+        + '<div class="unit-info"><div class="unit-name">' + ls.title + '</div>'
+        + '<div class="unit-meta">' + ls.sub + (done ? ' · <span style="color:var(--success)">已学 ✓</span>' : '') + '</div></div>'
+        + '<div class="unit-arrow">›</div></div>';
     });
     html += '</div>';
     document.getElementById('engBody').innerHTML = html;
@@ -374,7 +378,7 @@ function renderIpaDis(ls, idx) {
   const others = shuffle(phs.filter(p => p !== target)).slice(0, 3);
   const opts = shuffle([target].concat(others));
   box.innerHTML = '<p class="muted-note">第 ' + (idx + 1) + ' 题 · 播放例词，选出对应音标</p>'
-    + '<button class="btn-gold" style="width:100%;margin:8px 0" onclick="speak(\'' + ex + '\')">▶ 播放例词</button>'
+    + '<button class="btn-primary" style="width:100%;margin:8px 0" onclick="speak(\'' + ex + '\')">▶ 播放例词</button>'
     + '<div id="optWrap"></div><div id="ipaFb" class="feedback" style="display:none"></div>';
   const wrap = box.querySelector('#optWrap');
   opts.forEach(o => {
@@ -427,6 +431,11 @@ function clearWrong() {
 
 /* 工具 */
 function findPhonics(id) { for (const lv of DATA.phonics.levels) { const f = lv.lessons.find(x => x.id === id); if (f) return f; } return null; }
+function isLessonDone(id) {
+  let data = (typeof loadData === 'function') ? loadData() : (JSON.parse(localStorage.getItem('math_practice_data') || '{}'));
+  const s = data.stats || {};
+  return Object.keys(s).some(k => k.indexOf(String(id)) >= 0 && s[k] && s[k].done);
+}
 
 /* ============ 正确率统计（家长监督，写入共享 stats） ============ */
 function recordAccuracy(id, title, correct, total) {
