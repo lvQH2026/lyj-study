@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v10：三年级下册「位置与方向」题库补全——新增方向标箭头图/8向玫瑰图+★/4向地图(北箭头+两地相对方向)/相对方向推理，全部带 SVG 图片，答案不泄露在图上
-const CACHE = 'lyj-shell-v10';
+// v11：位置与方向题干多样化——5大类题型+每类多套措辞+防连续重复，20题文字明显不同；强制刷新缓存
+const CACHE = 'lyj-shell-v11';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

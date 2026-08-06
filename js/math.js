@@ -5750,19 +5750,47 @@ function svgMap4(ans,name1,name2){
 function g3_dir_compass(){
   const dirs=['东','南','西','北'];
   const ans=pick(dirs);
-  return msc('图中红色箭头指向（　）方向', svgCompassArrow(ans), ans, dirs.filter(d=>d!==ans));
+  const phr=pick([
+    '指南针的红色指针指向（　）方向？',
+    '图中红色箭头所指的是（　）方向',
+    '转动罗盘使红色指针停住，它最终指向（　）方',
+    '观察方向标，红色箭头指的是（　）',
+    '红针停在刻度盘上的（　）方向',
+    '指针式方向标中，红色一端朝向（　）'
+  ]);
+  return msc(phr, svgCompassArrow(ans), ans, dirs.filter(d=>d!==ans));
 }
 function g3_dir_rose(){
   const dirs=['东','南','西','北','东北','东南','西南','西北'];
   const ans=pick(dirs);
-  return msc('图中 ★ 在中心的（　）方向', svgRose4(ans), ans, dirs.filter(d=>d!==ans).slice(0,3));
+  const phr=pick([
+    '图中 ★ 位于中心的（　）方向',
+    '以中心为观测点，★ 在它的（　）方向',
+    '从中心点看，标有 ★ 的位置在（　）方',
+    '☆ 不在图上，★ 标记处是中心的（　）方向',
+    '按方位盘判断，★ 在中心的（　）方向'
+  ]);
+  return msc(phr, svgRose4(ans), ans, dirs.filter(d=>d!==ans).slice(0,3));
 }
 function g3_dir_map(){
-  const card=['东','南','西','北'];
-  const a=pick(['小明家','学校','公园']); let b;
-  do{ b=pick(['书店','邮局','医院','超市']); }while(b===a);
-  const ans=pick(card);
-  return msc(`${b}在${a}的（　）方向`, svgMap4(ans,a,b), ans, card.filter(d=>d!==ans));
+  const a=pick(['小明家','学校','公园','图书馆']); let b;
+  do{ b=pick(['书店','邮局','医院','超市','银行']); }while(b===a);
+  const ans=pick(['东','南','西','北']);
+  const phr=`在标有北箭头的示意图里，${b}在${a}的（　）方向`;
+  return msc(phr, svgMap4(ans,a,b), ans, ['东','南','西','北'].filter(d=>d!==ans));
+}
+function g3_dir_scene(){
+  const items=[
+    {q:'早晨，小明面向太阳站立，他的前面是（　）方',a:'东',d:['西','南','北']},
+    {q:'夜晚，小明面对北极星，他的后面是（　）方',a:'南',d:['北','东','西']},
+    {q:'刮南风时，风是从（　）方吹来的',a:'南',d:['北','东','西']},
+    {q:'绘制平面图时，图纸的上方通常表示（　）方',a:'北',d:['南','东','西']},
+    {q:'在我国，大树年轮较密的一面朝向（　）方',a:'北',d:['南','东','西']},
+    {q:'燕子秋天从北方飞往（　）方过冬',a:'南',d:['北','东','西']},
+    {q:'晴朗中午，影子一般指向（　）方',a:'北',d:['南','东','西']},
+    {q:'傍晚面对夕阳，左手边是（　）方',a:'南',d:['北','东','西']},
+  ];
+  const it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g3_dir_rel(){
   const items=[
@@ -5774,10 +5802,19 @@ function g3_dir_rel(){
     {q:'太阳从（　）方升起',a:'东',d:['西','南','北']},
     {q:'傍晚，太阳从（　）方落下',a:'西',d:['东','南','北']},
     {q:'树的年轮较疏的一面向着（　）方',a:'南',d:['北','东','西']},
+    {q:'面向南，右面是（　）方向',a:'西',d:['东','南','北']},
+    {q:('背对北站立，面前是（　）方'),a:'南',d:['北','东','西']},
   ];
   const it=pick(items); return mc(it.q,it.a,it.d);
 }
-function g3_direction(){ return pick([g3_dir_compass,g3_dir_rose,g3_dir_map,g3_dir_rel])(); }
+let _g3dirLast='';
+function g3_direction(){
+  let q, tries=0;
+  do { q = pick([g3_dir_compass,g3_dir_rose,g3_dir_map,g3_dir_scene,g3_dir_rel])(); tries++; }
+  while (q.question === _g3dirLast && tries < 6);
+  _g3dirLast = q.question;
+  return q;
+}
 function g3_div(){let a=ri(200,800),b=ri(2,9);if(a%b!==0)a+=b-a%b;return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1])}
 function g3_mul2(){let a=ri(15,50),b=ri(15,30);return mc(`${a}×${b}=？`,a*b,[a*b-5,a*b+5])}
 function g3_area(){
