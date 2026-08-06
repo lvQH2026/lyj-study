@@ -27,6 +27,18 @@
    .unit-item / .unit-number / .unit-info / .unit-name / .unit-meta / .unit-arrow
    等均由 style.css 定义），仅在英语专属元素上做作用域补充，避免双份定义漂移。 */
 
+/* 单元列表左侧序号圆形图标（仅英语板块作用域）：藏蓝→墨蓝哑光渐变 + 极淡弥散阴影 + 纯白纤细数字，
+   低调轻奢商务风；卡片结构 / 圆角 / 字体 / 布局全部沿用 style.css 原样，不做任何改动。
+   仅覆盖 background / color / 字号字重 / 字距 / 阴影，width·height·border-radius·flex 等保持原定义。 */
+#englishRoot .unit-number {
+  background: linear-gradient(140deg, #35496E 0%, #1C2A47 100%);
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: .6px;
+  box-shadow: 0 4px 14px rgba(18,28,52,.16), 0 1px 2px rgba(18,28,52,.10);
+}
+
 /* 顶部导航（下移 48px，避让顶部「数学｜英语」切换条；渐变与数学一致） */
 #englishRoot .navbar {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));

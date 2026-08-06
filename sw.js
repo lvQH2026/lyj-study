@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v12：位置与方向图形补全箭头头部——新增 svgArrow(线段+三角箭头)，方向标指针/地图北箭头/两地连线均带箭头
-const CACHE = 'lyj-shell-v12';
+// v13：英语板块单元列表左侧序号圆形图标改藏蓝墨蓝哑光渐变 + 极淡弥散阴影 + 纯白纤细数字（仅作用域 english.css，其余元素不变）
+const CACHE = 'lyj-shell-v13';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
