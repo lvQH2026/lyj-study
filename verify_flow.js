@@ -65,7 +65,7 @@ if (mathQuizOK) {
   const card = $('questionCard');
   ok('数学：题面已渲染（#questionCard）', !!card && card.textContent.trim().length > 0,
     card ? card.textContent.trim().slice(0, 40).replace(/\s+/g, ' ') : 'no #questionCard');
-  ok('数学：进度条已更新', ($('quizProgress') || {}).textContent === '第 1 / 30 题',
+  ok('数学：进度条已更新', ($('quizProgress') || {}).textContent === '第 1 / ' + S().quizQuestions.length + ' 题',
     ($('quizProgress') || {}).textContent);
 
   // 完整答完一整套（全部故意答错）→ finishQuiz 时批量入库
@@ -92,9 +92,9 @@ if (mathQuizOK) {
       answered++;
       w.submitAnswer();   // 下一题 / 最后一题触发 finishQuiz
     }
-    ok('数学：30 题全部作答无异常', answered === total, answered + '/' + total + (skipped ? '（' + skipped + ' 题无法构造错答）' : ''));
+    ok('数学：整套题全部作答无异常', answered === total, answered + '/' + total + (skipped ? '（' + skipped + ' 题无法构造错答）' : ''));
   } catch (e) {
-    ok('数学：30 题全部作答无异常', false, '第 ' + answered + ' 题：' + e.message);
+    ok('数学：整套题全部作答无异常', false, '第 ' + answered + ' 题：' + e.message);
   }
 
   const afterWrong = w.getWrongBank().length;
@@ -222,7 +222,7 @@ try {
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/main.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v7)', !/lyj-shell-v[3456]/.test(sw) && /lyj-shell-v7/.test(sw));
+ok('SW 版本号已升级 (v8)', !/lyj-shell-v[34567]/.test(sw) && /lyj-shell-v8/.test(sw));
 
 // ============ 四点五、CSS 隔离守卫 ============
 const engCss = fs.readFileSync(path.join(ROOT, 'css', 'english.css'), 'utf8');

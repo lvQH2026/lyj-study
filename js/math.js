@@ -6105,7 +6105,8 @@ let state = {
 // 数据持久化
 // ============================================================
 const STORAGE_KEY = 'math_practice_data';
-const QUIZ_LENGTH = 30; // 每套练习题量
+const QUIZ_LENGTH = 30; // 每套练习题量（快速练习 / 错题重练沿用）
+const UNIT_QUIZ_LENGTH = 20; // 单元 / 专项单元练习：每次随机出 20 题
 
 // ============================================================
 // 巧数三角形（专项30题）—— 由外部归档卷子整合而来
@@ -6708,7 +6709,7 @@ function startSpecialQuiz(grade, sem, idx) {
   state.quizMode = 'unit';
   state.quizTitle = unit.name;
   state.quizQuestions = [];
-  for (let i = 0; i < QUIZ_LENGTH; i++) {
+  for (let i = 0; i < UNIT_QUIZ_LENGTH; i++) {
     state.quizQuestions.push(unit.gen());
   }
   state.quizIndex = 0;
@@ -6807,7 +6808,7 @@ function beginUnitQuiz(idx, grade, sem) {
   state.quizMode = 'unit';
   state.quizTitle = unit.name;
   state.quizQuestions = [];
-  for (let i = 0; i < QUIZ_LENGTH; i++) {
+  for (let i = 0; i < UNIT_QUIZ_LENGTH; i++) {
     state.quizQuestions.push(unit.gen());
   }
   state.quizIndex = 0;

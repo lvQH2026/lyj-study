@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v7：英语各单元练习界面优化——5 步进度条、选择题 A/B/C/D 圆形标签、跟读脉冲指示+得分徽章、完成态结果卡（正确率+星级）
-const CACHE = 'lyj-shell-v7';
+// v8：数学单元/专项练习每次随机出 20 题（UNIT_QUIZ_LENGTH=20）；考试保持实时随机组卷
+const CACHE = 'lyj-shell-v8';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
