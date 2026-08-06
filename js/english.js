@@ -33,29 +33,56 @@ const HY3 = {
 
 /* 发音 / 识别 工具 */
 function speak(text, lang) {
-  if (!('speechSynthesis' in window)) return;
-  try {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang || 'en-US'; u.rate = 0.82; u.pitch = 1;
-    window.speechSynthesis.speak(u);
-  } catch (e) {}
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang || 'en-US'; u.rate = 0.9; u.pitch = 1; u.volume = 1;
+  const fire = () => { try { synth.speak(u); } catch (e) {} };
+  // 移动端修复：cancel 紧跟 speak 会吞掉首个音频；若正在播放则取消后延迟再播
+  if (synth.speaking || synth.pending) {
+    try { synth.cancel(); } catch (e) {}
+    setTimeout(fire, 60);
+  } else {
+    fire();
+  }
+  // iOS Safari：首个音频常需 pause/resume 触发
+  const ua = navigator.userAgent || '';
+  if (/iP(ad|hone|od)/i.test(ua)) {
+    setTimeout(() => { try { synth.pause(); synth.resume(); } catch (e) {} }, 220);
+  }
 }
 function recogSupported() { return ('webkitSpeechRecognition' in window) || ('SpeechRecognition' in window); }
+let _recog = null;
 function startRecog(expected, cb) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { cb({ supported: false }); return; }
-  let r;
-  try { r = new SR(); } catch (e) { cb({ supported: false }); return; }
-  r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 4;
+  // 复用单实例：浏览器全局只允许一个识别会话，复用可避免 "already started"
+  let r = _recog;
+  if (!r) { try { r = new SR(); _recog = r; } catch (e) { cb({ supported: false }); return; } }
+  let done = false;
+  const finish = (res) => { if (done) return; done = true; clearTimeout(safety); cb(res); };
+  r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 5; r.continuous = false;
   r.onresult = (e) => {
     const alts = [];
-    for (let i = 0; i < e.results[0].length; i++) alts.push(e.results[0][i].transcript.toLowerCase().trim());
-    cb({ supported: true, alts });
+    for (let i = 0; i < e.results[0].length; i++) alts.push((e.results[0][i].transcript || '').toLowerCase().trim());
+    finish({ supported: true, alts });
   };
-  r.onerror = (e) => cb({ supported: true, error: e.error });
+  r.onerror = (e) => {
+    const err = e && e.error;
+    if (err === 'no-speech') finish({ supported: true, error: '没听到声音，请再试一次' });
+    else if (err === 'not-allowed' || err === 'service-not-allowed') finish({ supported: true, error: '麦克风权限被拒绝，请在浏览器设置中允许使用麦克风' });
+    else if (err === 'network') finish({ supported: true, error: '网络异常，识别失败' });
+    else if (err === 'aborted') finish({ supported: true, error: '已取消' });
+    else finish({ supported: true, error: err || '识别失败' });
+  };
   r.onend = () => {};
-  try { r.start(); } catch (e) { cb({ supported: false }); }
+  const safety = setTimeout(() => { try { r.stop(); } catch (_) {} finish({ supported: true, error: '识别超时，请再试一次' }); }, 9000);
+  try { r.start(); }
+  catch (e) {
+    // 上次会话未正常结束：先停再试
+    try { r.stop(); } catch (_) {}
+    setTimeout(() => { try { r.start(); } catch (_) { finish({ supported: false }); } }, 120);
+  }
 }
 function scoreRead(alts, expected) {
   expected = expected.toLowerCase().trim();
@@ -188,7 +215,7 @@ function doPhonicsRecog(id) {
     HY3.encourage(95).then(t => note.innerHTML += '<br><span style="color:var(--success)">' + t + '</span>');
     return;
   }
-  note.textContent = '请跟读：' + target + ' …';
+  note.textContent = '🎤 聆听中，请跟读：' + target;
   startRecog(target, (res) => {
     if (!res.supported) { note.textContent = '麦克风不可用'; return; }
     if (res.error) { note.textContent = '识别失败：' + res.error; return; }
@@ -318,7 +345,7 @@ function doIpaRecog(id) {
     HY3.encourage(95).then(t => note.innerHTML += '<br><span style="color:var(--success)">' + t + '</span>');
     return;
   }
-  note.textContent = '请跟读：' + ex + ' …';
+  note.textContent = '🎤 聆听中，请跟读：' + ex;
   startRecog(ex, (res) => {
     if (!res.supported) { note.textContent = '麦克风不可用'; return; }
     if (res.error) { note.textContent = '识别失败：' + res.error; return; }

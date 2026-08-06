@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v3：多文件重构（样式/引擎外置 + 英语模块内置），必须升版本以清理旧缓存
-const CACHE = 'lyj-shell-v3';
+// v4：修复移动端 TTS 发音 / 麦克风识别（english.js speak/startRecog）
+const CACHE = 'lyj-shell-v4';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
