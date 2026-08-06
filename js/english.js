@@ -174,9 +174,9 @@ function renderPhonicsPlayer(ls) {
         '<p class="muted-note">点击「听」逐词听美式发音，可反复听</p>'
         + '<div class="word-list" id="listenList"></div>' },
     { t: '麦克风跟读打分（Hy3 鼓励）', body:
-        '<div id="recogBox" style="text-align:center;padding:8px 0">'
+        '<div id="recogBox" class="recog-box">'
         + '<button class="btn-primary" onclick="doPhonicsRecog(\'' + ls.id + '\')">开始跟读</button>'
-        + '<div class="muted-note" id="recogNote"></div></div>' },
+        + '<div class="recog-note" id="recogNote"></div></div>' },
     { t: '听音辨别选择题', body:
         '<div class="muted-note">听单词，从选项中选出你听到的词（本轮共 10 题，完成后记录正确率）</div>'
         + '<div id="disBox"></div>' },
@@ -186,16 +186,11 @@ function renderPhonicsPlayer(ls) {
   ];
   let html = '<div class="card"><div style="font-weight:700;font-size:16px">' + ls.title + '</div>'
     + '<div class="pill" style="margin-top:6px">' + ls.sub + '</div></div>';
+  html += stepBarHtml(stepDefs);
   stepDefs.forEach((s, i) => {
-    if (i === 3) {
-      html += '<div class="card step' + (i === 0 ? ' active' : '') + '" data-step="' + i + '">'
-        + '<div class="step-title"><span class="step-num">' + (i + 1) + '</span>' + s.t + '</div>'
-        + '<div class="step-wrap" style="margin-top:10px">' + s.body + '</div></div>';
-    } else {
-      html += '<div class="card step' + (i === 0 ? ' active' : '') + '" data-step="' + i + '">'
-        + '<div class="step-title"><span class="step-num">' + (i + 1) + '</span>' + s.t + '</div>'
-        + '<div class="step-wrap" style="margin-top:10px">' + s.body + '</div></div>';
-    }
+    html += '<div class="card step' + (i === 0 ? ' active' : '') + '" data-step="' + i + '">'
+      + '<div class="step-title"><span class="step-num">' + (i + 1) + '</span>' + s.t + '</div>'
+      + '<div class="step-wrap" style="margin-top:10px">' + s.body + '</div></div>';
   });
   html += '<div class="btn-row" style="margin-top:6px">'
     + '<button class="btn-ghost" style="flex:1" onclick="phonicsStep(-1)">上一步</button>'
@@ -204,6 +199,7 @@ function renderPhonicsPlayer(ls) {
   const listen = document.getElementById('listenList');
   words.forEach(w => listen.appendChild(makeWordChip(w)));
   startPhonicsDis(ls);
+  updateStepBar(0);
 }
 function makeWordChip(w) {
   const div = document.createElement('div');
@@ -220,22 +216,48 @@ function phonicsStep(dir) {
   const steps = document.querySelectorAll('#englishRoot .step');
   phStep = Math.max(0, Math.min(steps.length - 1, phStep + dir));
   steps.forEach((s, i) => s.classList.toggle('active', i === phStep));
+  updateStepBar(phStep);
+}
+/* 步骤进度条：生成 stepper 与步骤点（供 Phonics / IPA 共用） */
+function stepBarHtml(defs) {
+  let dots = '<div class="step-dots"><div class="step-dots-fill" id="stepFill" style="width:0%"></div>';
+  defs.forEach((s, i) => {
+    dots += '<div class="step-dot' + (i === 0 ? ' active' : '') + '" data-step="' + i + '" data-title="' + s.t + '"><span>' + (i + 1) + '</span></div>';
+  });
+  dots += '</div>';
+  return '<div class="step-progress">' + dots + '<div class="step-caption" id="stepCaption">第 1 / ' + defs.length + ' 步 · ' + defs[0].t + '</div></div>';
+}
+function updateStepBar(idx) {
+  const dots = document.querySelectorAll('#englishRoot .step-dot');
+  if (!dots.length) return;
+  dots.forEach((d, i) => { d.classList.toggle('active', i === idx); d.classList.toggle('done', i < idx); });
+  const cap = document.getElementById('stepCaption');
+  if (cap) { const t = (dots[idx] && dots[idx].getAttribute('data-title')) || ''; cap.textContent = '第 ' + (idx + 1) + ' / ' + dots.length + ' 步 · ' + t; }
+  const fill = document.getElementById('stepFill');
+  if (fill) { const pct = dots.length > 1 ? idx / (dots.length - 1) * 100 : 0; fill.style.width = pct + '%'; }
+}
+function starsHtml(acc) {
+  const n = acc >= 90 ? 5 : acc >= 80 ? 4 : acc >= 70 ? 3 : acc >= 60 ? 2 : 1;
+  let h = '<div class="lesson-stars">';
+  for (let i = 0; i < 5; i++) h += '<span class="' + (i < n ? 'on' : 'off') + '">★</span>';
+  return h + '</div>';
 }
 function doPhonicsRecog(id) {
   const ls = findPhonics(id); if (!ls) return;
   const target = ls.words[Math.floor(Math.random() * ls.words.length)].w;
   const note = document.getElementById('recogNote');
   if (!recogSupported()) {
-    note.innerHTML = '<span style="color:var(--warning)">当前环境不支持麦克风，已模拟跟读（' + target + '）</span>';
+    note.innerHTML = '<span style="color:var(--warning)">当前环境不支持麦克风，已模拟跟读（<b>' + target + '</b>）</span>';
     HY3.encourage(95).then(t => note.innerHTML += '<br><span style="color:var(--success)">' + t + '</span>');
     return;
   }
-  note.textContent = '🎤 聆听中，请跟读：' + target;
+  note.innerHTML = '<span class="pulse"></span>聆听中，请跟读：<b>' + target + '</b>';
   startRecog(target, (res) => {
     if (!res.supported) { note.textContent = '麦克风不可用'; return; }
     if (res.error) { note.textContent = '识别失败：' + res.error; return; }
     const sc = scoreRead(res.alts, target);
-    HY3.encourage(sc).then(t => note.innerHTML = '得分 ' + sc + ' · ' + t);
+    const cls = sc >= 85 ? 'good' : sc >= 70 ? 'mid' : 'low';
+    HY3.encourage(sc).then(t => note.innerHTML = '<div class="recog-result ' + cls + '"><span class="num">' + sc + '</span><span>分 · ' + t + '</span></div>');
   });
 }
 let phDis = null;
@@ -249,8 +271,12 @@ function renderPhonicsDis() {
   if (phDis.idx >= phDis.total) {
     const acc = Math.round(phDis.correct / phDis.total * 100);
     recordAccuracy('ph_' + phDis.ls.id, phDis.ls.title, phDis.correct, phDis.total);
-    box.innerHTML = '<div class="feedback ok" style="display:block">本轮完成！正确 ' + phDis.correct + ' / ' + phDis.total + '（正确率 ' + acc + '%）</div>'
-      + '<button class="btn-ghost" style="width:100%;margin-top:10px" onclick="switchMain(\'progress\')">查看学习进度</button>';
+    box.innerHTML = '<div class="lesson-done">'
+      + '<div class="big">' + acc + '%</div>'
+      + '<div class="sub">本轮完成 · 正确 ' + phDis.correct + ' / ' + phDis.total + '</div>'
+      + starsHtml(acc)
+      + '<button class="btn-primary" style="width:100%;margin-top:14px" onclick="switchMain(\'progress\')">查看学习进度</button>'
+      + '<button class="btn-ghost" style="width:100%;margin-top:10px" onclick="switchMain(\'wrong\')">查看错题本</button></div>';
     return;
   }
   const target = phDis.queue[phDis.idx];
@@ -261,9 +287,10 @@ function renderPhonicsDis() {
     + '<div id="optWrap"></div>'
     + '<div id="disFeedback" class="feedback" style="display:none"></div>';
   const wrap = box.querySelector('#optWrap');
-  opts.forEach(o => {
+  opts.forEach((o, i) => {
     const b = document.createElement('button');
-    b.className = 'option-btn'; b.textContent = o.toLowerCase();
+    b.className = 'option-btn';
+    b.innerHTML = '<span class="opt-label">' + ['A', 'B', 'C', 'D'][i] + '</span><span class="opt-val">' + o.toLowerCase() + '</span>';
     b.onclick = () => {
       const fb = box.querySelector('#disFeedback');
       if (o === target) {
@@ -276,9 +303,7 @@ function renderPhonicsDis() {
         b.classList.add('wrong');
         fb.className = 'feedback no'; fb.style.display = 'block';
         fb.textContent = '正确答案：' + target.toLowerCase();
-        HY3.explain({ answer: target.toLowerCase(), hint: phDis.ls.tip }).then(t => {
-          fb.innerHTML = '答错了 · ' + t;
-        });
+        HY3.explain({ answer: target.toLowerCase(), hint: phDis.ls.tip }).then(t => { fb.innerHTML = '答错了 · ' + t; });
         addWrong({ module: '自然拼读', lesson: phDis.ls.title, prompt: '听音辨词', answer: target.toLowerCase(), your: o.toLowerCase() });
         setTimeout(() => { phDis.idx++; renderPhonicsDis(); }, 1400);
       }
@@ -318,11 +343,12 @@ function renderIpaPlayer(ls) {
   const stepDefs = [
     { t: '看符号 + 文字发音要领', body: '<div id="ipaSymBox"></div>' },
     { t: '听标准发音', body: '<p class="muted-note">点击播放该音标的例词（美式）</p><div id="ipaListen" class="word-list"></div>' },
-    { t: '麦克风跟读打分（Hy3 鼓励）', body: '<div id="ipaRecog" style="text-align:center;padding:8px 0"><button class="btn-primary" onclick="doIpaRecog(\'' + ls.id + '\')">开始跟读</button><div class="muted-note" id="ipaRecogNote"></div></div>' },
+    { t: '麦克风跟读打分（Hy3 鼓励）', body: '<div id="ipaRecog" class="recog-box"><button class="btn-primary" onclick="doIpaRecog(\'' + ls.id + '\')">开始跟读</button><div class="recog-note" id="ipaRecogNote"></div></div>' },
     { t: '听音辨别选择题', body: '<div id="ipaDis"></div>' },
     { t: '错题自动入错题库（Hy3 讲解）', body: '<p class="muted-note">答错自动记录，讲解由 Hy3 生成（无密钥降级）。</p><button class="btn-ghost" style="width:100%" onclick="switchMain(\'wrong\')">查看错题本</button>' }
   ];
   let html = '<div class="card"><div style="font-weight:700;font-size:16px">' + ls.title + '</div><div class="pill" style="margin-top:6px">' + ls.sub + '</div></div>';
+  html += stepBarHtml(stepDefs);
   stepDefs.forEach((s, i) => {
     html += '<div class="card step' + (i === 0 ? ' active' : '') + '" data-step="' + i + '"><div class="step-title"><span class="step-num">' + (i + 1) + '</span>' + s.t + '</div><div class="step-wrap" style="margin-top:10px">' + s.body + '</div></div>';
   });
@@ -344,13 +370,15 @@ function renderIpaPlayer(ls) {
     b.onclick = () => speak(ex || p.sym.replace(/[\/]/g, ''));
     c.appendChild(b); listen.appendChild(c);
   });
-  renderIpaDis(ls, 0);
+  startIpaDis(ls);
+  updateStepBar(0);
 }
 let ipaStepIdx = 0;
 function ipaStep(dir) {
   const steps = document.querySelectorAll('#englishRoot .step');
   ipaStepIdx = Math.max(0, Math.min(steps.length - 1, ipaStepIdx + dir));
   steps.forEach((s, i) => s.classList.toggle('active', i === ipaStepIdx));
+  updateStepBar(ipaStepIdx);
 }
 function doIpaRecog(id) {
   const ls = DATA.ipa.lessons.find(x => x.id === id); if (!ls) return;
@@ -358,40 +386,62 @@ function doIpaRecog(id) {
   const m = p.tip.match(/如\s*([a-zA-Z]+)/); const ex = m ? m[1] : p.sym.replace(/[\/]/g, '');
   const note = document.getElementById('ipaRecogNote');
   if (!recogSupported()) {
-    note.innerHTML = '<span style="color:var(--warning)">当前环境不支持麦克风，已模拟跟读（' + ex + '）</span>';
+    note.innerHTML = '<span style="color:var(--warning)">当前环境不支持麦克风，已模拟跟读（<b>' + ex + '</b>）</span>';
     HY3.encourage(95).then(t => note.innerHTML += '<br><span style="color:var(--success)">' + t + '</span>');
     return;
   }
-  note.textContent = '🎤 聆听中，请跟读：' + ex;
+  note.innerHTML = '<span class="pulse"></span>聆听中，请跟读：<b>' + ex + '</b>';
   startRecog(ex, (res) => {
     if (!res.supported) { note.textContent = '麦克风不可用'; return; }
     if (res.error) { note.textContent = '识别失败：' + res.error; return; }
     const sc = scoreRead(res.alts, ex);
-    HY3.encourage(sc).then(t => note.innerHTML = '得分 ' + sc + ' · ' + t);
+    const cls = sc >= 85 ? 'good' : sc >= 70 ? 'mid' : 'low';
+    HY3.encourage(sc).then(t => note.innerHTML = '<div class="recog-result ' + cls + '"><span class="num">' + sc + '</span><span>分 · ' + t + '</span></div>');
   });
 }
-function renderIpaDis(ls, idx) {
+let ipaDis = null;
+function startIpaDis(ls) {
+  const q = shuffle(ls.phonemes.map(p => p.sym)).slice(0, Math.min(ls.phonemes.length, 8));
+  ipaDis = { ls, queue: q, idx: 0, correct: 0, total: q.length };
+  renderIpaDis();
+}
+function renderIpaDis() {
   const box = document.getElementById('ipaDis'); if (!box) return;
-  const phs = ls.phonemes;
-  const target = phs[idx % phs.length];
+  if (ipaDis.idx >= ipaDis.total) {
+    const acc = Math.round(ipaDis.correct / ipaDis.total * 100);
+    recordAccuracy('ip_' + ipaDis.ls.id, ipaDis.ls.title, ipaDis.correct, ipaDis.total);
+    box.innerHTML = '<div class="lesson-done">'
+      + '<div class="big">' + acc + '%</div>'
+      + '<div class="sub">本轮完成 · 正确 ' + ipaDis.correct + ' / ' + ipaDis.total + '</div>'
+      + starsHtml(acc)
+      + '<button class="btn-primary" style="width:100%;margin-top:14px" onclick="switchMain(\'progress\')">查看学习进度</button>'
+      + '<button class="btn-ghost" style="width:100%;margin-top:10px" onclick="switchMain(\'wrong\')">查看错题本</button></div>';
+    return;
+  }
+  const targetSym = ipaDis.queue[ipaDis.idx];
+  const target = ipaDis.ls.phonemes.find(p => p.sym === targetSym);
   const m = target.tip.match(/如\s*([a-zA-Z]+)/); const ex = m ? m[1] : target.sym.replace(/[\/]/g, '');
-  const others = shuffle(phs.filter(p => p !== target)).slice(0, 3);
+  const others = shuffle(ipaDis.ls.phonemes.filter(p => p.sym !== targetSym)).slice(0, 3);
   const opts = shuffle([target].concat(others));
-  box.innerHTML = '<p class="muted-note">第 ' + (idx + 1) + ' 题 · 播放例词，选出对应音标</p>'
+  box.innerHTML = '<p class="muted-note">第 ' + (ipaDis.idx + 1) + ' / ' + ipaDis.total + ' 题 · 播放例词，选出对应音标</p>'
     + '<button class="btn-primary" style="width:100%;margin:8px 0" onclick="speak(\'' + ex + '\')">▶ 播放例词</button>'
     + '<div id="optWrap"></div><div id="ipaFb" class="feedback" style="display:none"></div>';
   const wrap = box.querySelector('#optWrap');
-  opts.forEach(o => {
-    const b = document.createElement('button'); b.className = 'option-btn'; b.textContent = o.sym;
+  opts.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'option-btn';
+    b.innerHTML = '<span class="opt-label">' + ['A', 'B', 'C', 'D'][i] + '</span><span class="opt-val">' + o.sym + '</span>';
     b.onclick = () => {
       const fb = box.querySelector('#ipaFb');
-      if (o === target) {
+      if (o.sym === targetSym) {
         b.classList.add('correct'); fb.className = 'feedback ok'; fb.style.display = 'block'; fb.textContent = '答对了！';
-        if (idx + 1 < phs.length) setTimeout(() => renderIpaDis(ls, idx + 1), 700);
+        ipaDis.correct++;
+        setTimeout(() => { ipaDis.idx++; renderIpaDis(); }, 650);
       } else {
-        b.classList.add('wrong'); fb.className = 'feedback no'; fb.style.display = 'block'; fb.textContent = '正确答案：' + target.sym;
-        HY3.explain({ answer: target.sym, hint: target.tip }).then(t => fb.innerHTML = '答错了 · ' + t);
-        addWrong({ module: '国际音标', lesson: ls.title, prompt: '听音辨音标', answer: target.sym, your: o.sym });
+        b.classList.add('wrong'); fb.className = 'feedback no'; fb.style.display = 'block'; fb.textContent = '正确答案：' + targetSym;
+        HY3.explain({ answer: targetSym, hint: target.tip }).then(t => { fb.innerHTML = '答错了 · ' + t; });
+        addWrong({ module: '国际音标', lesson: ipaDis.ls.title, prompt: '听音辨音标', answer: targetSym, your: o.sym });
+        setTimeout(() => { ipaDis.idx++; renderIpaDis(); }, 1400);
       }
     };
     wrap.appendChild(b);

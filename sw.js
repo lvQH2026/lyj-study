@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v6：英语板块 UI 对齐数学（令牌/组件统一），首页课程列表改 unit-item 行样式，TTS 语速降至 0.7
-const CACHE = 'lyj-shell-v6';
+// v7：英语各单元练习界面优化——5 步进度条、选择题 A/B/C/D 圆形标签、跟读脉冲指示+得分徽章、完成态结果卡（正确率+星级）
+const CACHE = 'lyj-shell-v7';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

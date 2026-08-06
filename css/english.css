@@ -92,10 +92,15 @@
 #englishRoot .icon-btn:active { transform: scale(.92); }
 
 /* 注意：.option-btn / .feedback / .wrong-item 数学模块同名在用，必须作用域到 #englishRoot，否则会覆盖数学答题页样式 */
-#englishRoot .option-btn { display: block; width: 100%; text-align: left; padding: 13px 16px; margin-bottom: 10px; border: 1.5px solid var(--border); border-radius: 12px; background: #fff; font-size: 16px; font-weight: 600; color: var(--text); cursor: pointer; transition: border-color .15s, background .15s; }
-#englishRoot .option-btn:active { border-color: var(--primary-light); }
+/* 选择题选项：对齐数学 .option-btn（flex 居中 + 圆形 A/B/C/D 标签） */
+#englishRoot .option-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; text-align: center; padding: 14px 16px; margin-bottom: 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: #fff; font-size: 17px; font-weight: 600; color: var(--text); cursor: pointer; box-shadow: var(--shadow-sm); transition: all .18s ease; }
+#englishRoot .option-btn:active { transform: scale(.98); }
 #englishRoot .option-btn.correct { border-color: var(--success); background: rgba(47,179,126,.10); color: var(--success); }
 #englishRoot .option-btn.wrong { border-color: var(--accent); background: rgba(247,110,110,.08); color: var(--accent); }
+#englishRoot .opt-label { width: 26px; height: 26px; border-radius: 50%; background: var(--bg); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--text-lighter); flex-shrink: 0; }
+#englishRoot .option-btn.correct .opt-label { background: var(--success); color: #fff; }
+#englishRoot .option-btn.wrong .opt-label { background: var(--accent); color: #fff; }
+#englishRoot .opt-val { flex: 1; text-align: center; }
 #englishRoot .feedback { margin-top: 10px; font-size: 14px; padding: 10px 12px; border-radius: 10px; }
 #englishRoot .feedback.ok { background: rgba(47,179,126,.10); color: var(--success); }
 #englishRoot .feedback.no { background: rgba(247,110,110,.08); color: var(--accent); }
@@ -108,3 +113,33 @@
 #englishRoot .wrong-item .w-ans { font-size: 13px; color: var(--accent); }
 #englishRoot .empty { text-align: center; padding: 40px 16px; color: var(--text-lighter); }
 #englishRoot .hidden { display: none !important; }
+
+/* 步骤进度条（5 步闭环可视化）——全部选择器作用域到 #englishRoot */
+#englishRoot .step-progress { margin: 2px 0 14px; }
+#englishRoot .step-dots { display: flex; justify-content: space-between; position: relative; margin-bottom: 8px; }
+#englishRoot .step-dots::before { content: ''; position: absolute; top: 13px; left: 13px; right: 13px; height: 2px; background: var(--border); z-index: 0; }
+#englishRoot .step-dots-fill { position: absolute; top: 13px; left: 13px; height: 2px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); z-index: 0; transition: width .3s ease; }
+#englishRoot .step-dot { flex: 1; display: flex; justify-content: center; position: relative; z-index: 1; }
+#englishRoot .step-dot span { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2px solid var(--border); color: var(--text-lighter); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all .25s; }
+#englishRoot .step-dot.active span { background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgba(59,111,224,.30); transform: scale(1.08); }
+#englishRoot .step-dot.done span { background: var(--success); border-color: transparent; color: #fff; }
+#englishRoot .step-caption { text-align: center; font-size: 13px; color: var(--text-light); font-weight: 600; }
+
+/* 跟读打分 */
+#englishRoot .recog-box { text-align: center; padding: 10px 0; }
+#englishRoot .recog-note { font-size: 13px; color: var(--text-light); margin-top: 10px; line-height: 1.5; }
+#englishRoot .pulse { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: middle; animation: engPulse 1s infinite; }
+@keyframes engPulse { 0%{opacity:.4; transform:scale(.8);} 50%{opacity:1; transform:scale(1.25);} 100%{opacity:.4; transform:scale(.8);} }
+#englishRoot .recog-result { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 9px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+#englishRoot .recog-result .num { font-size: 20px; font-weight: 800; }
+#englishRoot .recog-result.good { background: rgba(47,179,126,.12); color: var(--success); }
+#englishRoot .recog-result.mid { background: rgba(242,163,60,.14); color: var(--warning); }
+#englishRoot .recog-result.low { background: rgba(247,110,110,.12); color: var(--accent); }
+
+/* 完成态结果卡片（正确率 + 星级评价） */
+#englishRoot .lesson-done { text-align: center; padding: 28px 16px; }
+#englishRoot .lesson-done .big { font-size: 46px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+#englishRoot .lesson-done .sub { font-size: 14px; color: var(--text-light); margin-top: 6px; }
+#englishRoot .lesson-stars { font-size: 26px; letter-spacing: 4px; margin: 10px 0; }
+#englishRoot .lesson-stars .on { color: var(--warning); }
+#englishRoot .lesson-stars .off { color: var(--border); }
