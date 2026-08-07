@@ -5859,9 +5859,9 @@ function g_app_area(){
 }
 function g_shape_angle_calc(){
   let items=[
-    {s:svgAngle(45,true),q:'这个角是什么角？',a:'锐角',d:['直角','钝角','平角']},
-    {s:svgAngle(90,true),q:'这个角是什么角？',a:'直角',d:['锐角','钝角','平角']},
-    {s:svgAngle(135,true),q:'这个角是什么角？',a:'钝角',d:['锐角','直角','平角']},
+    {s:svgAngle(45),q:'这个角是什么角？',a:'锐角',d:['直角','钝角','平角']},
+    {s:svgAngle(90),q:'这个角是什么角？',a:'直角',d:['锐角','钝角','平角']},
+    {s:svgAngle(135),q:'这个角是什么角？',a:'钝角',d:['锐角','直角','平角']},
   ];
   let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }

@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v16：英语单元列表序号图标移除深色覆盖，直接继承基础 .unit-number，与数学单元列表图标完全一致（蓝紫渐变）
-const CACHE = 'lyj-shell-v16';
+// v17：修复图形泄题——角度计算单元(g_shape_angle_calc)不再把度数画在角上；全量图形审计无度数泄露
+const CACHE = 'lyj-shell-v17';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
