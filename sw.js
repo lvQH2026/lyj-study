@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v17：修复图形泄题——角度计算单元(g_shape_angle_calc)不再把度数画在角上；全量图形审计无度数泄露
-const CACHE = 'lyj-shell-v17';
+// v18：修复角度图形与题目不符——svgAngle 改用正确几何(角从水平向右逆时针张开 deg 度)，并叠加量角器刻度与数字供读数
+const CACHE = 'lyj-shell-v18';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

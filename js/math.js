@@ -5524,11 +5524,32 @@ function svgClock(h,m){
   s+=`<circle cx="60" cy="60" r="3" fill="#333"/>`;
   return s;
 }
+// 半圆量角器：0° 在右、90° 在上、180° 在左，带刻度与数字
+function svgProtractor(cx, cy, R){
+  let s = `<path d="M ${cx-R} ${cy} A ${R} ${R} 0 0 1 ${cx+R} ${cy}" fill="rgba(180,148,90,0.06)" stroke="#B4945A" stroke-width="1.5"/>`;
+  s += `<line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="#B4945A" stroke-width="1"/>`;
+  for(let d=0; d<=180; d+=5){
+    let a = Math.PI*d/180, major=(d%10===0);
+    let r1=R, r2=R-(major?9:4);
+    s += `<line x1="${(cx+r1*Math.cos(a)).toFixed(1)}" y1="${(cy-r1*Math.sin(a)).toFixed(1)}" x2="${(cx+r2*Math.cos(a)).toFixed(1)}" y2="${(cy-r2*Math.sin(a)).toFixed(1)}" stroke="#B4945A" stroke-width="${major?1.1:0.6}"/>`;
+    if(d%30===0){
+      let rt=R-16;
+      s += `<text x="${(cx+rt*Math.cos(a)).toFixed(1)}" y="${(cy-rt*Math.sin(a)+2.6).toFixed(1)}" text-anchor="middle" font-size="8" fill="#3E4A63">${d}</text>`;
+    }
+  }
+  return s;
+}
+// 正确的角：从水平向右的射线起，逆时针（向上）张开 deg 度，并叠加量角器供读数
 function svgAngle(deg, showDeg){
-  let r=35, rad=Math.PI*(180-deg)/180, ex=60+r*Math.cos(rad), ey=60-r*Math.sin(rad);
-  let s=svgL(60,60,60+r,60)+svgL(60,60,ex,ey);
-  for(let i=0;i<=15;i++){let a=Math.PI*(180-(deg*i/15))/180; s+=`<line x1="${60+10*Math.cos(a)}" y1="${60-10*Math.sin(a)}" x2="${60+10*Math.cos(a+Math.PI*deg/15/180)}" y2="${60-10*Math.sin(a+Math.PI*deg/15/180)}" stroke="#E57373" stroke-width="1"/>`}
-  if (showDeg) s+=svgTxt(43,50,deg+'°',11,'#E57373');
+  let cx=60, cy=72, R=44, r=34;
+  let s = svgProtractor(cx, cy, R);
+  let a = Math.PI*deg/180, ex = cx + r*Math.cos(a), ey = cy - r*Math.sin(a);
+  s += `<line x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s += `<line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s += `<circle cx="${cx}" cy="${cy}" r="2.4" fill="#3E4A63"/>`;
+  let ar=r*0.5, pts=[];
+  for(let k=0;k<=10;k++){let dd=deg*k/10, aa=Math.PI*dd/180; pts.push(`${(cx+ar*Math.cos(aa)).toFixed(1)},${(cy-ar*Math.sin(aa)).toFixed(1)}`);}
+  s += `<polyline points="${pts.join(' ')}" fill="none" stroke="#E57373" stroke-width="1.3"/>`;
   return s;
 }
 function svgRuler(){let s='';for(let i=0;i<=10;i++){let h=(i%5==0)?10:5;s+=`<line x1="${5+i*11}" y1="35" x2="${5+i*11}" y2="${35-h}" stroke="#333" stroke-width="1"/>`;if(i%2==0)s+=svgTxt(5+i*11,48,i,8)} return svgR(2,30,115,30,'#fff',1)+s;}
