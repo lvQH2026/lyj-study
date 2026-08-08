@@ -5411,7 +5411,7 @@ const KNOWLEDGE_BASE = {
       { name: '多位数乘一位数', type: 'basic', gen: g3_mul },
       { name: '分数的初步认识', type: 'basic', gen: g3_fraction },
       { name: '长方形和正方形', type: 'shape', gen: g3_rect },
-      { name: '周长应用题', type: 'application', gen: g_app_area },
+      { name: '周长应用题', type: 'application', gen: g_app_perimeter },
       { name: '时间计算', type: 'application', gen: g_app_time },
     ],
     2: [
@@ -6970,7 +6970,19 @@ function g6_review(){
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
-function g_app_ratio(){let x=ri(3,12);return mc(`3:4=x:${x*4/3}, x=？`,x,[x-1,x+2,x*2])}
+// 周长应用题（三上）：长方形的周长 = (长+宽)×2，标签与内容一致
+function g_app_perimeter(){
+  let w=ri(4,15), h=ri(3,12);
+  let W=Math.min(w*9,90), H=Math.max(h*8,28);
+  return msc(`一个长方形花坛长${w}米、宽${h}米，沿着它的边走一圈是多少米？（求周长）`,
+    svgR(12,16,W,H,'#BBDEFB')+svgTxt(12+W/2,10,w+'米',9)+svgTxt(4,16+H/2,h+'米',9),
+    String(2*(w+h)),[String(w+h),String(w*h),String(2*(w+h)-1)]);
+}
+function g_app_ratio(){
+  const ratios=[[2,3],[3,4],[3,5],[4,5],[2,5],[5,6]];
+  let [a,b]=pick(ratios), k=ri(2,9), c=b*k, x=a*k;
+  return mc(`${a}:${b} = x:${c}，x=？`, x, [x-1, x+1, x+2]);
+}
 function g_app_chicken_rabbit(){
   let heads=ri(8,15),r=ri(1,heads-2),c=heads-r,feet=r*4+c*2;
   return mc(`鸡兔同笼，共${heads}个头${feet}只脚，兔有几只？`,r,[c,r+1,heads-r+1]);

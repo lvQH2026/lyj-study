@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v23：修复角度计算题目空白——beginUnitQuiz 兼容 gen 返回整组数组（角度计算一次抽20题），不再把数组当单题 push
-const CACHE = 'lyj-shell-v23';
+// v24：修复两处题目瑕疵——三上「周长应用题」改为真出周长题(g_app_perimeter)；六上「比例应用题」用整数倍 a:b=ak:bk 杜绝小数
+const CACHE = 'lyj-shell-v24';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
