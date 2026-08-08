@@ -4,6 +4,62 @@
 // ============================================================
 const ANGLE_METHOD_IMG = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><rect width="320" height="160" fill="#F7F6F2"/><text x="16" y="28" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3E4A63">量角三步法</text><g transform="translate(70,100)"><path d="M -50 0 A 50 50 0 0 1 50 0" fill="rgba(180,148,90,0.10)" stroke="#B4945A" stroke-width="1.5"/><line x1="-50" y1="0" x2="50" y2="0" stroke="#B4945A" stroke-width="1"/><line x1="0" y1="0" x2="50" y2="0" stroke="#3E4A63" stroke-width="2.4"/><line x1="0" y1="0" x2="35" y2="-35" stroke="#3E4A63" stroke-width="2.4"/><circle cx="0" cy="0" r="2.6" fill="#3E4A63"/><text x="-8" y="-40" font-size="10" fill="#B4945A">45°</text></g><text x="140" y="58" font-family="sans-serif" font-size="11" fill="#3E4A63">① 中心点对齐顶点</text><text x="140" y="84" font-family="sans-serif" font-size="11" fill="#3E4A63">② 0°刻度线对齐一边</text><text x="140" y="110" font-family="sans-serif" font-size="11" fill="#3E4A63">③ 看另一边读刻度</text></svg>`);
 
+const SHAPE_METHOD_IMG = 'data:image/svg+xml,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="440"><rect width="360" height="440" fill="#F7F6F2"/>`
+  +`<text x="18" y="26" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3E4A63">图形认知三要素</text>`
+  +`<text x="18" y="52" font-family="sans-serif" font-size="11" fill="#5C6370">—— 从「看线条」到「读角度」再到「找关系」</text>`
+  // 线段/射线/直线
+  +`<text x="18" y="82" font-family="sans-serif" font-size="13" font-weight="bold" fill="#B4945A">一、线段 · 射线 · 直线</text>`
+  +`<line x1="18" y1="108" x2="78" y2="108" stroke="#3E4A63" stroke-width="3" stroke-linecap="round"/><circle cx="18" cy="108" r="3" fill="#3E4A63"/><circle cx="78" cy="108" r="3" fill="#3E4A63"/>`
+  +`<text x="90" y="112" font-size="11" fill="#3E4A63">线段：2个端点</text>`
+  +`<circle cx="18" cy="132" r="3" fill="#3E4A63"/><line x1="18" y1="132" x2="78" y2="132" stroke="#E57373" stroke-width="3" stroke-linecap="round"/>`
+  +`<polygon points="78,132 70,128 70,136" fill="#E57373"/>`
+  +`<text x="90" y="136" font-size="11" fill="#E57373">射线：1个端点</text>`
+  +`<line x1="18" y1="158" x2="78" y2="158" stroke="#3E4A63" stroke-width="3" stroke-linecap="round"/>`
+  +`<text x="90" y="162" font-size="11" fill="#3E4A63">直线：0个端点</text>`
+  // 角的基本结构
+  +`<text x="18" y="190" font-family="sans-serif" font-size="13" font-weight="bold" fill="#B4945A">二、角的结构</text>`
+  +`<line x1="30" y1="230" x2="70" y2="230" stroke="#3E4A63" stroke-width="2.5"/>`
+  +`<line x1="30" y1="230" x2="54" y2="194" stroke="#3E4A63" stroke-width="2.5"/>`
+  +`<circle cx="30" cy="230" r="2.5" fill="#E57373"/>`
+  +`<text x="18" y="250" font-size="10" fill="#E57373">← 顶点</text>`
+  +`<text x="58" y="244" font-size="10" fill="#3E4A63">↑ 边</text>`
+  +`<text x="78" y="216" font-size="10" fill="#3E4A63">← 边</text>`
+  // 五类角
+  +`<text x="18" y="278" font-family="sans-serif" font-size="13" font-weight="bold" fill="#B4945A">三、角的五种类型</text>`
+  +`<g transform="translate(8,286)">`
+  +`<line x1="10" y1="28" x2="48" y2="28" stroke="#3E4A63" stroke-width="2"/>`
+  +`<line x1="10" y1="28" x2="42" y2="6" stroke="#3E4A63" stroke-width="2"/>`
+  +`<text x="28" y="46" font-size="9" fill="#4E8C6E" text-anchor="middle">锐角&lt;90°</text>`
+  +`</g>`
+  +`<g transform="translate(80,286)">`
+  +`<line x1="10" y1="28" x2="48" y2="28" stroke="#3E4A63" stroke-width="2"/>`
+  +`<line x1="10" y1="28" x2="10" y2="0" stroke="#E57373" stroke-width="2"/>`
+  +`<rect x="14" y="24" width="6" height="6" fill="none" stroke="#E57373" stroke-width="1"/>`
+  +`<text x="28" y="46" font-size="9" fill="#E57373" text-anchor="middle">直角=90°</text>`
+  +`</g>`
+  +`<g transform="translate(152,286)">`
+  +`<line x1="10" y1="28" x2="48" y2="28" stroke="#3E4A63" stroke-width="2"/>`
+  +`<line x1="10" y1="28" x2="4" y2="2" stroke="#3E4A63" stroke-width="2"/>`
+  +`<text x="28" y="46" font-size="9" fill="#C08A3E" text-anchor="middle">钝角&gt;90°</text>`
+  +`</g>`
+  +`<g transform="translate(224,286)">`
+  +`<line x1="10" y1="28" x2="48" y2="28" stroke="#3E4A63" stroke-width="2"/>`
+  +`<line x1="10" y1="28" x2="-8" y2="28" stroke="#3E4A63" stroke-width="2"/>`
+  +`<text x="28" y="46" font-size="9" fill="#6B7894" text-anchor="middle">平角=180°</text>`
+  +`</g>`
+  +`<g transform="translate(290,286)">`
+  +`<circle cx="28" cy="28" r="28" fill="none" stroke="#3E4A63" stroke-width="2"/>`
+  +`<line x1="28" y1="28" x2="56" y2="28" stroke="#3E4A63" stroke-width="2"/>`
+  +`<text x="28" y="68" font-size="9" fill="#3E4A63" text-anchor="middle">周角=360°</text>`
+  +`</g>`
+  // 角度关系
+  +`<text x="18" y="372" font-family="sans-serif" font-size="13" font-weight="bold" fill="#B4945A">四、角的关系</text>`
+  +`<text x="18" y="396" font-size="11" fill="#3E4A63">对顶角：相等（∠1=∠3, ∠2=∠4）</text>`
+  +`<text x="18" y="416" font-size="11" fill="#3E4A63">互补角：和=180°（平角）</text>`
+  +`<text x="18" y="436" font-size="11" fill="#3E4A63">互余角：和=90°（直角）</text>`
+  +`</svg>`
+);
 const TRIANGLE_METHOD_IMG = 'data:image/png;base64,' +
   'iVBORw0KGgoAAAANSUhEUgAAAqUAAAOgCAIAAACLAJhiAAAQAElEQVR4AexdBWAVx9Y+Z3avx3F3pxSHGqWlQt39ta/2v7q7u9t7dXelpW7UaQulRYp7QgJx' +
   '96u783+zm1xCSCCBJCQ00++ee+bMmTNnzszO2d2bxxOdB09KHLxvq8R+iYOnWNjfojbfKmjSkKmtH4lDpiY0EWAqaegB9eDApKHT/mnoMOygdrRHoGUi0Aou' +
@@ -5380,6 +5436,7 @@ const KNOWLEDGE_BASE = {
       { name: '行程应用题', type: 'application', gen: g_app_speed },
       { name: '角度计算', type: 'shape', gen: g_shape_angle_calc },
       { name: '专项·角的度量', type: 'shape', gen: g4_angle_special, paper: true, introImg: ANGLE_METHOD_IMG },
+      { name: '专项·图形认知', type: 'shape', gen: g4_shape_recognize, paper: true, introImg: SHAPE_METHOD_IMG, interactiveIntro: true },
     ],
     2: [
       { name: '四则运算', type: 'basic', gen: g4_mixed },
@@ -5754,6 +5811,311 @@ function mkJudge(q, ans, section, score){
   if(section){ o.sectionTitle=section; o.score=score; }
   return o;
 }
+// ===== 专项·图形认知：SVG 配图 + 看图说关系 + 折纸模拟 =====
+// 线段图形：两个端点+线段，端点实心圆
+function svgSegment(){
+  let s='';
+  s+=`<circle cx="24" cy="50" r="3" fill="#3E4A63"/>`;
+  s+=`<circle cx="96" cy="50" r="3" fill="#3E4A63"/>`;
+  s+=`<line x1="24" y1="50" x2="96" y2="50" stroke="#3E4A63" stroke-width="2.6" stroke-linecap="round"/>`;
+  s+=svgTxt(24,66,'A',10,'#3E4A63');
+  s+=svgTxt(96,66,'B',10,'#3E4A63');
+  return s;
+}
+// 射线图形
+function svgRayOnly(){
+  let s='';
+  s+=`<circle cx="24" cy="50" r="3" fill="#3E4A63"/>`;
+  s+=`<line x1="24" y1="50" x2="96" y2="50" stroke="#E57373" stroke-width="2.6" stroke-linecap="round"/>`;
+  let ang=Math.atan2(0,1), hl=8, ha=Math.PI/7;
+  let p1x=96-hl*Math.cos(ang-ha), p1y=50-hl*Math.sin(ang-ha);
+  let p2x=96-hl*Math.cos(ang+ha), p2y=50-hl*Math.sin(ang+ha);
+  s+=`<polygon points="96,50 ${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}" fill="#E57373"/>`;
+  s+=svgTxt(24,66,'A',10,'#3E4A63');
+  return s;
+}
+// 直线图形：两端箭头
+function svgLineArrow(){
+  let s='';
+  s+=`<line x1="20" y1="50" x2="100" y2="50" stroke="#3E4A63" stroke-width="2.6" stroke-linecap="round"/>`;
+  // 左箭头
+  let a1=Math.PI,hl=8,ha=Math.PI/7;
+  let p1x=20-hl*Math.cos(a1-ha),p1y=50-hl*Math.sin(a1-ha);
+  let p2x=20-hl*Math.cos(a1+ha),p2y=50-hl*Math.sin(a1+ha);
+  s+=`<polygon points="20,50 ${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}" fill="#3E4A63"/>`;
+  // 右箭头
+  let a2=0;
+  let p3x=100-hl*Math.cos(a2-ha),p3y=50-hl*Math.sin(a2-ha);
+  let p4x=100-hl*Math.cos(a2+ha),p4y=50-hl*Math.sin(a2+ha);
+  s+=`<polygon points="100,50 ${p3x.toFixed(1)},${p3y.toFixed(1)} ${p4x.toFixed(1)},${p4y.toFixed(1)}" fill="#3E4A63"/>`;
+  return s;
+}
+// 角度类型展示（不含度数，让孩子看图辨类型）
+function svgAngleNoLabel(deg){
+  let cx=60,cy=62,r=40;
+  let a=Math.PI*deg/180, ex=cx+r*Math.cos(a), ey=cy-r*Math.sin(a);
+  let s=`<line x1="${cx}" y1="${cy}" x2="${cx+35}" y2="${cy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="2.4" fill="#3E4A63"/>`;
+  // 小弧标记
+  let ar=14,pts=[];
+  for(let k=0;k<=10;k++){let dd=deg*k/10, aa=Math.PI*dd/180; pts.push(`${(cx+ar*Math.cos(aa)).toFixed(1)},${(cy-ar*Math.sin(aa)).toFixed(1)}`);}
+  s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="#E57373" stroke-width="1.5"/>`;
+  s+=svgTxt(cx+4,cy-12,'∠1',12,'#B4945A');
+  return s;
+}
+// 两直线相交，不标度数（看图说关系）
+function svgTwoLinesNoNum(a){
+  a=a||55;
+  let Vx=60,Vy=52,len=40;
+  let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  let rad=a*Math.PI/180;
+  let x1=Vx-len*Math.cos(rad), y1=Vy+len*Math.sin(rad);
+  let x2=Vx+len*Math.cos(rad), y2=Vy-len*Math.sin(rad);
+  s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx+14,Vy-12,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx-14,Vy-12,'∠2',11,'#B4945A');
+  s+=svgTxt(Vx+14,Vy+16,'∠3',11,'#B4945A');
+  s+=svgTxt(Vx-14,Vy+16,'∠4',11,'#B4945A');
+  return s;
+}
+// 补角/余角关系图（看图选关系，无数字）
+function svgCompRel(){ // 余角：直角 + 一条斜分线
+  let Vx=34,Vy=62,len=44;
+  let s=`<line x1="${Vx}" y1="${Vy+8}" x2="${Vx}" y2="${Vy-len}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<path d="M ${Vx+5} ${Vy} L ${Vx+5} ${Vy-5} L ${Vx} ${Vy-5}" fill="none" stroke="#3E4A63" stroke-width="1.2"/>`;
+  let a=40*Math.PI/180, ex=Vx+len*Math.cos(a), ey=Vy-len*Math.sin(a);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx+14,Vy-10,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx+26,Vy+6,'∠2',11,'#B4945A');
+  return s;
+}
+function svgSuppRel(){ // 平角：水平线 + 一条射线（分∠1大角/小角）
+  let Vx=60,Vy=58,len=44;
+  let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  let a=40*Math.PI/180, ex=Vx+len*Math.cos(a), ey=Vy-len*Math.sin(a);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx-16,Vy-10,'∠1',11,'#E57373');
+  s+=svgTxt(Vx+16,Vy-10,'∠2',11,'#B4945A');
+  return s;
+}
+// 折纸模拟SVG（静态三态）：未折 / 折起 / 折痕角展示
+function svgPaperFold3(){
+  let Px=60,Py=66,len=38,a=Math.PI/3; // 折起角=60°
+  let s=`<rect x="18" y="48" width="84" height="44" fill="rgba(180,148,90,0.09)" stroke="#3E4A63" stroke-width="1.5" rx="2"/>`;
+  // 底边
+  s+=`<line x1="18" y1="72" x2="102" y2="72" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  // 折起的边
+  let Fx=Px+len*Math.cos(a), Fy=Py-len*Math.sin(a);
+  s+=`<line x1="${Px}" y1="${Py}" x2="${Fx.toFixed(1)}" y2="${Fy.toFixed(1)}" stroke="#E57373" stroke-width="2.6" stroke-linecap="round"/>`;
+  // 原边虚线
+  s+=`<line x1="${Px}" y1="${Py}" x2="102" y2="72" stroke="#B4945A" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  // 折痕（平分角）
+  let ha=a/2;
+  let cx=Px+len*Math.cos(ha), cy=Py-len*Math.sin(ha);
+  s+=`<line x1="${Px}" y1="${Py}" x2="${cx.toFixed(1)}" y2="${cy.toFixed(1)}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+  s+=`<circle cx="${Px}" cy="${Py}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Px+20,Py-16,'∠1',11,'#E57373');
+  s+=svgTxt(Px+30,Py+2,'∠2',11,'#E57373');
+  return s;
+}
+// 折纸题配图：折起角为a°（偶数），折痕平分，∠1=a/2
+function svgPaperFoldQ(a){
+  a=a||60;
+  let Px=60,Py=66,len=38,rad=a*Math.PI/180;
+  let s=`<rect x="18" y="48" width="84" height="44" fill="rgba(180,148,90,0.09)" stroke="#3E4A63" stroke-width="1.5" rx="2"/>`;
+  s+=`<line x1="18" y1="72" x2="102" y2="72" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  let Fx=Px+len*Math.cos(rad), Fy=Py-len*Math.sin(rad);
+  s+=`<line x1="${Px}" y1="${Py}" x2="${Fx.toFixed(1)}" y2="${Fy.toFixed(1)}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Px}" y1="${Py}" x2="102" y2="72" stroke="#B4945A" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  let ha=rad/2;
+  let cx=Px+len*Math.cos(ha), cy=Py-len*Math.sin(ha);
+  s+=`<line x1="${Px}" y1="${Py}" x2="${cx.toFixed(1)}" y2="${cy.toFixed(1)}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+  s+=`<circle cx="${Px}" cy="${Py}" r="2.4" fill="#3E4A63"/>`;
+  // 角标位置参数化
+  let l1r=(a*0.75)*Math.PI/180;
+  let l2r=(a*0.28)*Math.PI/180;
+  s+=svgTxt((Px+24*Math.cos(l1r)).toFixed(1),(Py-24*Math.sin(l1r)).toFixed(1),'∠1',11,'#E57373');
+  s+=svgTxt((Px+28*Math.cos(l2r)).toFixed(1),(Py-28*Math.sin(l2r)).toFixed(1),'∠2',11,'#B4945A');
+  return s;
+}
+// 三角板认知图：30-60-90 + 45-45-90
+function svgSetSquaresLabeled(){
+  let s='';
+  // 30-60-90
+  s+=`<polygon points="16,84 68,84 16,54" fill="rgba(180,148,90,0.12)" stroke="#3E4A63" stroke-width="2"/>`;
+  s+=`<rect x="16" y="70" width="13" height="14" fill="#fff" stroke="#3E4A63" stroke-width="1.2"/>`;
+  s+=svgTxt(56,80,'30°',9,'#3E4A63');
+  s+=svgTxt(24,64,'60°',9,'#3E4A63');
+  // 45-45-90
+  s+=`<polygon points="82,84 112,84 82,56" fill="rgba(62,74,99,0.10)" stroke="#3E4A63" stroke-width="2"/>`;
+  s+=`<rect x="82" y="70" width="13" height="14" fill="#fff" stroke="#3E4A63" stroke-width="1.2"/>`;
+  s+=svgTxt(98,80,'45°',9,'#3E4A63');
+  s+=svgTxt(90,64,'45°',9,'#3E4A63');
+  return s;
+}
+// 从一点引出多条射线，数角的个数
+function svgRaysCount(n){
+  n=n||4;
+  let Vx=60,Vy=58,len=40;
+  let s=`<circle cx="${Vx}" cy="${Vy}" r="2.6" fill="#3E4A63"/>`;
+  let angs=[];
+  for(let i=0;i<n;i++){angs.push(-30+(180/(n-1))*i);}
+  angs.forEach((d,i)=>{
+    let a=d*Math.PI/180, ex=Vx+len*Math.cos(a), ey=Vy-len*Math.sin(a);
+    s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  });
+  return s;
+}
+
+// ===== 专项·图形认知：题目生成器 =====
+function sq_fill_line(){
+  const pool=[
+    {q:'如图，这条线有两个端点，它是（ ）。',a:'线段',svg:svgSegment()},
+    {q:'如图，这条线只有一个端点，另一端可以无限延伸，它是（ ）。',a:'射线',svg:svgRayOnly()},
+    {q:'如图，这条线没有端点，两端可以无限延伸，它是（ ）。',a:'直线',svg:svgLineArrow()},
+    {q:'角是由一个（ ）和两条（ ）组成的。',a:'顶点,边'},
+    {q:'角的大小与两条边（ ）的大小有关，与边的（ ）无关。',a:'张开,长短'},
+    {q:'如图，这个角小于90°，它是（ ）角。',a:'锐',svg:svgAngleNoLabel(45)},
+    {q:'如图，这个角大于90°小于180°，它是（ ）角。',a:'钝',svg:svgAngleNoLabel(120)},
+    {q:'如图，这个角等于90°，它是（ ）角。',a:'直',svg:svgAngleNoLabel(90)},
+    {q:'等于180°的角叫（ ）角。',a:'平'},
+    {q:'等于360°的角叫（ ）角。',a:'周'},
+    {q:'比直角大、比平角小的角是（ ）角。',a:'钝'},
+    {q:'1周角=（ ）个平角=（ ）个直角。',a:'2,4'},
+    {q:'从一点引出（ ）条射线，就能组成一个角。',a:'2'}
+  ];
+  let it=pick(pool);
+  return {type:'fill',question:it.q,answer:it.a,svg:it.svg||null};
+}
+function sq_judge_shape(){
+  const pool=[
+    {q:'直线有两个端点。',a:'错'},{q:'射线可以度量长度。',a:'错'},
+    {q:'线段可以度量长度。',a:'对'},{q:'角的两条边越长角越大。',a:'错'},
+    {q:'用放大镜看一个30°角，它会变大。',a:'错'},{q:'直角一定等于90°。',a:'对'},
+    {q:'锐角一定小于直角。',a:'对'},{q:'钝角一定大于锐角。',a:'对'},
+    {q:'平角是一条直线，所以平角就是直线。',a:'错'},
+    {q:'周角是一条射线。',a:'错'},{q:'两个锐角之和一定大于直角。',a:'错'},
+    {q:'正方形四个角都是直角。',a:'对'},{q:'长方形对折一次，折痕两侧的角相等。',a:'对'}
+  ];
+  let it=pick(pool); return {type:'choice',question:it.q,options:['对','错'],answer:it.a};
+}
+function sq_choice_classify(){
+  let deg=pick([35,60,90,105,120,150,175,180]);
+  let type=deg<90?'锐角':deg===90?'直角':deg<180?'钝角':deg===180?'平角':'周角';
+  let all=['锐角','直角','钝角','平角','周角'];
+  return mkChoice('观察下图中的∠1，它是（ ）角。',type,all.filter(x=>x!==type).slice(0,3),svgAngleNoLabel(deg));
+}
+function sq_choice_line(){
+  const pool=[
+    {q:'下图中表示的是（ ）。',a:'线段',d:['射线','直线'],svg:svgSegment()},
+    {q:'下图中表示的是（ ）。',a:'射线',d:['线段','直线'],svg:svgRayOnly()},
+    {q:'下图中表示的是（ ）。',a:'直线',d:['线段','射线'],svg:svgLineArrow()}
+  ];
+  let it=pick(pool); return mkChoice(it.q,it.a,it.d,it.svg);
+}
+// 看图辨关系（不给度数，纯看关系）
+function sq_rel_identify(){
+  const pool=[
+    {q:'如图，两条直线相交，∠1和∠3（对顶角）的关系是（ ）。',a:'相等',d:['互补','互余','无关'],svg:svgTwoLinesNoNum(ri(40,70))},
+    {q:'如图，两条直线相交，∠1和∠2的关系是（ ）。',a:'互补',d:['相等','互余','无关'],svg:svgTwoLinesNoNum(ri(40,70))},
+    {q:'如图，直角内∠1和∠2的关系是（ ）。',a:'互余',d:['互补','相等','无关'],svg:svgCompRel()},
+    {q:'如图，平角被一条射线分成∠1和∠2，∠1和∠2的关系是（ ）。',a:'互补',d:['互余','相等','对顶'],svg:svgSuppRel()},
+    {q:'如图，∠1和∠3的关系是（ ）。',a:'对顶角',d:['邻补角','互余角','同位角'],svg:svgTwoLinesNoNum(ri(40,70))},
+    {q:'如图，直角内有三条射线，∠1=∠2=∠3，每个角是（ ）°。',a:'30',d:['45','60','90'],svg:svgRightAngleTriple()||svgComplementary(30)}
+  ];
+  let it=pick(pool);
+  if(it.svg){
+    return mkChoice(it.q,it.a,it.d,it.svg);
+  }
+  return mkChoice(it.q,it.a,it.d);
+}
+// 折纸理解题
+function sq_fold_fill(){
+  let a=ri(25,35)*2, b=a/2;
+  let q=`如图，长方形纸沿折痕折起后，已知∠2=${a}°，∠1=（ ）°。（提示：折痕平分底边与折边）`;
+  return {type:'fill',question:q,answer:String(b),svg:svgPaperFoldQ(a)};
+}
+function sq_fold_choice(){
+  let a=ri(25,35)*2, b=a/2;
+  let opts=[(b+10)+'°',(b-10)+'°',(180-b)+'°'];
+  return mkChoice(`如图，长方形纸沿折痕折起，已知∠2=${a}°，∠1=（ ）°。`,b+'°',opts,svgPaperFoldQ(a));
+}
+function sq_judge_fold(){
+  const pool=[
+    {q:'长方形纸折起一角，折痕两侧的角一定相等。',a:'对'},
+    {q:'长方形纸对折后，∠2是110°，∠1一定是55°。',a:'对'},
+    {q:'折纸中折痕把折角平分了。',a:'对'},
+    {q:'长方形纸一角的折纸问题中，∠1+∠2=90°是错的。',a:'错'}
+  ];
+  let it=pick(pool); return mkJudge(it.q,it.a);
+}
+// 三角板相关
+function sq_setsquare_fill(){
+  let deg=pick([75,105,120,135,150,15]);
+  return {type:'fill',question:'用一副三角板能拼出 ' + deg + '° 的角吗？（填 能 或 不能）',answer:'能'};
+}
+function sq_setsquare_choice(){
+  let deg=pick([75,105,120,135,150]);
+  return mkChoice('用一副三角板（30°-60°-90°和45°-45°-90°），能拼出下面哪个角？',deg+'°',['80°','100°','110°'],svgSetSquaresLabeled());
+}
+// 数角
+function sq_count_angles(){
+  let n=ri(3,5), cnt=n*(n-1)/2;
+  if(n===3) cnt=3; else if(n===4) cnt=6; else cnt=10;
+  return mkChoice(`如图，从一点引出${n}条射线，共组成了（ ）个角。`,cnt+'个',[(cnt+1)+'个',(cnt+2)+'个',(cnt-1)+'个'],svgRaysCount(n));
+}
+// 钟面角
+function sq_clock_shape(){
+  let h=pick([1,2,3,4,6,8,9,10,12]);
+  let type='';
+  if(h===3||h===9) type='直角（90°）';
+  else if(h===1||h===2||h===10||h===11) type='锐角';
+  else if(h===4||h===5||h===7||h===8) type='钝角';
+  else if(h===6) type='平角（180°）';
+  else type='周角（360°）';
+  return mkChoice('钟面上（ ）时整，时针与分针成' + type + '。',h+'时',['3时','6时','9时','12时'].filter(x=>x!==h+'时'),svgClock(h,0));
+}
+// 看图辨三角形内角关系
+function sq_triangle_shape(){
+  let s=`<polygon points="60,28 24,80 96,80" fill="rgba(180,148,90,0.08)" stroke="#3E4A63" stroke-width="2"/>`;
+  s+=svgTxt(60,20,'A',10,'#3E4A63');
+  s+=svgTxt(14,88,'B',10,'#3E4A63');
+  s+=svgTxt(100,88,'C',10,'#3E4A63');
+  return mkChoice('观察上图中的三角形，三个角的和是（ ）°。','180',['90','270','360'],s);
+}
+
+// 主生成函数：5板块28题100分
+function g4_shape_recognize(){
+  const S1='一、认图形（每空3分，共24分）', S2='二、看角度（每题2分，共12分）', S3='三、辨关系（每题3分，共18分）', S4='四、折纸与拼角（每题5分，共20分）', S5='五、综合应用（共26分）';
+  const fills=[sq_fill_line, sq_fill_line, sq_fill_line, sq_fill_line, sq_fill_line, sq_fill_line, sq_fill_line, sq_fill_line];
+  const judges=[sq_judge_shape, sq_judge_shape, sq_judge_shape, sq_judge_shape, sq_judge_shape, sq_judge_shape];
+  const choicesC=[sq_choice_classify, sq_choice_line, sq_choice_line, sq_choice_classify, sq_choice_classify, sq_choice_line];
+  const rels=[sq_rel_identify, sq_rel_identify, sq_rel_identify, sq_rel_identify, sq_rel_identify, sq_rel_identify];
+  const folds=[sq_fold_fill, sq_fold_choice, sq_fold_choice, sq_judge_fold];
+  const compl=[sq_setsquare_fill, sq_setsquare_choice, sq_count_angles, sq_clock_shape, sq_triangle_shape];
+
+  let f=drawPool(fills,8).map(g=>g());
+  let j=drawPool(judges,6).map(g=>g());
+  let c=drawPool(choicesC,6).map(g=>g());
+  let r=drawPool(rels,6).map(g=>g());
+  let fd=drawPool(folds,4).map(g=>g());
+  let cp=drawPool(compl,4).map(g=>g());
+
+  f.forEach(q=>{q.sectionTitle=S1;q.score=3;});
+  j.forEach(q=>{q.sectionTitle=S2;q.score=2;});
+  c.forEach(q=>{q.sectionTitle=S2;q.score=2;});
+  r.forEach(q=>{q.sectionTitle=S3;q.score=3;});
+  fd.forEach(q=>{q.sectionTitle=S4;q.score=5;});
+  cp.forEach((q,i)=>{q.sectionTitle=S5;q.score=(i<3?7:6);});
+
+  return [].concat(f,j,c,r,fd,cp);
+}
+
 // ===== 专项·角的度量：各题型随机生成器（覆盖图1/2/3三张试卷）=====
 function q_fill_basic(){
   const pool=[
@@ -7292,11 +7654,93 @@ function showUnitIntro(unit, grade, sem, idx) {
   state.currentGrade = grade;
   state.currentSemester = sem;
   document.getElementById('specialIntroTitle').textContent = unit.name;
-  document.getElementById('specialIntroImg').src = unit.introImg;
+
+  let imgEl = document.getElementById('specialIntroImg');
+  let interactEl = document.getElementById('specialIntroInteractive');
+
+  if (unit.interactiveIntro) {
+    // 隐藏静态图，显示交互式探索区
+    if(imgEl) imgEl.style.display = 'none';
+    if(interactEl){
+      interactEl.style.display = 'block';
+      renderShapeExplore(interactEl);
+    }
+  } else {
+    if(imgEl){ imgEl.style.display = 'block'; imgEl.src = unit.introImg; }
+    if(interactEl) interactEl.style.display = 'none';
+  }
+
   document.getElementById('specialIntroBtn').onclick = () => beginUnitQuiz(idx, grade, sem);
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goHome();
   showPage('special-intro');
+}
+
+// 交互式图形探索器：拖动滑块看角度变化
+function renderShapeExplore(container){
+  let deg = 45;
+  function angType(d){
+    if(d===0) return {label:'零角',color:'#9AA0AB',cls:''};
+    if(d>0&&d<90) return {label:'锐角 &lt; 90°',color:'#4E8C6E',cls:'锐角'};
+    if(d===90) return {label:'直角 = 90°',color:'#E57373',cls:'直角'};
+    if(d>90&&d<180) return {label:'钝角 &gt; 90°',color:'#C08A3E',cls:'钝角'};
+    if(d===180) return {label:'平角 = 180°',color:'#6B7894',cls:'平角'};
+    if(d>180&&d<360) return {label:'优角 &gt; 180°',color:'#B4945A',cls:'优角'};
+    return {label:'周角 = 360°',color:'#3E4A63',cls:'周角'};
+  }
+  function draw(d){
+    let cx=180,cy=160,r=100,ar=70, a=Math.PI*d/180;
+    let ex=cx+r*Math.cos(a), ey=cy-r*Math.sin(a);
+    let pts=[]; for(let k=0;k<=20;k++){let dd=d*k/20,aa=Math.PI*dd/180;pts.push(`${(cx+ar*Math.cos(aa)).toFixed(1)},${(cy-ar*Math.sin(aa)).toFixed(1)}`);}
+    let t=angType(d);
+    return `<svg viewBox="0 0 360 300" style="width:100%;max-width:360px">
+      <!-- 量角器背景 -->
+      <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="rgba(180,148,90,0.05)" stroke="#B4945A" stroke-width="1"/>
+      <line x1="${cx-r}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#B4945A" stroke-width="0.8"/>
+      ${[0,30,60,90,120,150,180].map(dd=>{
+        let aa=Math.PI*dd/180;
+        let lx=cx+(r-12)*Math.cos(aa), ly=cy-(r-12)*Math.sin(aa);
+        return `<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9AA0AB">${dd}</text>`;
+      }).join('')}
+      ${[0,30,60,90,120,150,180].map(dd=>{
+        let aa=Math.PI*dd/180;
+        return `<line x1="${(cx+(r-6)*Math.cos(aa)).toFixed(1)}" y1="${(cy-(r-6)*Math.sin(aa)).toFixed(1)}" x2="${(cx+r*Math.cos(aa)).toFixed(1)}" y2="${(cy-r*Math.sin(aa)).toFixed(1)}" stroke="#B4945A" stroke-width="0.7"/>`;
+      }).join('')}
+      <!-- 角的边 -->
+      <line x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#3E4A63" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="${t.color}" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="${cx}" cy="${cy}" r="3.5" fill="#3E4A63"/>
+      <!-- 角的弧 -->
+      <polyline points="${pts.join(' ')}" fill="none" stroke="${t.color}" stroke-width="2.5"/>
+      <!-- 角度数字 -->
+      <text x="${(cx+ar*Math.cos(a/2)).toFixed(1)}" y="${(cy-ar*Math.sin(a/2)-8).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="bold" fill="${t.color}">${d}°</text>
+      <!-- 类型文字 -->
+      <rect x="${cx-45}" y="228" width="90" height="24" rx="12" fill="${t.color}" opacity="0.15"/>
+      <text x="${cx}" y="245" text-anchor="middle" font-size="13" font-weight="bold" fill="${t.color}">${d}° — ${t.label.replace(/<[^>]*>/g,'')}</text>
+    </svg>`;
+  }
+  container.innerHTML = `
+    <div style="margin:12px 0">
+      <div style="font-size:13px;color:var(--text-light);margin-bottom:8px;text-align:center">
+        👆 拖动下面滑块，观察角从<strong style="color:#4E8C6E">锐角</strong>→<strong style="color:#E57373">直角</strong>→<strong style="color:#C08A3E">钝角</strong>→<strong style="color:#6B7894">平角</strong>→<strong style="color:#3E4A63">周角</strong>的全过程
+      </div>
+      <div id="shapeExploreSvg">${draw(45)}</div>
+      <div style="padding:8px 0">
+        <input type="range" id="shapeExploreSlider" min="0" max="360" value="45" step="1"
+          style="width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,#4E8C6E 0%,#4E8C6E 25%,#E57373 25%,#E57373 25%,#C08A3E 25%,#C08A3E 50%,#6B7894 50%,#6B7894 50%,#B4945A 50%,#B4945A 100%,#3E4A63 100%);border-radius:4px;outline:none;cursor:pointer">
+        <input type="range" id="shapeExploreSlider2" min="0" max="360" value="45" step="1"
+          style="width:100%;height:8px;margin-top:6px;-webkit-appearance:none;appearance:none;background:transparent;border-radius:4px;outline:none;cursor:pointer;border:1px solid var(--border)">
+      </div>
+      <div style="text-align:center;font-size:13px;color:var(--text-lighter);margin-top:4px">
+        💡 上面是精细滑块(步长1°)，下面是快速滑块
+      </div>
+    </div>`;
+  let svgEl=document.getElementById('shapeExploreSvg');
+  function update(v){let d=parseInt(v)||0;if(svgEl)svgEl.innerHTML=draw(d);}
+  let s1=document.getElementById('shapeExploreSlider');
+  let s2=document.getElementById('shapeExploreSlider2');
+  if(s1)s1.addEventListener('input',function(){update(this.value);if(s2)s2.value=this.value;});
+  if(s2)s2.addEventListener('input',function(){update(this.value);if(s1)s1.value=this.value;});
 }
 
 function beginUnitQuiz(idx, grade, sem) {

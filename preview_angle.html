@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>角度图形修复预览</title>
+<style>
+  body{font-family:-apple-system,"PingFang SC",sans-serif;background:#F7F6F2;margin:0;padding:24px;color:#3E4A63;}
+  h1{font-size:18px;margin:0 0 4px}
+  p.sub{color:#8a8577;font-size:13px;margin:0 0 20px}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;}
+  .card{background:#fff;border:1px solid #ece8df;border-radius:14px;padding:12px;width:160px;box-shadow:0 4px 14px rgba(62,74,99,.06);}
+  .card .q{font-size:13px;font-weight:600;margin-bottom:8px}
+  .card .ans{font-size:12px;color:#B4945A;margin-top:6px}
+  .shape-container{display:flex;justify-content:center}
+  svg{width:100%;height:auto}
+</style>
+</head>
+<body>
+<h1>角度图形修复预览（v18）</h1>
+<p class="sub">图形与题目数字已对应，并叠加量角器刻度/数字供读数</p>
+<div class="grid" id="grid"></div>
+<script>
+// 与 js/math.js 中 svgProtractor / svgAngle 完全一致
+function svgProtractor(cx, cy, R){
+  let s = `<path d="M ${cx-R} ${cy} A ${R} ${R} 0 0 1 ${cx+R} ${cy}" fill="rgba(180,148,90,0.06)" stroke="#B4945A" stroke-width="1.5"/>`;
+  s += `<line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="#B4945A" stroke-width="1"/>`;
+  for(let d=0; d<=180; d+=5){
+    let a = Math.PI*d/180, major=(d%10===0);
+    let r1=R, r2=R-(major?9:4);
+    s += `<line x1="${(cx+r1*Math.cos(a)).toFixed(1)}" y1="${(cy-r1*Math.sin(a)).toFixed(1)}" x2="${(cx+r2*Math.cos(a)).toFixed(1)}" y2="${(cy-r2*Math.sin(a)).toFixed(1)}" stroke="#B4945A" stroke-width="${major?1.1:0.6}"/>`;
+    if(d%30===0){
+      let rt=R-16;
+      s += `<text x="${(cx+rt*Math.cos(a)).toFixed(1)}" y="${(cy-rt*Math.sin(a)+2.6).toFixed(1)}" text-anchor="middle" font-size="8" fill="#3E4A63">${d}</text>`;
+    }
+  }
+  return s;
+}
+function svgAngle(deg, showDeg){
+  let cx=60, cy=72, R=44, r=34;
+  let s = svgProtractor(cx, cy, R);
+  let a = Math.PI*deg/180, ex = cx + r*Math.cos(a), ey = cy - r*Math.sin(a);
+  s += `<line x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s += `<line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s += `<circle cx="${cx}" cy="${cy}" r="2.4" fill="#3E4A63"/>`;
+  let ar=r*0.5, pts=[];
+  for(let k=0;k<=10;k++){let dd=deg*k/10, aa=Math.PI*dd/180; pts.push(`${(cx+ar*Math.cos(aa)).toFixed(1)},${(cy-ar*Math.sin(aa)).toFixed(1)}`);}
+  s += `<polyline points="${pts.join(' ')}" fill="none" stroke="#E57373" stroke-width="1.3"/>`;
+  return s;
+}
+const cases = [
+  {q:'这个角是多少度？', deg:45, ans:'45°'},
+  {q:'这个角是多少度？', deg:120, ans:'120°'},
+  {q:'这个角是多少度？', deg:150, ans:'150°'},
+  {q:'这个角是多少度？', deg:30, ans:'30°'},
+  {q:'这个角是多少度？', deg:135, ans:'135°'},
+  {q:'这个角是什么角？', deg:45, ans:'锐角'},
+  {q:'这个角是什么角？', deg:90, ans:'直角'},
+  {q:'这个角是什么角？', deg:135, ans:'钝角'},
+];
+const grid = document.getElementById('grid');
+cases.forEach(c=>{
+  const div = document.createElement('div');
+  div.className='card';
+  div.innerHTML = `<div class="q">${c.q}</div><div class="shape-container"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">${svgAngle(c.deg)}</svg></div><div class="ans">答案：${c.ans}（图形画出的也是 ${c.deg}°）</div>`;
+  grid.appendChild(div);
+});
+</script>
+</body>
+</html>

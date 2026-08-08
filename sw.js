@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v21：修复专项配图角度不准——相交线/垂线/折叠/互补/平角/直线三角等图形的角度改为参数化，画出的角=题面数字；三角板比例精确为30-60-90
-const CACHE = 'lyj-shell-v21';
+// v22：新增专项·图形认知——交互式角度探索器+看图说关系+折纸理解，5板块28题100分
+const CACHE = 'lyj-shell-v22';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
