@@ -7813,8 +7813,15 @@ function beginUnitQuiz(idx, grade, sem) {
   if (unit.paper) {
     state.quizQuestions = unit.gen();
   } else {
-    for (let i = 0; i < UNIT_QUIZ_LENGTH; i++) {
-      state.quizQuestions.push(unit.gen());
+    let first = unit.gen();
+    if (Array.isArray(first)) {
+      // gen 已返回完整题组（如角度计算：一次从题库随机抽 N 道）
+      state.quizQuestions = first;
+    } else {
+      state.quizQuestions.push(first);
+      for (let i = 1; i < UNIT_QUIZ_LENGTH; i++) {
+        state.quizQuestions.push(unit.gen());
+      }
     }
   }
   state.quizIndex = 0;

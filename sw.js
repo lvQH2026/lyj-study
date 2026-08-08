@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v22：新增专项·图形认知——交互式角度探索器+看图说关系+折纸理解，5板块28题100分
-const CACHE = 'lyj-shell-v22';
+// v23：修复角度计算题目空白——beginUnitQuiz 兼容 gen 返回整组数组（角度计算一次抽20题），不再把数组当单题 push
+const CACHE = 'lyj-shell-v23';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
