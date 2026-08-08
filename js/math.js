@@ -5592,18 +5592,147 @@ function svgMultiAngle(){
   s+=ang(98,76,100,22)+`<text x="90" y="94" font-size="9" fill="#B4945A">钝角</text>`;
   return s;
 }
-function svgAnglePair(){
+function svgAnglePair(a){
+  a=a||35;
   let Vx=18,Vy=58;
   let s=`<line x1="${Vx}" y1="${Vy}" x2="112" y2="${Vy}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
-  let a=35*Math.PI/180, ex=Vx+42*Math.cos(a), ey=Vy-42*Math.sin(a);
+  let rad=a*Math.PI/180, ex=Vx+42*Math.cos(rad), ey=Vy-42*Math.sin(rad);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#E57373" stroke-width="2.6" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.6" fill="#3E4A63"/>`;
-  s+=`<text x="${Vx+4}" y="${ey-5}" font-size="10" fill="#E57373">∠1=35°</text>`;
+  s+=`<text x="${Vx+4}" y="${ey-5}" font-size="10" fill="#E57373">∠1=${a}°</text>`;
   return s;
 }
 function svgRay(){
   return `<line x1="18" y1="82" x2="102" y2="34" stroke="#3E4A63" stroke-width="2.4" stroke-linecap="round"/>`
        + `<circle cx="18" cy="82" r="3" fill="#3E4A63"/>`;
+}
+// 直线上三角度数和（图3-3）：底边水平，顶点出发两条射线，分成∠1/∠2/∠3
+function svgStraightTriple(){
+  let Vx=60,Vy=62,len=46;
+  let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  let a1=40*Math.PI/180,a2=140*Math.PI/180;
+  let ex1=Vx+len*Math.cos(a1),ey1=Vy-len*Math.sin(a1);
+  let ex2=Vx+len*Math.cos(a2),ey2=Vy-len*Math.sin(a2);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex1.toFixed(1)}" y2="${ey1.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex2.toFixed(1)}" y2="${ey2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx-16,Vy+14,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx,Vy-18,'∠2',11,'#E57373');
+  s+=svgTxt(Vx+16,Vy+14,'∠3',11,'#B4945A');
+  return s;
+}
+// 两直线相交（图1-4/图3-6）：X形，标∠1/∠2/∠3/∠4
+function svgIntersectLines(){
+  let Vx=60,Vy=52,len=44;
+  let s='';
+  let a=35*Math.PI/180;
+  for(let k=0;k<4;k++){
+    let aa=a+k*Math.PI/2;
+    let x1=Vx-len*Math.cos(aa),y1=Vy+len*Math.sin(aa);
+    let x2=Vx+len*Math.cos(aa),y2=Vy-len*Math.sin(aa);
+    s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  }
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx-12,Vy-10,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx+12,Vy-10,'∠2',11,'#B4945A');
+  s+=svgTxt(Vx+12,Vy+16,'∠3',11,'#B4945A');
+  s+=svgTxt(Vx-12,Vy+16,'∠4',11,'#B4945A');
+  return s;
+}
+// 直角内余角（图3-2）：竖直边+水平边，斜线分成∠1/∠2
+function svgComplementary(){
+  let Vx=60,Vy=68,len=42;
+  let s=`<line x1="${Vx}" y1="${Vy+8}" x2="${Vx}" y2="${Vy-len}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Vx-len+8}" y1="${Vy}" x2="${Vx+len-8}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  // 直角标记
+  s+=`<path d="M ${Vx+6} ${Vy} L ${Vx+6} ${Vy-6} L ${Vx} ${Vy-6}" fill="none" stroke="#3E4A63" stroke-width="1.2"/>`;
+  let a=36*Math.PI/180,ex=Vx+len*Math.cos(a),ey=Vy-len*Math.sin(a);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx+10,Vy-10,'∠1',11,'#E57373');
+  s+=svgTxt(Vx+24,Vy+6,'∠2',11,'#B4945A');
+  return s;
+}
+// 垂线+斜线组合（图1-5/图3-5/图3-7）：水平线+垂直线+斜线，形成多角
+function svgPerpendicularCross(){
+  let Vx=60,Vy=58,len=44;
+  let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Vx}" y1="${Vy+len-8}" x2="${Vx}" y2="${Vy-len+8}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<path d="M ${Vx+5} ${Vy} L ${Vx+5} ${Vy-5} L ${Vx} ${Vy-5}" fill="none" stroke="#3E4A63" stroke-width="1.2"/>`;
+  let a=55*Math.PI/180,ex=Vx+len*Math.cos(a),ey=Vy-len*Math.sin(a);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx+14,Vy-12,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx-12,Vy+14,'∠2',11,'#B4945A');
+  s+=svgTxt(Vx+14,Vy+14,'∠3',11,'#B4945A');
+  return s;
+}
+// 平角内双角（图3-1）：水平线，斜线形成∠1与已知角
+function svgSupplementary(){
+  let Vx=60,Vy=62,len=46;
+  let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  let a=40*Math.PI/180,ex=Vx+len*Math.cos(a),ey=Vy-len*Math.sin(a);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx-18,Vy-10,'∠1',11,'#E57373');
+  s+=svgTxt(Vx+18,Vy-10,'40°',11,'#B4945A');
+  return s;
+}
+// 直角内三余角（图3-8）：直角内三条射线分∠1/∠2/∠3
+function svgRightAngleTriple(){
+  let Vx=34,Vy=68,len=48;
+  let s=`<line x1="${Vx}" y1="${Vy+10}" x2="${Vx}" y2="${Vy-len}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
+  s+=`<path d="M ${Vx+5} ${Vy} L ${Vx+5} ${Vy-5} L ${Vx} ${Vy-5}" fill="none" stroke="#3E4A63" stroke-width="1.2"/>`;
+  let a1=30*Math.PI/180,a2=70*Math.PI/180;
+  let ex1=Vx+len*Math.cos(a1),ey1=Vy-len*Math.sin(a1);
+  let ex2=Vx+len*Math.cos(a2),ey2=Vy-len*Math.sin(a2);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex1.toFixed(1)}" y2="${ey1.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex2.toFixed(1)}" y2="${ey2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
+  s+=svgTxt(Vx+18,Vy-8,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx+24,Vy-22,'∠2',11,'#B4945A');
+  s+=svgTxt(Vx+8,Vy-28,'∠3',11,'#E57373');
+  return s;
+}
+// 长方形折叠角（图2折叠专项）：折痕、虚线原边、∠1/∠2
+function svgFoldedAngle(){
+  let s='';
+  // 长方形底边
+  s+=`<line x1="18" y1="70" x2="102" y2="70" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  // 折起后的斜边
+  let a=70*Math.PI/180,ex=60+36*Math.cos(a),ey=70-36*Math.sin(a);
+  s+=`<line x1="60" y1="70" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  // 原边虚线
+  let dex=60+36,dey=70;
+  s+=`<line x1="60" y1="70" x2="${dex}" y2="${dey}" stroke="#B4945A" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  // 折痕
+  let fx=60+36*Math.cos(a),fy=70-36*Math.sin(a);
+  s+=`<line x1="${fx.toFixed(1)}" y1="${fy.toFixed(1)}" x2="102" y2="70" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=svgTxt(48,62,'∠2',11,'#B4945A');
+  s+=svgTxt(82,62,'∠1',11,'#E57373');
+  return s;
+}
+// 正方形与长方形重叠角（图2-5）：两个直角顶点重合，旋转45°正方形
+function svgOverlapAngle(){
+  let Vx=58,Vy=60;
+  let s='';
+  // 长方形两边
+  s+=`<line x1="${Vx-40}" y1="${Vy}" x2="${Vx+44}" y2="${Vy}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<line x1="${Vx}" y1="${Vy-36}" x2="${Vx}" y2="${Vy+40}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  // 正方形（旋转）
+  let r=34, a=45*Math.PI/180;
+  let pts=[];
+  for(let k=0;k<4;k++){
+    let aa=a+k*Math.PI/2;
+    pts.push(`${(Vx+r*Math.cos(aa)).toFixed(1)},${(Vy-r*Math.sin(aa)).toFixed(1)}`);
+  }
+  s+=`<polygon points="${pts.join(' ')}" fill="rgba(180,148,90,0.08)" stroke="#3E4A63" stroke-width="2"/>`;
+  // 角标位置
+  s+=svgTxt(Vx-16,Vy-8,'∠1',11,'#E57373');
+  s+=svgTxt(Vx+8,Vy+16,'∠2',11,'#E57373');
+  s+=svgTxt(Vx-6,Vy+6,'∠3',11,'#B4945A');
+  return s;
 }
 function mkChoice(q, ans, opts, svg, section, score){
   let o=[ans,...opts].filter((v,i,A)=>A.indexOf(v)===i);
@@ -5618,43 +5747,184 @@ function mkJudge(q, ans, section, score){
   if(section){ o.sectionTitle=section; o.score=score; }
   return o;
 }
+// ===== 专项·角的度量：各题型随机生成器（覆盖图1/2/3三张试卷）=====
+function q_fill_basic(){
+  const pool=[
+    {q:'线段有（ ）个端点。',a:'2'},{q:'射线有（ ）个端点。',a:'1'},
+    {q:'直线（ ）端点。（填“有”或“没有”）',a:'没有'},
+    {q:'角的大小与边的长短（ ）。',a:'无关'},
+    {q:'角的大小与两条边（ ）的大小有关。',a:'张开'},
+    {q:'直角是（ ）度。',a:'90'},{q:'平角是（ ）度。',a:'180'},{q:'周角是（ ）度。',a:'360'},
+    {q:'1周角 =（ ）个平角。',a:'2'},{q:'1周角 =（ ）个直角。',a:'4'},
+    {q:'1平角 =（ ）个直角。',a:'2'},
+    {q:'一副三角板中，最大的角是（ ）度。',a:'90'}
+  ];
+  let it=pick(pool); return {type:'fill',question:it.q,answer:it.a};
+}
+function q_fill_supp(){
+  let a=ri(25,75), b=180-a;
+  return {type:'fill',question:`如图，∠1与${a}°的角组成一个平角，∠1=（ ）°。`,answer:String(b),svg:svgSupplementary()};
+}
+function q_fill_comp(){
+  let a=ri(20,70), b=90-a;
+  return {type:'fill',question:`如图，∠1与${a}°的角组成一个直角，∠1=（ ）°。`,answer:String(b),svg:svgComplementary()};
+}
+function q_fill_triple(){
+  let a=ri(25,65), b=ri(25,65);
+  if(a+b>=170){a=30;b=40;}
+  let c=180-a-b;
+  return {type:'fill',question:`如图，∠1=${a}°，∠3=${b}°，∠2=（ ）°。`,answer:String(c),svg:svgStraightTriple()};
+}
+function q_fill_intersect(){
+  let a=ri(35,145), q, ans;
+  if(Math.random()<0.5){q=`如图，两条直线相交，已知∠1=${a}°，∠2=（ ）°。`;ans=String(180-a);}
+  else{q=`如图，两条直线相交，已知∠1=${a}°，∠3=（ ）°。`;ans=String(a);}
+  return {type:'fill',question:q,answer:ans,svg:svgIntersectLines()};
+}
+function q_fill_perp(){
+  let a=ri(25,65), cases=pick(['know1求2','know2求1','know1求3','know3求1']), q, ans;
+  switch(cases){
+    case 'know1求2': q=`如图，∠1=${a}°，∠2=（ ）°。`; ans=String(90-a); break;
+    case 'know2求1': q=`如图，∠2=${90-a}°，∠1=（ ）°。`; ans=String(a); break;
+    case 'know1求3': q=`如图，∠1=${a}°，∠3=（ ）°。`; ans=String(90-a); break;
+    case 'know3求1': q=`如图，∠3=${90-a}°，∠1=（ ）°。`; ans=String(a); break;
+  }
+  return {type:'fill',question:q,answer:ans,svg:svgPerpendicularCross()};
+}
+function q_fill_fold(){
+  let a=ri(55,75), b=180-2*a;
+  return {type:'fill',question:`如图，长方形纸折起后，已知∠2=${a}°，∠1=（ ）°。`,answer:String(b),svg:svgFoldedAngle()};
+}
+function q_fill_overlap(){
+  return {type:'fill',question:'如图，正方形与长方形部分重叠，已知∠1+∠2+∠3=122°，∠3=（ ）°。',answer:'58',svg:svgOverlapAngle()};
+}
+function q_judge(){
+  const pool=[
+    {q:'大于90°的角叫钝角。',a:'错'},{q:'平角是一条直线。',a:'错'},
+    {q:'用放大镜看一个30°的角，它变成90°。',a:'错'},
+    {q:'角的两条边越长，这个角就越大。',a:'错'},{q:'周角只有一条边。',a:'错'},
+    {q:'用一副三角板能拼出105°的角。',a:'对'},{q:'锐角一定小于90°。',a:'对'},
+    {q:'钝角一定大于直角。',a:'对'},{q:'平角比周角大。',a:'错'},
+    {q:'两条直线相交，对顶角相等。',a:'对'},{q:'两条直线相交，邻补角之和为180°。',a:'对'},
+    {q:'长方形纸对折后，折痕两侧的角相等。',a:'对'},
+    {q:'直角减去一个锐角，剩下的一定是锐角。',a:'对'},
+    {q:'两个锐角的和一定是钝角。',a:'错'}
+  ];
+  let it=pick(pool); return {type:'choice',question:it.q,options:['对','错'],answer:it.a};
+}
+function q_choice_basic(){
+  const pool=[
+    {q:'下面（ ）是射线。',a:'太阳射出的光线',d:['绷紧的绳子','黑板的边'],svg:svgRay()},
+    {q:'一个20°的角，放在5倍放大镜下看，它是（ ）。',a:'20°',d:['100°','4°']},
+    {q:'把平角分成两个角，其中一个是钝角，另一个一定是（ ）。',a:'锐角',d:['直角','钝角']},
+    {q:'角的两条边是（ ）。',a:'射线',d:['直线','线段']},
+    {q:'从一点出发可以画（ ）条射线。',a:'无数条',d:['1条','2条']}
+  ];
+  let it=pick(pool); return mkChoice(it.q,it.a,it.d,it.svg||null);
+}
+function q_choice_classify(){
+  let deg=pick([35,60,120,100,150,90]);
+  let type=deg<90?'锐角':deg===90?'直角':deg<180?'钝角':'平角';
+  return mkChoice('下图中∠1是（ ）角。',type,['锐角','直角','钝角'].filter(x=>x!==type),svgAngle(deg));
+}
+function q_choice_setsquare(){
+  let deg=pick([75,105,120,135,150,15]);
+  return mkChoice('用一副三角板能拼出下面哪个角？',deg+'°',['80°','100°','110°'],svgTwoSetSquares());
+}
+function q_choice_clock(){
+  let h=pick([3,6,9,12]);
+  let ans=h===3?'直角':h===6?'平角':h===9?'直角':'周角';
+  return mkChoice('钟面上（ ）时整，时针与分针成'+ans+'。',h+'时',['3时','6时','9时','12时'].filter(x=>x!==h+'时'),svgClock(h,0));
+}
+function q_choice_protractor(){
+  let deg=pick([30,45,60,90,120,135,150]);
+  let opts=[30,60,90,120,150].filter(x=>x!==deg).slice(0,3);
+  return mkChoice('量出下面角的度数。',deg+'°',opts.map(x=>x+'°'),svgAngle(deg));
+}
+function q_choice_intersect(){
+  let a=ri(40,140), cases=pick(['邻补','对顶']);
+  let q=cases==='邻补'?`两条直线相交，∠1=${a}°，∠2与∠1互为邻补角，∠2=（ ）°。`:`两条直线相交，∠1=${a}°，∠2与∠1为对顶角，∠2=（ ）°。`;
+  let ans=cases==='邻补'?String(180-a):String(a);
+  let opts=[String(180-a),String(a),String(Math.abs(90-a)),String(90+a)].filter((v,i,A)=>A.indexOf(v)===i).slice(0,3);
+  return mkChoice(q,ans,opts,svgIntersectLines());
+}
+function q_choice_fold(){
+  let a=ri(55,75), b=180-2*a;
+  let opts=[(b+10)+'°',(b-10)+'°',(180-b)+'°'];
+  return mkChoice(`如图，长方形纸折起后，已知∠2=${a}°，∠1=（ ）°。`,b+'°',opts,svgFoldedAngle());
+}
+function q_choice_overlap(){
+  return mkChoice('如图，正方形与长方形的一个顶点重合，∠1和∠2的大小关系是（ ）。','相等',['∠1大','∠2大','无法比较'],svgOverlapAngle());
+}
+function q_choice_complement(){
+  let a=ri(20,70);
+  return mkChoice(`如图，∠1与${a}°的角组成直角，∠1=（ ）°。`,(90-a)+'°',[a+'°',(90+a)+'°',(180-a)+'°'],svgComplementary());
+}
+function q_op_protractor(){
+  let deg=pick([45,60,90,120,135,150]);
+  let opts=[30,60,90,120,150].filter(x=>x!==deg).slice(0,3);
+  return mkChoice('量出下面角的度数。',deg+'°',opts.map(x=>x+'°'),svgAngle(deg));
+}
+function q_op_setsquare(){
+  let deg=pick([75,105,120,135,150]);
+  return mkChoice('用一副三角板能拼出下面哪个角？',deg+'°',['80°','100°','110°'],svgTwoSetSquares());
+}
+function q_op_rays(){return mkChoice('图中从一点引出4条射线，共有（ ）个角。','6个',['3个','4个','5个'],svgRays());}
+function q_op_multiangle(){return mkChoice('上图分别画了锐角、直角、钝角，其中钝角有（ ）个。','1个',['0个','2个','3个'],svgMultiAngle());}
+function q_op_clock(){
+  let h=pick([3,6,9]);
+  let type=h===3?'直角':h===6?'平角':'直角';
+  return mkChoice('钟面上（ ）时整，时针与分针成'+type+'。',h+'时',['3时','6时','9时'].filter(x=>x!==h+'时'),svgClock(h,0));
+}
+function q_word_supp(){
+  let a=ri(30,60);
+  return {type:'fill',question:`已知∠1=${a}°，∠1与∠2组成一个平角，∠2是多少度？`,answer:String(180-a),svg:svgAnglePair(a)};
+}
+function q_word_comp(){
+  let a=ri(25,65);
+  return {type:'fill',question:`已知∠1=${a}°，∠1与∠2组成一个直角，∠2是多少度？`,answer:String(90-a),svg:svgComplementary()};
+}
+function q_word_triple(){
+  let a=ri(25,65), b=ri(25,65);
+  if(a+b>=170){a=35;b=45;}
+  let c=180-a-b;
+  return {type:'fill',question:`如图，∠1=${a}°，∠2=${b}°，求∠3的度数。`,answer:String(c),svg:svgStraightTriple()};
+}
+function q_word_intersect(){
+  let a=ri(35,145);
+  let q=`如图，两条直线相交，已知∠1=${a}°，求∠2、∠3、∠4的度数。（按顺序用逗号隔开，如120,60,120）`;
+  let ans=`${180-a},${a},${180-a}`;
+  return {type:'fill',question:q,answer:ans,svg:svgIntersectLines()};
+}
+function q_word_perp(){
+  let a=ri(25,65);
+  let q=`如图，∠1=${a}°，∠2与∠3分别是多少度？（按顺序用逗号隔开，如50,40）`;
+  let ans=`${90-a},${a}`;
+  return {type:'fill',question:q,answer:ans,svg:svgPerpendicularCross()};
+}
+function q_word_fold(){
+  let a=ri(55,75), b=180-2*a;
+  return {type:'fill',question:`如图，长方形纸折起后，已知∠2=${a}°，求∠1的度数。`,answer:String(b),svg:svgFoldedAngle()};
+}
+function drawPool(pool,n){let copy=[];while(copy.length<n){copy=copy.concat(pool.slice().sort(()=>Math.random()-0.5));}return copy.slice(0,n);}
 function g4_angle_special(){
   const S1='一、填空（每空3分）', S2='二、判断（每题2分）', S3='三、选择（每题3分）', S4='四、操作·作图（共26分）', S5='五、解决问题（共20分）';
-  let Q=[];
-  // 一、填空（8题，24分）
-  Q.push({type:'fill',question:'线段有（ ）个端点。',answer:'2',sectionTitle:S1,score:3});
-  Q.push({type:'fill',question:'射线有（ ）个端点。',answer:'1',sectionTitle:S1,score:3});
-  Q.push({type:'fill',question:'角的大小与边的长短（ ）。（填“有关”或“无关”）',answer:'无关',sectionTitle:S1,score:3});
-  Q.push({type:'fill',question:'直角是（ ）度。',answer:'90',sectionTitle:S1,score:3});
-  Q.push({type:'fill',question:'平角是（ ）度。',answer:'180',sectionTitle:S1,score:3});
-  Q.push({type:'fill',question:'周角是（ ）度。',answer:'360',sectionTitle:S1,score:3});
-  Q.push({type:'fill',question:'1周角 =（ ）个直角。',answer:'4',sectionTitle:S1,score:3});
-  Q.push({type:'fill',question:'一副三角板中，最大的角是（ ）度。',answer:'90',sectionTitle:S1,score:3});
-  // 二、判断（6题，12分）
-  Q.push(mkJudge('大于90°的角叫钝角。','错',S2,2));
-  Q.push(mkJudge('平角是一条直线。','错',S2,2));
-  Q.push(mkJudge('用放大镜看一个30°的角，它变成90°。','错',S2,2));
-  Q.push(mkJudge('角的两条边越长，这个角就越大。','错',S2,2));
-  Q.push(mkJudge('周角只有一条边。','错',S2,2));
-  Q.push(mkJudge('用一副三角板能拼出105°的角。','对',S2,2));
-  // 三、选择（6题，18分）
-  Q.push(mkChoice('下面（ ）是射线。','太阳射出的光线',['绷紧的绳子','黑板的边'],svgRay(),S3,3));
-  Q.push(mkChoice('一个20°的角，放在5倍放大镜下看，它是（ ）。','20°',['100°','4°'],null,S3,3));
-  Q.push(mkChoice('下图中∠1是（ ）角。','钝角',['锐角','直角'],svgAngle(120),S3,3));
-  Q.push(mkChoice('下面不能用一副三角板拼出的是（ ）。','80°',['75°','105°'],svgTwoSetSquares(),S3,3));
-  Q.push(mkChoice('钟面上（ ）时整，时针与分针成平角。','6时',['3时','9时'],svgClock(6,0),S3,3));
-  Q.push(mkChoice('把平角分成两个角，其中一个是钝角，另一个一定是（ ）。','锐角',['直角','钝角'],null,S3,3));
-  // 四、操作·作图（5题，26分）
-  Q.push(mkChoice('量出下面角的度数。','45°',['30°','60°','90°'],svgAngle(45),S4,5));
-  Q.push(mkChoice('量出下面角的度数。','135°',['90°','120°','150°'],svgAngle(135),S4,5));
-  Q.push(mkChoice('用一副三角板能拼出下面哪个角？','75°',['80°','100°'],svgTwoSetSquares(),S4,6));
-  Q.push(mkChoice('图中从一点引出4条射线，共有（ ）个角。','6个',['3个','4个','5个'],svgRays(),S4,5));
-  Q.push(mkChoice('上图分别画了锐角、直角、钝角，其中钝角有（ ）个。','1个',['0个','2个','3个'],svgMultiAngle(),S4,5));
-  // 五、解决问题（3题，20分）
-  Q.push({type:'fill',question:'已知∠1=35°，∠1与∠2组成一个平角，∠2 =（ ）°。',answer:'145',sectionTitle:S5,score:7,svg:svgAnglePair()});
-  Q.push(mkChoice('一个周角减去一个钝角，剩下的是什么角？','锐角',['直角','钝角'],svgAngle(130),S5,7));
-  Q.push(mkChoice('用一副三角板可以拼出下面哪个15°倍数的角？','15°',['20°','25°'],svgTwoSetSquares(),S5,6));
-  return Q;
+  const fills=[q_fill_basic,q_fill_supp,q_fill_comp,q_fill_triple,q_fill_intersect,q_fill_perp,q_fill_fold,q_fill_overlap];
+  const judges=[q_judge];
+  const choices=[q_choice_basic,q_choice_classify,q_choice_setsquare,q_choice_clock,q_choice_protractor,q_choice_intersect,q_choice_fold,q_choice_overlap,q_choice_complement];
+  const ops=[q_op_protractor,q_op_setsquare,q_op_rays,q_op_multiangle,q_op_clock];
+  const words=[q_word_supp,q_word_comp,q_word_triple,q_word_intersect,q_word_perp,q_word_fold];
+  let f=drawPool(fills,8).map(g=>g());
+  let j=drawPool(judges,6).map(g=>g());
+  let c=drawPool(choices,6).map(g=>g());
+  let o=drawPool(ops,5).map(g=>g());
+  let w=drawPool(words,3).map(g=>g());
+  f.forEach(q=>{q.sectionTitle=S1;q.score=3;});
+  j.forEach(q=>{q.sectionTitle=S2;q.score=2;});
+  c.forEach(q=>{q.sectionTitle=S3;q.score=3;});
+  o.forEach((q,i)=>{q.sectionTitle=S4;q.score=(i<2?5:(i===2?6:5));});
+  w.forEach((q,i)=>{q.sectionTitle=S5;q.score=(i<2?7:6);});
+  return f.concat(j,c,o,w);
 }
 
 // ---- 选择题/填空题工厂 ----

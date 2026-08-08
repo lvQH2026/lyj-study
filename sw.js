@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v19：新增「专项·角的度量」整卷试卷(28题/100分，五大题型+精准配图)；方法引导页+分区标题/配分支持
-const CACHE = 'lyj-shell-v19';
+// v20：「专项·角的度量」扩充为随机组卷，覆盖图1/2/3三张试卷题型（相交线/垂线/折叠/重叠角/互补互余）+ 精准配图
+const CACHE = 'lyj-shell-v20';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
