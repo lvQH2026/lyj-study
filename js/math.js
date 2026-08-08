@@ -5571,10 +5571,12 @@ function svgRays(){
 }
 function svgTwoSetSquares(){
   let s='';
-  s+=`<polygon points="18,84 76,84 18,47" fill="rgba(180,148,90,0.12)" stroke="#3E4A63" stroke-width="2"/>`;
+  // 30-60-90：短直角边=30，长直角边≈30√3≈52，直角在左下 —— 比例精确
+  s+=`<polygon points="18,84 70,84 18,54" fill="rgba(180,148,90,0.12)" stroke="#3E4A63" stroke-width="2"/>`;
   s+=`<rect x="18" y="70" width="13" height="14" fill="#fff" stroke="#3E4A63" stroke-width="1.2"/>`;
-  s+=`<text x="42" y="80" font-size="9" fill="#3E4A63">30°</text>`;
-  s+=`<text x="24" y="60" font-size="9" fill="#3E4A63">60°</text>`;
+  s+=`<text x="56" y="80" font-size="9" fill="#3E4A63">30°</text>`;
+  s+=`<text x="24" y="62" font-size="9" fill="#3E4A63">60°</text>`;
+  // 45-45-90：两直角边相等
   s+=`<polygon points="84,84 112,84 84,56" fill="rgba(62,74,99,0.10)" stroke="#3E4A63" stroke-width="2"/>`;
   s+=`<rect x="84" y="70" width="13" height="14" fill="#fff" stroke="#3E4A63" stroke-width="1.2"/>`;
   s+=`<text x="98" y="80" font-size="9" fill="#3E4A63">45°</text>`;
@@ -5606,13 +5608,13 @@ function svgRay(){
   return `<line x1="18" y1="82" x2="102" y2="34" stroke="#3E4A63" stroke-width="2.4" stroke-linecap="round"/>`
        + `<circle cx="18" cy="82" r="3" fill="#3E4A63"/>`;
 }
-// 直线上三角度数和（图3-3）：底边水平，顶点出发两条射线，分成∠1/∠2/∠3
-function svgStraightTriple(){
+// 直线上三角度数和：底边水平，顶点出发两条射线，分成∠1(左)/∠2(中)/∠3(右)；a=∠1, b=∠3, ∠2=180-a-b
+function svgStraightTriple(a, b){
+  a=a||40; b=b||40;
   let Vx=60,Vy=62,len=46;
   let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
-  let a1=40*Math.PI/180,a2=140*Math.PI/180;
-  let ex1=Vx+len*Math.cos(a1),ey1=Vy-len*Math.sin(a1);
-  let ex2=Vx+len*Math.cos(a2),ey2=Vy-len*Math.sin(a2);
+  let r1=(180-a)*Math.PI/180, ex1=Vx+len*Math.cos(r1),ey1=Vy-len*Math.sin(r1);
+  let r2=b*Math.PI/180, ex2=Vx+len*Math.cos(r2),ey2=Vy-len*Math.sin(r2);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex1.toFixed(1)}" y2="${ey1.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex2.toFixed(1)}" y2="${ey2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
@@ -5621,61 +5623,61 @@ function svgStraightTriple(){
   s+=svgTxt(Vx+16,Vy+14,'∠3',11,'#B4945A');
   return s;
 }
-// 两直线相交（图1-4/图3-6）：X形，标∠1/∠2/∠3/∠4
-function svgIntersectLines(){
+// 两直线相交：一条水平，一条与之成 a° 角，标∠1/∠2/∠3/∠4（∠1=∠3=a, ∠2=∠4=180-a）
+function svgIntersectLines(a){
+  a=a||50;
   let Vx=60,Vy=52,len=44;
   let s='';
-  let a=35*Math.PI/180;
-  for(let k=0;k<4;k++){
-    let aa=a+k*Math.PI/2;
-    let x1=Vx-len*Math.cos(aa),y1=Vy+len*Math.sin(aa);
-    let x2=Vx+len*Math.cos(aa),y2=Vy-len*Math.sin(aa);
-    s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
-  }
+  let rad=a*Math.PI/180;
+  s+=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  let x1=Vx-len*Math.cos(rad), y1=Vy+len*Math.sin(rad);
+  let x2=Vx+len*Math.cos(rad), y2=Vy-len*Math.sin(rad);
+  s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx-12,Vy-10,'∠1',11,'#B4945A');
-  s+=svgTxt(Vx+12,Vy-10,'∠2',11,'#B4945A');
+  s+=svgTxt(Vx+12,Vy-10,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx-12,Vy-10,'∠2',11,'#B4945A');
   s+=svgTxt(Vx+12,Vy+16,'∠3',11,'#B4945A');
   s+=svgTxt(Vx-12,Vy+16,'∠4',11,'#B4945A');
   return s;
 }
-// 直角内余角（图3-2）：竖直边+水平边，斜线分成∠1/∠2
-function svgComplementary(){
+// 直角内余角：竖直边+水平边，斜线在∠2(=a°)处分开，∠1=90-a
+function svgComplementary(a){
+  a=a||36;
   let Vx=60,Vy=68,len=42;
   let s=`<line x1="${Vx}" y1="${Vy+8}" x2="${Vx}" y2="${Vy-len}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
   s+=`<line x1="${Vx-len+8}" y1="${Vy}" x2="${Vx+len-8}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
-  // 直角标记
   s+=`<path d="M ${Vx+6} ${Vy} L ${Vx+6} ${Vy-6} L ${Vx} ${Vy-6}" fill="none" stroke="#3E4A63" stroke-width="1.2"/>`;
-  let a=36*Math.PI/180,ex=Vx+len*Math.cos(a),ey=Vy-len*Math.sin(a);
+  let rad=a*Math.PI/180,ex=Vx+len*Math.cos(rad),ey=Vy-len*Math.sin(rad);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
   s+=svgTxt(Vx+10,Vy-10,'∠1',11,'#E57373');
   s+=svgTxt(Vx+24,Vy+6,'∠2',11,'#B4945A');
   return s;
 }
-// 垂线+斜线组合（图1-5/图3-5/图3-7）：水平线+垂直线+斜线，形成多角
-function svgPerpendicularCross(){
+// 垂线+斜线：水平线+垂直线成直角，斜线在∠2(=a°)处分开，∠1=90-a（只标∠1/∠2）
+function svgPerpendicularCross(a){
+  a=a||50;
   let Vx=60,Vy=58,len=44;
   let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
   s+=`<line x1="${Vx}" y1="${Vy+len-8}" x2="${Vx}" y2="${Vy-len+8}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
   s+=`<path d="M ${Vx+5} ${Vy} L ${Vx+5} ${Vy-5} L ${Vx} ${Vy-5}" fill="none" stroke="#3E4A63" stroke-width="1.2"/>`;
-  let a=55*Math.PI/180,ex=Vx+len*Math.cos(a),ey=Vy-len*Math.sin(a);
+  let rad=a*Math.PI/180,ex=Vx+len*Math.cos(rad),ey=Vy-len*Math.sin(rad);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx+14,Vy-12,'∠1',11,'#B4945A');
-  s+=svgTxt(Vx-12,Vy+14,'∠2',11,'#B4945A');
-  s+=svgTxt(Vx+14,Vy+14,'∠3',11,'#B4945A');
+  s+=svgTxt(Vx+12,Vy-12,'∠1',11,'#B4945A');
+  s+=svgTxt(Vx+14,Vy+14,'∠2',11,'#B4945A');
   return s;
 }
-// 平角内双角（图3-1）：水平线，斜线形成∠1与已知角
-function svgSupplementary(){
+// 平角内双角：水平线，射线成 a°，小角标 a°，大角∠1=180-a
+function svgSupplementary(a){
+  a=a||40;
   let Vx=60,Vy=62,len=46;
   let s=`<line x1="${Vx-len}" y1="${Vy}" x2="${Vx+len}" y2="${Vy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
-  let a=40*Math.PI/180,ex=Vx+len*Math.cos(a),ey=Vy-len*Math.sin(a);
+  let rad=a*Math.PI/180,ex=Vx+len*Math.cos(rad),ey=Vy-len*Math.sin(rad);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
   s+=svgTxt(Vx-18,Vy-10,'∠1',11,'#E57373');
-  s+=svgTxt(Vx+18,Vy-10,'40°',11,'#B4945A');
+  s+=svgTxt(Vx+18,Vy-10,a+'°',11,'#B4945A');
   return s;
 }
 // 直角内三余角（图3-8）：直角内三条射线分∠1/∠2/∠3
@@ -5695,22 +5697,27 @@ function svgRightAngleTriple(){
   s+=svgTxt(Vx+8,Vy-28,'∠3',11,'#E57373');
   return s;
 }
-// 长方形折叠角（图2折叠专项）：折痕、虚线原边、∠1/∠2
-function svgFoldedAngle(){
-  let s='';
-  // 长方形底边
-  s+=`<line x1="18" y1="70" x2="102" y2="70" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
-  // 折起后的斜边
-  let a=70*Math.PI/180,ex=60+36*Math.cos(a),ey=70-36*Math.sin(a);
-  s+=`<line x1="60" y1="70" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
-  // 原边虚线
-  let dex=60+36,dey=70;
-  s+=`<line x1="60" y1="70" x2="${dex}" y2="${dey}" stroke="#B4945A" stroke-width="1.5" stroke-dasharray="4,3"/>`;
-  // 折痕
-  let fx=60+36*Math.cos(a),fy=70-36*Math.sin(a);
-  s+=`<line x1="${fx.toFixed(1)}" y1="${fy.toFixed(1)}" x2="102" y2="70" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
-  s+=svgTxt(48,62,'∠2',11,'#B4945A');
-  s+=svgTxt(82,62,'∠1',11,'#E57373');
+// 长方形折叠角：底边水平，折起的边与底边成 a°（=∠2），折痕平分底与折边（∠1=a/2）
+function svgFoldedAngle(a){
+  a=a||60;
+  let Px=60,Py=70,len=36;
+  let s=`<line x1="18" y1="70" x2="102" y2="70" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  let rad=a*Math.PI/180;
+  let Fx=Px+len*Math.cos(rad), Fy=Py-len*Math.sin(rad);
+  // 折起的边
+  s+=`<line x1="${Px}" y1="${Py}" x2="${Fx.toFixed(1)}" y2="${Fy.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  // 原边虚线（未折时位置）
+  s+=`<line x1="${Px}" y1="${Py}" x2="102" y2="70" stroke="#B4945A" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  // 折痕（平分底边与折边，角度 a/2）
+  let cx=Px+len*Math.cos(rad/2), cy=Py-len*Math.sin(rad/2);
+  s+=`<line x1="${Px}" y1="${Py}" x2="${cx.toFixed(1)}" y2="${cy.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Px}" cy="${Py}" r="2.4" fill="#3E4A63"/>`;
+  // ∠2 在底边与折边之间（靠近底边）
+  let l2r=(a*0.32)*Math.PI/180;
+  s+=svgTxt((Px+30*Math.cos(l2r)).toFixed(1),(Py-30*Math.sin(l2r)).toFixed(1),'∠2',11,'#B4945A');
+  // ∠1 在折边与折痕之间（靠近上侧）
+  let l1r=(a*0.78)*Math.PI/180;
+  s+=svgTxt((Px+22*Math.cos(l1r)).toFixed(1),(Py-22*Math.sin(l1r)).toFixed(1),'∠1',11,'#E57373');
   return s;
 }
 // 正方形与长方形重叠角（图2-5）：两个直角顶点重合，旋转45°正方形
@@ -5763,40 +5770,36 @@ function q_fill_basic(){
 }
 function q_fill_supp(){
   let a=ri(25,75), b=180-a;
-  return {type:'fill',question:`如图，∠1与${a}°的角组成一个平角，∠1=（ ）°。`,answer:String(b),svg:svgSupplementary()};
+  return {type:'fill',question:`如图，∠1与${a}°的角组成一个平角，∠1=（ ）°。`,answer:String(b),svg:svgSupplementary(a)};
 }
 function q_fill_comp(){
   let a=ri(20,70), b=90-a;
-  return {type:'fill',question:`如图，∠1与${a}°的角组成一个直角，∠1=（ ）°。`,answer:String(b),svg:svgComplementary()};
+  return {type:'fill',question:`如图，∠1与${a}°的角组成一个直角，∠1=（ ）°。`,answer:String(b),svg:svgComplementary(a)};
 }
 function q_fill_triple(){
   let a=ri(25,65), b=ri(25,65);
   if(a+b>=170){a=30;b=40;}
   let c=180-a-b;
-  return {type:'fill',question:`如图，∠1=${a}°，∠3=${b}°，∠2=（ ）°。`,answer:String(c),svg:svgStraightTriple()};
+  return {type:'fill',question:`如图，∠1=${a}°，∠3=${b}°，∠2=（ ）°。`,answer:String(c),svg:svgStraightTriple(a,b)};
 }
 function q_fill_intersect(){
   let a=ri(35,145), q, ans;
   if(Math.random()<0.5){q=`如图，两条直线相交，已知∠1=${a}°，∠2=（ ）°。`;ans=String(180-a);}
   else{q=`如图，两条直线相交，已知∠1=${a}°，∠3=（ ）°。`;ans=String(a);}
-  return {type:'fill',question:q,answer:ans,svg:svgIntersectLines()};
+  return {type:'fill',question:q,answer:ans,svg:svgIntersectLines(a)};
 }
 function q_fill_perp(){
-  let a=ri(25,65), cases=pick(['know1求2','know2求1','know1求3','know3求1']), q, ans;
-  switch(cases){
-    case 'know1求2': q=`如图，∠1=${a}°，∠2=（ ）°。`; ans=String(90-a); break;
-    case 'know2求1': q=`如图，∠2=${90-a}°，∠1=（ ）°。`; ans=String(a); break;
-    case 'know1求3': q=`如图，∠1=${a}°，∠3=（ ）°。`; ans=String(90-a); break;
-    case 'know3求1': q=`如图，∠3=${90-a}°，∠1=（ ）°。`; ans=String(a); break;
-  }
-  return {type:'fill',question:q,answer:ans,svg:svgPerpendicularCross()};
+  let x=ri(25,65), cases=pick(['know1求2','know2求1']), q, ans;
+  if(cases==='know1求2'){ q=`如图，∠2=${x}°，∠1=（ ）°。`; ans=String(90-x); }
+  else { q=`如图，∠1=${90-x}°，∠2=（ ）°。`; ans=String(x); }
+  return {type:'fill',question:q,answer:ans,svg:svgPerpendicularCross(x)};
 }
 function q_fill_fold(){
-  let a=ri(55,75), b=180-2*a;
-  return {type:'fill',question:`如图，长方形纸折起后，已知∠2=${a}°，∠1=（ ）°。`,answer:String(b),svg:svgFoldedAngle()};
+  let a=ri(25,35)*2, b=a/2;
+  return {type:'fill',question:`如图，长方形纸折起后，已知∠2=${a}°，∠1=（ ）°。`,answer:String(b),svg:svgFoldedAngle(a)};
 }
 function q_fill_overlap(){
-  return {type:'fill',question:'如图，正方形与长方形部分重叠，已知∠1+∠2+∠3=122°，∠3=（ ）°。',answer:'58',svg:svgOverlapAngle()};
+  return {type:'fill',question:'如图，正方形与长方形重叠，重叠处的三个角∠1、∠2、∠3相等，它们的和是135°，∠3=（ ）°。',answer:'45',svg:svgOverlapAngle()};
 }
 function q_judge(){
   const pool=[
@@ -5846,19 +5849,19 @@ function q_choice_intersect(){
   let q=cases==='邻补'?`两条直线相交，∠1=${a}°，∠2与∠1互为邻补角，∠2=（ ）°。`:`两条直线相交，∠1=${a}°，∠2与∠1为对顶角，∠2=（ ）°。`;
   let ans=cases==='邻补'?String(180-a):String(a);
   let opts=[String(180-a),String(a),String(Math.abs(90-a)),String(90+a)].filter((v,i,A)=>A.indexOf(v)===i).slice(0,3);
-  return mkChoice(q,ans,opts,svgIntersectLines());
+  return mkChoice(q,ans,opts,svgIntersectLines(a));
 }
 function q_choice_fold(){
-  let a=ri(55,75), b=180-2*a;
+  let a=ri(25,35)*2, b=a/2;
   let opts=[(b+10)+'°',(b-10)+'°',(180-b)+'°'];
-  return mkChoice(`如图，长方形纸折起后，已知∠2=${a}°，∠1=（ ）°。`,b+'°',opts,svgFoldedAngle());
+  return mkChoice(`如图，长方形纸折起后，已知∠2=${a}°，∠1=（ ）°。`,b+'°',opts,svgFoldedAngle(a));
 }
 function q_choice_overlap(){
   return mkChoice('如图，正方形与长方形的一个顶点重合，∠1和∠2的大小关系是（ ）。','相等',['∠1大','∠2大','无法比较'],svgOverlapAngle());
 }
 function q_choice_complement(){
   let a=ri(20,70);
-  return mkChoice(`如图，∠1与${a}°的角组成直角，∠1=（ ）°。`,(90-a)+'°',[a+'°',(90+a)+'°',(180-a)+'°'],svgComplementary());
+  return mkChoice(`如图，∠1与${a}°的角组成直角，∠1=（ ）°。`,(90-a)+'°',[a+'°',(90+a)+'°',(180-a)+'°'],svgComplementary(a));
 }
 function q_op_protractor(){
   let deg=pick([45,60,90,120,135,150]);
@@ -5882,29 +5885,28 @@ function q_word_supp(){
 }
 function q_word_comp(){
   let a=ri(25,65);
-  return {type:'fill',question:`已知∠1=${a}°，∠1与∠2组成一个直角，∠2是多少度？`,answer:String(90-a),svg:svgComplementary()};
+  return {type:'fill',question:`已知∠1=${a}°，∠1与∠2组成一个直角，∠2是多少度？`,answer:String(90-a),svg:svgComplementary(a)};
 }
 function q_word_triple(){
   let a=ri(25,65), b=ri(25,65);
   if(a+b>=170){a=35;b=45;}
   let c=180-a-b;
-  return {type:'fill',question:`如图，∠1=${a}°，∠2=${b}°，求∠3的度数。`,answer:String(c),svg:svgStraightTriple()};
+  return {type:'fill',question:`如图，∠1=${a}°，∠2=${b}°，求∠3的度数。`,answer:String(c),svg:svgStraightTriple(a,b)};
 }
 function q_word_intersect(){
   let a=ri(35,145);
   let q=`如图，两条直线相交，已知∠1=${a}°，求∠2、∠3、∠4的度数。（按顺序用逗号隔开，如120,60,120）`;
   let ans=`${180-a},${a},${180-a}`;
-  return {type:'fill',question:q,answer:ans,svg:svgIntersectLines()};
+  return {type:'fill',question:q,answer:ans,svg:svgIntersectLines(a)};
 }
 function q_word_perp(){
-  let a=ri(25,65);
-  let q=`如图，∠1=${a}°，∠2与∠3分别是多少度？（按顺序用逗号隔开，如50,40）`;
-  let ans=`${90-a},${a}`;
-  return {type:'fill',question:q,answer:ans,svg:svgPerpendicularCross()};
+  let x=ri(25,65);
+  let q=`如图，∠2=${x}°，∠1是多少度？`;
+  return {type:'fill',question:q,answer:String(90-x),svg:svgPerpendicularCross(x)};
 }
 function q_word_fold(){
-  let a=ri(55,75), b=180-2*a;
-  return {type:'fill',question:`如图，长方形纸折起后，已知∠2=${a}°，求∠1的度数。`,answer:String(b),svg:svgFoldedAngle()};
+  let a=ri(25,35)*2, b=a/2;
+  return {type:'fill',question:`如图，长方形纸折起后，已知∠2=${a}°，求∠1的度数。`,answer:String(b),svg:svgFoldedAngle(a)};
 }
 function drawPool(pool,n){let copy=[];while(copy.length<n){copy=copy.concat(pool.slice().sort(()=>Math.random()-0.5));}return copy.slice(0,n);}
 function g4_angle_special(){

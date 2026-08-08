@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v20：「专项·角的度量」扩充为随机组卷，覆盖图1/2/3三张试卷题型（相交线/垂线/折叠/重叠角/互补互余）+ 精准配图
-const CACHE = 'lyj-shell-v20';
+// v21：修复专项配图角度不准——相交线/垂线/折叠/互补/平角/直线三角等图形的角度改为参数化，画出的角=题面数字；三角板比例精确为30-60-90
+const CACHE = 'lyj-shell-v21';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
