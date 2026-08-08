@@ -5675,9 +5675,10 @@ function svgStraightTriple(a, b){
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex1.toFixed(1)}" y2="${ey1.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex2.toFixed(1)}" y2="${ey2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx-16,Vy+14,'∠1',11,'#B4945A');
-  s+=svgTxt(Vx,Vy-18,'∠2',11,'#E57373');
-  s+=svgTxt(Vx+16,Vy+14,'∠3',11,'#B4945A');
+  let m1=180-a/2, m2=(180-a+b)/2, m3=b/2, R1=15,R2=16,R3=15;
+  s+=svgTxt((Vx+R1*Math.cos(m1*Math.PI/180)).toFixed(1),(Vy-R1*Math.sin(m1*Math.PI/180)).toFixed(1),'∠1',11,'#B4945A');
+  s+=svgTxt((Vx+R2*Math.cos(m2*Math.PI/180)).toFixed(1),(Vy-R2*Math.sin(m2*Math.PI/180)).toFixed(1),'∠2',11,'#E57373');
+  s+=svgTxt((Vx+R3*Math.cos(m3*Math.PI/180)).toFixed(1),(Vy-R3*Math.sin(m3*Math.PI/180)).toFixed(1),'∠3',11,'#B4945A');
   return s;
 }
 // 两直线相交：一条水平，一条与之成 a° 角，标∠1/∠2/∠3/∠4（∠1=∠3=a, ∠2=∠4=180-a）
@@ -5691,10 +5692,11 @@ function svgIntersectLines(a){
   let x2=Vx+len*Math.cos(rad), y2=Vy-len*Math.sin(rad);
   s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx+12,Vy-10,'∠1',11,'#B4945A');
-  s+=svgTxt(Vx-12,Vy-10,'∠2',11,'#B4945A');
-  s+=svgTxt(Vx+12,Vy+16,'∠3',11,'#B4945A');
-  s+=svgTxt(Vx-12,Vy+16,'∠4',11,'#B4945A');
+  let m1=a/2, m2=(a+180)/2, m3=180+a/2, m4=270+a/2, Rt=13;
+  s+=svgTxt((Vx+Rt*Math.cos(m1*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m1*Math.PI/180)).toFixed(1),'∠1',11,'#B4945A');
+  s+=svgTxt((Vx+Rt*Math.cos(m2*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m2*Math.PI/180)).toFixed(1),'∠2',11,'#B4945A');
+  s+=svgTxt((Vx+Rt*Math.cos(m3*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m3*Math.PI/180)).toFixed(1),'∠3',11,'#B4945A');
+  s+=svgTxt((Vx+Rt*Math.cos(m4*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m4*Math.PI/180)).toFixed(1),'∠4',11,'#B4945A');
   return s;
 }
 // 直角内余角：竖直边+水平边，斜线在∠2(=a°)处分开，∠1=90-a
@@ -5707,8 +5709,9 @@ function svgComplementary(a){
   let rad=a*Math.PI/180,ex=Vx+len*Math.cos(rad),ey=Vy-len*Math.sin(rad);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx+10,Vy-10,'∠1',11,'#E57373');
-  s+=svgTxt(Vx+24,Vy+6,'∠2',11,'#B4945A');
+  let cm1=(a+90)/2, cm2=a/2, cR=13;
+  s+=svgTxt((Vx+cR*Math.cos(cm1*Math.PI/180)).toFixed(1),(Vy-cR*Math.sin(cm1*Math.PI/180)).toFixed(1),'∠1',11,'#E57373');
+  s+=svgTxt((Vx+cR*Math.cos(cm2*Math.PI/180)).toFixed(1),(Vy-cR*Math.sin(cm2*Math.PI/180)).toFixed(1),'∠2',11,'#B4945A');
   return s;
 }
 // 垂线+斜线：水平线+垂直线成直角，斜线在∠2(=a°)处分开，∠1=90-a（只标∠1/∠2）
@@ -5721,8 +5724,9 @@ function svgPerpendicularCross(a){
   let rad=a*Math.PI/180,ex=Vx+len*Math.cos(rad),ey=Vy-len*Math.sin(rad);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx+12,Vy-12,'∠1',11,'#B4945A');
-  s+=svgTxt(Vx+14,Vy+14,'∠2',11,'#B4945A');
+  let pm1=(a+90)/2, pm2=a/2, pR=13;
+  s+=svgTxt((Vx+pR*Math.cos(pm1*Math.PI/180)).toFixed(1),(Vy-pR*Math.sin(pm1*Math.PI/180)).toFixed(1),'∠1',11,'#B4945A');
+  s+=svgTxt((Vx+pR*Math.cos(pm2*Math.PI/180)).toFixed(1),(Vy-pR*Math.sin(pm2*Math.PI/180)).toFixed(1),'∠2',11,'#B4945A');
   return s;
 }
 // 平角内双角：水平线，射线成 a°，小角标 a°，大角∠1=180-a
@@ -5874,10 +5878,11 @@ function svgTwoLinesNoNum(a){
   let x2=Vx+len*Math.cos(rad), y2=Vy-len*Math.sin(rad);
   s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx+14,Vy-12,'∠1',11,'#B4945A');
-  s+=svgTxt(Vx-14,Vy-12,'∠2',11,'#B4945A');
-  s+=svgTxt(Vx+14,Vy+16,'∠3',11,'#B4945A');
-  s+=svgTxt(Vx-14,Vy+16,'∠4',11,'#B4945A');
+  let m1=a/2, m2=(a+180)/2, m3=180+a/2, m4=270+a/2, Rt=13;
+  s+=svgTxt((Vx+Rt*Math.cos(m1*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m1*Math.PI/180)).toFixed(1),'∠1',11,'#B4945A');
+  s+=svgTxt((Vx+Rt*Math.cos(m2*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m2*Math.PI/180)).toFixed(1),'∠2',11,'#B4945A');
+  s+=svgTxt((Vx+Rt*Math.cos(m3*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m3*Math.PI/180)).toFixed(1),'∠3',11,'#B4945A');
+  s+=svgTxt((Vx+Rt*Math.cos(m4*Math.PI/180)).toFixed(1),(Vy-Rt*Math.sin(m4*Math.PI/180)).toFixed(1),'∠4',11,'#B4945A');
   return s;
 }
 // 补角/余角关系图（看图选关系，无数字）
@@ -5889,8 +5894,9 @@ function svgCompRel(){ // 余角：直角 + 一条斜分线
   let a=40*Math.PI/180, ex=Vx+len*Math.cos(a), ey=Vy-len*Math.sin(a);
   s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
   s+=`<circle cx="${Vx}" cy="${Vy}" r="2.4" fill="#3E4A63"/>`;
-  s+=svgTxt(Vx+14,Vy-10,'∠1',11,'#B4945A');
-  s+=svgTxt(Vx+26,Vy+6,'∠2',11,'#B4945A');
+  let rm1=65, rm2=20, rR=13;
+  s+=svgTxt((Vx+rR*Math.cos(rm1*Math.PI/180)).toFixed(1),(Vy-rR*Math.sin(rm1*Math.PI/180)).toFixed(1),'∠1',11,'#B4945A');
+  s+=svgTxt((Vx+rR*Math.cos(rm2*Math.PI/180)).toFixed(1),(Vy-rR*Math.sin(rm2*Math.PI/180)).toFixed(1),'∠2',11,'#B4945A');
   return s;
 }
 function svgSuppRel(){ // 平角：水平线 + 一条射线（分∠1大角/小角）
@@ -6208,7 +6214,7 @@ function q_choice_protractor(){
 }
 function q_choice_intersect(){
   let a=ri(40,140), cases=pick(['邻补','对顶']);
-  let q=cases==='邻补'?`两条直线相交，∠1=${a}°，∠2与∠1互为邻补角，∠2=（ ）°。`:`两条直线相交，∠1=${a}°，∠2与∠1为对顶角，∠2=（ ）°。`;
+  let q=cases==='邻补'?`两条直线相交，∠1=${a}°，∠2与∠1互为邻补角，∠2=（ ）°。`:`两条直线相交，∠1=${a}°，∠3与∠1为对顶角，∠3=（ ）°。`;
   let ans=cases==='邻补'?String(180-a):String(a);
   let opts=[String(180-a),String(a),String(Math.abs(90-a)),String(90+a)].filter((v,i,A)=>A.indexOf(v)===i).slice(0,3);
   return mkChoice(q,ans,opts,svgIntersectLines(a));

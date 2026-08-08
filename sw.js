@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v24：修复两处题目瑕疵——三上「周长应用题」改为真出周长题(g_app_perimeter)；六上「比例应用题」用整数倍 a:b=ak:bk 杜绝小数
-const CACHE = 'lyj-shell-v24';
+// v25：修复多处角度配图∠1/∠2/∠3标签落点——改为按角扇区中点参数化定位；相交线∠3改标为∠1的对顶角(对角)；同步修正一道把对顶角错写成∠2的题目文字
+const CACHE = 'lyj-shell-v25';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
