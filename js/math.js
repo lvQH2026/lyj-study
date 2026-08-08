@@ -2,6 +2,8 @@
 // ============================================================
 // 知识点数据库 - 人教版小学数学1-6年级上下册
 // ============================================================
+const ANGLE_METHOD_IMG = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><rect width="320" height="160" fill="#F7F6F2"/><text x="16" y="28" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3E4A63">量角三步法</text><g transform="translate(70,100)"><path d="M -50 0 A 50 50 0 0 1 50 0" fill="rgba(180,148,90,0.10)" stroke="#B4945A" stroke-width="1.5"/><line x1="-50" y1="0" x2="50" y2="0" stroke="#B4945A" stroke-width="1"/><line x1="0" y1="0" x2="50" y2="0" stroke="#3E4A63" stroke-width="2.4"/><line x1="0" y1="0" x2="35" y2="-35" stroke="#3E4A63" stroke-width="2.4"/><circle cx="0" cy="0" r="2.6" fill="#3E4A63"/><text x="-8" y="-40" font-size="10" fill="#B4945A">45°</text></g><text x="140" y="58" font-family="sans-serif" font-size="11" fill="#3E4A63">① 中心点对齐顶点</text><text x="140" y="84" font-family="sans-serif" font-size="11" fill="#3E4A63">② 0°刻度线对齐一边</text><text x="140" y="110" font-family="sans-serif" font-size="11" fill="#3E4A63">③ 看另一边读刻度</text></svg>`);
+
 const TRIANGLE_METHOD_IMG = 'data:image/png;base64,' +
   'iVBORw0KGgoAAAANSUhEUgAAAqUAAAOgCAIAAACLAJhiAAAQAElEQVR4AexdBWAVx9Y+Z3avx3F3pxSHGqWlQt39ta/2v7q7u9t7dXelpW7UaQulRYp7QgJx' +
   '96u783+zm1xCSCCBJCQ00++ee+bMmTNnzszO2d2bxxOdB09KHLxvq8R+iYOnWNjfojbfKmjSkKmtH4lDpiY0EWAqaegB9eDApKHT/mnoMOygdrRHoGUi0Aou' +
@@ -5377,6 +5379,7 @@ const KNOWLEDGE_BASE = {
       { name: '条形统计图', type: 'application', gen: g4_bar },
       { name: '行程应用题', type: 'application', gen: g_app_speed },
       { name: '角度计算', type: 'shape', gen: g_shape_angle_calc },
+      { name: '专项·角的度量', type: 'shape', gen: g4_angle_special, paper: true, introImg: ANGLE_METHOD_IMG },
     ],
     2: [
       { name: '四则运算', type: 'basic', gen: g4_mixed },
@@ -5553,6 +5556,106 @@ function svgAngle(deg, showDeg){
   return s;
 }
 function svgRuler(){let s='';for(let i=0;i<=10;i++){let h=(i%5==0)?10:5;s+=`<line x1="${5+i*11}" y1="35" x2="${5+i*11}" y2="${35-h}" stroke="#333" stroke-width="1"/>`;if(i%2==0)s+=svgTxt(5+i*11,48,i,8)} return svgR(2,30,115,30,'#fff',1)+s;}
+
+// ===== 专项·角的度量：精准配图 + 整卷试卷生成 =====
+function svgRays(){
+  let Vx=60,Vy=58,len=44, s=`<circle cx="${Vx}" cy="${Vy}" r="2.6" fill="#3E4A63"/>`;
+  const angs=[-44,-15,16,47];
+  angs.forEach((d,i)=>{
+    let a=d*Math.PI/180, ex=Vx+len*Math.cos(a), ey=Vy-len*Math.sin(a);
+    s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+    let lx=Vx+(len+9)*Math.cos(a), ly=Vy-(len+9)*Math.sin(a);
+    s+=`<text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" text-anchor="middle" font-size="11" fill="#B4945A">${'abcd'[i]}</text>`;
+  });
+  return s;
+}
+function svgTwoSetSquares(){
+  let s='';
+  s+=`<polygon points="18,84 76,84 18,47" fill="rgba(180,148,90,0.12)" stroke="#3E4A63" stroke-width="2"/>`;
+  s+=`<rect x="18" y="70" width="13" height="14" fill="#fff" stroke="#3E4A63" stroke-width="1.2"/>`;
+  s+=`<text x="42" y="80" font-size="9" fill="#3E4A63">30°</text>`;
+  s+=`<text x="24" y="60" font-size="9" fill="#3E4A63">60°</text>`;
+  s+=`<polygon points="84,84 112,84 84,56" fill="rgba(62,74,99,0.10)" stroke="#3E4A63" stroke-width="2"/>`;
+  s+=`<rect x="84" y="70" width="13" height="14" fill="#fff" stroke="#3E4A63" stroke-width="1.2"/>`;
+  s+=`<text x="98" y="80" font-size="9" fill="#3E4A63">45°</text>`;
+  return s;
+}
+function svgMultiAngle(){
+  function ang(Vx,Vy,deg,r){
+    let a=deg*Math.PI/180, ex=Vx+r*Math.cos(a), ey=Vy-r*Math.sin(a);
+    return `<line x1="${Vx}" y1="${Vy}" x2="${Vx+r}" y2="${Vy}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`
+         + `<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`
+         + `<circle cx="${Vx}" cy="${Vy}" r="2" fill="#3E4A63"/>`;
+  }
+  let s=ang(18,76,40,26)+`<text x="12" y="94" font-size="9" fill="#B4945A">锐角</text>`;
+  s+=ang(58,76,90,26)+`<text x="52" y="94" font-size="9" fill="#B4945A">直角</text>`;
+  s+=ang(98,76,100,22)+`<text x="90" y="94" font-size="9" fill="#B4945A">钝角</text>`;
+  return s;
+}
+function svgAnglePair(){
+  let Vx=18,Vy=58;
+  let s=`<line x1="${Vx}" y1="${Vy}" x2="112" y2="${Vy}" stroke="#3E4A63" stroke-width="2" stroke-linecap="round"/>`;
+  let a=35*Math.PI/180, ex=Vx+42*Math.cos(a), ey=Vy-42*Math.sin(a);
+  s+=`<line x1="${Vx}" y1="${Vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#E57373" stroke-width="2.6" stroke-linecap="round"/>`;
+  s+=`<circle cx="${Vx}" cy="${Vy}" r="2.6" fill="#3E4A63"/>`;
+  s+=`<text x="${Vx+4}" y="${ey-5}" font-size="10" fill="#E57373">∠1=35°</text>`;
+  return s;
+}
+function svgRay(){
+  return `<line x1="18" y1="82" x2="102" y2="34" stroke="#3E4A63" stroke-width="2.4" stroke-linecap="round"/>`
+       + `<circle cx="18" cy="82" r="3" fill="#3E4A63"/>`;
+}
+function mkChoice(q, ans, opts, svg, section, score){
+  let o=[ans,...opts].filter((v,i,A)=>A.indexOf(v)===i);
+  o.sort(()=>Math.random()-0.5);
+  let qo={type: svg?'shape_choice':'choice', question:q, options:o, answer:ans};
+  if(svg) qo.svg=svg;
+  if(section){ qo.sectionTitle=section; qo.score=score; }
+  return qo;
+}
+function mkJudge(q, ans, section, score){
+  let o={type:'choice', question:q, options:['对','错'], answer:ans};
+  if(section){ o.sectionTitle=section; o.score=score; }
+  return o;
+}
+function g4_angle_special(){
+  const S1='一、填空（每空3分）', S2='二、判断（每题2分）', S3='三、选择（每题3分）', S4='四、操作·作图（共26分）', S5='五、解决问题（共20分）';
+  let Q=[];
+  // 一、填空（8题，24分）
+  Q.push({type:'fill',question:'线段有（ ）个端点。',answer:'2',sectionTitle:S1,score:3});
+  Q.push({type:'fill',question:'射线有（ ）个端点。',answer:'1',sectionTitle:S1,score:3});
+  Q.push({type:'fill',question:'角的大小与边的长短（ ）。（填“有关”或“无关”）',answer:'无关',sectionTitle:S1,score:3});
+  Q.push({type:'fill',question:'直角是（ ）度。',answer:'90',sectionTitle:S1,score:3});
+  Q.push({type:'fill',question:'平角是（ ）度。',answer:'180',sectionTitle:S1,score:3});
+  Q.push({type:'fill',question:'周角是（ ）度。',answer:'360',sectionTitle:S1,score:3});
+  Q.push({type:'fill',question:'1周角 =（ ）个直角。',answer:'4',sectionTitle:S1,score:3});
+  Q.push({type:'fill',question:'一副三角板中，最大的角是（ ）度。',answer:'90',sectionTitle:S1,score:3});
+  // 二、判断（6题，12分）
+  Q.push(mkJudge('大于90°的角叫钝角。','错',S2,2));
+  Q.push(mkJudge('平角是一条直线。','错',S2,2));
+  Q.push(mkJudge('用放大镜看一个30°的角，它变成90°。','错',S2,2));
+  Q.push(mkJudge('角的两条边越长，这个角就越大。','错',S2,2));
+  Q.push(mkJudge('周角只有一条边。','错',S2,2));
+  Q.push(mkJudge('用一副三角板能拼出105°的角。','对',S2,2));
+  // 三、选择（6题，18分）
+  Q.push(mkChoice('下面（ ）是射线。','太阳射出的光线',['绷紧的绳子','黑板的边'],svgRay(),S3,3));
+  Q.push(mkChoice('一个20°的角，放在5倍放大镜下看，它是（ ）。','20°',['100°','4°'],null,S3,3));
+  Q.push(mkChoice('下图中∠1是（ ）角。','钝角',['锐角','直角'],svgAngle(120),S3,3));
+  Q.push(mkChoice('下面不能用一副三角板拼出的是（ ）。','80°',['75°','105°'],svgTwoSetSquares(),S3,3));
+  Q.push(mkChoice('钟面上（ ）时整，时针与分针成平角。','6时',['3时','9时'],svgClock(6,0),S3,3));
+  Q.push(mkChoice('把平角分成两个角，其中一个是钝角，另一个一定是（ ）。','锐角',['直角','钝角'],null,S3,3));
+  // 四、操作·作图（5题，26分）
+  Q.push(mkChoice('量出下面角的度数。','45°',['30°','60°','90°'],svgAngle(45),S4,5));
+  Q.push(mkChoice('量出下面角的度数。','135°',['90°','120°','150°'],svgAngle(135),S4,5));
+  Q.push(mkChoice('用一副三角板能拼出下面哪个角？','75°',['80°','100°'],svgTwoSetSquares(),S4,6));
+  Q.push(mkChoice('图中从一点引出4条射线，共有（ ）个角。','6个',['3个','4个','5个'],svgRays(),S4,5));
+  Q.push(mkChoice('上图分别画了锐角、直角、钝角，其中钝角有（ ）个。','1个',['0个','2个','3个'],svgMultiAngle(),S4,5));
+  // 五、解决问题（3题，20分）
+  Q.push({type:'fill',question:'已知∠1=35°，∠1与∠2组成一个平角，∠2 =（ ）°。',answer:'145',sectionTitle:S5,score:7,svg:svgAnglePair()});
+  Q.push(mkChoice('一个周角减去一个钝角，剩下的是什么角？','锐角',['直角','钝角'],svgAngle(130),S5,7));
+  Q.push(mkChoice('用一副三角板可以拼出下面哪个15°倍数的角？','15°',['20°','25°'],svgTwoSetSquares(),S5,6));
+  return Q;
+}
 
 // ---- 选择题/填空题工厂 ----
 function mc(q,a,d){
@@ -6840,21 +6943,8 @@ function startSpecialQuiz(grade, sem, idx) {
   state.currentGrade = grade;
   state.currentSemester = sem;
   let unit = KNOWLEDGE_BASE[grade][sem][idx];
-  state.quizMode = 'unit';
-  state.quizTitle = unit.name;
-  state.quizQuestions = [];
-  for (let i = 0; i < UNIT_QUIZ_LENGTH; i++) {
-    state.quizQuestions.push(unit.gen());
-  }
-  state.quizIndex = 0;
-  state.quizScore = 0;
-  state.quizCorrect = 0;
-  state.quizWrong = 0;
-  state.quizWrongQuestions = [];
-  showPage('quiz');
-  document.getElementById('backBtn').style.display = 'block';
-  document.getElementById('backBtn').onclick = () => goBack();
-  renderQuestion();
+  if (unit.introImg) { showUnitIntro(unit, grade, sem, idx); return; }
+  beginUnitQuiz(idx, grade, sem);
 }
 
 function selectGrade(grade) {
@@ -6942,8 +7032,12 @@ function beginUnitQuiz(idx, grade, sem) {
   state.quizMode = 'unit';
   state.quizTitle = unit.name;
   state.quizQuestions = [];
-  for (let i = 0; i < UNIT_QUIZ_LENGTH; i++) {
-    state.quizQuestions.push(unit.gen());
+  if (unit.paper) {
+    state.quizQuestions = unit.gen();
+  } else {
+    for (let i = 0; i < UNIT_QUIZ_LENGTH; i++) {
+      state.quizQuestions.push(unit.gen());
+    }
   }
   state.quizIndex = 0;
   state.quizScore = 0;
@@ -7579,7 +7673,7 @@ function renderQuestion() {
   let html = '';
 
   // 考试模式：分区大标题只在该分区第一题出现，其余题显示细分区条
-  if (isExam && q.sectionTitle) {
+  if (q.sectionTitle) {
     let prev = state.quizIndex > 0 ? state.quizQuestions[state.quizIndex - 1] : null;
     let isSectionStart = !prev || prev.sectionTitle !== q.sectionTitle;
     if (isSectionStart) {
@@ -7589,7 +7683,7 @@ function renderQuestion() {
     }
   }
   let qScore = (typeof q.score === 'number') ? q.score : 10;
-  let scoreBadge = isExam ? `<span class="exam-score-badge">${qScore}分</span>` : '';
+  let scoreBadge = (typeof q.score === 'number') ? `<span class="exam-score-badge">${qScore}分</span>` : '';
   html += `<div class="question-type-tag">${typeTag} ${scoreBadge}</div>`;
 
   // 题干长度自适应字号：长应用题改用小字号 + 左对齐，短算式保留大字
