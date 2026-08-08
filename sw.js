@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v25：修复多处角度配图∠1/∠2/∠3标签落点——改为按角扇区中点参数化定位；相交线∠3改标为∠1的对顶角(对角)；同步修正一道把对顶角错写成∠2的题目文字
-const CACHE = 'lyj-shell-v25';
+// v26：修复考试系统"题目错乱"——buildQuestionPool 兼容 gen 返回数组(角度计算/专项类)；单元考试禁用"补充其他单元"与"配图保底"，确保只考本单元、零串题
+const CACHE = 'lyj-shell-v26';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

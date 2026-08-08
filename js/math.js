@@ -8155,8 +8155,12 @@ function buildQuestionPool(units, target, seen, isCore) {
     for (let u of units) {
       if (pool.length >= target) break;
       for (let tries = 0; tries < 8; tries++) {
-        let q;
-        try { q = u.gen(); } catch (e) { continue; }
+        let raw;
+        try { raw = u.gen(); } catch (e) { continue; }
+        // v23 契约：gen() 可返回单题对象，或整组题目数组（如角度计算/专项类返回 20~34 题）。
+        // 数组直接作为本轮候选，避免 q.question 为 undefined 导致整单元抽空、考试串题。
+        let cands = Array.isArray(raw) ? raw : [raw];
+        let q = cands[tries % cands.length];
         if (!q || !q.question || q.answer === undefined || q.answer === null) continue;
         let key = q.question + '|' + q.answer;
         if (seen.has(key)) continue;
@@ -8322,17 +8326,20 @@ function generateExamPaper() {
   // 题池：目标 90 道候选，保证四个分区都有得挑
   let pool = buildQuestionPool(units, 90, seen, true);
 
-  // 单元题量不足时，用同册其他单元补充（相当于试卷中的"复习巩固"部分）
-  if (pool.length < 45 && all && all.length > units.length) {
+  // 单元题量不足时，用同册其他单元补充（相当于试卷中的"复习巩固"部分）。
+  // 单元考试只考本单元，绝不混入其他单元，故跳过补充。
+  if (pool.length < 45 && all && all.length > units.length && examState.type !== 'unit') {
     let others = all.filter(u => units.indexOf(u) === -1);
     pool = pool.concat(buildQuestionPool(others, 60 - pool.length, seen, false));
   }
   if (pool.length === 0) return null;
 
-  // 极端情况下仍不足 30 道，允许少量重复以凑满整卷
+  // 极端情况下仍不足 30 道，允许少量重复以凑满整卷（单元考试不重复，保留本单元题量即可）
   let baseLen = pool.length;
-  for (let k = 0; pool.length < 32; k++) {
-    pool.push(Object.assign({}, pool[k % baseLen]));
+  if (examState.type !== 'unit') {
+    for (let k = 0; pool.length < 32; k++) {
+      pool.push(Object.assign({}, pool[k % baseLen]));
+    }
   }
 
   let used = new Set();
@@ -8371,7 +8378,8 @@ function generateExamPaper() {
   // 当考查范围本身不含图形题单元时，从同册"全册题池"补充，替换选择题区里的非配图题。
   const MIN_IMG = 4;
   let imgNow = questions.filter(q => String(q.svg || '').includes('<')).length;
-  if (imgNow < MIN_IMG && all && all.length > units.length) {
+  // 单元考试只考本单元，禁止从全册拿配图题替换（否则会混入其他单元图形题）。
+  if (imgNow < MIN_IMG && all && all.length > units.length && examState.type !== 'unit') {
     let imgPool = buildQuestionPool(all, 50, seen, false)
       .filter(q => String(q.svg || '').includes('<') && !questions.some(x => x.question === q.question && x.answer === q.answer));
     let replSlots = questions.map((q, i) => ({ q, i }))
