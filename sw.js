@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v26：修复考试系统"题目错乱"——buildQuestionPool 兼容 gen 返回数组(角度计算/专项类)；单元考试禁用"补充其他单元"与"配图保底"，确保只考本单元、零串题
-const CACHE = 'lyj-shell-v26';
+// v27：新增专项·三位数乘两位数(200题池随机抽30)；四级上册 KNOWLEDGE_BASE[4][1] 新增 g_special_3x2_mul
+const CACHE = 'lyj-shell-v27';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

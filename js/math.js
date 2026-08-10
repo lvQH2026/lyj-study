@@ -5437,6 +5437,7 @@ const KNOWLEDGE_BASE = {
       { name: '角度计算', type: 'shape', gen: g_shape_angle_calc },
       { name: '专项·角的度量', type: 'shape', gen: g4_angle_special, paper: true, introImg: ANGLE_METHOD_IMG },
       { name: '专项·图形认知', type: 'shape', gen: g4_shape_recognize, paper: true, introImg: SHAPE_METHOD_IMG, interactiveIntro: true },
+      { name: '专项·三位数乘两位数', type: 'basic', gen: g_special_3x2_mul },
     ],
     2: [
       { name: '四则运算', type: 'basic', gen: g4_mixed },
@@ -6715,6 +6716,7 @@ function g4_angle(){
   let it=pick(items); return msc(it.q,it.s,it.a,it.d);
 }
 function g4_mul(){let a=ri(100,500),b=ri(20,50);return mf(`${a}×${b}=？`,a*b)}
+function g_special_3x2_mul(){let P=200,S=30,s=new Set(),p=[];while(p.length<P){let a=ri(100,999),b=ri(10,99),k=a+'×'+b;if(!s.has(k)){s.add(k);p.push({a,b})}}for(let i=p.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]]}return p.slice(0,S).map(q=>mf(`${q.a}×${q.b}=？`,q.a*q.b))}
 function g4_div(){let a=ri(200,600),b=ri(10,30);if(a%b!==0)a+=b-a%b;return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1])}
 function g4_parallel(){
   let items=[
