@@ -7752,11 +7752,11 @@ function showUnitDiagrams(unit, grade, sem, idx) {
     renderShapeExplore(card.querySelector('.diag-card-body'));
   }
   // 通用交互动图（按知识点映射，每单元 1~3 个）
-  const diags = (typeof getUnitDiagrams === 'function') ? getUnitDiagrams(unit) : [];
+  const diags = (typeof getUnitDiagrams === 'function') ? getUnitDiagrams(unit, grade, sem) : [];
   diags.forEach(d => {
     const card = document.createElement('div');
     card.className = 'diag-card';
-    card.innerHTML = '<div class="diag-card-title">🎬 ' + d.title + '</div><div class="diag-card-body"></div><div class="diag-card-hint">👆 拖动图形，自己试一试</div>';
+    card.innerHTML = '<div class="diag-card-title">🎬 ' + d.title + '</div><div class="diag-card-body"></div><div class="diag-card-hint">' + (d.hint || '👆 拖动图形，自己试一试') + '</div>';
     cardsEl.appendChild(card);
     try { d.fn(card.querySelector('.diag-card-body'), d.opts || {}); }
     catch (e) { console.error('diagram render error', d.title, e); }

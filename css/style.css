@@ -1481,3 +1481,83 @@ input:focus,textarea:focus,select:focus{
   margin-top:4px; opacity:.85;
 }
 #specialIntroImgWrap img { max-width:100%; }
+
+/* ============================================================
+ *  四年级参考交互动画图解（移植自「四年级下册数学乐园」参考页）
+ *  作用域限定在 .diag-card-body，配色沿用参考页，不依赖未定义变量，
+ *  不影响全站其它 .btn / .card 等组件
+ * ============================================================ */
+.diag-card-body .anim-stage {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+  background: #fbfcfe; border: 1.5px solid #e4eaf2; border-radius: 13px; padding: 8px;
+}
+.diag-card-body .anim-svg { width: 100%; max-width: 470px; height: auto; display: block; touch-action: manipulation; }
+.diag-card-body .anim-msg {
+  margin: 14px 0 4px; text-align: center; font-size: 16px; font-weight: 600;
+  background: #eaf1ff; border-radius: 11px; padding: 11px 13px; line-height: 1.7;
+}
+.diag-card-body .anim-ctrl { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; margin-top: 12px; }
+.diag-card-body .anim-sliders { display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: center; margin-top: 13px; }
+.diag-card-body .anim-sliders label {
+  display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14.5px;
+  background: #f5f8fd; border-radius: 10px; padding: 7px 12px;
+}
+.diag-card-body .anim-sliders input[type=range] { width: 118px; accent-color: #2d6cdf; height: 26px; }
+.diag-card-body .anim-sliders span { min-width: 26px; text-align: center; color: #2d6cdf; font-weight: 800; }
+.diag-card-body .anim-tip {
+  margin-top: 14px; background: #f0fbf4; border: 1.5px solid #c7edd7;
+  border-radius: 12px; padding: 11px 14px; font-size: 14px; color: #1d6b45; line-height: 1.7;
+}
+.diag-card-body .anim-tabs { display: flex; gap: 8px; margin-bottom: 12px; justify-content: center; }
+.diag-card-body .tab {
+  border: 2px solid #e4eaf2; background: #fff; padding: 8px 20px; border-radius: 999px;
+  font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; min-height: 42px;
+}
+.diag-card-body .tab-on { background: #a55eea; border-color: #a55eea; color: #fff; }
+.diag-card-body .anim-steps { margin-top: 12px; display: flex; flex-direction: column; gap: 7px; }
+.diag-card-body .step {
+  background: #f7f9fc; border-left: 4px solid #2d6cdf; border-radius: 8px;
+  padding: 8px 12px; font-size: 14.5px;
+}
+.diag-card-body .step.ok { border-left-color: #26a269; background: #f0fbf4; color: #1d6b45; }
+.diag-card-body .anim-foot { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; }
+.diag-card-body .hl { color: #e8503a; font-size: 1.08em; }
+.diag-card-body .sub { color: #5b6b7c; font-size: .92em; }
+
+/* 按钮：仅作用于图解卡片内部，避免影响全站 .btn */
+.diag-card-body .btn {
+  border: 2px solid #e4eaf2; background: #fff; color: #22303f;
+  padding: 10px 17px; border-radius: 12px; cursor: pointer;
+  font-size: 15px; font-weight: 700; font-family: inherit; transition: .16s; min-height: 44px;
+}
+.diag-card-body .btn:hover { border-color: #b9cdf0; background: #f7faff; }
+.diag-card-body .btn:active { transform: scale(.97); }
+.diag-card-body .btn:disabled { opacity: .42; cursor: not-allowed; }
+.diag-card-body .btn-primary { background: #2d6cdf; border-color: #2d6cdf; color: #fff; }
+.diag-card-body .btn-primary:hover { background: #2359bd; border-color: #2359bd; }
+.diag-card-body .btn-submit { background: #26a269; border-color: #26a269; color: #fff; }
+.diag-card-body .btn-submit:hover { background: #1c7f52; border-color: #1c7f52; }
+.diag-card-body .btn-ghost { border-color: transparent; color: #5b6b7c; background: transparent; }
+.diag-card-body .btn-back { border: 0; background: #eaf1ff; color: #2d6cdf; padding: 7px 14px; font-size: 14px; min-height: 38px; }
+
+/* SVG 动画过渡 */
+.diag-card-body .ts-wedge { transition: transform .85s cubic-bezier(.34, 1.15, .64, 1); }
+.diag-card-body #ts-done { transition: opacity .4s; }
+.diag-card-body .mo-mirror { opacity: .2; transition: transform .8s cubic-bezier(.34, 1.2, .64, 1), opacity .55s; }
+.diag-card-body .mo-v { transform: scaleX(0); }
+.diag-card-body .mo-h { transform: scaleY(0); }
+.diag-card-body .mo-mirror.mo-on { opacity: 1; transform: scale(1); }
+.diag-card-body .dc-cell { cursor: pointer; transition: fill .15s; }
+.diag-card-body .av-bar { transition: y .05s linear, height .05s linear; }
+.diag-card-body .av-btn { cursor: pointer; user-select: none; }
+.diag-card-body .cr-newleg { animation: legIn .45s ease-out; }
+@keyframes legIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* 手机端：图解按钮与滑块稍紧凑 */
+@media (max-width: 700px) {
+  .diag-card-body .anim-msg { font-size: 15px; }
+  .diag-card-body .anim-sliders label { font-size: 13.5px; padding: 6px 10px; }
+  .diag-card-body .anim-sliders input[type=range] { width: 96px; }
+  .diag-card-body .btn { padding: 10px 14px; font-size: 14.5px; }
+  .diag-card-body .anim-stage { padding: 4px; }
+}
