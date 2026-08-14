@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v29：四年级单元「交互动画图解」按参考页「四年级下册数学乐园」升级为 6 个精美交互动画（三角形内角和/乘法分配律/小数意义/轴对称与平移/平均数/鸡兔同笼），作用域限定美化CSS
-const CACHE = 'lyj-shell-v29';
+// v30：修复交互动图两类问题——①部分图形拖不动（三角形顶点/小数方格/图形平移旋转加真实拖拽手柄）；②部分图形与单元知识不符（巧数三角形改用数三角形专项、四则运算新增运算顺序、图形的运动补上旋转）
+const CACHE = 'lyj-shell-v30';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

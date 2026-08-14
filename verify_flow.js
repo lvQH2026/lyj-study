@@ -227,7 +227,7 @@ try {
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/diagram.js', 'js/main.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v29)', /lyj-shell-v29/.test(sw) && !/lyj-shell-v1[23456789]/.test(sw) && !/lyj-shell-v2[0-8]/.test(sw));
+ok('SW 版本号已升级 (v30)', /lyj-shell-v30/.test(sw) && !/lyj-shell-v1[0-9]/.test(sw) && !/lyj-shell-v2[0-9]/.test(sw));
 
 // ============ 四点五、CSS 隔离守卫 ============
 const engCss = fs.readFileSync(path.join(ROOT, 'css', 'english.css'), 'utf8');

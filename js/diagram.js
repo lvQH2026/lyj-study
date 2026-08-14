@@ -32,17 +32,18 @@ function dgPoint(svg, ev){
   const vb = svg.viewBox.baseVal;
   return { x:(ev.clientX-r.left)/r.width*vb.width, y:(ev.clientY-r.top)/r.height*vb.height };
 }
+// 拖拽助手：标准 pointer 事件 + setPointerCapture，拖动的节点不会被重绘销毁时可稳定工作
 function dgDrag(svg, node, onMove){
   node.style.cursor='grab';
   node.style.touchAction='none';
   node.addEventListener('pointerdown', function(e){
     e.preventDefault();
-    try{node.setPointerCapture(e.pointerId);}catch(_){}
+    try{ node.setPointerCapture(e.pointerId); }catch(_){}
     node.style.cursor='grabbing';
-    const mv = function(ev){ onMove(dgPoint(svg,ev)); };
-    const up = function(){ node.removeEventListener('pointermove',mv); node.removeEventListener('pointerup',up); node.style.cursor='grab'; };
-    node.addEventListener('pointermove',mv);
-    node.addEventListener('pointerup',up);
+    const mv = function(ev){ onMove(dgPoint(svg, ev)); };
+    const up = function(){ node.removeEventListener('pointermove', mv); node.removeEventListener('pointerup', up); node.style.cursor='grab'; };
+    node.addEventListener('pointermove', mv);
+    node.addEventListener('pointerup', up);
     mv(e);
   });
 }
@@ -710,14 +711,18 @@ function getUnitDiagrams(unit, grade, sem){
 
   // ===== 四年级优先：按参考页「四年级下册数学乐园」升级为精美交互动画 =====
   if (grade === 4) {
-    if (/三角形/.test(name)) {
+    if (/巧数|数三角/.test(name)) {
+      add(out, refCountTriangles, '巧数三角形（专项）', {}, '👆 数一数图中有几个三角形，点验证看对错');
+    } else if (/四则运算|运算顺序|混合运算/.test(name)) {
+      add(out, refOrderOfOps, '四则运算顺序', {}, '👆 点"先算这一步"，看先乘除后加减');
+    } else if (/三角形/.test(name)) {
       add(out, refTriSum, '三角形内角和 = 180°', {}, '👆 点"把三个角拼在一起"，看内角和');
     } else if (/运算定律|分配律/.test(name)) {
       add(out, refDistributive, '乘法分配律', {}, '👆 拖滑块改长宽，点"分开算"对比');
     } else if (/小数/.test(name) && /意义|性质/.test(name)) {
       add(out, refDecimal, '小数的意义（100 格方格）', {}, '👆 拖滑块或点格子，看 0.1 和 0.01');
     } else if (/对称|平移|图形的运动/.test(name)) {
-      add(out, refMotion, '轴对称与平移', {}, '👆 点按钮、拖滑块，看图形变换');
+      add(out, refMotion, '轴对称 · 平移 · 旋转', {}, '👆 点按钮、拖手柄，看图形变换');
     }
     if (out.length) return out.slice(0, 3);
   }
@@ -883,38 +888,73 @@ function refTriSum(box) {
     '  <svg id="ts-tri" viewBox="0 0 420 250" class="anim-svg"></svg>' +
     '  <svg id="ts-line" viewBox="0 0 420 170" class="anim-svg"></svg>' +
     '</div>' +
-    '<div class="anim-msg" id="ts-msg">三个内角分别是 ?，猜猜它们的和是多少？</div>' +
+    '<div class="anim-msg" id="ts-msg"></div>' +
     '<div class="anim-ctrl">' +
     '  <button class="btn btn-primary" id="ts-fold">▶ 把三个角拼在一起</button>' +
     '  <button class="btn" id="ts-new">🎲 换一个三角形</button>' +
     '</div>' +
-    '<div class="anim-tip">💡 结论：任意三角形的三个内角剪下来拼在一起，都能拼成一个<b>平角</b>，所以<b>三角形内角和 = 180°</b>。</div>';
+    '<div class="anim-tip">💡 拖动上方<b>顶点</b>改变三角形形状，三个内角会实时变化，但它们的和永远 = <b>180°</b>。点"把三个角拼在一起"看拼成平角。</div>';
 
-  let A, B, C;
+  // 顶点位置为真相来源；角度由位置反算，保证拖拽时度数真实可信
+  let P = [{ x: 70, y: 205 }, { x: 350, y: 205 }, { x: 210, y: 60 }];
+  let A = 60, B = 60, C = 60, apex = null;
+
+  function angleAt(v, a, b) {
+    const v1 = { x: a.x - v.x, y: a.y - v.y }, v2 = { x: b.x - v.x, y: b.y - v.y };
+    let d = Math.atan2(v2.y, v2.x) - Math.atan2(v1.y, v1.x);
+    d = d * 180 / Math.PI;
+    while (d < 0) d += 360; while (d > 360) d -= 360;
+    return d > 180 ? 360 - d : d;
+  }
+  function computeAngles() {
+    A = Math.round(angleAt(P[0], P[1], P[2]));
+    B = Math.round(angleAt(P[1], P[0], P[2]));
+    C = 180 - A - B; // 保证三者之和恒为 180，避免浮点误差导致显示异常
+  }
+  function placeFromAngles(a, b) {
+    // 已知底边 P0→P1 与底角 a、b，求顶点 P2
+    const x0 = P[0].x, x1 = P[1].x, yb = P[0].y, dx = x1 - x0;
+    const t = dx * Math.sin(rad(b)) / Math.sin(rad(a + b));
+    P[2] = { x: x0 + t * Math.cos(rad(a)), y: yb - t * Math.sin(rad(a)) };
+  }
 
   function drawTriangle() {
     const svg = box.querySelector('#ts-tri');
-    const W = 420, H = 250, pad = 52;
-    const t = Math.sin(rad(B)) / Math.sin(rad(A + B));
-    const raw = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: t * Math.cos(rad(A)), y: t * Math.sin(rad(A)) }];
-    const xs = raw.map(function (p) { return p.x; }), ys = raw.map(function (p) { return p.y; });
+    const W = 420, H = 250, pad = 30;
+    const xs = P.map(function (p) { return p.x; }), ys = P.map(function (p) { return p.y; });
     const minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
     const minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-    const s = Math.min((W - 2 * pad) / (maxX - minX), (H - 2 * pad) / Math.max(maxY - minY, 0.2));
-    const P = raw.map(function (p) {
+    const s = Math.min((W - 2 * pad) / Math.max(maxX - minX, 1), (H - 2 * pad) / Math.max(maxY - minY, 1));
+    const Q = P.map(function (p) {
       return { x: pad + (p.x - minX) * s + (W - 2 * pad - (maxX - minX) * s) / 2, y: H - pad - (p.y - minY) * s };
     });
     const ang = [A, B, C];
-    let html = '<polygon points="' + P.map(function (p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ') +
+    let html = '<g id="ts-g"><polygon points="' + Q.map(function (p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ') +
       '" fill="#eef6ff" stroke="#2d6cdf" stroke-width="3" stroke-linejoin="round"/>';
     for (let i = 0; i < 3; i++) {
-      const v = P[i], p1 = P[(i + 1) % 3], p2 = P[(i + 2) % 3];
+      const v = Q[i], p1 = Q[(i + 1) % 3], p2 = Q[(i + 2) % 3];
       const a = arcPoly(v.x, v.y, p1, p2, 30);
       html += '<polyline points="' + a.poly + '" fill="none" stroke="' + WEDGE_COLORS[i] + '" stroke-width="4"/>';
       const lx = v.x + 48 * Math.cos(a.mid), ly = v.y + 48 * Math.sin(a.mid);
       html += '<text x="' + lx.toFixed(1) + '" y="' + (ly + 5).toFixed(1) + '" text-anchor="middle" font-size="17" font-weight="700" fill="' + WEDGE_COLORS[i] + '">' + ang[i] + '°</text>';
     }
-    svg.innerHTML = html;
+    html += '</g>';
+    let g = svg.querySelector('#ts-g');
+    if (!g) { g = dg('g', { id: 'ts-g' }, svg); }
+    g.innerHTML = html.replace('<g id="ts-g">', '').replace('</g>', '');
+    // 顶点拖拽手柄（只创建一次，避免重复绑定监听）
+    if (!apex) {
+      apex = dg('circle', { id: 'ts-apex', r: 11, fill: '#2d6cdf', stroke: '#fff', 'stroke-width': 2.5, opacity: 0.9 }, svg);
+      dgDrag(svg, apex, function (p) {
+        const nx = Math.max(60, Math.min(360, p.x));
+        const ny = Math.max(25, Math.min(170, p.y));
+        P[2] = { x: nx, y: ny };
+        computeAngles();
+        drawTriangle();
+        refreshMsg(false);
+      });
+    }
+    apex.setAttribute('cx', Q[2].x); apex.setAttribute('cy', Q[2].y);
   }
 
   function drawWedges(folded) {
@@ -950,20 +990,22 @@ function refTriSum(box) {
     }
   }
 
-  function refresh(folded) {
-    drawTriangle();
-    drawWedges(folded);
+  function refreshMsg(folded) {
     box.querySelector('#ts-msg').innerHTML = folded
       ? '∠1 + ∠2 + ∠3 = ' + A + '° + ' + B + '° + ' + C + '° = <b class="hl">180°</b>　拼成了平角！'
-      : '这个三角形的三个内角是 ' + A + '°、' + B + '°、' + C + '°，点下面的按钮把它们拼一拼。';
+      : '∠1=' + A + '°、∠2=' + B + '°、∠3=' + C + '°　→　和 = <b class="hl">180°</b>（拖动顶点试试）';
   }
 
   function reroll() {
     A = R(30, 80); B = R(30, 80); C = 180 - A - B;
-    refresh(false);
+    placeFromAngles(A, B);
+    computeAngles();
+    drawTriangle();
+    drawWedges(false);
+    refreshMsg(false);
   }
 
-  box.querySelector('#ts-fold').onclick = function () { refresh(true); };
+  box.querySelector('#ts-fold').onclick = function () { drawWedges(true); refreshMsg(true); };
   box.querySelector('#ts-new').onclick = reroll;
   reroll();
 }
@@ -1024,7 +1066,7 @@ function refDistributive(box) {
  * ============================================================ */
 function refDecimal(box) {
   box.innerHTML =
-    '<div class="anim-stage"><svg id="dc-svg" viewBox="0 0 300 300" class="anim-svg" style="max-width:320px"></svg></div>' +
+    '<div class="anim-stage"><svg id="dc-svg" viewBox="0 0 300 300" class="anim-svg" style="max-width:320px;touch-action:none"></svg></div>' +
     '<div class="anim-msg" id="dc-msg"></div>' +
     '<div class="anim-sliders"><label style="flex:1 1 100%">涂色格数：<input type="range" id="dc-n" min="0" max="100" value="37"><span id="dc-nv">37</span></label></div>' +
     '<div class="anim-ctrl">' +
@@ -1062,6 +1104,21 @@ function refDecimal(box) {
     });
   }
 
+  // 直接在方格上拖动涂色（点一下也可）
+  let painting = false;
+  const svgDC = $('#dc-svg');
+  function cellAt(e) {
+    const p = dgPoint(svgDC, e);
+    const u = 28, x0 = 10, y0 = 10;
+    const c = Math.floor((p.x - x0) / u), r = Math.floor((p.y - y0) / u);
+    if (c < 0 || c > 9 || r < 0 || r > 9) return -1;
+    return r * 10 + c;
+  }
+  function paint(e) { if (!box.isConnected) return; const i = cellAt(e); if (i < 0) return; $('#dc-n').value = i + 1; draw(); }
+  svgDC.addEventListener('pointerdown', function (e) { e.preventDefault(); painting = true; paint(e); });
+  svgDC.addEventListener('pointermove', function (e) { if (painting) paint(e); });
+  window.addEventListener('pointerup', function () { painting = false; });
+
   $('#dc-n').oninput = draw;
   $('#dc-m1').onclick = function () { $('#dc-n').value = Math.max(0, +$('#dc-n').value - 1); draw(); };
   $('#dc-p1').onclick = function () { $('#dc-n').value = Math.min(100, +$('#dc-n').value + 1); draw(); };
@@ -1070,12 +1127,173 @@ function refDecimal(box) {
 }
 
 /* ============================================================
+ * 3.5 四则运算顺序（先乘除后加减）
+ * ============================================================ */
+function refOrderOfOps(box) {
+  box.innerHTML =
+    '<div class="anim-stage"><svg id="oo-svg" viewBox="0 0 470 150" class="anim-svg"></svg></div>' +
+    '<div class="anim-msg" id="oo-msg"></div>' +
+    '<div class="anim-ctrl">' +
+    '  <button class="btn btn-primary" id="oo-next">👉 先算这一步</button>' +
+    '  <button class="btn" id="oo-ans">💡 显示全部步骤</button>' +
+    '  <button class="btn" id="oo-new">🎲 换一道</button>' +
+    '</div>' +
+    '<div class="anim-tip">💡 <b>先乘除，后加减</b>：同一级运算从左往右算。先找有没有 × 或 ÷，有就先算它；都算完，再算 + 和 −。点"先算这一步"，看每一步先算谁。</div>';
+
+  const $ = function (id) { return box.querySelector(id); };
+  let toks, hi;
+
+  function fixDivide() {
+    for (let i = 1; i < toks.length; i += 2) {
+      if (toks[i] === '÷') {
+        const a = toks[i - 1];
+        const fac = [2, 3, 4, 5, 6].filter(function (f) { return a % f === 0; });
+        toks[i + 1] = fac.length ? fac[R(0, fac.length - 1)] : 1;
+      }
+    }
+  }
+  function findHi() {
+    for (let i = 1; i < toks.length; i += 2) if (toks[i] === '×' || toks[i] === '÷') return i;
+    for (let i = 1; i < toks.length; i += 2) if (toks[i] === '+' || toks[i] === '−') return i;
+    return -1;
+  }
+  function computeStep() {
+    if (hi < 0) return;
+    const a = toks[hi - 1], op = toks[hi], b = toks[hi + 1];
+    let r;
+    if (op === '×') r = a * b; else if (op === '÷') r = a / b; else if (op === '+') r = a + b; else r = a - b;
+    toks.splice(hi - 1, 3, r);
+    hi = findHi();
+  }
+  function gen() {
+    const n = R(3, 4);
+    const hasMul = Math.random() < 0.5;
+    const nums = [], ops = [];
+    for (let i = 0; i < n; i++) nums.push(R(2, 9));
+    for (let i = 0; i < n - 1; i++) {
+      if (hasMul) ops.push(Math.random() < 0.6 ? '×' : '+');
+      else ops.push(Math.random() < 0.6 ? '÷' : '+');
+    }
+    toks = [];
+    for (let i = 0; i < n; i++) { toks.push(nums[i]); if (i < n - 1) toks.push(ops[i]); }
+    fixDivide();
+    hi = findHi();
+  }
+  function draw() {
+    const svg = $('#oo-svg');
+    let x = 24; const y = 80;
+    let g = '';
+    for (let i = 0; i < toks.length; i++) {
+      const t = String(toks[i]);
+      const isOp = (i % 2 === 1);
+      const hot = (i === hi);
+      const fs = hot ? 36 : 28;
+      const col = hot ? '#e8590c' : (isOp ? '#2d6cdf' : '#1a202c');
+      const w = t.length * fs * 0.6;
+      g += '<text x="' + x + '" y="' + y + '" font-size="' + fs + '" font-weight="' + (hot ? '800' : '700') + '" fill="' + col + '" font-family="ui-monospace,Menlo,Consolas,monospace" text-anchor="start">' + t + '</text>';
+      if (hot) g += '<rect x="' + (x - 4) + '" y="' + (y + 9) + '" width="' + (w + 8) + '" height="6" rx="3" fill="#e8590c" opacity="0.85"/>';
+      x += w + (isOp ? 18 : 12);
+    }
+    svg.innerHTML = g;
+    $('#oo-msg').innerHTML = hi < 0
+      ? '全部算完啦！结果是 <b class="hl">' + toks[0] + '</b>。'
+      : '现在该先算 <b class="hl">' + toks[hi - 1] + ' ' + toks[hi] + ' ' + toks[hi + 1] + '</b>（先乘除后加减，同级从左往右）。点"先算这一步"算它。';
+  }
+  $('#oo-next').onclick = function () { if (hi < 0) return; computeStep(); draw(); };
+  $('#oo-ans').onclick = function () { let guard = 0; while (hi >= 0 && guard < 30) { computeStep(); guard++; } draw(); };
+  $('#oo-new').onclick = function () { gen(); draw(); };
+  gen(); draw();
+}
+
+/* ============================================================
+ * 3.6 巧数三角形（专项）
+ * ============================================================ */
+function refCountTriangles(box) {
+  box.innerHTML =
+    '<div class="anim-stage"><svg id="ct-svg" viewBox="0 0 420 260" class="anim-svg"></svg></div>' +
+    '<div class="anim-msg" id="ct-msg"></div>' +
+    '<div class="anim-sliders"><label style="flex:1 1 100%">我数到：<input type="number" id="ct-ans" min="0" max="99" value="0" style="width:66px"> 个</label></div>' +
+    '<div class="anim-ctrl">' +
+    '  <button class="btn btn-primary" id="ct-check">✔ 验证</button>' +
+    '  <button class="btn" id="ct-show">👀 显示所有三角形</button>' +
+    '  <button class="btn" id="ct-easy">简单</button>' +
+    '  <button class="btn" id="ct-mid">中等</button>' +
+    '  <button class="btn" id="ct-hard">难</button>' +
+    '</div>' +
+    '<div class="anim-tip">💡 别只数小三角形！由 2 段、3 段拼起来的<b>大三角形</b>也要算。<br>规律：底边被分成 n 段时，三角形总数 = 1+2+…+n = n(n+1)/2。</div>';
+
+  const $ = function (id) { return box.querySelector(id); };
+  let N = 4, timer = null;
+
+  function geom() {
+    const W = 420, baseY = 220, x0 = 50, x1 = 370;
+    const apex = { x: W / 2, y: 36 };
+    const pts = [];
+    for (let i = 0; i <= N; i++) pts.push({ x: x0 + (x1 - x0) * i / N, y: baseY });
+    return { apex: apex, pts: pts };
+  }
+  function trueCount() { return N * (N + 1) / 2; }
+
+  function draw(reveal) {
+    const svg = $('#ct-svg');
+    const G = geom();
+    let g = '';
+    g += '<polygon points="' + G.apex.x + ',' + G.apex.y + ' ' + G.pts[0].x + ',' + G.pts[0].y + ' ' + G.pts[N].x + ',' + G.pts[N].y + '" fill="#eef6ff" stroke="#2d6cdf" stroke-width="2.5" stroke-linejoin="round"/>';
+    for (let i = 1; i < N; i++) g += '<line x1="' + G.apex.x + '" y1="' + G.apex.y + '" x2="' + G.pts[i].x + '" y2="' + G.pts[i].y + '" stroke="#9fb0c6" stroke-width="1.5"/>';
+    g += '<line x1="' + G.pts[0].x + '" y1="' + G.pts[0].y + '" x2="' + G.pts[N].x + '" y2="' + G.pts[N].y + '" stroke="#2d6cdf" stroke-width="2.5"/>';
+    if (reveal) {
+      let k = 0;
+      for (let i = 0; i <= N; i++) {
+        for (let j = i + 1; j <= N; j++) {
+          g += '<polygon points="' + G.apex.x + ',' + G.apex.y + ' ' + G.pts[i].x + ',' + G.pts[i].y + ' ' + G.pts[j].x + ',' + G.pts[j].y + '" fill="none" stroke="' + WEDGE_COLORS[k % 3] + '" stroke-width="2.5" stroke-linejoin="round"/>';
+          k++;
+        }
+      }
+    }
+    svg.innerHTML = g;
+  }
+
+  function showAll() {
+    clearInterval(timer);
+    draw(false);
+    const G = geom();
+    const list = [];
+    for (let i = 0; i <= N; i++) for (let j = i + 1; j <= N; j++) list.push([i, j]);
+    const svg = $('#ct-svg');
+    let k = 0;
+    $('#ct-msg').innerHTML = '正在标出所有三角形… (0/' + list.length + ')';
+    timer = setInterval(function () {
+      if (!box.isConnected) { clearInterval(timer); return; }
+      const pr = list[k];
+      dg('polygon', { points: G.apex.x + ',' + G.apex.y + ' ' + G.pts[pr[0]].x + ',' + G.pts[pr[0]].y + ' ' + G.pts[pr[1]].x + ',' + G.pts[pr[1]].y, fill: 'none', stroke: WEDGE_COLORS[k % 3], 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, svg);
+      k++;
+      $('#ct-msg').innerHTML = '正在标出所有三角形… (' + k + '/' + list.length + ')';
+      if (k >= list.length) { clearInterval(timer); $('#ct-msg').innerHTML = '共 <b class="hl">' + list.length + '</b> 个三角形 ＝ 1+2+…+' + N + ' = ' + (N * (N + 1) / 2) + '。'; }
+    }, 240);
+  }
+
+  function setLevel(n) { clearInterval(timer); N = n; $('#ct-ans').value = 0; $('#ct-msg').innerHTML = ''; draw(false); }
+  $('#ct-check').onclick = function () {
+    const v = +$('#ct-ans').value, t = trueCount();
+    $('#ct-msg').innerHTML = v === t
+      ? '🎉 正确！图中共有 <b class="hl">' + t + '</b> 个三角形。'
+      : '再想想～图中其实有 <b class="hl">' + t + '</b> 个三角形（不是 ' + v + ' 个）。点"显示所有三角形"看看漏了哪些。';
+  };
+  $('#ct-show').onclick = showAll;
+  $('#ct-easy').onclick = function () { setLevel(3); };
+  $('#ct-mid').onclick = function () { setLevel(4); };
+  $('#ct-hard').onclick = function () { setLevel(5); };
+  draw(false);
+  return function () { clearInterval(timer); };
+}
+
+/* ============================================================
  * 4. 轴对称与平移
  * ============================================================ */
 function refMotion(box) {
   box.innerHTML =
-    '<div class="anim-tabs"><button class="tab tab-on" data-m="sym">轴对称</button><button class="tab" data-m="tra">平移</button></div>' +
-    '<div class="anim-stage"><svg id="mo-svg" viewBox="0 0 420 300" class="anim-svg"></svg></div>' +
+    '<div class="anim-tabs"><button class="tab tab-on" data-m="sym">轴对称</button><button class="tab" data-m="tra">平移</button><button class="tab" data-m="rot">旋转</button></div>' +
+    '<div class="anim-stage"><svg id="mo-svg" viewBox="0 0 420 300" class="anim-svg" style="touch-action:none"></svg></div>' +
     '<div class="anim-msg" id="mo-msg"></div>' +
     '<div class="anim-sliders" id="mo-sliders"></div>' +
     '<div class="anim-ctrl" id="mo-ctrl"></div>' +
@@ -1085,8 +1303,42 @@ function refMotion(box) {
   const U = 30, OX = 30, OY = 30, COLS = 12, ROWS = 8;
   /* 小旗图形（格子坐标） */
   const SHAPE = [[0, 0], [0, 5], [3, 4], [3, 2], [1, 2], [1, 0]];
-  let mode = 'sym', axis = 'v', shown = false, dx = 4, dy = 0;
+  let mode = 'sym', axis = 'v', shown = false, dx = 4, dy = 0, ang = 0;
   let timer = null;
+  const svgMO = box.querySelector('#mo-svg');
+  let layer = svgMO.querySelector('#mo-layer'); if (!layer) layer = dg('g', { id: 'mo-layer' }, svgMO);
+  let handle = null;
+  function positionHandle() {
+    if (!handle) return;
+    if (mode === 'tra') {
+      const refX = OX + (SHAPE[0][0] + 1) * U, refY = OY + (SHAPE[0][1] + 2) * U;
+      handle.setAttribute('cx', refX + dx * U); handle.setAttribute('cy', refY + dy * U);
+      handle.setAttribute('fill', '#0f9b5a'); handle.style.display = '';
+    } else if (mode === 'rot') {
+      const cx = OX + 5 * U, cy = OY + 4 * U, R = 56;
+      handle.setAttribute('cx', cx + R * Math.cos(rad(ang))); handle.setAttribute('cy', cy + R * Math.sin(rad(ang)));
+      handle.setAttribute('fill', '#e8590c'); handle.style.display = '';
+    } else {
+      handle.style.display = 'none';
+    }
+  }
+  function ensureHandle() {
+    if (handle) { positionHandle(); return; }
+    handle = dg('circle', { id: 'mo-handle', r: 10, fill: '#0f9b5a', stroke: '#fff', 'stroke-width': 2.5, opacity: 0.95 }, svgMO);
+    dgDrag(svgMO, handle, function (p) {
+      if (mode === 'tra') {
+        const refX = OX + (SHAPE[0][0] + 1) * U, refY = OY + (SHAPE[0][1] + 2) * U;
+        dx = Math.max(-2, Math.min(7, Math.round((p.x - refX) / U)));
+        dy = Math.max(-2, Math.min(3, Math.round((p.y - refY) / U)));
+        draw();
+      } else if (mode === 'rot') {
+        const cx = OX + 5 * U, cy = OY + 4 * U;
+        ang = Math.round(Math.atan2(p.y - cy, p.x - cx) * 180 / Math.PI);
+        draw();
+      }
+    });
+    positionHandle();
+  }
 
   function grid() {
     let g = '';
@@ -1131,7 +1383,7 @@ function refMotion(box) {
       $('#mo-go').onclick = function () { shown = true; draw(); };
       $('#mo-axis').onclick = function () { axis = axis === 'v' ? 'h' : 'v'; shown = false; draw(); };
       $('#mo-rst').onclick = function () { shown = false; draw(); };
-    } else {
+    } else if (mode === 'tra') {
       const base = SHAPE.map(function (p) { return [p[0] + 1, p[1] + 2]; });
       g += poly(base, '#cbd5e0', '#8a97a8', true, 0.35);
       const mv = base.map(function (p) { return [p[0] + dx, p[1] + dy]; });
@@ -1142,7 +1394,7 @@ function refMotion(box) {
         g += '<line x1="' + sx + '" y1="' + sy + '" x2="' + ex + '" y2="' + ey + '" stroke="#0f9b5a" stroke-width="2.5" stroke-dasharray="5 4"/>' +
           '<circle cx="' + ex + '" cy="' + ey + '" r="4" fill="#0f9b5a"/>';
       }
-      $('#mo-msg').innerHTML = '把图形向' + (dx >= 0 ? '右' : '左') + '平移 <b class="hl">' + Math.abs(dx) + '</b> 格，向' + (dy >= 0 ? '下' : '上') + '平移 <b class="hl">' + Math.abs(dy) + '</b> 格。<br><span class="sub">形状和大小都没有改变，只是位置变了。</span>';
+      $('#mo-msg').innerHTML = '把图形向' + (dx >= 0 ? '右' : '左') + '平移 <b class="hl">' + Math.abs(dx) + '</b> 格，向' + (dy >= 0 ? '下' : '上') + '平移 <b class="hl">' + Math.abs(dy) + '</b> 格。<br><span class="sub">形状和大小都没有改变，只是位置变了。（也可直接拖动绿色手柄）</span>';
       $('#mo-sliders').innerHTML =
         '<label>左右：<input type="range" id="mo-dx" min="-2" max="7" value="' + dx + '"><span>' + dx + '</span></label>' +
         '<label>上下：<input type="range" id="mo-dy" min="-2" max="3" value="' + dy + '"><span>' + dy + '</span></label>';
@@ -1161,12 +1413,36 @@ function refMotion(box) {
         }, 320);
       };
       $('#mo-rst2').onclick = function () { clearInterval(timer); dx = 0; dy = 0; draw(); };
+    } else { // rot
+      const cx = OX + 5 * U, cy = OY + 4 * U;
+      g += '<circle cx="' + cx + '" cy="' + cy + '" r="3.5" fill="#e8590c"/>';
+      g += '<circle cx="' + cx + '" cy="' + cy + '" r="14" fill="none" stroke="#e8590c" stroke-width="1.5" stroke-dasharray="4 4"/>';
+      g += '<text x="' + (cx + 20) + '" y="' + (cy + 5) + '" font-size="12" fill="#e8590c" font-weight="700">旋转中心</text>';
+      const off = [4, 2];
+      const pts = SHAPE.map(function (p) { return [p[0] + off[0], p[1] + off[1]]; });
+      g += '<g transform="rotate(' + ang + ' ' + cx + ' ' + cy + ')">' + poly(pts, '#ffa94d', '#e8590c') + '</g>';
+      $('#mo-msg').innerHTML = '绕红点（旋转中心）把图形转了 <b class="hl">' + ang + '°</b>。<br><span class="sub">旋转只改变<b>方向</b>，不改变<b>形状和大小</b>。（拖动橙色手柄转一转）</span>';
+      $('#mo-sliders').innerHTML = '<label>旋转：<input type="range" id="mo-ang" min="-180" max="180" value="' + ang + '"><span>' + ang + '°</span></label>';
+      $('#mo-ctrl').innerHTML = '<button class="btn btn-primary" id="mo-spin">⟳ 自动旋转演示</button><button class="btn" id="mo-rst3">↺ 回到 0°</button>';
+      $('#mo-tip').innerHTML = '💡 <b>旋转</b>：图形绕一个定点（旋转中心）转动一定角度。旋转只改变<b>方向</b>，不改变<b>形状和大小</b>。';
+      $('#mo-ang').oninput = function () { ang = +this.value; draw(); };
+      $('#mo-spin').onclick = function () {
+        clearInterval(timer); ang = 0; draw();
+        let step = 0;
+        timer = setInterval(function () {
+          if (!box.isConnected) { clearInterval(timer); return; }
+          step++; ang = (ang + 15) % 360; if (ang > 180) ang -= 360; draw();
+          if (step >= 24) clearInterval(timer);
+        }, 70);
+      };
+      $('#mo-rst3').onclick = function () { clearInterval(timer); ang = 0; draw(); };
     }
-    $('#mo-svg').innerHTML = g;
+    layer.innerHTML = g;
+    ensureHandle();
     if (mode === 'sym' && shown) {
       requestAnimationFrame(function () {
         if (!box.isConnected) return;
-        const m = $('#mo-svg').querySelector('.mo-mirror');
+        const m = layer.querySelector('.mo-mirror');
         if (m) m.classList.add('mo-on');
       });
     }
@@ -1178,6 +1454,7 @@ function refMotion(box) {
       t.classList.add('tab-on');
       mode = t.getAttribute('data-m'); shown = false; clearInterval(timer);
       if (mode === 'tra') { dx = 4; dy = 0; }
+      if (mode === 'rot') { ang = 0; }
       draw();
     };
   });
