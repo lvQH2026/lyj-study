@@ -7659,8 +7659,7 @@ function startSpecialQuiz(grade, sem, idx) {
   state.currentGrade = grade;
   state.currentSemester = sem;
   let unit = KNOWLEDGE_BASE[grade][sem][idx];
-  if (unit.introImg) { showUnitIntro(unit, grade, sem, idx); return; }
-  beginUnitQuiz(idx, grade, sem);
+  showUnitDiagrams(unit, grade, sem, idx);
 }
 
 function selectGrade(grade) {
@@ -7725,32 +7724,43 @@ function getTypeName(type) {
 // ============================================================
 function startUnitQuiz(unitIdx) {
   let unit = KNOWLEDGE_BASE[state.currentGrade][state.currentSemester][unitIdx];
-  if (unit.introImg) {
-    showUnitIntro(unit, state.currentGrade, state.currentSemester, unitIdx);
-    return;
-  }
-  beginUnitQuiz(unitIdx, state.currentGrade, state.currentSemester);
+  showUnitDiagrams(unit, state.currentGrade, state.currentSemester, unitIdx);
 }
 
-function showUnitIntro(unit, grade, sem, idx) {
+function showUnitDiagrams(unit, grade, sem, idx) {
   state.currentGrade = grade;
   state.currentSemester = sem;
   document.getElementById('specialIntroTitle').textContent = unit.name;
 
-  let imgEl = document.getElementById('specialIntroImg');
-  let interactEl = document.getElementById('specialIntroInteractive');
+  const cardsEl = document.getElementById('diagramCards');
+  const imgWrap = document.getElementById('specialIntroImgWrap');
+  const imgEl = document.getElementById('specialIntroImg');
+  cardsEl.innerHTML = '';
+  imgWrap.style.display = 'none';
 
-  if (unit.interactiveIntro) {
-    // 隐藏静态图，显示交互式探索区
-    if(imgEl) imgEl.style.display = 'none';
-    if(interactEl){
-      interactEl.style.display = 'block';
-      renderShapeExplore(interactEl);
-    }
-  } else {
-    if(imgEl){ imgEl.style.display = 'block'; imgEl.src = unit.introImg; }
-    if(interactEl) interactEl.style.display = 'none';
+  // 静态方法图（若有）
+  if (unit.introImg) {
+    imgWrap.style.display = 'block';
+    imgEl.src = unit.introImg;
   }
+  // 交互式探索（若有）
+  if (unit.interactiveIntro) {
+    const card = document.createElement('div');
+    card.className = 'diag-card';
+    card.innerHTML = '<div class="diag-card-title">🎬 动手探索</div><div class="diag-card-body"></div><div class="diag-card-hint">👆 拖动滑块，看角的变化</div>';
+    cardsEl.appendChild(card);
+    renderShapeExplore(card.querySelector('.diag-card-body'));
+  }
+  // 通用交互动图（按知识点映射，每单元 1~3 个）
+  const diags = (typeof getUnitDiagrams === 'function') ? getUnitDiagrams(unit) : [];
+  diags.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'diag-card';
+    card.innerHTML = '<div class="diag-card-title">🎬 ' + d.title + '</div><div class="diag-card-body"></div><div class="diag-card-hint">👆 拖动图形，自己试一试</div>';
+    cardsEl.appendChild(card);
+    try { d.fn(card.querySelector('.diag-card-body'), d.opts || {}); }
+    catch (e) { console.error('diagram render error', d.title, e); }
+  });
 
   document.getElementById('specialIntroBtn').onclick = () => beginUnitQuiz(idx, grade, sem);
   document.getElementById('backBtn').style.display = 'block';

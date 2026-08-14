@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v27：新增专项·三位数乘两位数(200题池随机抽30)；四级上册 KNOWLEDGE_BASE[4][1] 新增 g_special_3x2_mul
-const CACHE = 'lyj-shell-v27';
+// v28：每个数学单元进入前新增「🎬交互动画图解」页(js/diagram.js)；getUnitDiagrams 按知识点映射全量102单元、共202张可拖拽SVG动图；入口流程改先进图解页再答题
+const CACHE = 'lyj-shell-v28';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

@@ -29,7 +29,7 @@ w.confirm = () => true;
 if (!w.HTMLElement.prototype.scrollIntoView) w.HTMLElement.prototype.scrollIntoView = function(){};
 
 // 以真实 <script> 元素注入，复现浏览器同一全局作用域（let/const 全局词法绑定共享）
-['js/core.js','js/math.js','js/data.js','js/english.js','js/main.js'].forEach(s => {
+['js/core.js','js/math.js','js/data.js','js/english.js','js/diagram.js','js/main.js'].forEach(s => {
   const el = w.document.createElement('script');
   el.textContent = fs.readFileSync(path.join(ROOT, s), 'utf8');
   w.document.body.appendChild(el);
@@ -53,8 +53,13 @@ ok('数学：state 全局词法绑定可用', !!S() && S().currentGrade === 3, '
 let mathQuizOK = false;
 try {
   w.startUnitQuiz(0);
+  // 新流程：进单元先弹「交互动画图解」页，需点「开始答题」才进入真正答题
+  const cards = d.querySelectorAll('#diagramCards .diag-card').length;
+  const btn = d.getElementById('specialIntroBtn');
+  if (btn && btn.onclick) btn.onclick();
   const st = S();
   mathQuizOK = st && Array.isArray(st.quizQuestions) && st.quizQuestions.length > 0;
+  ok('数学：进入单元先弹交互动画图解页', cards > 0, '图解卡片数 ' + cards);
   ok('数学：进入单元练习并生成题目', mathQuizOK,
     '题目数 ' + (st && st.quizQuestions ? st.quizQuestions.length : 0) + ' / 单元「' + (st ? st.quizTitle : '') + '」');
 } catch (e) {
@@ -220,9 +225,9 @@ try {
 
 // ============ 四、SW 缓存清单 ============
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/main.js']
+['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/diagram.js', 'js/main.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v27)', /lyj-shell-v27/.test(sw) && !/lyj-shell-v1[23456789]/.test(sw) && !/lyj-shell-v2[0-6]/.test(sw));
+ok('SW 版本号已升级 (v28)', /lyj-shell-v28/.test(sw) && !/lyj-shell-v1[23456789]/.test(sw) && !/lyj-shell-v2[0-7]/.test(sw));
 
 // ============ 四点五、CSS 隔离守卫 ============
 const engCss = fs.readFileSync(path.join(ROOT, 'css', 'english.css'), 'utf8');

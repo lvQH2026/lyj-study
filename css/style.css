@@ -1460,3 +1460,24 @@ input:focus,textarea:focus,select:focus{
   display: block; margin: 0 auto;
 }
 #shapeExploreSvg { min-height: 240px; }
+
+/* ===== 交互动画图解卡片 ===== */
+#diagramCards { display:flex; flex-direction:column; gap:14px; }
+.diag-card {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 12px 10px;
+  box-shadow:0 1px 3px rgba(62,74,99,.06);
+}
+.diag-card-title {
+  font-size:14px; font-weight:700; color:var(--primary);
+  margin-bottom:6px; display:flex; align-items:center; gap:4px;
+}
+.diag-card-body { width:100%; }
+.diag-card-body svg { display:block; margin:0 auto; touch-action:none; }
+.diag-card-hint {
+  font-size:11px; color:var(--text-lighter); text-align:center;
+  margin-top:4px; opacity:.85;
+}
+#specialIntroImgWrap img { max-width:100%; }

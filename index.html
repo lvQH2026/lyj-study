@@ -117,15 +117,19 @@
 </div>
 
 
-<!-- ===== 专项练习方法图 ===== -->
+<!-- ===== 交互动画图解 ===== -->
 <div class="page" id="page-special-intro">
-  <div class="card" style="text-align:center;padding:20px">
-    <div style="font-size:22px;margin-bottom:8px">专项练习</div>
-    <h2 id="specialIntroTitle" style="margin-bottom:6px"></h2>
-    <p style="color:var(--text-light);font-size:13px;margin-bottom:12px" id="specialIntroDesc">请仔细观察下图中的方法，然后答题。</p>
-    <img id="specialIntroImg" src="" alt="" style="max-width:100%;border-radius:10px;display:block;margin:0 auto;border:1px solid var(--line);">
-    <div id="specialIntroInteractive" style="display:none;margin:0 auto;max-width:380px"></div>
-    <button class="btn btn-primary" id="specialIntroBtn" style="margin-top:16px;max-width:240px">开始答题</button>
+  <div class="card" style="padding:18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <span style="font-size:20px">🎬</span>
+      <h2 id="specialIntroTitle" style="margin:0"></h2>
+    </div>
+    <p style="color:var(--text-light);font-size:13px;margin:0 0 14px" id="specialIntroDesc">动手拖动下面的图形，先观察再答题。</p>
+    <div id="specialIntroImgWrap" style="display:none;text-align:center;margin-bottom:14px">
+      <img id="specialIntroImg" src="" alt="" style="max-width:100%;border-radius:10px;display:inline-block;border:1px solid var(--line);">
+    </div>
+    <div id="diagramCards"></div>
+    <button class="btn btn-primary" id="specialIntroBtn" style="margin-top:18px;max-width:240px">开始答题</button>
   </div>
 </div>
 <!-- ===== 单元列表页 ===== -->
@@ -381,6 +385,7 @@
 <script src="js/math.js"></script>
 <script src="js/data.js"></script>
 <script src="js/english.js"></script>
+<script src="js/diagram.js"></script>
 <script src="js/main.js"></script>
 
 <script src="config.js"></script>
