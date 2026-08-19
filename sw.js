@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v33：修复"拖动图形点不动"——diagPlant 新增真实可拖拽金色手柄（拖右端改间隔数，与滑块双向同步）；默认提示改为中性"动手试一试"，不再误套"拖动图形"到纯滑块/按钮类动图
-const CACHE = 'lyj-shell-v33';
+// v34：五六年级全动画轻奢重写 + 修复 dgSlider 手柄未挂载 DOM 的 bug（所有用 dgSlider 的动画滑块此前不可见不可拖）
+const CACHE = 'lyj-shell-v34';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

@@ -50,7 +50,7 @@ function dgDrag(svg, node, onMove){
 // 滑块：沿水平轨道拖动，返回 {set, handle}
 function dgSlider(svg, x, y, w, min, max, val, color, onInput, fmt){
   dg('line', {x1:x, y1:y, x2:x+w, y2:y, stroke:DC.line, 'stroke-width':4, 'stroke-linecap':'round'}, svg);
-  const handle = dg('circle', {cx:x+(val-min)/(max-min)*w, cy:y, r:9, fill:color||DC.gold, stroke:'#fff', 'stroke-width':2});
+  const handle = dg('circle', {cx:x+(val-min)/(max-min)*w, cy:y, r:9, fill:color||DC.gold, stroke:'#fff', 'stroke-width':2}, svg);
   const t = dg('text', {x:x+w/2, y:y+20, 'font-size':11, fill:'#5C6370', 'text-anchor':'middle'}, svg);
   function upd(v){ v=Math.max(min,Math.min(max,v)); handle.setAttribute('cx', x+(v-min)/(max-min)*w); if(fmt) t.textContent=fmt(v); onInput(v); }
   dgDrag(svg, handle, function(p){ upd(min+(p.x-x)/w*(max-min)); });
@@ -64,16 +64,42 @@ function dgMake(container, w, h){
   return svg;
 }
 
+// ============================================================
+// 轻奢画框共享助手（主站黛蓝/香槟金/米白体系）
+// ============================================================
+// 白色圆角画板卡片：在米白底上叠一张白卡，内容绘制在卡内（坐标为整图坐标，卡仅作底衬）
+function luxCard(svg, x, y, w, h){
+  dg('rect',{x:x, y:y, width:w, height:h, rx:14, fill:'#FFFFFF', stroke:DC.line, 'stroke-width':1.5}, svg);
+  return {x:x, y:y, w:w, h:h};
+}
+// 信息脚卡：#F3EEE3 圆角卡；字符串中 *段* 用香槟金高亮（如 '面积 *9600*'）
+function luxInfo(svg, x, y, w, h){
+  dg('rect',{x:x, y:y, width:w, height:h, rx:10, fill:'#F3EEE3', stroke:DC.line, 'stroke-width':1}, svg);
+  const g=dg('g',{},svg);
+  return function(s){
+    g.innerHTML='';
+    const t=dg('text',{x:x+w/2, y:y+h/2+5, 'font-size':13, fill:DC.ink, 'text-anchor':'middle', 'font-weight':'bold'}, g);
+    String(s).split('*').forEach((seg,i)=>{ dg('tspan',{fill: i%2===1?DC.gold:DC.ink}, t).textContent=seg; });
+  };
+}
+// 标准轻奢滑块：金色手柄 + 浅色轨道 + 居中标签（复用 dgSlider）
+function luxSlider(svg, x, y, w, min, max, val, onInput, fmt){
+  return dgSlider(svg, x, y, w, min, max, val, DC.gold, onInput, fmt);
+}
+
+
 // ---------- 1. 数轴 ----------
 function diagNumberLine(container, opts){
   opts = opts||{};
   const min = opts.min!=null?opts.min:0, max = opts.max!=null?opts.max:20;
-  const svg = dgMake(container, 360, 200);
-  dgBg(svg,360,200);
-  const x0=30, x1=330, y=120;
+  const W=360, H=224;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '数轴 · 拖动小球定位', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 150);
+  const x0=40, x1=320, y=112;
   dg('line',{x1:x0,y1:y,x2:x1,y2:y,stroke:DC.ink,'stroke-width':2},svg);
   const span=max-min;
-  // 刻度数量：小范围逐格，大范围取 10 个整间隔（避免万以内轴画出上千刻度）
   const tickCount = span<=24 ? span : (span<=60 ? 12 : 10);
   for(let i=0;i<=tickCount;i++){
     const v=min+span*i/tickCount, x=x0+(x1-x0)*i/tickCount;
@@ -81,19 +107,12 @@ function diagNumberLine(container, opts){
     const showLabel = tickCount<=12 ? true : (i%2===0);
     if(showLabel) dgt(svg,x,y+22,String(v),10,DC.light);
   }
-  const info = dgt(svg,180,40,'拖动小球改变数值',12,DC.gold);
-  const valT = dgt(svg,180,62,'',18,DC.ink);
-  const marker = dg('circle',{cx:x1,cy:y,r:9,fill:DC.red,stroke:'#fff','stroke-width':2},svg);
-  const flag = dg('line',{x1:x1,y1:y-9,x2:x1,y2:y-22,stroke:DC.red,'stroke-width':1.5},svg);
-  dgDrag(svg, marker, function(p){
-    let v=min+Math.round((p.x-x0)/(x1-x0)*span);
-    v=Math.max(min,Math.min(max,v));
-    const x=x0+(x1-x0)*(v-min)/span;
-    marker.setAttribute('cx',x); flag.setAttribute('x1',x); flag.setAttribute('x2',x);
-    valT.textContent='数值：'+v;
-  });
-  valT.textContent='数值：'+max;
-  marker.setAttribute('cx',x1);
+  const setInfo = luxInfo(svg, 22, 196, 316, 30);
+  const marker = dg('circle',{cx:x1,cy:y,r:10,fill:DC.red,stroke:'#fff','stroke-width':2,style:'cursor:grab'},svg);
+  const flag = dg('line',{x1:x1,y1:y-10,x2:x1,y2:y-24,stroke:DC.red,'stroke-width':1.5},svg);
+  function place(v){ v=Math.max(min,Math.min(max,v)); const x=x0+(x1-x0)*(v-min)/span; marker.setAttribute('cx',x); flag.setAttribute('x1',x); flag.setAttribute('x2',x); setInfo('拖动小球 → 数值 *'+v+'*'); }
+  dgDrag(svg, marker, function(p){ place(min+Math.round((p.x-x0)/(x1-x0)*span)); });
+  place(max);
 }
 
 // ---------- 2. 位值积木 ----------
@@ -206,14 +225,16 @@ function diagSubColumn(container, opts){
 function diagMulArea(container, opts){
   opts=opts||{};
   const maxR = opts.maxR||9, maxC = opts.maxC||9;
-  const svg = dgMake(container, 360, 260);
-  dgBg(svg,360,260);
-  dgt(svg,180,26,'拖动右下角方块，改变行×列',11,DC.gold);
-  const gx=40, gy=50, cell=26;
+  const W=360, H=264;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '乘法面积模型 · 行 × 列', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 160);
+  const gx=48, gy=60, cell=26;
   let rows=4, cols=5;
   const gridG=dg('g',{},svg);
-  const handle=dg('rect',{width:18,height:18,rx:4,fill:DC.gold,stroke:'#fff','stroke-width':2},svg);
-  const info=dgt(svg,180,238,'',18,DC.ink);
+  const handle=dg('rect',{width:20,height:20,rx:5,fill:DC.gold,stroke:'#fff','stroke-width':2,style:'cursor:grab'},svg);
+  const setInfo = luxInfo(svg, 22, 214, 316, 34);
   function redraw(){
     gridG.innerHTML='';
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
@@ -221,9 +242,9 @@ function diagMulArea(container, opts){
       dg('rect',{x:gx+c*cell,y:gy+r*cell,width:cell-2,height:cell-2,rx:3,fill:f,opacity:0.85},gridG);
     }
     dg('rect',{x:gx,y:gy,width:cols*cell,height:rows*cell,fill:'none',stroke:DC.ink,'stroke-width':1.5},gridG);
-    handle.setAttribute('x', gx+cols*cell-9);
-    handle.setAttribute('y', gy+rows*cell-9);
-    info.textContent=rows+' × '+cols+' = '+(rows*cols);
+    handle.setAttribute('x', gx+cols*cell-10);
+    handle.setAttribute('y', gy+rows*cell-10);
+    setInfo('*'+rows+'* 行 × *'+cols+'* 列 = *'+(rows*cols)+'* 个');
   }
   dgDrag(svg, handle, function(p){
     cols=Math.max(1,Math.min(maxC,Math.round((p.x-gx)/cell)));
@@ -237,42 +258,46 @@ function diagMulArea(container, opts){
 function diagDivGroups(container, opts){
   opts=opts||{};
   const N = opts.N||24;
-  const svg = dgMake(container, 360, 240);
-  dgBg(svg,360,240);
-  dgt(svg,180,26,'拖动滑块改变每份个数',11,DC.gold);
+  const W=360, H=256;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '除法 · 平均分（圈一圈）', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 156);
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,222,'',15,DC.ink);
-  dgSlider(svg,40,200,280,1,9,3,DC.green,function(v){
+  const setInfo = luxInfo(svg, 22, 206, 316, 34);
+  luxSlider(svg, 50, 190, 260, 1, 9, 3, function(v){
     const per=Math.round(v);
     g.innerHTML='';
     const groups=Math.floor(N/per), rem=N%per;
     let idx=0;
     for(let grp=0; grp<groups; grp++){
       for(let k=0;k<per;k++){
-        const x=20+(idx%12)*28, y=60+Math.floor(idx/12)*28;
+        const x=46+(idx%11)*26, y=64+Math.floor(idx/11)*26;
         dg('circle',{cx:x,cy:y,r:10,fill:DC.green,opacity:0.85},g);
         idx++;
       }
     }
     for(let k=0;k<rem;k++){
-      const x=20+(idx%12)*28, y=60+Math.floor(idx/12)*28;
+      const x=46+(idx%11)*26, y=64+Math.floor(idx/11)*26;
       dg('circle',{cx:x,cy:y,r:10,fill:DC.red,opacity:0.85},g); idx++;
     }
-    info.textContent=N+' ÷ '+per+' = '+groups+(rem?' 余 '+rem:'');
-  });
+    setInfo('*'+N+'* ÷ *'+per+'* = *'+groups+'*'+(rem?' 余 *'+rem+'*':''));
+  }, v=>'每份 '+Math.round(v)+' 个');
 }
 
 // ---------- 7. 分数条 ----------
 function diagFractionBar(container, opts){
   opts=opts||{};
   const den = opts.den||4;
-  const svg = dgMake(container, 360, 200);
-  dgBg(svg,360,200);
-  dgt(svg,180,26,'拖动金块，看阴影占几分之几',11,DC.gold);
-  const bx=30, by=70, bw=300, bh=46;
+  const W=360, H=230;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '分数条 · 几分之几', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 138);
+  const bx=40, by=78, bw=280, bh=46;
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,160,'',18,DC.ink);
-  dgSlider(svg,30,150,bw-20,0,den,2,DC.gold,function(v){
+  const setInfo = luxInfo(svg, 22, 188, 316, 30);
+  luxSlider(svg, 40, 158, 280, 0, den, 2, function(v){
     const num=Math.round(v);
     g.innerHTML='';
     dg('rect',{x:bx,y:by,width:bw,height:bh,rx:6,fill:'#fff',stroke:DC.ink,'stroke-width':1.5},g);
@@ -281,34 +306,36 @@ function diagFractionBar(container, opts){
       dg('rect',{x:bx+i*cw,y:by,width:cw-1,height:bh,fill:(i<num?DC.gold:'#EDE7D9')},g);
       if(i>0) dg('line',{x1:bx+i*cw,y1:by,x2:bx+i*cw,y2:by+bh,stroke:DC.ink,'stroke-width':1},g);
     }
-    info.textContent=num+' / '+den;
-  });
+    setInfo('阴影占 *'+num+' / '+den+'*');
+  }, v=>'分子 '+Math.round(v));
 }
 
 // ---------- 8. 分数圆 ----------
 function diagFractionCircle(container, opts){
   opts=opts||{};
   const den = opts.den||4;
-  const svg = dgMake(container, 360, 240);
-  dgBg(svg,360,240);
-  dgt(svg,180,26,'拖动金块，给圆涂色',11,DC.gold);
-  const cx=180, cy=120, r=70;
+  const W=360, H=248;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '分数圆 · 涂一涂', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 156);
+  const cx=180, cy=104, r=64;
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,222,'',18,DC.ink);
-  dgSlider(svg,40,205,280,0,den,1,DC.gold,function(v){
+  const setInfo = luxInfo(svg, 22, 206, 316, 34);
+  luxSlider(svg, 40, 192, 280, 0, den, 1, function(v){
     const num=Math.round(v);
     g.innerHTML='';
     dg('circle',{cx,cy,r,fill:'#EDE7D9',stroke:DC.ink,'stroke-width':1.5},g);
     for(let i=0;i<num;i++){
       const a0=2*Math.PI*i/den, a1=2*Math.PI*(i+1)/den;
-      const p=dg('path',{d:`M ${cx} ${cy} L ${cx+r*Math.cos(a0)} ${cy+r*Math.sin(a0)} A ${r} ${r} 0 0 1 ${cx+r*Math.cos(a1)} ${cy+r*Math.sin(a1)} Z`,fill:DC.gold},g);
+      dg('path',{d:`M ${cx} ${cy} L ${cx+r*Math.cos(a0)} ${cy+r*Math.sin(a0)} A ${r} ${r} 0 0 1 ${cx+r*Math.cos(a1)} ${cy+r*Math.sin(a1)} Z`,fill:DC.gold},g);
     }
     for(let i=0;i<den;i++){
       const a=2*Math.PI*i/den;
       dg('line',{x1:cx,y1:cy,x2:cx+r*Math.cos(a),y2:cy+r*Math.sin(a),stroke:DC.ink,'stroke-width':1},g);
     }
-    info.textContent=num+' / '+den;
-  });
+    setInfo('阴影占 *'+num+' / '+den+'*');
+  }, v=>'涂色份数 '+Math.round(v));
 }
 
 // ---------- 9. 小数轴 ----------
@@ -332,40 +359,44 @@ function diagDecimalLine(container){
 
 // ---------- 10. 百分数 ----------
 function diagPercent(container){
-  const svg = dgMake(container, 360, 200);
-  dgBg(svg,360,200);
-  dgt(svg,180,26,'拖动滑块填色，看百分比',11,DC.gold);
-  const bx=30,by=60,bw=300,bh=50;
+  const W=360, H=228;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '百分数 · 百分之几', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 138);
+  const bx=40,by=74,bw=280,bh=50;
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,160,'',18,DC.ink);
-  dgSlider(svg,30,150,bw-20,0,100,40,DC.amber,function(v){
+  const setInfo = luxInfo(svg, 22, 188, 316, 30);
+  luxSlider(svg, 40, 158, 280, 0, 100, 40, function(v){
     const p=Math.round(v);
     g.innerHTML='';
     dg('rect',{x:bx,y:by,width:bw,height:bh,rx:6,fill:'#EDE7D9',stroke:DC.ink,'stroke-width':1.5},g);
     dg('rect',{x:bx,y:by,width:bw*p/100,height:bh,rx:6,fill:DC.amber},g);
-    info.textContent=p+'%';
-  });
+    setInfo('已涂色 *'+p+'%*');
+  }, v=>'百分比 '+Math.round(v));
 }
 
 // ---------- 11. 比 ----------
 function diagRatio(container){
-  const svg = dgMake(container, 360, 220);
-  dgBg(svg,360,220);
-  dgt(svg,180,26,'拖动两个色条，看最简比',11,DC.gold);
+  const W=360, H=244;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '比 · 两个量的关系', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 150);
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,200,'',16,DC.ink);
+  const setInfo = luxInfo(svg, 22, 200, 316, 34);
   function gcd(a,b){return b?gcd(b,a%b):a;}
   function draw(A,B){
     g.innerHTML='';
     const total=A+B;
-    dg('rect',{x:30,y:50,width:300*A/total,height:18,rx:4,fill:DC.green},g);
-    dg('rect',{x:30+300*A/total,y:50,width:300*B/total,height:18,rx:4,fill:DC.blue},g);
+    dg('rect',{x:30,y:54,width:300*A/total,height:18,rx:4,fill:DC.green},g);
+    dg('rect',{x:30+300*A/total,y:54,width:300*B/total,height:18,rx:4,fill:DC.blue},g);
     const k=gcd(A,B);
-    info.textContent=A+' : '+B+'  =  '+(A/k)+' : '+(B/k);
+    setInfo('*'+A+' : '+B+'*  =  '+(A/k)+' : '+(B/k));
   }
   let A=3, B=4;
-  dgSlider(svg,30,80,300,1,12,3,DC.green,v=>{A=Math.round(v);draw(A,B);});
-  dgSlider(svg,30,140,300,1,12,4,DC.blue,v=>{B=Math.round(v);draw(A,B);});
+  luxSlider(svg,30,100,300,1,12,3,function(v){A=Math.round(v);draw(A,B);}, v=>'前项 '+Math.round(v));
+  luxSlider(svg,30,150,300,1,12,4,function(v){B=Math.round(v);draw(A,B);}, v=>'后项 '+Math.round(v));
   draw(3,4);
 }
 
@@ -430,28 +461,32 @@ function diagTriangle(container){
 
 // ---------- 15. 多边形(边数) ----------
 function diagPolygon(container){
-  const svg = dgMake(container, 360, 240);
-  dgBg(svg,360,240);
-  dgt(svg,180,26,'拖动滑块改变边数',11,DC.gold);
-  const cx=180, cy=130, r=80;
+  const W=360, H=252;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '多边形 · 边数越多越圆', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 156);
+  const cx=180, cy=104, r=66;
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,220,'',16,DC.ink);
+  const setInfo = luxInfo(svg, 22, 206, 316, 34);
   const names={3:'三边形',4:'四边形',5:'五边形',6:'六边形',7:'七边形',8:'八边形'};
-  dgSlider(svg,40,200,280,3,8,5,DC.blue,function(v){
+  luxSlider(svg, 40, 192, 280, 3, 8, 5, function(v){
     const n=Math.round(v); g.innerHTML='';
     let pts=[];
     for(let i=0;i<n;i++){const a=2*Math.PI*i/n-Math.PI/2; pts.push((cx+r*Math.cos(a))+','+(cy+r*Math.sin(a)));}
     dg('polygon',{points:pts.join(' '),fill:'rgba(107,120,148,0.15)',stroke:DC.blue,'stroke-width':2.5},g);
     const interior=Math.round((n-2)*180/n);
-    info.textContent=n+' 边形（'+names[n]+'） 内角和 '+(n-2)*180+'° 每个内角约 '+interior+'°';
-  });
+    setInfo('*'+n+'* 边形（'+names[n]+'） 内角和 *'+(n-2)*180+'°*');
+  }, v=>'边数 '+Math.round(v));
 }
 
 // ---------- 16. 图形识别(点击) ----------
 function diagShapeGallery(container){
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  dgt(svg,180,24,'点击图形，认识它的名字',11,DC.gold);
+  const W=360, H=256;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '认识图形 · 点一点', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 168);
   const shapes=[
     {name:'正方形',draw:()=>dg('rect',{x:0,y:0,width:50,height:50,fill:DC.gold,opacity:0.85})},
     {name:'长方形',draw:()=>dg('rect',{x:0,y:0,width:64,height:40,fill:DC.green,opacity:0.85})},
@@ -459,14 +494,15 @@ function diagShapeGallery(container){
     {name:'圆',draw:()=>dg('circle',{cx:28,cy:28,r:28,fill:DC.red,opacity:0.85})},
     {name:'平行四边形',draw:()=>dg('polygon',{points:'12,56 50,56 64,12 26,12',fill:DC.amber,opacity:0.85})},
   ];
-  const info=dgt(svg,180,232,'',15,DC.ink);
+  const setInfo = luxInfo(svg, 22, 214, 316, 30);
   shapes.forEach((s,i)=>{
-    const ox=30+(i%3)*110, oy=50+Math.floor(i/3)*95;
+    const ox=40+(i%3)*110, oy=54+Math.floor(i/3)*96;
     const wrap=dg('g',{transform:`translate(${ox},${oy})`,style:'cursor:pointer'},svg);
     const node=s.draw(); wrap.appendChild(node);
-    wrap.addEventListener('click',()=>{ svg.querySelectorAll('.sg').forEach(n=>n.setAttribute('stroke','none')); node.setAttribute('stroke','#3E4A63'); node.setAttribute('stroke-width','3'); info.textContent='这是：'+s.name; });
+    wrap.addEventListener('click',()=>{ svg.querySelectorAll('.sg').forEach(n=>n.setAttribute('stroke','none')); node.setAttribute('stroke','#3E4A63'); node.setAttribute('stroke-width','3'); setInfo('这是：*'+s.name+'*'); });
     wrap.classList.add('sg');
   });
+  setInfo('点击图形，认识它的名字');
 }
 
 // ---------- 17. 对称(拖镜像线) ----------
@@ -485,30 +521,36 @@ function diagSymmetry(container){
 
 // ---------- 18. 圆(拖半径) ----------
 function diagCircle(container){
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  const cx=150, cy=130;
-  dgt(svg,180,24,'拖动圆，改变半径',11,DC.gold);
+  const W=360, H=256;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '圆 · 半径 直径 面积', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 162);
+  const cx=132, cy=118;
   const c=dg('circle',{cx,cy,r:60,fill:'rgba(229,115,115,0.15)',stroke:DC.red,'stroke-width':2.5},svg);
   const rline=dg('line',{x1:cx,y1:cy,x2:cx+60,y2:cy,stroke:DC.red,'stroke-width':3,'stroke-linecap':'round'},svg);
   dg('circle',{cx,cy,r:4,fill:DC.ink},svg);
-  const info=dgt(svg,300,90,'',13,DC.ink,'start');
-  const handle=dg('circle',{cx:cx+60,cy:cy,r:8,fill:DC.gold,stroke:'#fff','stroke-width':2},svg);
-  dgDrag(svg,handle,function(p){ let r=Math.hypot(p.x-cx,p.y-cy); r=Math.max(20,Math.min(120,r)); c.setAttribute('r',r); rline.setAttribute('x2',cx+r); handle.setAttribute('cx',cx+r); const d=(2*r).toFixed(0), area=Math.round(Math.PI*r*r); info.textContent='r='+Math.round(r)+'\nd='+d+'\n面积≈'+area; });
-  info.textContent='r=60\nd=120\n面积≈11310';
+  const setInfo = luxInfo(svg, 22, 212, 316, 34);
+  const handle=dg('circle',{cx:cx+60,cy:cy,r:9,fill:DC.gold,stroke:'#fff','stroke-width':2,style:'cursor:grab'},svg);
+  function upd(r){ c.setAttribute('r',r); rline.setAttribute('x2',cx+r); handle.setAttribute('cx',cx+r); const d=(2*r).toFixed(0), area=Math.round(Math.PI*r*r); setInfo('r=*'+Math.round(r)+'*  d=*'+d+'*  面积≈*'+area+'*'); }
+  dgDrag(svg,handle,function(p){ let r=Math.hypot(p.x-cx,p.y-cy); r=Math.max(20,Math.min(120,r)); upd(r); });
+  upd(60);
 }
 
 // ---------- 19. 矩形周长面积(拖尺寸) ----------
 function diagAreaRect(container){
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  dgt(svg,180,24,'拖动矩形角，看周长和面积',11,DC.gold);
-  const gx=60, gy=55;
+  const W=360, H=256;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '长方形 · 面积与周长', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 162);
+  const gx=70, gy=64;
   const rect=dg('rect',{x:gx,y:gy,width:120,height:80,fill:'rgba(78,140,110,0.18)',stroke:DC.green,'stroke-width':2.5},svg);
-  const info=dgt(svg,180,228,'',15,DC.ink);
-  const handle=dg('rect',{x:gx+120-8,y:gy+80-8,width:16,height:16,rx:4,fill:DC.gold,stroke:'#fff','stroke-width':2},svg);
-  dgDrag(svg,handle,function(p){ let w=Math.max(40,Math.min(260,p.x-gx)), h=Math.max(40,Math.min(160,p.y-gy)); rect.setAttribute('width',w); rect.setAttribute('height',h); handle.setAttribute('x',gx+w-8); handle.setAttribute('y',gy+h-8); info.textContent='长 '+Math.round(w)+'  宽 '+Math.round(h)+'  →  面积 '+(w*h)+'  周长 '+Math.round(2*(w+h)); });
-  info.textContent='长 120  宽 80  →  面积 9600  周长 400';
+  const handle=dg('rect',{x:gx+120-9,y:gy+80-9,width:18,height:18,rx:5,fill:DC.gold,stroke:'#fff','stroke-width':2,style:'cursor:grab'},svg);
+  const setInfo = luxInfo(svg, 22, 212, 316, 34);
+  function upd(w,h){ rect.setAttribute('width',w); rect.setAttribute('height',h); handle.setAttribute('x',gx+w-9); handle.setAttribute('y',gy+h-9); setInfo('长 *'+Math.round(w)+'*  宽 *'+Math.round(h)+'*  →  面积 *'+(w*h)+'*  周长 *'+Math.round(2*(w+h))+'*'); }
+  dgDrag(svg,handle,function(p){ let w=Math.max(50,Math.min(250,p.x-gx)), h=Math.max(40,Math.min(150,p.y-gy)); upd(w,h); });
+  upd(120,80);
 }
 
 // ---------- 20. 时钟(拖指针) ----------
@@ -568,38 +610,42 @@ function diagMoney(container, opts){
 // ---------- 23. 柱状图(拖高度) ----------
 function diagBarChart(container, opts){
   opts=opts||{};
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  dgt(svg,180,24,'拖动柱顶，调整数据',11,DC.gold);
+  const W=360, H=250;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '条形统计图 · 拖动改数据', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 150);
   const data=[5,8,3,6,9]; const labels=['一','二','三','四','五'];
-  const gx=40, gy=200, bw=44, gap=18, maxH=140;
+  const gx=46, gy=176, bw=44, gap=10, maxH=118;
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,232,'',13,DC.ink);
-  const handles=[];
+  const setInfo = luxInfo(svg, 22, 204, 316, 34);
   function draw(){
     g.innerHTML='';
     let s='';
-    data.forEach((v,i)=>{ const x=gx+i*(bw+gap), h=v/10*maxH; dg('rect',{x,y:gy-h,width:bw,height:h,rx:4,fill:DC.blue,opacity:0.85},g); dgt(svg,x+bw/2,gy+16,labels[i],11,DC.light); s+=labels[i]+'='+v+' '; });
-    info.textContent=s;
+    data.forEach((v,i)=>{ const x=gx+i*(bw+gap), h=v/10*maxH; dg('rect',{x:x,y:gy-h,width:bw,height:h,rx:4,fill:DC.blue,opacity:0.85},g); dgt(svg,x+bw/2,gy+16,labels[i],11,DC.light); s+=labels[i]+'='+v+'  '; });
+    setInfo(s.trim());
   }
-  data.forEach((v,i)=>{ const x=gx+i*(bw+gap); const h=v/10*maxH; const hd=dg('rect',{x:x-4,y:gy-h-8,width:bw+8,height:16,rx:6,fill:DC.gold,opacity:0.9},svg); handles.push(hd);
-    dgDrag(svg,hd,function(p){ let nv=Math.round((gy-p.y)/maxH*10); nv=Math.max(0,Math.min(10,nv)); data[i]=nv; draw(); }); });
+  data.forEach((v,i)=>{ const x=gx+i*(bw+gap); const h=v/10*maxH; const hd=dg('rect',{x:x-4,y:gy-h-9,width:bw+8,height:18,rx:6,fill:DC.gold,opacity:0.95,style:'cursor:grab'},svg);
+    dgDrag(svg,hd,function(p){ let nv=Math.round((gy-p.y)/maxH*10); nv=Math.max(0,Math.min(10,nv)); data[i]=nv; draw(); });
+  });
   draw();
 }
 
 // ---------- 24. 饼图 ----------
 function diagPieChart(container){
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  dgt(svg,180,24,'拖动扇区边界，调比例',11,DC.gold);
-  const cx=150, cy=125, r=80;
+  const W=360, H=256;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '扇形统计图 · 拖动调比例', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 162);
+  const cx=132, cy=118, r=72;
   const g=dg('g',{},svg);
-  const info=dgt(svg,300,90,'',13,DC.ink,'start');
+  const setInfo = luxInfo(svg, 22, 212, 316, 34);
   let a1=0.4, a2=0.7; // 比例(0~1)
-  const h1=dg('circle',{cx:cx+r*Math.cos(2*Math.PI*a1),cy:r*Math.sin(2*Math.PI*a1),r:7,fill:DC.gold,stroke:'#fff','stroke-width':2},svg);
-  const h2=dg('circle',{cx:cx+r*Math.cos(2*Math.PI*a2),cy:r*Math.sin(2*Math.PI*a2),r:7,fill:DC.amber,stroke:'#fff','stroke-width':2},svg);
-  function path(frac){ const a0=0, a1v=2*Math.PI*frac; return `M ${cx} ${cy} L ${cx+r} ${cy} A ${r} ${r} 0 0 1 ${cx+r*Math.cos(a1v)} ${cy+r*Math.sin(a1v)} Z`; }
-  function draw(){ g.innerHTML=''; dg('path',{d:path(a1),fill:DC.green},g); dg('path',{d:`M ${cx} ${cy} L ${cx+r*Math.cos(2*Math.PI*a1)} ${cy+r*Math.sin(2*Math.PI*a1)} A ${r} ${r} 0 0 1 ${cx+r*Math.cos(2*Math.PI*a2)} ${cy+r*Math.sin(2*Math.PI*a2)} Z`,fill:DC.blue},g); dg('path',{d:`M ${cx} ${cy} L ${cx+r*Math.cos(2*Math.PI*a2)} ${cy+r*Math.sin(2*Math.PI*a2)} A ${r} ${r} 0 0 1 ${cx+r} ${cy} Z`,fill:DC.amber},g); info.textContent='A '+Math.round(a1*100)+'%  B '+Math.round((a2-a1)*100)+'%  C '+Math.round((1-a2)*100)+'%'; }
+  const h1=dg('circle',{cx:cx+r*Math.cos(2*Math.PI*a1),cy:cy+r*Math.sin(2*Math.PI*a1),r:8,fill:DC.gold,stroke:'#fff','stroke-width':2,style:'cursor:grab'},svg);
+  const h2=dg('circle',{cx:cx+r*Math.cos(2*Math.PI*a2),cy:cy+r*Math.sin(2*Math.PI*a2),r:8,fill:DC.amber,stroke:'#fff','stroke-width':2,style:'cursor:grab'},svg);
+  function path(frac){ const a1v=2*Math.PI*frac; return `M ${cx} ${cy} L ${cx+r} ${cy} A ${r} ${r} 0 0 1 ${cx+r*Math.cos(a1v)} ${cy+r*Math.sin(a1v)} Z`; }
+  function draw(){ g.innerHTML=''; dg('path',{d:path(a1),fill:DC.green},g); dg('path',{d:`M ${cx} ${cy} L ${cx+r*Math.cos(2*Math.PI*a1)} ${cy+r*Math.sin(2*Math.PI*a1)} A ${r} ${r} 0 0 1 ${cx+r*Math.cos(2*Math.PI*a2)} ${cy+r*Math.sin(2*Math.PI*a2)} Z`,fill:DC.blue},g); dg('path',{d:`M ${cx} ${cy} L ${cx+r*Math.cos(2*Math.PI*a2)} ${cy+r*Math.sin(2*Math.PI*a2)} A ${r} ${r} 0 0 1 ${cx+r} ${cy} Z`,fill:DC.amber},g); setInfo('A *'+Math.round(a1*100)+'%*  B *'+Math.round((a2-a1)*100)+'%*  C *'+Math.round((1-a2)*100)+'%*'); }
   dgDrag(svg,h1,function(p){ let a=Math.atan2(p.y-cy,p.x-cx)/(2*Math.PI); if(a<0)a+=1; a1=Math.max(0.05,Math.min(a2-0.05,a)); h1.setAttribute('cx',cx+r*Math.cos(2*Math.PI*a1)); h1.setAttribute('cy',cy+r*Math.sin(2*Math.PI*a1)); draw(); });
   dgDrag(svg,h2,function(p){ let a=Math.atan2(p.y-cy,p.x-cx)/(2*Math.PI); if(a<0)a+=1; a2=Math.max(a1+0.05,Math.min(0.95,a)); h2.setAttribute('cx',cx+r*Math.cos(2*Math.PI*a2)); h2.setAttribute('cy',cy+r*Math.sin(2*Math.PI*a2)); draw(); });
   draw();
@@ -607,18 +653,20 @@ function diagPieChart(container){
 
 // ---------- 25. 速度时间 ----------
 function diagSpeed(container){
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  dgt(svg,180,24,'拖动滑块，看路程=速度×时间',11,DC.gold);
-  const pad=40, gx=50, gy=200, gw=260, gh=150;
+  const W=360, H=258;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '速度 · 时间 · 路程', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 168);
+  const gx=50, gy=186, gw=260, gh=140;
   dg('rect',{x:gx,y:gy-gh,width:gw,height:gh,fill:'#fff',stroke:DC.line,'stroke-width':1},svg);
   dgt(svg,gx-10,gy+18,'0',10,DC.light); dgt(svg,gx+gw+6,gy-gh,'路程',10,DC.light,'start'); dgt(svg,gx+gw+6,gy,'时间',10,DC.light,'start');
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,40,'',14,DC.ink);
-  function draw(v,t){ g.innerHTML=''; const x=gx+gw*t/10, y=gy-gh*v/10; dg('line',{x1:gx,y1:gy,x2:x,y2:y,stroke:DC.red,'stroke-width':2.5},g); dg('circle',{cx:x,cy:y,r:5,fill:DC.red},g); info.textContent='速度 '+v+' × 时间 '+t+' = 路程 '+v*t; }
+  const setInfo = luxInfo(svg, 22, 214, 316, 34);
+  function draw(v,t){ g.innerHTML=''; const x=gx+gw*t/10, y=gy-gh*v/10; dg('line',{x1:gx,y1:gy,x2:x,y2:y,stroke:DC.red,'stroke-width':2.5},g); dg('circle',{cx:x,cy:y,r:5,fill:DC.red},g); setInfo('速度 *'+v+'* × 时间 *'+t+'* = 路程 *'+(v*t)+'*'); }
   let curV=4, curT=5;
-  dgSlider(svg,50,225,130,1,10,4,DC.red,v=>draw(v, curT));
-  dgSlider(svg,200,225,130,1,10,5,DC.blue,v=>{curT=v;draw(curV,v);});
+  luxSlider(svg,50,196,130,1,10,4,function(v){curV=v;draw(curV, curT);}, v=>'速度 '+v);
+  luxSlider(svg,200,196,130,1,10,5,function(v){curT=v;draw(curV, curT);}, v=>'时间 '+v);
   draw(4,5);
 }
 
@@ -786,15 +834,23 @@ function diagPlant(container, opts){
 
 // ---------- 27. 鸡兔同笼 ----------
 function diagChickenRabbit(container){
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  dgt(svg,180,24,'拖动滑块调鸡、兔数量',11,DC.gold);
+  const W=360, H=256;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '鸡兔同笼 · 数头数脚', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 156);
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,232,'',14,DC.ink);
-  function draw(c,r){ g.innerHTML=''; let x=20,y=60; for(let i=0;i<c;i++){ dg('text',{x,y,'font-size':22},g).textContent='🐔'; x+=26; if(x>320){x=20;y+=30;} } for(let i=0;i<r;i++){ dg('text',{x,y,'font-size':22},g).textContent='🐰'; x+=26; if(x>320){x=20;y+=30;} } info.textContent='鸡 '+c+' 只，兔 '+r+' 只 → 头 '+(c+r)+' 个，脚 '+(2*c+4*r)+' 只'; }
+  const setInfo = luxInfo(svg, 22, 206, 316, 34);
+  function draw(c,r){
+    g.innerHTML='';
+    let x=46, y=64;
+    for(let i=0;i<c;i++){ dg('circle',{cx:x,cy:y,r:13,fill:DC.green,opacity:0.9},g); dg('text',{x:x,y:y+5,'font-size':13,fill:'#fff','text-anchor':'middle','font-weight':'bold'},g).textContent='鸡'; x+=30; if(x>300){x=46;y+=34;} }
+    for(let i=0;i<r;i++){ dg('circle',{cx:x,cy:y,r:13,fill:DC.red,opacity:0.9},g); dg('text',{x:x,y:y+5,'font-size':13,fill:'#fff','text-anchor':'middle','font-weight':'bold'},g).textContent='兔'; x+=30; if(x>300){x=46;y+=34;} }
+    setInfo('鸡 *'+c+'* 只，兔 *'+r+'* 只 → 头 *'+(c+r)+'* 个，脚 *'+(2*c+4*r)+'* 只');
+  }
   let curC=3, curR=2;
-  dgSlider(svg,30,210,150,0,10,3,DC.green,v=>draw(Math.round(v),curR));
-  dgSlider(svg,200,210,150,0,10,2,DC.red,v=>{curR=Math.round(v);draw(curC,v);});
+  luxSlider(svg, 30, 192, 150, 0, 10, 3, function(v){curC=Math.round(v);draw(curC,curR);}, v=>'鸡 '+Math.round(v));
+  luxSlider(svg, 200, 192, 150, 0, 10, 2, function(v){curR=Math.round(v);draw(curC,curR);}, v=>'兔 '+Math.round(v));
   draw(3,2);
 }
 
@@ -802,45 +858,44 @@ function diagChickenRabbit(container){
 function diagEquation(container, opts){
   opts=opts||{};
   const a = opts.a||3, b = opts.b||12;
-  const svg = dgMake(container, 360, 240);
-  dgBg(svg,360,240);
-  dgt(svg,180,24,'拖动滑块找 x，使天平平衡',11,DC.gold);
-  const beamY=90;
+  const W=360, H=248;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '简易方程 · 天平找 x', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 156);
+  const beamY=96;
   const g=dg('g',{},svg);
-  const info=dgt(svg,180,222,'',15,DC.ink);
+  const setInfo = luxInfo(svg, 22, 206, 316, 34);
   function draw(xv){
     g.innerHTML='';
-    // 天平
     dg('line',{x1:60,y1:beamY,x2:300,y2:beamY,stroke:DC.ink,'stroke-width':3},g);
-    dg('polygon',{points:'180,beamY 168,beamY+14 192,beamY+14',fill:DC.ink},g);
-    dg('line',{x1:180,y1:beamY+14,x2:180,y2:beamY+70,stroke:DC.ink,'stroke-width':3},g);
-    // 左盘: a 个 x
-    dg('line',{x1:90,y1:beamY,x2:90,y2:beamY+30,stroke:DC.line,'stroke-width':2},g);
-    dg('text',{x:90,y:beamY+50,'font-size':16,fill:DC.green,'text-anchor':'middle'},g).textContent=a+'x';
-    // 右盘: b
-    dg('line',{x1:270,y1:beamY,x2:270,y2:beamY+30,stroke:DC.line,'stroke-width':2},g);
-    dg('text',{x:270,y:beamY+50,'font-size':16,fill:DC.red,'text-anchor':'middle'},g).textContent=''+b;
+    dg('polygon',{points:'180,'+beamY+' 168,'+(beamY+14)+' 192,'+(beamY+14),fill:DC.ink},g);
+    dg('line',{x1:180,y1:beamY+14,x2:180,y2:beamY+64,stroke:DC.ink,'stroke-width':3},g);
+    dg('line',{x1:90,y1:beamY,x2:90,y2:beamY+28,stroke:DC.line,'stroke-width':2},g);
+    dg('text',{x:90,y:beamY+52,'font-size':18,fill:DC.green,'text-anchor':'middle','font-weight':'bold'},g).textContent=a+'x';
+    dg('line',{x1:270,y1:beamY,x2:270,y2:beamY+28,stroke:DC.line,'stroke-width':2},g);
+    dg('text',{x:270,y:beamY+52,'font-size':18,fill:DC.red,'text-anchor':'middle','font-weight':'bold'},g).textContent=''+b;
     const balanced = a*xv===b;
-    info.textContent=a+'x = '+b+'  →  x = '+xv+(balanced?'  ✓ 平衡！':'');
-    info.setAttribute('fill', balanced?DC.green:DC.ink);
+    setInfo('*'+a+'x* = '+b+'  →  x = *'+xv+'*'+(balanced?'  ✓ 平衡':''));
   }
-  dgSlider(svg,40,200,280,0,Math.ceil(b/a)+2,Math.round(b/a),DC.gold,v=>draw(Math.round(v)));
+  luxSlider(svg, 40, 192, 280, 0, Math.ceil(b/a)+2, Math.round(b/a), v=>draw(Math.round(v)));
 }
 
 // ---------- 29. 3D 展开/旋转 ----------
 function diag3DUnfold(container){
-  const svg = dgMake(container, 360, 250);
-  dgBg(svg,360,250);
-  dgt(svg,180,24,'拖动旋转，认识正方体展开图',11,DC.gold);
-  const g=dg('g',{transform:'translate(180,130)'},svg);
-  // 十字展开图（共 6 个正方形，正方体标准展开图之一）
+  const W=360, H=256;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 22, '正方体 · 展开与旋转', 13, DC.gold);
+  luxCard(svg, 22, 36, 316, 162);
+  const g=dg('g',{transform:'translate(180,118)'},svg);
   const sq=(x,y,c)=>dg('rect',{x:x*46-23,y:y*46-23,width:44,height:44,fill:c,stroke:'#fff','stroke-width':2},g);
   const layout=[[0,-1,DC.green],[-1,0,DC.gold],[0,0,DC.blue],[1,0,DC.red],[0,1,DC.amber],[0,2,DC.ink]];
   layout.forEach((c)=>sq(c[0],c[1],c[2]));
-  const info=dgt(svg,180,232,'',14,DC.ink);
+  const setInfo = luxInfo(svg, 22, 212, 316, 34);
   let ang=0;
-  dgDrag(svg,g,function(p){ ang=Math.atan2(p.y-130,p.x-180); g.setAttribute('transform','translate(180,130) rotate('+(ang*180/Math.PI)+')'); info.textContent='旋转中：'+Math.round(ang*180/Math.PI)+'°'; });
-  info.textContent='正方体有 11 种展开图，这是十字型（6 个面）';
+  dgDrag(svg,g,function(p){ ang=Math.atan2(p.y-118,p.x-180); g.setAttribute('transform','translate(180,118) rotate('+(ang*180/Math.PI)+')'); setInfo('旋转 *'+Math.round(ang*180/Math.PI)+'°* ｜ 正方体有 11 种展开图'); });
+  setInfo('这是 *十字型* 展开图（共 6 个面）');
 }
 
 // ============================================================
@@ -1701,9 +1756,9 @@ function refChickenRabbit(box) {
     '<div class="anim-ctrl">' +
     '  <button class="btn btn-primary" id="cr-a">① 假设全是鸡</button>' +
     '  <button class="btn btn-primary" id="cr-b">② 给兔子补上脚</button>' +
-    '  <button class="btn" id="cr-new">🎲 换一道题</button>' +
+    '  <button class="btn" id="cr-new">换一道题</button>' +
     '</div>' +
-    '<div class="anim-tip">💡 <b>假设法</b>：先当作全是鸡，算出的脚会比实际少；每把一只兔当成鸡就少 2 只脚，所以 <b>兔的只数 =（实际脚数 − 头数×2）÷ 2</b>。</div>';
+    '<div class="anim-tip"><b>假设法</b>：先当作全是鸡，算出的脚会比实际少；每把一只兔当成鸡就少 2 只脚，所以 <b>兔的只数 =（实际脚数 − 头数×2）÷ 2</b>。</div>';
 
   const $ = function (id) { return box.querySelector(id); };
   let H, L, RB, CK, rabbitShown = 0, timer = null;
@@ -1717,12 +1772,12 @@ function refChickenRabbit(box) {
       const x = x0 + c * u, y = y0 + r * 78;
       const isRab = i < rabbitShown;
       legs += isRab ? 4 : 2;
-      g += '<circle cx="' + (x + 18) + '" cy="' + y + '" r="16" fill="' + (isRab ? '#fd79a8' : '#ffd93d') + '" stroke="#8a6d1f" stroke-width="1.5"/>';
-      g += '<text x="' + (x + 18) + '" y="' + (y + 6) + '" text-anchor="middle" font-size="18">' + (isRab ? '🐰' : '🐔') + '</text>';
+      g += '<circle cx="' + (x + 18) + '" cy="' + y + '" r="16" fill="' + (isRab ? DC.red : DC.gold) + '" stroke="' + DC.ink + '" stroke-width="1.5"/>';
+      g += '<text x="' + (x + 18) + '" y="' + (y + 6) + '" text-anchor="middle" font-size="18" fill="#fff">' + (isRab ? '兔' : '鸡') + '</text>';
       const nLeg = isRab ? 4 : 2;
       for (let k = 0; k < nLeg; k++) {
         const lx = x + 18 + (k - (nLeg - 1) / 2) * 9;
-        g += '<line class="' + (isRab && k >= 2 ? 'cr-newleg' : '') + '" x1="' + lx + '" y1="' + (y + 15) + '" x2="' + lx + '" y2="' + (y + 40) + '" stroke="' + (isRab ? '#c2185b' : '#c98f00') + '" stroke-width="3" stroke-linecap="round"/>';
+        g += '<line class="' + (isRab && k >= 2 ? 'cr-newleg' : '') + '" x1="' + lx + '" y1="' + (y + 15) + '" x2="' + lx + '" y2="' + (y + 40) + '" stroke="' + (isRab ? DC.red : DC.gold) + '" stroke-width="3" stroke-linecap="round"/>';
       }
     }
     $('#cr-svg').innerHTML = g;
