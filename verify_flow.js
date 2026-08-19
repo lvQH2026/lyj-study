@@ -225,9 +225,9 @@ try {
 
 // ============ 四、SW 缓存清单 ============
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/diagram.js', 'js/main.js']
+['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/chinese.js', 'js/diagram.js', 'js/main.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v34)', /lyj-shell-v34/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-3])/.test(sw));
+ok('SW 版本号已升级 (v35)', /lyj-shell-v35/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-4])/.test(sw));
 
 // ============ 四点五、CSS 隔离守卫 ============
 const engCss = fs.readFileSync(path.join(ROOT, 'css', 'english.css'), 'utf8');
@@ -258,7 +258,7 @@ ok('对齐：english.css 不再覆盖 .btn-primary（继承数学全局）', !/#
 ok('对齐：english.js 首页使用数学 .unit-item 行样式', /class="unit-item"/.test(fs.readFileSync(path.join(ROOT, 'js', 'english.js'), 'utf8')));
 
 // ============ 五、文件存在性 ============
-['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/main.js']
+['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/chinese.js', 'js/main.js']
   .forEach(f => {
     const p = path.join(ROOT, f);
     const e = fs.existsSync(p);

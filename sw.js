@@ -1,10 +1,10 @@
 // 吕泳冀学习站 Service Worker
-// v34：五六年级全动画轻奢重写 + 修复 dgSlider 手柄未挂载 DOM 的 bug（所有用 dgSlider 的动画滑块此前不可见不可拖）
-const CACHE = 'lyj-shell-v34';
+// v35：新增语文模块（4-6年级知识板块+阅读理解+古诗文+错题库），顶部三按钮（数学|语文|英语）
+const CACHE = 'lyj-shell-v35';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
-  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/diagram.js', './js/main.js',
+  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'
 ];

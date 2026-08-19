@@ -70,6 +70,7 @@
 </head>
 <body><div id="moduleSwitch" class="module-switch">
   <button class="mod-btn active" data-mod="math" onclick="App.switchModule('math')">数学</button>
+  <button class="mod-btn" data-mod="chinese" onclick="App.switchModule('chinese')">语文</button>
   <button class="mod-btn" data-mod="english" onclick="App.switchModule('english')">英语</button>
 </div>
 <div id="mathRoot">
@@ -379,12 +380,89 @@
     <button class="nav-tab" data-tab="progress" onclick="switchMain('progress')"><span class="tab-label">进度</span></button>
   </div>
 </div><!-- /englishRoot -->
+<div id="chineseRoot" style="display:none">
+  <div class="navbar">
+    <button class="nav-icon-btn" id="cnBackBtn" onclick="CN.goHome()" style="display:none">&larr;</button>
+    <h1>📖 小学语文</h1>
+  </div>
+
+  <!-- 首页 -->
+  <div class="page active" id="cnPageHome">
+    <div id="cnHomeContent" style="padding:14px"></div>
+  </div>
+
+  <!-- 答题页 -->
+  <div class="page" id="cnPageQuiz">
+    <div class="quiz-header">
+      <div class="quiz-progress" id="cnQuizProgress">第 1 / 10 题</div>
+      <div class="quiz-score" id="cnQuizScore">★ 0</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="cnProgressFill" style="width:10%"></div>
+    </div>
+    <div class="question-card" id="cnQuestionCard"></div>
+    <div class="quiz-bottom">
+      <div id="cnQuizActions"></div>
+    </div>
+  </div>
+
+  <!-- 结果页 -->
+  <div class="page" id="cnPageResult">
+    <div class="card result-card">
+      <div class="result-emoji" id="cnResultEmoji">🎉</div>
+      <div class="result-title" id="cnResultTitle">太棒了！</div>
+      <div class="stars" id="cnResultStars"></div>
+      <div class="result-score"><span id="cnResultScore">0</span><span class="total" id="cnResultTotal">/10</span></div>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="num correct" id="cnResultCorrect">0</div>
+          <div class="label">答对</div>
+        </div>
+        <div class="result-stat">
+          <div class="num wrong" id="cnResultWrong">0</div>
+          <div class="label">答错</div>
+        </div>
+        <div class="result-stat">
+          <div class="num" id="cnResultAcc" style="color:var(--primary)">0%</div>
+          <div class="label">正确率</div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="CN.goHome()">返回首页</button>
+        <button class="btn btn-primary" onclick="CN.beginQuiz(CN._lastUnitIdx||0)">再练一次</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 错题库页 -->
+  <div class="page" id="cnPageWrong">
+    <div class="section-title">语文错题库</div>
+    <div class="btn-group" style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="CN.startWrongReview()">开始错题重练</button>
+      <button class="btn btn-outline" onclick="CN.clearWrong()">清空语文错题</button>
+    </div>
+    <div id="cnWrongList"></div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav cn-bottom-nav">
+    <button class="nav-tab active" data-tab="home" onclick="CN.switchTab('home')">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">首页</span>
+    </button>
+    <button class="nav-tab" data-tab="wrong" onclick="CN.switchTab('wrong')">
+      <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="tab-label">错题库</span>
+    </button>
+  </div>
+</div><!-- /chineseRoot -->
 <div class="toast" id="toast"></div>
 
 <script src="js/core.js"></script>
 <script src="js/math.js"></script>
 <script src="js/data.js"></script>
 <script src="js/english.js"></script>
+<script src="js/chinese.js"></script>
 <script src="js/diagram.js"></script>
 <script src="js/main.js"></script>
 
