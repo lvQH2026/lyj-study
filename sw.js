@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v32：重做 diagPlant 动画——双行 pill 标签 + 矢量小树/花坛/楼梯/钟面 + 公式高亮卡，去掉卡通样式，贴合主站轻奢极简风格
-const CACHE = 'lyj-shell-v32';
+// v33：修复"拖动图形点不动"——diagPlant 新增真实可拖拽金色手柄（拖右端改间隔数，与滑块双向同步）；默认提示改为中性"动手试一试"，不再误套"拖动图形"到纯滑块/按钮类动图
+const CACHE = 'lyj-shell-v33';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

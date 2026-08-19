@@ -637,6 +637,9 @@ function diagPlant(container, opts){
   const TABS=[['both','两端都种'],['one','一端种'],['none','两端不种'],['closed','封闭图形'],['stair','爬楼梯'],['bell','敲钟']];
   let mode='both', n=5;
 
+  // 直线种树相关常量（拖拽手柄用于改变间隔数 n）
+  const SEGL=30, lineX0=boardX+26, roadY=150;
+
   // 双行 pill 标签
   const tabBar=dg('g',{},svg);
   const tabEls=TABS.map((t,i)=>{
@@ -681,19 +684,35 @@ function diagPlant(container, opts){
     dg('line',{x1:x,y1:y+1,x2:x+5,y2:y+9,stroke:DC.ink,'stroke-width':2,'stroke-linecap':'round'},gContent);
   }
 
+  // ---- 可拖拽的金色手柄（拖右端改变间隔数 n；持久节点，重绘后保活）----
+  const endHandle = dg('g', { id: 'pl-handle', style: 'cursor:grab;touch-action:none' }, svg);
+  dg('circle', { r: 12, fill: DC.gold, stroke: '#fff', 'stroke-width': 2.5 }, endHandle);
+  dg('text', { x: 0, y: 4, 'font-size': 12, 'text-anchor': 'middle', fill: '#fff', 'font-weight': 'bold' }, endHandle).textContent = '↔';
+  function positionHandle(){
+    if (mode==='both' || mode==='one' || mode==='none') {
+      endHandle.setAttribute('transform', 'translate(' + (lineX0 + n*SEGL) + ',' + (roadY-20) + ')');
+      endHandle.style.display = '';
+    } else {
+      endHandle.style.display = 'none';
+    }
+  }
+  dgDrag(svg, endHandle, function (p) {
+    const nn = Math.max(3, Math.min(9, Math.round((p.x - lineX0) / SEGL)));
+    if (nn !== n) { n = nn; syncSlider(); draw(); }
+  });
+
   function drawLine(){
-    const x0=boardX+26, x1=W-boardX-26, roadY=150;
-    dg('rect',{x:boardX+8,y:roadY,width:boardW-16,height:11,rx:4,fill:'#E9E3D6'},gContent);
-    dg('line',{x1:boardX+8,y1:roadY,x2:W-boardX-8,y2:roadY,stroke:DC.ink,'stroke-width':2},gContent);
-    const total=n;
-    const pos=[]; for(let k=0;k<=total;k++) pos.push(x0+(x1-x0)*k/total);
-    const plantAt = mode==='both' ? ()=>true : mode==='one' ? k=>k<total : k=>k>0&&k<total;
+    const x0=lineX0, x1=x0 + n*SEGL;
+    dg('rect',{x:x0-8,y:roadY,width:(x1-x0)+16,height:11,rx:4,fill:'#E9E3D6'},gContent);
+    dg('line',{x1:x0-8,y1:roadY,x2:x1+8,y2:roadY,stroke:DC.ink,'stroke-width':2},gContent);
+    const pos=[]; for(let k=0;k<=n;k++) pos.push(x0+k*SEGL);
+    const plantAt = mode==='both' ? ()=>true : mode==='one' ? k=>k<n : k=>k>0&&k<n;
     pos.forEach((x,k)=>{
       if(plantAt(k)) tree(x, roadY-20, 1);
       else dg('circle',{cx:x,cy:roadY-20,r:9,fill:'none',stroke:DC.light,'stroke-width':1.5,'stroke-dasharray':'3 3'},gContent);
     });
     dgt(gContent, pos[0], roadY+22, '起点', 10, DC.light);
-    dgt(gContent, pos[total], roadY+22, '终点', 10, DC.light);
+    dgt(gContent, pos[n], roadY+22, '终点', 10, DC.light);
     dgt(gContent, (x0+x1)/2, roadY+22, '每段相等 · 共 '+n+' 段', 10, DC.light);
   }
   function drawClosed(){
@@ -735,6 +754,10 @@ function diagPlant(container, opts){
     dgt(gContent, cx, cy+r+16, '红点 = 敲的次数，弧段 = 间隔', 10, DC.light);
   }
 
+  // 滑块（与拖拽手柄双向同步）
+  function syncSlider(){ if (sl) sl.set(n); }
+  let sl = dgSlider(svg, 60, 302, 240, 3, 9, 5, DC.green, function(v){ n=Math.round(v); draw(); }, v=>'间隔 '+Math.round(v)+' 段');
+
   function draw(){
     gContent.innerHTML='';
     if(mode==='both'||mode==='one'||mode==='none'){
@@ -751,13 +774,13 @@ function diagPlant(container, opts){
     else if(mode==='stair') f='从 1 楼到 *'+(n+1)+'* 楼 → 层数 = '+(n+1)+' − 1 = *'+n+'* 层';
     else if(mode==='bell') f='敲 *'+n+'* 下 → 间隔 = '+n+' − 1 = *'+(n-1)+'* 个';
     setFormula(f);
+    positionHandle();
   }
   function setMode(m){
     mode=m;
     tabEls.forEach((e,i)=>{ const on=TABS[i][0]===m; e.r.setAttribute('fill', on?DC.gold:'#EDE7DB'); e.r.setAttribute('stroke', on?DC.gold:'#E3DCCB'); e.tx.setAttribute('fill', on?'#fff':DC.ink); });
     draw();
   }
-  dgSlider(svg, 60, 302, 240, 3, 9, 5, DC.green, function(v){ n=Math.round(v); draw(); }, v=>'间隔 '+Math.round(v)+' 段');
   draw();
 }
 
@@ -945,7 +968,7 @@ function getUnitDiagrams(unit, grade, sem){
   if (/克和千克|重量|容量/.test(name)) add(out, diagBarChart, '用柱状图比轻重');
   // 应用题类
   if (/行程|速度/.test(name)) add(out, diagSpeed, '路程=速度×时间');
-  if (/植树/.test(name)) add(out, diagPlant, '植树问题：间隔与棵数');
+  if (/植树/.test(name)) add(out, diagPlant, '植树问题：间隔与棵数', {}, '👆 拖动金色手柄，或拉滑块，看间隔与棵数怎样变');
   if (/鸡兔/.test(name)) add(out, diagChickenRabbit, '鸡兔同笼：数头数脚');
   if (/面积应用|周长应用/.test(name)) add(out, diagAreaRect, '画图算面积/周长');
   if (/工程问题|价格应用|分数应用/.test(name)) add(out, diagBarChart, '用图表示数量关系');

@@ -7799,7 +7799,7 @@ function showUnitDiagrams(unit, grade, sem, idx) {
   diags.forEach(d => {
     const card = document.createElement('div');
     card.className = 'diag-card';
-    card.innerHTML = '<div class="diag-card-title">🎬 ' + d.title + '</div><div class="diag-card-body"></div><div class="diag-card-hint">' + (d.hint || '👆 拖动图形，自己试一试') + '</div>';
+    card.innerHTML = '<div class="diag-card-title">🎬 ' + d.title + '</div><div class="diag-card-body"></div><div class="diag-card-hint">' + (d.hint || '👆 动手试一试，看图形怎么变') + '</div>';
     cardsEl.appendChild(card);
     try { d.fn(card.querySelector('.diag-card-body'), d.opts || {}); }
     catch (e) { console.error('diagram render error', d.title, e); }
