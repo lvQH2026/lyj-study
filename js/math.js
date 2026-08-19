@@ -60,6 +60,30 @@ const SHAPE_METHOD_IMG = 'data:image/svg+xml,' + encodeURIComponent(
   +`<text x="18" y="436" font-size="11" fill="#3E4A63">互余角：和=90°（直角）</text>`
   +`</svg>`
 );
+const TREE_METHOD_IMG = 'data:image/svg+xml,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="300"><rect width="360" height="300" fill="#F7F6F2"/>`
+  +`<text x="18" y="26" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3E4A63">植树问题 · 先找「间隔数」</text>`
+  +`<text x="18" y="50" font-family="sans-serif" font-size="11" fill="#5C6370">总距离 ÷ 间距 = 间隔数，再按情况算棵数</text>`
+  +`<g transform="translate(18,70)">`
+  +`<rect x="0" y="0" width="324" height="30" rx="6" fill="#3E4A63"/><text x="10" y="20" font-size="12" fill="#fff">① 两端都种</text><text x="120" y="20" font-size="12" fill="#fff">棵数 = 间隔数 + 1</text>`
+  +`</g>`
+  +`<g transform="translate(18,108)">`
+  +`<rect x="0" y="0" width="324" height="30" rx="6" fill="#B4945A"/><text x="10" y="20" font-size="12" fill="#fff">② 一端种一端不种</text><text x="150" y="20" font-size="12" fill="#fff">棵数 = 间隔数</text>`
+  +`</g>`
+  +`<g transform="translate(18,146)">`
+  +`<rect x="0" y="0" width="324" height="30" rx="6" fill="#3E4A63"/><text x="10" y="20" font-size="12" fill="#fff">③ 两端都不种</text><text x="122" y="20" font-size="12" fill="#fff">棵数 = 间隔数 - 1</text>`
+  +`</g>`
+  +`<g transform="translate(18,184)">`
+  +`<rect x="0" y="0" width="324" height="30" rx="6" fill="#B4945A"/><text x="10" y="20" font-size="12" fill="#fff">④ 封闭图形（环形）</text><text x="160" y="20" font-size="12" fill="#fff">棵数 = 间隔数</text>`
+  +`</g>`
+  +`<g transform="translate(18,222)">`
+  +`<rect x="0" y="0" width="324" height="30" rx="6" fill="#3E4A63"/><text x="10" y="20" font-size="12" fill="#fff">⑤ 爬楼梯</text><text x="92" y="20" font-size="12" fill="#fff">层数 = 终点楼层 - 起点楼层</text>`
+  +`</g>`
+  +`<g transform="translate(18,260)">`
+  +`<rect x="0" y="0" width="324" height="30" rx="6" fill="#B4945A"/><text x="10" y="20" font-size="12" fill="#fff">⑥ 敲钟</text><text x="76" y="20" font-size="12" fill="#fff">间隔 = 敲的次数 - 1</text>`
+  +`</g>`
+  +`</svg>`
+);
 const TRIANGLE_METHOD_IMG = 'data:image/png;base64,' +
   'iVBORw0KGgoAAAANSUhEUgAAAqUAAAOgCAIAAACLAJhiAAAQAElEQVR4AexdBWAVx9Y+Z3avx3F3pxSHGqWlQt39ta/2v7q7u9t7dXelpW7UaQulRYp7QgJx' +
   '96u783+zm1xCSCCBJCQ00++ee+bMmTNnzszO2d2bxxOdB09KHLxvq8R+iYOnWNjfojbfKmjSkKmtH4lDpiY0EWAqaegB9eDApKHT/mnoMOygdrRHoGUi0Aou' +
@@ -5459,6 +5483,7 @@ const KNOWLEDGE_BASE = {
       { name: '多边形的面积', type: 'shape', gen: g5_area },
       { name: '可能性', type: 'application', gen: g5_prob },
       { name: '植树问题', type: 'application', gen: g5_tree },
+      { name: '专项·植树问题', type: 'application', gen: g_tree_special, paper: true, introImg: TREE_METHOD_IMG },
       { name: '面积应用题', type: 'application', gen: g_app_area },
       { name: '鸡兔同笼', type: 'application', gen: g_app_chicken_rabbit },
     ],
@@ -6822,6 +6847,24 @@ function g5_prob(){
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g5_tree(){let l=ri(50,120),g=ri(4,8);return mc(`一条路长${l}米，每隔${g}米种一棵（两端都种），共几棵？`,l/g+1,[l/g,l/g-1,l/g+2])}
+// 专项·植树问题：覆盖 6 大类（两端都种/一端种/两端不种/封闭图形/爬楼梯/敲钟），每类 5 题共 30 题
+function g_tree_special(){
+  const pool=[];
+  for(let i=0;i<5;i++){ const g=pick([4,5,6,8,10]), n=ri(4,12), L=g*n;
+    pool.push(mc(`一条路长${L}米，每隔${g}米种一棵树（两端都种），一共要种多少棵？`, n+1, [n, n-1, n+2])); }
+  for(let i=0;i<5;i++){ const g=pick([4,5,6,8,10]), n=ri(4,12), L=g*n;
+    pool.push(mc(`一条${L}米长的走廊，从头到尾每隔${g}米放一盆花（只在一端放，另一端不放），一共放多少盆？`, n, [n+1, n-1, n+2])); }
+  for(let i=0;i<5;i++){ const g=pick([4,5,6,8,10]), n=ri(4,12), L=g*n;
+    pool.push(mc(`在一条${L}米长的小路一侧种树，两端都不种，每隔${g}米种一棵，一共种多少棵？`, n-1, [n, n+1, n-2])); }
+  for(let i=0;i<5;i++){ const g=pick([4,5,6,8,10]), n=ri(4,12), P=g*n;
+    pool.push(mc(`一个圆形花坛周长${P}米，沿花坛每隔${g}米种一棵月季，一共种多少棵？`, n, [n+1, n-1, n+2])); }
+  for(let i=0;i<5;i++){ const a=ri(1,6), b=a+ri(2,6);
+    pool.push(mc(`小明从${a}楼走到${b}楼，每上一层楼算一段，他一共要走多少层？`, b-a, [b, a, b-a+1])); }
+  for(let i=0;i<5;i++){ const k=ri(3,10);
+    pool.push(mc(`时钟敲${k}下，中间有几个时间间隔？`, k-1, [k, k+1, k-2])); }
+  for(let i=pool.length-1;i>0;i--){ const j=ri(0,i); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  return pool;
+}
 function g5_observe(){
   let items=[
     {q:'从正面看一个正方体，看到的形状是？',a:'正方形',d:['长方形','三角形','圆形']},

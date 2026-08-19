@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v30：修复交互动图两类问题——①部分图形拖不动（三角形顶点/小数方格/图形平移旋转加真实拖拽手柄）；②部分图形与单元知识不符（巧数三角形改用数三角形专项、四则运算新增运算顺序、图形的运动补上旋转）
-const CACHE = 'lyj-shell-v30';
+// v31：新增「专项·植树问题」单元（覆盖两端都种/一端种/两端不种/封闭图形/爬楼梯/敲钟 6 大类，30 题/组），升级 diagPlant 为多 tab 交互图解
+const CACHE = 'lyj-shell-v31';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

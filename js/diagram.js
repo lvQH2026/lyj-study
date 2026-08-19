@@ -622,21 +622,64 @@ function diagSpeed(container){
   draw(4,5);
 }
 
-// ---------- 26. 植树问题 ----------
+// ---------- 26. 植树问题（多 tab：两端都种/一端种/两端不种/封闭/爬楼梯/敲钟）----------
 function diagPlant(container, opts){
   opts=opts||{};
-  const svg = dgMake(container, 360, 220);
-  dgBg(svg,360,220);
-  dgt(svg,180,24,'拖动滑块，看两端都栽的规律',11,DC.gold);
-  const g=dg('g',{},svg);
-  const info=dgt(svg,180,202,'',15,DC.ink);
-  dgSlider(svg,40,180,280,1,12,4,DC.green,function(v){
-    const n=Math.round(v); g.innerHTML='';
-    const roadX0=30, roadX1=330, y=90;
-    dg('line',{x1:roadX0,y1:y,x2:roadX1,y2:y,stroke:DC.line,'stroke-width':4},g);
-    for(let i=0;i<=n;i++){ const x=roadX0+(roadX1-roadX0)*i/n; dg('circle',{cx:x,cy:y,r:8,fill:DC.green},g); }
-    info.textContent='间隔 '+n+' 段 → 两端都栽 树 '+(n+1)+' 棵';
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg,360,240);
+  const TABS=[['both','两端都种'],['one','一端种'],['none','两端不种'],['closed','封闭'],['stair','爬楼梯'],['bell','敲钟']];
+  let mode='both';
+  const tabBar=dg('g',{},svg);
+  const tabEls=TABS.map((t,i)=>{
+    const x=12+i*57;
+    const r=dg('rect',{x:x,y:8,width:52,height:22,rx:6,fill: i===0?DC.gold:'#EDE7DB',style:'cursor:pointer'},tabBar);
+    const tx=dg('text',{x:x+26,y:23,'font-size':10,'text-anchor':'middle',fill: i===0?'#fff':'#3E4A63',style:'cursor:pointer;user-select:none'},tabBar);
+    tx.textContent=t[1];
+    r.addEventListener('click',()=>setMode(t[0]));
+    tx.addEventListener('click',()=>setMode(t[0]));
+    return {r,tx};
   });
+  const g=dg('g',{},svg);
+  const info=dgt(svg,180,226,'',14,DC.ink);
+  let n=4;
+  function setMode(m){
+    mode=m;
+    tabEls.forEach((e,i)=>{ const on=TABS[i][0]===m; e.r.setAttribute('fill', on?DC.gold:'#EDE7DB'); e.tx.setAttribute('fill', on?'#fff':'#3E4A63'); });
+    draw();
+  }
+  function draw(){
+    g.innerHTML='';
+    const roadX0=30, roadX1=330, y=110;
+    if(mode==='both'||mode==='one'||mode==='none'){
+      let trees = mode==='both'? n+1 : mode==='one'? n : n-1;
+      trees=Math.max(trees,0);
+      dg('line',{x1:roadX0,y1:y,x2:roadX1,y2:y,stroke:DC.line,'stroke-width':4},g);
+      if(trees===1){ dg('circle',{cx:(roadX0+roadX1)/2,cy:y,r:8,fill:DC.green},g); }
+      else { for(let i=0;i<trees;i++){ const x=roadX0+(roadX1-roadX0)*i/(trees-1); dg('circle',{cx:x,cy:y,r:8,fill:DC.green},g); } }
+      const label = mode==='both'?'两端都种':mode==='one'?'一端种一端不种':'两端都不种';
+      const note = mode==='both'?'间隔 '+n+' 段，两端都栽 → '+(n+1)+' 棵'
+                 : mode==='one'?'间隔 '+n+' 段，只一端栽 → '+n+' 棵'
+                 : '间隔 '+n+' 段，两端都不栽 → '+(n-1)+' 棵';
+      info.textContent=note;
+    } else if(mode==='closed'){
+      const cx=180,cy=110,r=70;
+      dg('circle',{cx:cx,cy:cy,r:r,fill:'none',stroke:DC.line,'stroke-width':4},g);
+      for(let i=0;i<n;i++){ const a=-Math.PI/2 + i*2*Math.PI/n; const x=cx+r*Math.cos(a), yy=cy+r*Math.sin(a); dg('circle',{cx:x,cy:yy,r:7,fill:DC.green},g); }
+      info.textContent='周长分成 '+n+' 段（封闭）→ '+n+' 棵';
+    } else if(mode==='stair'){
+      const floors=n+1, top=60, bot=190, stepH=(bot-top)/(floors-1);
+      for(let f=1;f<=floors;f++){ const yy=bot-(f-1)*stepH; dg('line',{x1:120,y1:yy,x2:240,y2:yy,stroke: f===1||f===floors?DC.ink:DC.line,'stroke-width':2},g);
+        dg('text',{x:104,y:yy+4,'font-size':10,fill:DC.ink},g).textContent=f+'楼'; }
+      info.textContent='从1楼到'+(n+1)+'楼 → 爬了 '+n+' 层';
+    } else if(mode==='bell'){
+      const k=n, ix=180, iy=170, r=80;
+      dg('path',{d:'M '+(ix-r)+' '+iy+' A '+r+' '+r+' 0 0 1 '+(ix+r)+' '+iy,fill:'none',stroke:DC.line,'stroke-width':3},g);
+      for(let i=0;i<k;i++){ const a=Math.PI - i*Math.PI/(k-1||1); const x=ix-r*Math.cos(a), yy=iy-r*Math.sin(a); dg('circle',{cx:x,cy:yy,r:6,fill:DC.red},g); }
+      info.textContent='敲 '+k+' 下 → 中间 '+(k-1)+' 个间隔';
+    }
+  }
+  dgSlider(svg,40,205,280,1,12,4,DC.green,function(v){ n=Math.round(v); draw(); });
+  draw();
 }
 
 // ---------- 27. 鸡兔同笼 ----------
