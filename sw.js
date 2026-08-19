@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v31：新增「专项·植树问题」单元（覆盖两端都种/一端种/两端不种/封闭图形/爬楼梯/敲钟 6 大类，30 题/组），升级 diagPlant 为多 tab 交互图解
-const CACHE = 'lyj-shell-v31';
+// v32：重做 diagPlant 动画——双行 pill 标签 + 矢量小树/花坛/楼梯/钟面 + 公式高亮卡，去掉卡通样式，贴合主站轻奢极简风格
+const CACHE = 'lyj-shell-v32';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

@@ -625,60 +625,139 @@ function diagSpeed(container){
 // ---------- 26. 植树问题（多 tab：两端都种/一端种/两端不种/封闭/爬楼梯/敲钟）----------
 function diagPlant(container, opts){
   opts=opts||{};
-  const svg = dgMake(container, 360, 240);
-  dgBg(svg,360,240);
-  const TABS=[['both','两端都种'],['one','一端种'],['none','两端不种'],['closed','封闭'],['stair','爬楼梯'],['bell','敲钟']];
-  let mode='both';
+  const W=360, H=332;
+  const svg = dgMake(container, W, H);
+  dgBg(svg, W, H);
+  dgt(svg, W/2, 20, '植树问题 · 间隔与棵数', 13, DC.gold);
+
+  // 画板卡片
+  const boardX=12, boardY=30, boardW=W-24, boardH=150;
+  dg('rect',{x:boardX,y:boardY,width:boardW,height:boardH,rx:12,fill:'#FFFFFF',stroke:DC.line,'stroke-width':1.5},svg);
+
+  const TABS=[['both','两端都种'],['one','一端种'],['none','两端不种'],['closed','封闭图形'],['stair','爬楼梯'],['bell','敲钟']];
+  let mode='both', n=5;
+
+  // 双行 pill 标签
   const tabBar=dg('g',{},svg);
   const tabEls=TABS.map((t,i)=>{
-    const x=12+i*57;
-    const r=dg('rect',{x:x,y:8,width:52,height:22,rx:6,fill: i===0?DC.gold:'#EDE7DB',style:'cursor:pointer'},tabBar);
-    const tx=dg('text',{x:x+26,y:23,'font-size':10,'text-anchor':'middle',fill: i===0?'#fff':'#3E4A63',style:'cursor:pointer;user-select:none'},tabBar);
+    const col=i%3, row=Math.floor(i/3);
+    const tw=104, th=24, gapX=12, gapY=8;
+    const x=12+col*(tw+gapX), y=boardY+boardH+10+row*(th+gapY);
+    const r=dg('rect',{x:x,y:y,width:tw,height:th,rx:12,fill: i===0?DC.gold:'#EDE7DB',stroke: i===0?DC.gold:'#E3DCCB','stroke-width':1.5,style:'cursor:pointer'},tabBar);
+    const tx=dg('text',{x:x+tw/2,y:y+th/2+4,'font-size':11,'text-anchor':'middle',fill: i===0?'#fff':DC.ink,'font-weight':'bold',style:'cursor:pointer;user-select:none'},tabBar);
     tx.textContent=t[1];
     r.addEventListener('click',()=>setMode(t[0]));
     tx.addEventListener('click',()=>setMode(t[0]));
     return {r,tx};
   });
-  const g=dg('g',{},svg);
-  const info=dgt(svg,180,226,'',14,DC.ink);
-  let n=4;
+
+  // 画板内容层（重绘只清这一层）
+  const gContent=dg('g',{},svg);
+
+  // 底部公式高亮卡
+  const fy=boardY+boardH+10+2*(24+8)+8;
+  dg('rect',{x:12,y:fy,width:W-24,height:34,rx:10,fill:'#F3EEE3',stroke:DC.line,'stroke-width':1},svg);
+  const gFormula=dg('g',{},svg);
+  function setFormula(s){
+    gFormula.innerHTML='';
+    const txt=dg('text',{x:W/2,y:fy+22,'font-size':13,fill:DC.ink,'text-anchor':'middle','font-weight':'bold'},gFormula);
+    s.split('*').forEach((seg,i)=>{ dg('tspan',{fill: i%2===1?DC.gold:DC.ink},txt).textContent=seg; });
+  }
+
+  // ---- 矢量小元素 ----
+  function tree(x,y,s){
+    dg('rect',{x:x-2,y:y+6,width:4,height:9,rx:1,fill:'#9C6B3F'},gContent);
+    dg('circle',{cx:x,cy:y,r:9*s,fill:DC.green,stroke:'#fff','stroke-width':1.5},gContent);
+    dg('circle',{cx:x-3,cy:y-2,r:3*s,fill:'#5Fa37c',opacity:0.7},gContent);
+  }
+  function flower(x,y,c){
+    for(let i=0;i<6;i++){ const a=i*Math.PI/3; dg('circle',{cx:x+7*Math.cos(a),cy:y+7*Math.sin(a),r:3,fill:c},gContent); }
+    dg('circle',{cx:x,cy:y,r:3.5,fill:DC.gold},gContent);
+  }
+  function person(x,y){
+    dg('circle',{cx:x,cy:y-11,r:5,fill:DC.ink},gContent);
+    dg('line',{x1:x,y1:y-6,x2:x,y2:y+7,stroke:DC.ink,'stroke-width':2.5,'stroke-linecap':'round'},gContent);
+    dg('line',{x1:x,y1:y+1,x2:x-5,y2:y+9,stroke:DC.ink,'stroke-width':2,'stroke-linecap':'round'},gContent);
+    dg('line',{x1:x,y1:y+1,x2:x+5,y2:y+9,stroke:DC.ink,'stroke-width':2,'stroke-linecap':'round'},gContent);
+  }
+
+  function drawLine(){
+    const x0=boardX+26, x1=W-boardX-26, roadY=150;
+    dg('rect',{x:boardX+8,y:roadY,width:boardW-16,height:11,rx:4,fill:'#E9E3D6'},gContent);
+    dg('line',{x1:boardX+8,y1:roadY,x2:W-boardX-8,y2:roadY,stroke:DC.ink,'stroke-width':2},gContent);
+    const total=n;
+    const pos=[]; for(let k=0;k<=total;k++) pos.push(x0+(x1-x0)*k/total);
+    const plantAt = mode==='both' ? ()=>true : mode==='one' ? k=>k<total : k=>k>0&&k<total;
+    pos.forEach((x,k)=>{
+      if(plantAt(k)) tree(x, roadY-20, 1);
+      else dg('circle',{cx:x,cy:roadY-20,r:9,fill:'none',stroke:DC.light,'stroke-width':1.5,'stroke-dasharray':'3 3'},gContent);
+    });
+    dgt(gContent, pos[0], roadY+22, '起点', 10, DC.light);
+    dgt(gContent, pos[total], roadY+22, '终点', 10, DC.light);
+    dgt(gContent, (x0+x1)/2, roadY+22, '每段相等 · 共 '+n+' 段', 10, DC.light);
+  }
+  function drawClosed(){
+    const cx=W/2, cy=boardY+boardH/2+4, r=54;
+    dg('circle',{cx:cx,cy:cy,r:r,fill:'#FBF4E6',stroke:DC.gold,'stroke-width':2.5},gContent);
+    dg('circle',{cx:cx,cy:cy,r:r-12,fill:'none',stroke:DC.line,'stroke-width':1,'stroke-dasharray':'3 3'},gContent);
+    for(let i=0;i<n;i++){ const a=-Math.PI/2 + i*2*Math.PI/n; tree(cx+r*Math.cos(a), cy+r*Math.sin(a), 0.8); }
+    flower(cx, cy, '#E57373'); flower(cx-20, cy+9, '#C08A3E'); flower(cx+20, cy-9, '#6B7894');
+    dgt(gContent, cx, cy+r+16, '周长分成 '+n+' 段 → '+n+' 棵', 10, DC.light);
+  }
+  function drawStair(){
+    const floors=n+1, x0=boardX+22, baseY=boardY+boardH-16, topY=boardY+20;
+    const stepW=(W-boardX*2-44)/n, stepH=(baseY-topY)/n;
+    let d='M '+x0+' '+baseY, cx=x0, cy=baseY;
+    for(let i=0;i<n;i++){ d+=' h '+stepW+' v '+(-stepH); }
+    d+=' h '+stepW+' v '+(stepH*n)+' Z';
+    dg('path',{d:d,fill:'#EDE7DB',stroke:DC.ink,'stroke-width':2,'stroke-linejoin':'round'},gContent);
+    let hx=x0, hy=baseY;
+    for(let i=0;i<n;i++){ dg('line',{x1:hx,y1:hy-stepH,x2:hx+stepW,y2:hy-stepH,stroke:DC.gold,'stroke-width':2.5},gContent); hx+=stepW; hy-=stepH; }
+    let lx=x0, ly=baseY;
+    for(let f=1;f<=floors;f++){ dgt(gContent, lx-7, ly+4, f+'楼', 10, (f===1||f===floors)?DC.ink:DC.light); lx+=stepW; ly-=stepH; }
+    dg('line',{x1:x0-6,y1:baseY+13,x2:x0+n*stepW+6,y2:topY+stepH+13,stroke:DC.gold,'stroke-width':2,'stroke-dasharray':'5 4'},gContent);
+    person(x0+stepW*0.5, baseY-stepH*0.5);
+  }
+  function drawBell(){
+    const cx=W/2-32, cy=boardY+boardH/2+2, r=42;
+    dg('circle',{cx:cx,cy:cy,r:r,fill:'#FFFFFF',stroke:DC.ink,'stroke-width':2.5},gContent);
+    for(let i=0;i<12;i++){ const a=i*Math.PI/6 - Math.PI/2, x1=cx+(r-3)*Math.cos(a), y1=cy+(r-3)*Math.sin(a), x2=cx+(r-8)*Math.cos(a), y2=cy+(r-8)*Math.sin(a); dg('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:DC.light,'stroke-width':1.5},gContent); }
+    dg('line',{x1:cx,y1:cy,x2:cx,y2:cy-r+13,stroke:DC.ink,'stroke-width':2.5,'stroke-linecap':'round'},gContent);
+    dg('line',{x1:cx,y1:cy,x2:cx+r-15,y2:cy,stroke:DC.ink,'stroke-width':2,'stroke-linecap':'round'},gContent);
+    dg('circle',{cx:cx,cy:cy,r:3,fill:DC.red},gContent);
+    const ar=r+20, a0=-Math.PI/2-0.62, a1=-Math.PI/2+0.62, pts=[];
+    for(let i=0;i<n;i++){ const a=a0+(a1-a0)*i/Math.max(n-1,1); pts.push([cx+ar*Math.cos(a), cy+ar*Math.sin(a)]); }
+    if(pts.length>1){ let dd='M '+pts[0][0]+' '+pts[0][1]; for(let i=1;i<pts.length;i++) dd+=' L '+pts[i][0]+' '+pts[i][1]; dg('path',{d:dd,fill:'none',stroke:DC.gold,'stroke-width':1.5,'stroke-dasharray':'3 3'},gContent); }
+    pts.forEach(p=>dg('circle',{cx:p[0],cy:p[1],r:5,fill:DC.red,stroke:'#fff','stroke-width':1.5},gContent));
+    const hx=cx+r+16;
+    dg('line',{x1:hx,y1:cy,x2:hx+11,y2:cy-11,stroke:DC.ink,'stroke-width':2.5,'stroke-linecap':'round'},gContent);
+    dg('circle',{cx:hx+11,cy:cy-11,r:4,fill:DC.gold},gContent);
+    dgt(gContent, cx, cy+r+16, '红点 = 敲的次数，弧段 = 间隔', 10, DC.light);
+  }
+
+  function draw(){
+    gContent.innerHTML='';
+    if(mode==='both'||mode==='one'||mode==='none'){
+      dgt(gContent, W/2, boardY+16, mode==='both'?'两端都种':mode==='one'?'一端种 · 一端不种':'两端都不种', 12, DC.ink);
+      drawLine();
+    } else if(mode==='closed') drawClosed();
+    else if(mode==='stair') drawStair();
+    else if(mode==='bell') drawBell();
+    let f;
+    if(mode==='both') f='间隔 *'+n+'* 段 → 棵数 = 段数 + 1 = *'+(n+1)+'* 棵';
+    else if(mode==='one') f='间隔 *'+n+'* 段 → 棵数 = 段数 = *'+n+'* 棵';
+    else if(mode==='none') f='间隔 *'+n+'* 段 → 棵数 = 段数 − 1 = *'+(n-1)+'* 棵';
+    else if(mode==='closed') f='封闭图形：棵数 = 段数 = *'+n+'* 棵';
+    else if(mode==='stair') f='从 1 楼到 *'+(n+1)+'* 楼 → 层数 = '+(n+1)+' − 1 = *'+n+'* 层';
+    else if(mode==='bell') f='敲 *'+n+'* 下 → 间隔 = '+n+' − 1 = *'+(n-1)+'* 个';
+    setFormula(f);
+  }
   function setMode(m){
     mode=m;
-    tabEls.forEach((e,i)=>{ const on=TABS[i][0]===m; e.r.setAttribute('fill', on?DC.gold:'#EDE7DB'); e.tx.setAttribute('fill', on?'#fff':'#3E4A63'); });
+    tabEls.forEach((e,i)=>{ const on=TABS[i][0]===m; e.r.setAttribute('fill', on?DC.gold:'#EDE7DB'); e.r.setAttribute('stroke', on?DC.gold:'#E3DCCB'); e.tx.setAttribute('fill', on?'#fff':DC.ink); });
     draw();
   }
-  function draw(){
-    g.innerHTML='';
-    const roadX0=30, roadX1=330, y=110;
-    if(mode==='both'||mode==='one'||mode==='none'){
-      let trees = mode==='both'? n+1 : mode==='one'? n : n-1;
-      trees=Math.max(trees,0);
-      dg('line',{x1:roadX0,y1:y,x2:roadX1,y2:y,stroke:DC.line,'stroke-width':4},g);
-      if(trees===1){ dg('circle',{cx:(roadX0+roadX1)/2,cy:y,r:8,fill:DC.green},g); }
-      else { for(let i=0;i<trees;i++){ const x=roadX0+(roadX1-roadX0)*i/(trees-1); dg('circle',{cx:x,cy:y,r:8,fill:DC.green},g); } }
-      const label = mode==='both'?'两端都种':mode==='one'?'一端种一端不种':'两端都不种';
-      const note = mode==='both'?'间隔 '+n+' 段，两端都栽 → '+(n+1)+' 棵'
-                 : mode==='one'?'间隔 '+n+' 段，只一端栽 → '+n+' 棵'
-                 : '间隔 '+n+' 段，两端都不栽 → '+(n-1)+' 棵';
-      info.textContent=note;
-    } else if(mode==='closed'){
-      const cx=180,cy=110,r=70;
-      dg('circle',{cx:cx,cy:cy,r:r,fill:'none',stroke:DC.line,'stroke-width':4},g);
-      for(let i=0;i<n;i++){ const a=-Math.PI/2 + i*2*Math.PI/n; const x=cx+r*Math.cos(a), yy=cy+r*Math.sin(a); dg('circle',{cx:x,cy:yy,r:7,fill:DC.green},g); }
-      info.textContent='周长分成 '+n+' 段（封闭）→ '+n+' 棵';
-    } else if(mode==='stair'){
-      const floors=n+1, top=60, bot=190, stepH=(bot-top)/(floors-1);
-      for(let f=1;f<=floors;f++){ const yy=bot-(f-1)*stepH; dg('line',{x1:120,y1:yy,x2:240,y2:yy,stroke: f===1||f===floors?DC.ink:DC.line,'stroke-width':2},g);
-        dg('text',{x:104,y:yy+4,'font-size':10,fill:DC.ink},g).textContent=f+'楼'; }
-      info.textContent='从1楼到'+(n+1)+'楼 → 爬了 '+n+' 层';
-    } else if(mode==='bell'){
-      const k=n, ix=180, iy=170, r=80;
-      dg('path',{d:'M '+(ix-r)+' '+iy+' A '+r+' '+r+' 0 0 1 '+(ix+r)+' '+iy,fill:'none',stroke:DC.line,'stroke-width':3},g);
-      for(let i=0;i<k;i++){ const a=Math.PI - i*Math.PI/(k-1||1); const x=ix-r*Math.cos(a), yy=iy-r*Math.sin(a); dg('circle',{cx:x,cy:yy,r:6,fill:DC.red},g); }
-      info.textContent='敲 '+k+' 下 → 中间 '+(k-1)+' 个间隔';
-    }
-  }
-  dgSlider(svg,40,205,280,1,12,4,DC.green,function(v){ n=Math.round(v); draw(); });
+  dgSlider(svg, 60, 302, 240, 3, 9, 5, DC.green, function(v){ n=Math.round(v); draw(); }, v=>'间隔 '+Math.round(v)+' 段');
   draw();
 }
 
