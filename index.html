@@ -391,6 +391,11 @@
     <div id="cnHomeContent" style="padding:14px"></div>
   </div>
 
+  <!-- 同步学习页 -->
+  <div class="page" id="cnPageLearn">
+    <div id="cnLearnContent" style="padding:14px"></div>
+  </div>
+
   <!-- 答题页 -->
   <div class="page" id="cnPageQuiz">
     <div class="quiz-header">
@@ -427,9 +432,10 @@
           <div class="label">正确率</div>
         </div>
       </div>
+      <div id="cnResultExtra"></div>
       <div class="btn-group">
         <button class="btn btn-outline" onclick="CN.goHome()">返回首页</button>
-        <button class="btn btn-primary" onclick="CN.beginQuiz(CN._lastUnitIdx||0)">再练一次</button>
+        <button class="btn btn-primary" id="cnReplayBtn" onclick="CN.beginQuiz(CN._lastUnitIdx||0)">再练一次</button>
       </div>
     </div>
   </div>

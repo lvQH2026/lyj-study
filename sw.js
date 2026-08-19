@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v35：新增语文模块（4-6年级知识板块+阅读理解+古诗文+错题库），顶部三按钮（数学|语文|英语）
-const CACHE = 'lyj-shell-v35';
+// v36：语文模块升级——单元同步学习+随机30题练习+单元/期中/期末考试（真实试卷结构）+12条万能答题公式
+const CACHE = 'lyj-shell-v36';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
