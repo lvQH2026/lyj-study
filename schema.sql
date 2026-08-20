@@ -38,7 +38,11 @@ alter table content enable row level security;
 alter table children enable row level security;
 
 -- 匿名 key 权限（家庭自用，足够）
-create policy "anon insert study" on study_records for insert to anon with check (true);
+-- 注意：新版 sb_publishable_ 密钥的请求角色是 authenticated（不是 anon），
+-- 策略必须 to anon, authenticated 双授，否则 insert 报 42501 RLS 拒绝（2026-08 踩坑）
+create policy "insert study" on study_records for insert to anon, authenticated with check (true);
+create policy "select study" on study_records for select to anon, authenticated using (true);
+create policy "delete study" on study_records for delete to anon, authenticated using (true);
 create policy "anon read content" on content for select to anon using (true);
 create policy "anon upsert children" on children for all to anon using (true) with check (true);
 

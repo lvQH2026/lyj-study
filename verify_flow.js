@@ -229,6 +229,17 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 ok('SW 版本号已升级 (v39)', /lyj-shell-v39/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-8])/.test(sw));
 
+// ============ 四·一、云端同步（supabase.js v39 修复守卫） ============
+const sbjs = fs.readFileSync(path.join(ROOT, 'supabase.js'), 'utf8');
+ok('supabase.js：insert 显式检查 {error}（supabase-js v2 失败不抛异常）', /r\s*&&\s*r\.error/.test(sbjs));
+ok('supabase.js：doInsert 封装存在', sbjs.includes('doInsert'));
+ok('supabase.js：同步失败落盘 syncError', sbjs.includes('syncError'));
+ok('supabase.js：语文 synced 误标一次性迁移 resetCnSyncedOnce', sbjs.includes('resetCnSyncedOnce') && sbjs.includes('lyj_v39_cn_resync'));
+ok('supabase.js：打开页面自动补同步积压记录', /loadAndApplyContent[\s\S]*pushStudyRecords\(\)/.test(sbjs) && sbjs.split('ensureChild()').length >= 2);
+const parentjs = fs.readFileSync(path.join(ROOT, 'parent.js'), 'utf8');
+ok('parent.js：家长页显示云端同步异常提示', parentjs.includes('云端同步异常'));
+ok('parent.js：家长页 SDK 未加载单独提示', parentjs.includes('云端同步不可用'));
+
 // ============ 四点五、CSS 隔离守卫 ============
 const engCss = fs.readFileSync(path.join(ROOT, 'css', 'english.css'), 'utf8');
 const mainCss = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
