@@ -1,6 +1,7 @@
 // 吕泳冀学习站 Service Worker
-// v37：语文练习/考试成绩与错题同步到家长后台（云端 study_records + 家长端阅读短文展示）
-const CACHE = 'lyj-shell-v37';
+// v38：语文模块改为同步课本单元（六上8单元 + 六下6单元 + 专项6板块），
+//      单元/期中/期末考试按上下册范围与真实试卷结构（基础/阅读/积累）组卷
+const CACHE = 'lyj-shell-v38';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
