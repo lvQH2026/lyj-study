@@ -41,6 +41,7 @@ async function pushStudyRecords() {
   // 只同步尚未上传过的记录（增量同步，避免每次全量重插导致批次过大失败）
   const pending = hist.filter(h => !h.synced);
   if (!pending.length) return;
+  let syncErr = null;
   const toRow = (h) => ({
     learning_id: getLearningId(),
     grade: h.grade,
@@ -65,15 +66,32 @@ async function pushStudyRecords() {
     }))
   });
   const mark = (h) => { h.synced = true; };
+  // supabase-js v2 的 insert 失败（如 RLS 拒绝）不会 throw，而是返回 {error}——必须显式检查
+  const doInsert = async (rows) => {
+    const r = await c.from('study_records').insert(rows);
+    if (r && r.error) throw r.error;
+    return r;
+  };
   try {
-    await c.from('study_records').insert(pending.map(toRow));
+    await doInsert(pending.map(toRow));
     pending.forEach(mark);
   } catch (e) {
     console.warn('pushStudyRecords 批次失败，改为逐条写入：', e);
+    let firstErr = null;
     for (const h of pending) {
-      try { await c.from('study_records').insert(toRow(h)); mark(h); }
-      catch (e2) { console.warn('跳过一条记录：', h.unitName, e2); }
+      try { await doInsert(toRow(h)); mark(h); }
+      catch (e2) {
+        if (!firstErr) firstErr = (e2 && e2.message) ? e2.message : String(e2);
+        console.warn('跳过一条记录：', h.unitName, e2);
+      }
     }
+    syncErr = firstErr;
+  }
+  // 同步状态落盘：成功清空，失败记错误（家长本机页可见，避免静默失败）
+  if (syncErr) {
+    data.syncError = { time: Date.now(), msg: String(syncErr).slice(0, 300) };
+  } else {
+    delete data.syncError;
   }
   saveData(data);
 }
@@ -116,7 +134,26 @@ async function loadAndApplyContent() {
   }
   if (typeof renderSpecialSection === 'function') { try { renderSpecialSection(); } catch (e) {} }
   if (c) { ensureChild(); }   // 云端模式：打开即注册本机学习ID，家长可立即远程查看
+  if (c) { pushStudyRecords(); }  // v39：打开即补同步积压记录（此前 RLS 拒绝被静默标记 synced 的记录）
 }
+
+// v39 一次性修复：服务端 RLS 拒绝 insert 时（返回 {error} 而非抛异常），
+// 旧版代码未检查 error 字段、把语文记录误标 synced=true 导致永不重传。
+// 云端经核实无任何语文记录，安全地把全部语文历史重置为待同步。
+(function resetCnSyncedOnce() {
+  if (localStorage.getItem('lyj_v39_cn_resync') === 'done') return;
+  const cfg = window.APP_CONFIG;
+  if (!cfg || !cfg.USE_CLOUD) { localStorage.setItem('lyj_v39_cn_resync', 'done'); return; }
+  try {
+    const data = JSON.parse(localStorage.getItem('math_practice_data') || '{}');
+    let changed = false;
+    (data.history || []).forEach(function (h) {
+      if (h.module === '\u8BED\u6587' && h.synced === true) { h.synced = false; changed = true; }
+    });
+    if (changed) localStorage.setItem('math_practice_data', JSON.stringify(data));
+  } catch (e) { console.warn('resetCnSyncedOnce', e); }
+  localStorage.setItem('lyj_v39_cn_resync', 'done');
+})();
 
 async function getChildStats(learningId, pw) {
   const c = sbClient(); if (!c) return null;

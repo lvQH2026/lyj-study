@@ -75,7 +75,16 @@ function renderParent() {
   if (cloud) {
     box.style.display = 'block';
     const s = getLocalStats();
-    result.innerHTML = renderDashboard(s) + '<div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
+    const d2 = loadData();
+    let syncBox;
+    if (typeof window.supabase === 'undefined') {
+      syncBox = '<div style="margin:10px 0;padding:10px 12px;border:1px solid #cf1322;border-radius:10px;background:#fff1f0;color:#cf1322;font-size:12px;line-height:1.6"><b>云端同步不可用</b><br>Supabase SDK 未加载（网络受限时常见）。答题记录只存在本机。</div>';
+    } else if (d2 && d2.syncError) {
+      syncBox = '<div style="margin:10px 0;padding:10px 12px;border:1px solid #cf1322;border-radius:10px;background:#fff1f0;color:#cf1322;font-size:12px;line-height:1.6"><b>云端同步异常</b>（' + new Date(d2.syncError.time).toLocaleString('zh-CN') + '）<br>' + esc(d2.syncError.msg) + '<br><span style="color:#8c8c8c">答题记录只存在本机。请检查 Supabase 的 study_records 表 RLS 策略是否允许插入。</span></div>';
+    } else {
+      syncBox = '<div style="margin:10px 0;font-size:12px;color:var(--success)">✓ 云端同步正常</div>';
+    }
+    result.innerHTML = syncBox + renderDashboard(s) + '<div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
   } else {
     box.style.display = 'none';
     const s = getLocalStats();
