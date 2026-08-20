@@ -1,10 +1,10 @@
 // 吕泳冀学习站 Service Worker
-// v39：云端同步失败可见化——同步错误落盘 syncError，家长本机页显示异常提示
-const CACHE = 'lyj-shell-v39';
+// v40：家长端新增 AI 学习分析版块（成绩走势/错题归因/风险预测/提升方案/导出分享）
+const CACHE = 'lyj-shell-v40';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
-  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js',
+  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'
 ];

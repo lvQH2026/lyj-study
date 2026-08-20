@@ -84,13 +84,28 @@ function renderParent() {
     } else {
       syncBox = '<div style="margin:10px 0;font-size:12px;color:var(--success)">✓ 云端同步正常</div>';
     }
-    result.innerHTML = syncBox + renderDashboard(s) + '<div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
+    result.innerHTML = syncBox + renderDashboard(s) + '<div id="aiMount"></div><div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
+    mountAiAnalysis('aiMount', 'local', null);
   } else {
     box.style.display = 'none';
     const s = getLocalStats();
     result.innerHTML =
       '<div class="pp-note">当前为「本机预览」模式（数据存在这台手机本地）。部署到云端并填入 Supabase 后，家长可在自己手机上用学习ID+口令远程查看。</div>' +
-      renderDashboard(s);
+      renderDashboard(s) + '<div id="aiMount"></div>';
+    mountAiAnalysis('aiMount', 'local', null);
+  }
+}
+
+// AI 学习分析版块挂载（本机全量 / 远程云端聚合）
+function mountAiAnalysis(mountId, mode, cloudStats) {
+  const mount = document.getElementById(mountId);
+  if (!mount || typeof window.AI_ANALYSIS === 'undefined') return;
+  try {
+    const raw = (loadData() || {}).history || [];
+    const dataset = mode === 'local' ? window.AI_ANALYSIS.normalize(raw) : [];
+    window.AI_ANALYSIS.mount(mount, { dataset: dataset, mode: mode, cloudStats: cloudStats || null });
+  } catch (e) {
+    console.warn('mountAiAnalysis', e);
   }
 }
 
@@ -101,7 +116,8 @@ async function parentLogin() {
   const stats = await getChildStats(id, pw);
   const result = document.getElementById('parentResult');
   if (!stats) { result.innerHTML = '<p style="color:#cf1322">未找到该学习ID，或口令不正确。</p>'; return; }
-  result.innerHTML = renderDashboard(stats, true);
+  result.innerHTML = renderDashboard(stats, true) + '<div id="aiMount"></div>';
+  mountAiAnalysis('aiMount', 'cloud', stats);
 }
 
 function renderDashboard(s) {
