@@ -227,7 +227,14 @@ try {
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/chinese.js', 'js/diagram.js', 'js/main.js', 'js/aiAnalysis.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v42 回滚版)', /lyj-shell-v42/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|4[01])/.test(sw));
+ok('SW 版本号已升级 (v43 浅色家长端)', /lyj-shell-v43/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|4[0-2])/.test(sw));
+
+// ============ 四·零、家长端浅色主题守卫（v43） ============
+const pStyle = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+ok('家长端令牌 --pp-bg1 为浅色（#F 开头，非深色 #0E1220）', /--pp-bg1:#F[0-9A-Fa-f]{5}/.test(pStyle) && !/--pp-bg1:#0E1220/.test(pStyle));
+ok('家长端 --pp-text 为深字浅底（#3E4A63 黛蓝，非 #E8EBF5 浅字）', /--pp-text:#3E4A63/.test(pStyle) && !/--pp-text:#E8EBF5/.test(pStyle));
+ok('家长端 #page-parent 无深色径向光晕（无 #7C8CFF 霓虹/无 #0E1220）', !/#7C8CFF|\.20\),|#0E1220/.test(pStyle.split('#page-parent{')[1] ? pStyle.split('#page-parent{')[1].split('}')[0] : ''));
+ok('aiAnalysis.js：提升方案卡为浅色金边（无 #2E3648 深色渐变）', !/linear-gradient\(135deg,#3E4A63,#2E3648\)/.test(fs.readFileSync(path.join(ROOT, 'js', 'aiAnalysis.js'), 'utf8')));
 
 // ============ 四·一、云端同步（supabase.js v39 修复守卫） ============
 const sbjs = fs.readFileSync(path.join(ROOT, 'supabase.js'), 'utf8');

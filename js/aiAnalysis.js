@@ -513,15 +513,15 @@
       h += '</div>';
 
       // 4. 提升方案卡片
-      h += '<div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,#3E4A63,#2E3648);border:none"><div class="section-title" style="color:#D8C08F">\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</div>';
-      h += '<div style="font-size:12.5px;color:#E8E6DF;line-height:1.8">';
-      h += '<div style="margin-bottom:8px;font-weight:700;color:#D8C08F">\u672C\u5468\u76EE\u6807</div>';
+      h += '<div class="card" style="margin-bottom:12px;background:#FCF9F2;border:1px solid #E8D9B8"><div class="section-title" style="color:#B4945A">\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</div>';
+      h += '<div style="font-size:12.5px;color:#3E4A63;line-height:1.8">';
+      h += '<div style="margin-bottom:8px;font-weight:700;color:#B4945A">\u672C\u5468\u76EE\u6807</div>';
       plan.weekly.forEach(function (x) { h += '<div>\u00B7 ' + esc(x) + '</div>'; });
-      h += '<div style="margin:10px 0 8px;font-weight:700;color:#D8C08F">\u6BCF\u65E5\u5B89\u6392</div>';
+      h += '<div style="margin:10px 0 8px;font-weight:700;color:#B4945A">\u6BCF\u65E5\u5B89\u6392</div>';
       plan.daily.forEach(function (x) { h += '<div>\u00B7 ' + esc(x) + '</div>'; });
       h += '</div></div>';
 
-      h += '<div style="font-size:11px;color:#9AA3BD;text-align:center;margin:10px 0 4px">\u5206\u6790\u57FA\u4E8E\u5B69\u5B50\u5B9E\u9645\u7EC3\u4E60\u6570\u636E\u81EA\u52A8\u751F\u6210\uFF0C\u4EC5\u4F9B\u53C2\u8003</div>';
+      h += '<div style="font-size:11px;color:#7A8398;text-align:center;margin:10px 0 4px">\u5206\u6790\u57FA\u4E8E\u5B69\u5B50\u5B9E\u9645\u7EC3\u4E60\u6570\u636E\u81EA\u52A8\u751F\u6210\uFF0C\u4EC5\u4F9B\u53C2\u8003</div>';
       return h;
     }
 

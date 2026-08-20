@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v42：家长端回滚——撤销 v41「成长中心」合并改版，恢复 v40 版面（统计页与家长页分立 + AI 分析版块）
-const CACHE = 'lyj-shell-v42';
+// v43：家长端整体改为浅色明亮主题（撤销原深色玻璃拟态）——pp 令牌转浅色、卡片/导航/输入框浅色化、AI 提升方案卡改浅色金边
+const CACHE = 'lyj-shell-v43';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
