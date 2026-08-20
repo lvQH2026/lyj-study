@@ -17,7 +17,8 @@ function normalizeWrong(rawList) {
         options: q.options || [],
         answer: q.answer,
         explain: q.explain || '',
-        svg: q.svg || ''
+        svg: q.svg || '',
+        passage: q.passage || ''
       }
     };
   });
@@ -114,6 +115,7 @@ function renderDashboard(s) {
         const q = w.question || {};
         return `<div class="pp-wrong-row">
           <div class="pp-dim">${esc(w.unitName)}${w.grade ? ' · ' + esc(String(w.grade)) + '年级' : ''}</div>
+          ${q.passage ? `<div class="pp-passage">${esc(q.passage)}</div>` : ''}
           <div class="pp-wrong-q">${esc(q.question)}</div>
           ${q.svg ? `<div style="margin:4px 0">${q.svg}</div>` : ''}
           <div class="pp-dim" style="margin-top:2px">你的答案：<b class="pp-bad">${esc(w.userAnswer)}</b>　正确答案：<b class="pp-good">${esc(q.answer)}</b></div>

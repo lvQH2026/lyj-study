@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v36：语文模块升级——单元同步学习+随机30题练习+单元/期中/期末考试（真实试卷结构）+12条万能答题公式
-const CACHE = 'lyj-shell-v36';
+// v37：语文练习/考试成绩与错题同步到家长后台（云端 study_records + 家长端阅读短文展示）
+const CACHE = 'lyj-shell-v37';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

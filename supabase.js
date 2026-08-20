@@ -58,7 +58,9 @@ async function pushStudyRecords() {
         options: (w.question && w.question.options) || [],
         answer: (w.question && w.question.answer) || '',
         explain: (w.question && w.question.explain) || '',
-        svg: (w.question && w.question.svg) || ''
+        svg: (w.question && w.question.svg) || '',
+        passage: (w.question && w.question.passage) || '',
+        type: (w.question && w.question.type) || ''
       }
     }))
   });

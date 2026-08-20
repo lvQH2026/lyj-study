@@ -1259,6 +1259,16 @@
       el('cnFeedback').innerHTML = '<span style="color:var(--danger);font-weight:600">\u2718 答错了。</span> <span style="color:var(--text-light)">正确答案：' + item.answer + '</span>';
       // 加入错题库
       cnAddWrong(item, ans);
+      // 收集本次测验错题明细（供历史记录/云端同步用）
+      if (!q.wrongs) q.wrongs = [];
+      const unitName = (q.paper && q.paper.title) ||
+        (CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx] ? CN_DATA[cnState.grade][cnState.unitIdx].name : '');
+      q.wrongs.push({
+        unitName: unitName,
+        grade: cnState.grade,
+        userAnswer: ans,
+        question: item
+      });
     }
 
     // 下一题或结束
@@ -1340,11 +1350,15 @@
       }
     }
 
-    // 记录历史
+    // 记录历史（带本次错题明细，供家长后台/云端同步）
     if (q.paper) {
-      cnRecordHistory(cnState.grade, q.paper.title, Math.round(score / total * 100), 100);
+      cnRecordHistory(cnState.grade, q.paper.title, Math.round(score / total * 100), 100, q.wrongs || []);
     } else {
-      cnRecordHistory(cnState.grade, CN_DATA[cnState.grade][cnState.unitIdx].name, score, total);
+      cnRecordHistory(cnState.grade, CN_DATA[cnState.grade][cnState.unitIdx].name, score, total, q.wrongs || []);
+    }
+    // 练习情况同步到家长后台（云端模式自动上传，本地模式仅写 localStorage）
+    if (typeof syncAfterQuiz === 'function') {
+      try { syncAfterQuiz(); } catch (e) { console.warn('cnSyncAfterQuiz', e); }
     }
   }
 
@@ -1365,6 +1379,8 @@
     const existing = data.wrong.find(function (w) {
       return w.module === '\u8BED\u6587' && w.question && w.question.question === question.question;
     });
+    const unitName = (cnState.quiz && cnState.quiz.paper && cnState.quiz.paper.title) ||
+      (question.section || (CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx] ? CN_DATA[cnState.grade][cnState.unitIdx].name : ''));
     if (existing) {
       existing.count = (existing.count || 1) + 1;
       existing.lastWrong = Date.now();
@@ -1374,7 +1390,7 @@
         module: '\u8BED\u6587',
         question: question,
         userAnswer: userAnswer,
-        unitName: question.section || (CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx] ? CN_DATA[cnState.grade][cnState.unitIdx].name : ''),
+        unitName: unitName,
         grade: cnState.grade,
         time: Date.now(),
         count: 1
@@ -1445,7 +1461,7 @@
   function cnSaveData(data) {
     localStorage.setItem('math_practice_data', JSON.stringify(data));
   }
-  function cnRecordHistory(grade, unitName, score, total) {
+  function cnRecordHistory(grade, unitName, score, total, wrong) {
     const data = cnLoadData();
     if (!data.history) data.history = [];
     data.history.unshift({
@@ -1455,8 +1471,11 @@
       score: score,
       total: total,
       accuracy: Math.round(score / total * 100),
-      time: Date.now()
+      time: Date.now(),
+      wrong: Array.isArray(wrong) ? wrong : [],
+      synced: false          // 待云端同步标记（家长后台远程查看）
     });
+    if (data.history.length > 100) data.history = data.history.slice(0, 100);
     cnSaveData(data);
   }
 

@@ -35,6 +35,7 @@
   .wrong-item { padding:12px 0; border-bottom:1px solid #f0f2f5; }
   .wrong-item:last-child { border-bottom:none; }
   .wrong-meta { font-size:12px; color:#8a9099; margin-bottom:4px; }
+  .wrong-passage { font-size:13px; line-height:1.7; color:#5a6472; background:#f7f8fa; border:1px solid #eef0f4; border-radius:8px; padding:10px 12px; margin:6px 0 8px; max-height:140px; overflow-y:auto; }
   .wrong-stem { font-size:15px; font-weight:600; margin:2px 0 8px; }
   .wrong-svg { margin:6px 0; }
   .wrong-ans { font-size:14px; margin-top:4px; }
@@ -109,6 +110,7 @@ function renderStats(s) {
         const q = w.question||{};
         return `<div class="wrong-item">
           <div class="wrong-meta">${esc(w.unitName)}${w.grade?' · '+esc(String(w.grade))+'年级':''}</div>
+          ${q.passage?`<div class="wrong-passage">${esc(q.passage)}</div>`:''}
           <div class="wrong-stem">${esc(q.question)}</div>
           ${q.svg?`<div class="wrong-svg">${q.svg}</div>`:''}
           <div class="wrong-ans">你的答案：<span class="me">${esc(w.userAnswer)}</span>　正确答案：<span class="ok">${esc(q.answer)}</span></div>
