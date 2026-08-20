@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v41：统计页与家长后台合并为「成长中心」——学习概览/学习报告(AI分析)/近期练习/最近错题/家长管理，全浅色明亮主题
-const CACHE = 'lyj-shell-v41';
+// v42：家长端回滚——撤销 v41「成长中心」合并改版，恢复 v40 版面（统计页与家长页分立 + AI 分析版块）
+const CACHE = 'lyj-shell-v42';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

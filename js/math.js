@@ -7288,6 +7288,10 @@ function switchTab(tab) {
     showPage('wrong');
     document.getElementById('backBtn').style.display = 'none';
     renderWrongBank();
+  } else if (tab === 'stats') {
+    showPage('stats');
+    document.getElementById('backBtn').style.display = 'none';
+    renderStats();
   } else if (tab === 'exam') {
     showPage('exam');
     document.getElementById('backBtn').style.display = 'none';

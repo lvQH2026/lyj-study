@@ -29,7 +29,7 @@ w.confirm = () => true;
 if (!w.HTMLElement.prototype.scrollIntoView) w.HTMLElement.prototype.scrollIntoView = function(){};
 
 // 以真实 <script> 元素注入，复现浏览器同一全局作用域（let/const 全局词法绑定共享）
-['js/core.js','js/math.js','js/data.js','js/english.js','js/chinese.js','js/diagram.js','js/main.js','js/aiAnalysis.js','parent.js'].forEach(s => {
+['js/core.js','js/math.js','js/data.js','js/english.js','js/diagram.js','js/main.js'].forEach(s => {
   const el = w.document.createElement('script');
   el.textContent = fs.readFileSync(path.join(ROOT, s), 'utf8');
   w.document.body.appendChild(el);
@@ -138,23 +138,13 @@ if (mathQuizOK) {
     ok('数学：错题库列表渲染', false, e.message);
   }
 
-  // 成长中心（v41 合并统计页+家长后台）渲染
+  // 统计页渲染
   try {
-    w.renderParent();
-    const gm = $('growthMount');
-    const inner = gm ? gm.innerHTML : '';
-    ok('成长中心：合并页面渲染', !!gm && inner.length > 200, '长度 ' + inner.length);
-    ok('成长中心：学习概览卡', inner.indexOf('stat-card') >= 0 && inner.indexOf('平均正确率') >= 0 && inner.indexOf('薄弱单元') >= 0 && inner.indexOf('错题数') >= 0, '');
-    ok('成长中心：学习报告分区', inner.indexOf('学习报告') >= 0, '');
-    ok('成长中心：近期练习分区', inner.indexOf('近期练习') >= 0, '');
-    ok('成长中心：最近错题分区', inner.indexOf('最近错题') >= 0, '');
-    ok('成长中心：家长管理分区', inner.indexOf('家长管理') >= 0, '');
-    ok('成长中心：数据与报告工具', inner.indexOf('导出学习数据') >= 0 && inner.indexOf('导入学习数据') >= 0 && inner.indexOf('导出错题本') >= 0, '');
-    ok('成长中心：AI 分析版块挂载', inner.indexOf('aiMount') >= 0, '');
-    ok('成长中心：无深色渐变卡（浅色规范）', inner.indexOf('linear-gradient(135deg,#3E4A63') < 0, '');
-    ok('成长中心：无残留统计页容器', !$('statsOverview') && !$('page-stats'), '');
+    w.renderStats();
+    const so = $('statsOverview');
+    ok('数学：统计页渲染', !!so && so.innerHTML.length > 50, '长度 ' + (so ? so.innerHTML.length : -1));
   } catch (e) {
-    ok('成长中心：合并页面渲染', false, e.message);
+    ok('数学：统计页渲染', false, e.message);
   }
 }
 
@@ -237,7 +227,7 @@ try {
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/chinese.js', 'js/diagram.js', 'js/main.js', 'js/aiAnalysis.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v41)', /lyj-shell-v41/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|40)/.test(sw));
+ok('SW 版本号已升级 (v42 回滚版)', /lyj-shell-v42/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|4[01])/.test(sw));
 
 // ============ 四·一、云端同步（supabase.js v39 修复守卫） ============
 const sbjs = fs.readFileSync(path.join(ROOT, 'supabase.js'), 'utf8');
