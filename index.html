@@ -211,29 +211,6 @@
   <div id="wrongListContainer"></div>
 </div>
 
-<!-- ===== 统计页 ===== -->
-<div class="page" id="page-stats">
-  <div class="section-title">学习统计</div>
-  <div class="stats-overview" id="statsOverview"></div>
-  <div class="section-title">📋 各年级详情</div>
-  <div class="card">
-    <table class="grade-stats-table" id="gradeStatsTable"></table>
-  </div>
-  <div class="section-title">近期成绩</div>
-  <div id="recentScores"></div>
-
-  <div class="section-title">💾 数据备份与同步</div>
-  <div class="card">
-    <div style="font-size:13px;color:var(--text-light);line-height:1.7;margin-bottom:12px">
-      学习记录保存在本机浏览器里。换手机或想在电脑上继续练，先在这里<strong>导出</strong>，再到另一台设备<strong>导入</strong>即可。
-    </div>
-    <button class="btn btn-primary" style="margin-bottom:10px" onclick="exportUserData()">⬇️ 导出学习数据（JSON）</button>
-    <button class="btn btn-outline" style="margin-bottom:10px" onclick="document.getElementById(&#39;importFile&#39;).click()">⬆️ 导入学习数据</button>
-    <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importUserData(event)">
-    <button class="btn btn-outline" onclick="exportWrongBookText()">📄 导出错题本（文本）</button>
-  </div>
-</div>
-
 <!-- ===== 拍图上传页 ===== -->
 <div class="page" id="page-upload">
   <div class="section-title">拍图上传试题</div>
@@ -336,32 +313,17 @@
     <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
     <span class="tab-label">错题库</span>
   </button>
-  <button class="nav-tab" data-page="stats" onclick="switchTab('stats')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></span>
-    <span class="tab-label">统计</span>
-  </button>
   <button class="nav-tab" data-page="parent" onclick="switchTab('parent')">
-    <span class="tab-icon">👨‍👩‍👦</span>
-    <span class="tab-label">家长</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7M9 11h4"/></svg></span>
+    <span class="tab-label">成长</span>
   </button>
   
 </div>
 
 <div class="page" id="page-parent">
-  <div class="navbar"><h1>家长后台</h1></div>
+  <div class="navbar"><h1>成长中心</h1></div>
   <div style="padding:12px">
-    <div id="deviceCred" style="background:#e6f0ff;border:1px solid #b3d4ff;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#1d4ed8">
-      <div style="font-weight:700;margin-bottom:6px">📱 吕泳冀 · 学习凭证</div>
-      <div id="deviceCredBody">…</div>
-      <div style="font-size:12px;color:#475569;margin-top:6px">所有设备自动共享此身份。家长远程查看：打开本应用 → 点「家长」→ 用学习ID和口令登录。</div>
-    </div>
-    <div id="parentLogin" style="display:none;background:#fff;border-radius:10px;padding:12px;margin-bottom:12px">
-      <div style="font-size:14px;font-weight:700;margin-bottom:8px">查看孩子的学习情况</div>
-      <input id="parentId" placeholder="学习ID（如 LYJ3X9ZQ）" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-      <input id="parentPw" type="password" placeholder="口令" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-      <button class="btn btn-primary" style="width:100%" onclick="parentLogin()">查看</button>
-    </div>
-    <div id="parentResult"></div>
+    <div id="growthMount"></div>
   </div>
 </div>
 

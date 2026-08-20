@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v40：家长端新增 AI 学习分析版块（成绩走势/错题归因/风险预测/提升方案/导出分享）
-const CACHE = 'lyj-shell-v40';
+// v41：统计页与家长后台合并为「成长中心」——学习概览/学习报告(AI分析)/近期练习/最近错题/家长管理，全浅色明亮主题
+const CACHE = 'lyj-shell-v41';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

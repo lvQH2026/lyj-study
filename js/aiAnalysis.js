@@ -483,7 +483,29 @@
       }
       h += '</div>';
 
-      // 2. 错题归因卡片
+      // 2. 学科与单元表现卡片（本机=dataset 聚合柱状；云端=cloudUnits）
+      let barData = null;
+      if (mode === 'local') {
+        const unitAgg = {};
+        dataset.forEach(function (r) {
+          if (!unitAgg[r.unit]) unitAgg[r.unit] = { c: 0, t: 0 };
+          unitAgg[r.unit].c += r.correct;
+          unitAgg[r.unit].t += r.total;
+        });
+        barData = Object.keys(unitAgg).map(function (k) {
+          return { unit: k, accuracy: unitAgg[k].t ? Math.round(unitAgg[k].c / unitAgg[k].t * 100) : 0, count: 1 };
+        }).sort(function (a, b) { return a.accuracy - b.accuracy; });
+      } else {
+        barData = cloudUnits;
+      }
+      if (barData && barData.length) {
+        h += '<div class="card" style="margin-bottom:12px"><div class="section-title">\u5B66\u79D1\u4E0E\u5355\u5143\u8868\u73B0</div>';
+        h += renderBarSvg(barData, 640);
+        h += '<div style="margin-top:6px;font-size:11px;color:#9AA3BD">\u91D1=\u8FBE\u6807(80%\u4EE5\u4E0A) \u00B7 \u9EDB\u84DD=\u5DE9\u56FA(60-79%) \u00B7 \u7EA2=\u9700\u91CD\u70B9\u5173\u6CE8(\u4E0D\u8DB360%)\uFF1B\u5706\u70B9\u989C\u8272\u4EE3\u8868\u5B66\u79D1</div>';
+        h += '</div>';
+      }
+
+      // 3. 错题归因卡片
       h += '<div class="card" style="margin-bottom:12px"><div class="section-title">\u9519\u9898\u5F52\u56E0\u4E0E\u5EFA\u8BAE</div>';
       if (!attr.length) {
         h += '<div class="pp-dim">\u6682\u65E0\u9519\u9898\u8BB0\u5F55\uFF0C\u8868\u73B0\u4E0D\u9519\u3002</div>';
@@ -512,12 +534,12 @@
       });
       h += '</div>';
 
-      // 4. 提升方案卡片
-      h += '<div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,#3E4A63,#2E3648);border:none"><div class="section-title" style="color:#D8C08F">\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</div>';
-      h += '<div style="font-size:12.5px;color:#E8E6DF;line-height:1.8">';
-      h += '<div style="margin-bottom:8px;font-weight:700;color:#D8C08F">\u672C\u5468\u76EE\u6807</div>';
+      // 4. 提升方案卡片（浅色明亮 · 金边米白底，v41 家长端禁用深色）
+      h += '<div class="card" style="margin-bottom:12px;background:#FCF9F2;border:1px solid #E8D9B8"><div class="section-title" style="color:#8A6D2F">\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</div>';
+      h += '<div style="font-size:12.5px;color:#5A6478;line-height:1.8">';
+      h += '<div style="margin-bottom:8px;font-weight:700;color:#8A6D2F">\u672C\u5468\u76EE\u6807</div>';
       plan.weekly.forEach(function (x) { h += '<div>\u00B7 ' + esc(x) + '</div>'; });
-      h += '<div style="margin:10px 0 8px;font-weight:700;color:#D8C08F">\u6BCF\u65E5\u5B89\u6392</div>';
+      h += '<div style="margin:10px 0 8px;font-weight:700;color:#8A6D2F">\u6BCF\u65E5\u5B89\u6392</div>';
       plan.daily.forEach(function (x) { h += '<div>\u00B7 ' + esc(x) + '</div>'; });
       h += '</div></div>';
 
