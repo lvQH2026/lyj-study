@@ -263,7 +263,7 @@
       const gy = y(v);
       if (gy < PT || gy > PT + ih) return;
       g += '<line x1="' + PL + '" y1="' + gy + '" x2="' + (W - PR) + '" y2="' + gy + '" stroke="#ECEAE4" stroke-width="1"/>';
-      g += '<text x="' + (PL - 6) + '" y="' + (gy + 4) + '" font-size="10" fill="#9AA3BD" text-anchor="end">' + v + '</text>';
+      g += '<text x="' + (PL - 6) + '" y="' + (gy + 5) + '" font-size="15" fill="#7A8398" text-anchor="end">' + v + '</text>';
     });
     // 面积
     let area = '', line = '', dots = '', labels = '';
@@ -276,11 +276,11 @@
     pts.forEach(function (p) {
       dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="#B4945A" stroke="#fff" stroke-width="1.5"/>';
       if (p[2].accuracy != null) {
-        dots += '<text x="' + p[0] + '" y="' + (p[1] - 8) + '" font-size="10" fill="#3E4A63" text-anchor="middle" font-weight="700">' + p[2].accuracy + '</text>';
+        dots += '<text x="' + p[0] + '" y="' + (p[1] - 9) + '" font-size="14" fill="#3E4A63" text-anchor="middle" font-weight="700">' + p[2].accuracy + '</text>';
       }
     });
     points.forEach(function (p, i) {
-      labels += '<text x="' + x(i) + '" y="' + (H - 10) + '" font-size="10" fill="#9AA3BD" text-anchor="middle">' + p.label + '</text>';
+      labels += '<text x="' + x(i) + '" y="' + (H - 11) + '" font-size="15" fill="#5A6478" text-anchor="middle">' + p.label + '</text>';
     });
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="\u6210\u7EE9\u8D70\u52BF\u56FE">'
       + '<defs><linearGradient id="aiArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B4945A" stop-opacity=".28"/><stop offset="100%" stop-color="#B4945A" stop-opacity=".02"/></linearGradient></defs>'
@@ -305,13 +305,13 @@
       const cx = PL + gap + i * (bw + gap);
       const color = v >= 80 ? '#B4945A' : v >= 60 ? '#3E4A63' : '#cf1322';
       rects += '<rect x="' + cx + '" y="' + (PT + ih - h) + '" width="' + bw + '" height="' + Math.max(h, 2) + '" rx="5" fill="' + color + '" opacity=".92"/>';
-      rects += '<text x="' + (cx + bw / 2) + '" y="' + (PT + ih - h - 6) + '" font-size="10.5" fill="' + color + '" text-anchor="middle" font-weight="700">' + v + '%</text>';
+      rects += '<text x="' + (cx + bw / 2) + '" y="' + (PT + ih - h - 7) + '" font-size="15" fill="' + color + '" text-anchor="middle" font-weight="700">' + v + '%</text>';
       // 学科色点
       const sc = SUBJ_COLOR[subjectOf(u.unit)] || '#3E4A63';
       rects += '<circle cx="' + (cx + bw / 2) + '" y="' + (H - 40) + '" r="3" fill="' + sc + '"/>';
       // 单元名（截断换行）
       const name = String(u.unit || '').length > 7 ? String(u.unit).slice(0, 7) + '\u2026' : (u.unit || '');
-      labels += '<text x="' + (cx + bw / 2) + '" y="' + (H - 20) + '" font-size="9.5" fill="#5A6478" text-anchor="middle">' + esc(name) + '</text>';
+      labels += '<text transform="rotate(-30 ' + (cx + bw / 2) + ' ' + (H - 18) + ')" x="' + (cx + bw / 2) + '" y="' + (H - 18) + '" font-size="15" fill="#5A6478" text-anchor="middle">' + esc(name) + '</text>';
     });
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="\u5355\u5143\u6B63\u786E\u7387\u56FE">'
       + '<line x1="' + PL + '" y1="' + (PT + ih) + '" x2="' + (W - PR) + '" y2="' + (PT + ih) + '" stroke="#ECEAE4" stroke-width="1"/>'
