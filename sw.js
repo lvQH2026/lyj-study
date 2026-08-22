@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v50：五年级课本同步三层结构——五上五下 15 课本单元（位置数对/植树问题/长方体正方体/找次品等新单元）+ 单元卷缺题根治（buildQuestionPool 抗枯竭 tries 24 + 单元卷条件补齐 30 题 + 五六年级 18 个薄生成器参数化扩容）；找次品四档三分法；折线统计图/扇形统计图参数化识图题
-const CACHE = 'lyj-shell-v50';
+// v51：错题公式卡联动+难度分级 6:3:1+A4 打印导出——单元练习/考试卷按基础:提高:拓展=6:3:1 组题（相对难度打标+档内循环补齐+由易到难排序+徽标）；错题解析内嵌所属单元万能公式卡+错题库公式卡折叠+一键练同类题；printCurrentPaper A4 打印视图（卷头/答题线/参考答案页）
+const CACHE = 'lyj-shell-v51';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

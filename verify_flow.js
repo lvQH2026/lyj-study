@@ -229,7 +229,7 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 {
   const mV = sw.match(/lyj-shell-v(\d+)/);
-  ok('SW 版本号已升级 (v50 五年级课本同步三层结构)', !!mV && +mV[1] === 50);
+  ok('SW 版本号已升级 (v51 错题公式卡联动+难度分级+A4 打印)', !!mV && +mV[1] === 51);
 }
 
 // ============ 四·四、语文 4/5 年级 课本同步结构守卫（v45） ============

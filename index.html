@@ -150,6 +150,7 @@
     <div class="exam-title" id="examPaperTitle"></div>
     <div class="exam-sub" id="examPaperSub"></div>
     <div style="text-align:center;font-size:18px;font-weight:700;color:#cf1322;margin-top:4px" id="examTimer">⏱ 70:00</div>
+    <div style="text-align:center;margin-top:6px"><button class="prt-trigger-btn" onclick="printCurrentPaper()">🖨 打印本卷（A4）</button></div>
   </div>
   <div class="quiz-header">
     <div class="quiz-progress" id="quizProgress">第 1 / 10 题</div>
@@ -193,6 +194,7 @@
     <div id="wrongAddedInfo" style="font-size:13px;color:var(--text-lighter);margin-bottom:16px"></div>
     <div class="btn-group">
       <button class="btn btn-outline" onclick="goHome()">返回首页</button>
+      <button class="btn btn-outline" onclick="printCurrentPaper()">🖨 打印试卷</button>
       <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()">再练一次</button>
     </div>
   </div>

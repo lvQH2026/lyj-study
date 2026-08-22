@@ -8967,21 +8967,33 @@ function renderShapeExplore(container){
 
 function beginUnitQuiz(idx, grade, sem) {
   let unit = KNOWLEDGE_BASE[grade][sem][idx];
+  // v51：practiceSimilarWrong 等入口直连时不经过 showUnitDiagrams，须在此确保年级/学期上下文
+  state.currentGrade = grade;
+  state.currentSemester = sem;
   state.quizMode = 'unit';
   state.quizTitle = unit.name;
   state.quizQuestions = [];
   if (unit.paper) {
-    state.quizQuestions = unit.gen();
+    // v51：整卷题组也做相对难度打标（浅拷贝避免污染题池），卷面显示难度徽标
+    let arr = unit.gen();
+    if (Array.isArray(arr) && arr.length && !arr[0].diff) {
+      arr = arr.map(q => Object.assign({}, q));
+      tagRelativeDifficulty(arr);
+    }
+    state.quizQuestions = arr;
   } else {
     let first = unit.gen();
     if (Array.isArray(first)) {
       // gen 已返回完整题组（如角度计算：一次从题库随机抽 N 道）
       state.quizQuestions = first;
     } else {
-      state.quizQuestions.push(first);
-      for (let i = 1; i < UNIT_QUIZ_LENGTH; i++) {
-        state.quizQuestions.push(unit.gen());
+      // v51：难度分级 6:3:1——多采 3 倍候选，按题面去重后按 基础/提高/拓展 配比挑 20 题
+      let cands = [first];
+      for (let i = 1; i < UNIT_QUIZ_LENGTH * 3; i++) {
+        let g = unit.gen();
+        if (Array.isArray(g)) cands = cands.concat(g); else cands.push(g);
       }
+      state.quizQuestions = pickDifficultyMix(cands, UNIT_QUIZ_LENGTH);
     }
   }
   state.quizIndex = 0;
@@ -9680,6 +9692,97 @@ function generateSteps(q) {
   return [`答案：${ans}`];
 }
 
+// ============================================================
+// v51：难度分级（基础 : 提高 : 拓展 = 6 : 3 : 1）
+// ============================================================
+const DIFF_NAMES = { 1: '基础', 2: '提高', 3: '拓展' };
+
+// 绝对难度信号分（越大越难）：题干长度 / 策略词 / 多步运算 / 解析步骤数 / 题型
+function difficultyScore(q) {
+  let t = String((q && q.question) || '').replace(/<[^>]+>/g, '');
+  let s = Math.min(t.length / 12, 3);   // 长度信号：应用题题干长
+  if (/至少|最少|保证|怎样|为什么|规律|第\s*\d+\s*个/.test(t)) s += 2;   // 策略/探究词
+  if (/\d+\s*[+−-]\s*\d+\s*[+−-]\s*\d+/.test(t)) s += 1;                // 两步以上加减
+  if (/[×÷]/.test(t) && t.split(/[×÷]/).length >= 3) s += 1;           // 两步以上乘除
+  if (q && q.steps && q.steps.length >= 3) s += 1;
+  if (q && q.type === 'fill') s += 0.5;
+  return s;
+}
+
+function shuffleArr(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    let t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// 相对难度打标：按信号分在集合内排序，前 60% → 基础，中 30% → 提高，后 10% → 拓展。
+// 同一题池内相对排名，保证任意单元/试卷都能得到 6:3:1 的难度梯度（原地打标）。
+function tagRelativeDifficulty(arr) {
+  if (!arr || !arr.length) return arr;
+  let scored = arr.map(q => ({ q: q, s: difficultyScore(q) + Math.random() * 0.01 }));
+  scored.sort((a, b) => a.s - b.s);
+  let n = scored.length;
+  let b = Math.round(n * 0.6), m = Math.round(n * 0.9);
+  scored.forEach((o, i) => { o.q.diff = (i < b) ? 1 : (i < m) ? 2 : 3; });
+  return arr;
+}
+
+// 题目难度：显式 q.diff 优先（相对打标结果），否则退回启发式
+function questionDifficulty(q) {
+  if (q && q.diff) return q.diff;
+  let t = String((q && q.question) || '').replace(/<[^>]+>/g, '');
+  if (/至少|最少|最多几次|怎样|为什么|规律|第\s*\d+\s*个/.test(t)) return 3;
+  let appWord = /每|一共|还剩|还差|小时|分钟|千米|公斤|千克|棵|支|块|页|天/.test(t);
+  if (appWord && t.length >= 18) return 2;
+  if (/\d+\s*[+−-]\s*\d+\s*[+−-]\s*\d+/.test(t)) return 2;
+  if (/[×÷]/.test(t) && t.split(/[×÷]/).length >= 3) return 2;
+  if (q && q.steps && q.steps.length >= 3) return 2;
+  return 1;
+}
+
+// n 题的 6:3:1 配比（四舍五入后把余量给拓展档）
+function diffMixFor(n) {
+  let b = Math.round(n * 0.6), a = Math.round(n * 0.3);
+  let c = n - b - a;
+  if (c < 0) { b += c; c = 0; }   // n 很小时保证总数不超
+  return [b, a, c];
+}
+
+// 从候选题中挑 n 道：题面去重 → 相对打标 → 按难度 6:3:1 抽取（各档内随机）；
+// 某档候选不足时在该档内循环复用（重复题仍留在原难度档，保持由易到难）。
+// 输出按 基础→提高→拓展 排序。
+function pickDifficultyMix(cands, n) {
+  let seen = new Set();
+  let uniq = [];
+  (cands || []).forEach(q => {
+    let t = String((q && q.question) || '');
+    if (seen.has(t)) return;
+    seen.add(t);
+    uniq.push(q);
+  });
+  tagRelativeDifficulty(uniq);
+  let byDiff = { 1: [], 2: [], 3: [] };
+  uniq.forEach(q => byDiff[q.diff].push(q));
+  [1, 2, 3].forEach(d => shuffleArr(byDiff[d]));
+  let want = diffMixFor(n);
+  let out = [];
+  [1, 2, 3].forEach(d => {
+    let band = byDiff[d];
+    if (!band.length) return;
+    for (let k = 0; k < want[d - 1]; k++) out.push(band[k % band.length]);
+  });
+  // 个别档整档为空：按 基础→提高→拓展 顺序从全量补齐
+  if (out.length < n) {
+    let orderedAll = byDiff[1].concat(byDiff[2], byDiff[3]);
+    let fi = 0;
+    while (out.length < n && orderedAll.length) { out.push(orderedAll[fi % orderedAll.length]); fi++; }
+  }
+  while (out.length < n) out.push({ question: '', answer: '', type: 'fill' });
+  return out;
+}
+
 function generateExamPaper() {
   let { units, all, rangeText } = getExamUnits();
   if (!units || units.length === 0) return null;
@@ -9706,12 +9809,27 @@ function generateExamPaper() {
     }
   }
 
+  // v51：题池整体相对打标（前60%基础/中30%提高/后10%拓展），供分区按 6:3:1 选题
+  tagRelativeDifficulty(pool);
+
   let used = new Set();
   let usedText = new Set();   // 跨分区共享的题面文本去重（v49：杜绝视觉重复题）
   let questions = [];
 
   PAPER_STRUCTURE.forEach(sec => {
-    let picked = pickFromPool(pool, used, sec.count, getSectionScorer(sec.key), usedText);
+    // v51：分区内部按 6:3:1 难度配比选题（基础→提高→拓展）；
+    // 某难度档候选不足时回退为原逻辑按题型分值选题，保证分区题数不减。
+    let mix = diffMixFor(sec.count);
+    let picked = [];
+    [1, 2, 3].forEach(d => {
+      if (!mix[d - 1]) return;
+      let baseScorer = getSectionScorer(sec.key);
+      let sub = pickFromPool(pool, used, mix[d - 1], q => (questionDifficulty(q) === d ? baseScorer(q) : 0), usedText);
+      picked = picked.concat(sub);
+    });
+    if (picked.length < sec.count) {
+      picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer(sec.key), usedText));
+    }
     picked.forEach(q => {
       let item = Object.assign({}, q);
       item.score = sec.score;
@@ -9780,9 +9898,13 @@ function generateExamPaper() {
   let cnGrade = ['一', '二', '三', '四', '五', '六'][examState.grade - 1];
   let semName = examState.semester === 1 ? '上册' : '下册';
 
+  // v51：卷面注明难度分布（基础/提高/拓展）
+  let dcnt = { 1: 0, 2: 0, 3: 0 };
+  questions.forEach(q => { dcnt[questionDifficulty(q)]++; });
+
   return {
     title: `${cnGrade}年级数学${semName} ${typeName}`,
-    sub: `考查范围：${rangeText} · 满分100分 · 共30题`,
+    sub: `考查范围：${rangeText} · 满分100分 · 共${questions.length}题 · 基础${dcnt[1]}／提高${dcnt[2]}／拓展${dcnt[3]}`,
     questions: questions,
     typeName: typeName,
   };
@@ -9872,7 +9994,10 @@ function renderQuestion() {
   }
   let qScore = (typeof q.score === 'number') ? q.score : 10;
   let scoreBadge = (typeof q.score === 'number') ? `<span class="exam-score-badge">${qScore}分</span>` : '';
-  html += `<div class="question-type-tag">${typeTag} ${scoreBadge}</div>`;
+  // v51：难度徽标（基础/提高/拓展）
+  let diffLv = questionDifficulty(q);
+  let diffBadge = `<span class="diff-badge diff-${diffLv}">${DIFF_NAMES[diffLv]}</span>`;
+  html += `<div class="question-type-tag">${typeTag} ${scoreBadge}${diffBadge}</div>`;
 
   // 题干长度自适应字号：长应用题改用小字号 + 左对齐，短算式保留大字
   let qText = String(q.question || '');
@@ -9996,7 +10121,14 @@ function submitAnswer() {
     } else {
       state.quizWrong++;
       feedback.className = 'feedback wrong show shake';
-      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>`;
+      // v51 错题公式卡联动：答错时内嵌该单元的万能公式卡（做错 → 回看公式 → 重做）
+      let fidxHtml = '';
+      if (state.quizMode === 'unit') {
+        let hit = findUnitByName(state.currentGrade, state.quizTitle);
+        fidxHtml = unitFormulaHtml(hit && hit.unit);
+        if (fidxHtml) fidxHtml = `<div class="fb-fidx">${fidxHtml}</div>`;
+      }
+      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}`;
       // 加入错题
       state.quizWrongQuestions.push({
         index: state.quizIndex,
@@ -10199,6 +10331,16 @@ function renderWrongBank() {
     let userAns = w.userAnswer;
     let correctAns = q.answer;
 
+    // v51 错题公式卡联动：能定位到所属单元的错题，挂出该单元万能公式卡 + 一键练同类题
+    let hit = findUnitByName(w.grade, w.unitName);
+    let fidxHtml = unitFormulaHtml(hit && hit.unit);
+    let fidxBlock = fidxHtml
+      ? `<details class="wrong-fidx"><summary>本单元万能公式（错题联动）</summary><div class="wrong-fidx-body">${fidxHtml}</div></details>`
+      : '';
+    let similarBtn = hit
+      ? `<button class="btn-similar" onclick="practiceSimilarWrong('${w.id}')">练同类题</button>`
+      : '';
+
     html += `<div class="wrong-item">
       <div class="wrong-item-header">
         <span class="wrong-item-tag">${gradeNames[w.grade] || ''} · ${w.unitName || ''}</span>
@@ -10208,8 +10350,10 @@ function renderWrongBank() {
       <div class="wrong-item-answer">
         你的答案：<span class="user-ans">${userAns}</span> ｜ 正确答案：<span class="correct-ans">${correctAns}</span>
       </div>
+      ${fidxBlock}
       <div class="wrong-item-actions">
         <button class="btn-retry" onclick="retryOneWrong('${w.id}')">重做</button>
+        ${similarBtn}
         <button class="btn-delete" onclick="deleteOneWrong('${w.id}')">删除</button>
       </div>
     </div>`;
@@ -10256,6 +10400,122 @@ function clearAllWrong() {
     renderWrongBank();
     showToast('已清空数学错题库');
   }
+}
+
+// ============================================================
+// v51：错题公式卡联动 + A4 打印导出
+// ============================================================
+
+// 按年级+单元名定位 KNOWLEDGE_BASE 中的单元（错题的 unitName 即练习时的 quizTitle）
+function findUnitByName(grade, name) {
+  if (!grade || !name) return null;
+  let sems = KNOWLEDGE_BASE[grade];
+  if (!sems) return null;
+  for (let s = 1; s <= 2; s++) {
+    let arr = sems[s];
+    if (!arr) continue;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] && arr[i].name === name) return { unit: arr[i], grade: grade, sem: s, idx: i };
+    }
+  }
+  return null;
+}
+
+// 单元万能公式卡 HTML（金色描边小卡，错题联动与答题反馈共用）
+function unitFormulaHtml(unit) {
+  if (!unit || !unit.fidx || !unit.fidx.length) return '';
+  let h = '<div class="wrong-fidx-title">万能公式</div>';
+  unit.fidx.forEach(f => {
+    h += '<div class="wrong-fidx-card">'
+      + '<span class="wrong-fidx-t">' + f.t + '</span>'
+      + '<span class="wrong-fidx-f">' + f.f + '</span>'
+      + (f.warn ? '<span class="wrong-fidx-warn">⚠ ' + f.warn + '</span>' : '')
+      + '</div>';
+  });
+  return h;
+}
+
+// 错题「练同类题」：定位所属单元后直接开一组新的单元练习
+function practiceSimilarWrong(id) {
+  let w = getWrongBank().find(x => x.id === id);
+  if (!w) { showToast('错题不存在'); return; }
+  let hit = findUnitByName(w.grade, w.unitName);
+  if (!hit) { showToast('未找到对应单元'); return; }
+  beginUnitQuiz(hit.idx, hit.grade, hit.sem);
+}
+
+// v51：A4 打印导出——把当前试卷（单元练习/考试卷）渲染为打印视图后调起打印
+function printCurrentPaper() {
+  let qs = (state.quizQuestions || []).slice();
+  if (!qs.length) { showToast('当前没有可打印的试卷'); return; }
+
+  let isExam = state.quizMode === 'exam';
+  let title = isExam && state.examPaper ? state.examPaper.title
+    : (state.quizTitle ? state.quizTitle + ' 练习卷' : '数学练习卷');
+  let d = new Date();
+  let dateStr = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+
+  // 难度分布统计
+  let dcnt = { 1: 0, 2: 0, 3: 0 };
+  qs.forEach(q => { dcnt[questionDifficulty(q)]++; });
+  let sub = isExam && state.examPaper ? state.examPaper.sub
+    : `共 ${qs.length} 题 · ${dateStr}`;
+  sub += ` · 难度：基础${dcnt[1]}／提高${dcnt[2]}／拓展${dcnt[3]}`;
+
+  let h = `<div class="prt-head">
+    <div class="prt-title">${title}</div>
+    <div class="prt-sub">${sub}</div>
+    <div class="prt-info">姓名：＿＿＿＿＿＿＿　班级：＿＿＿＿＿＿＿　得分：＿＿＿＿＿＿＿</div>
+  </div>`;
+
+  // 按分区组织（单元练习无分区则连续编号）
+  let secs = [], cur = null;
+  qs.forEach(q => {
+    let st = q.sectionTitle || '';
+    if (!cur || cur.title !== st) { cur = { title: st, qs: [] }; secs.push(cur); }
+    cur.qs.push(q);
+  });
+
+  let labels = ['A', 'B', 'C', 'D'];
+  let no = 0;
+  secs.forEach(sec => {
+    if (sec.title) h += `<div class="prt-sec">${sec.title}</div>`;
+    sec.qs.forEach(q => {
+      no++;
+      let diffLv = questionDifficulty(q);
+      let txt = String(q.question || '').replace(/\n/g, '<br>');
+      h += '<div class="prt-q">';
+      h += `<div class="prt-qtext"><span class="prt-no">${no}.</span>${txt}`
+        + `<span class="prt-diff diff-${diffLv}">${DIFF_NAMES[diffLv]}</span>`
+        + (typeof q.score === 'number' ? `<span class="prt-score">（${q.score}分）</span>` : '')
+        + '</div>';
+      if (q.svg) h += `<div class="prt-fig"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">${q.svg}</svg></div>`;
+      if (q.options && q.options.length >= 2 && !q.forceFill) {
+        h += '<div class="prt-opts">';
+        q.options.forEach((o, i2) => {
+          let val = typeof o === 'object' ? o.value : o;
+          let lab = typeof o === 'object' ? o.label : labels[i2];
+          h += `<div class="prt-opt"><span class="prt-optlab">${lab}.</span> ${val}</div>`;
+        });
+        h += '</div>';
+      } else {
+        h += '<div class="prt-blank">答：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</div>';
+      }
+      h += '</div>';
+    });
+  });
+
+  // 附：参考答案页（另起一页）
+  h += '<div class="prt-answers"><div class="prt-ans-title">参考答案</div><div class="prt-ans-grid">';
+  qs.forEach((q, i) => {
+    h += `<div class="prt-ans-item"><b>${i + 1}.</b> ${q.answer}</div>`;
+  });
+  h += '</div></div>';
+
+  let root = document.getElementById('printRoot');
+  if (!root) { root = document.createElement('div'); root.id = 'printRoot'; document.body.appendChild(root); }
+  root.innerHTML = h;
+  window.print();
 }
 
 // ============================================================

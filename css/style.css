@@ -1561,3 +1561,138 @@ input:focus,textarea:focus,select:focus{
   .diag-card-body .btn { padding: 10px 14px; font-size: 14.5px; }
   .diag-card-body .anim-stage { padding: 4px; }
 }
+
+/* ============================================================
+   v51：难度分级徽标（基础 / 提高 / 拓展）
+   ============================================================ */
+.diff-badge {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  margin-left: 4px;
+  font-weight: 600;
+}
+.diff-1 { background: #E8F4EC; color: #4E8C6E; }
+.diff-2 { background: #FCF4E3; color: #A67C33; }
+.diff-3 { background: #F9ECEC; color: #C0504D; }
+
+/* ============================================================
+   v51：错题公式卡联动（答题反馈 + 错题库）
+   ============================================================ */
+.fb-fidx {
+  margin-top: 10px;
+  text-align: left;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.wrong-fidx-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 8px 0 6px;
+}
+.wrong-fidx-card {
+  background: #FCF9F2;
+  border: 1px solid #E8D9B8;
+  border-left: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 7px;
+  text-align: left;
+}
+.wrong-fidx-t {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+.wrong-fidx-f {
+  display: block;
+  font-size: 13px;
+  color: var(--primary);
+  line-height: 1.6;
+}
+.wrong-fidx-warn {
+  display: block;
+  font-size: 11px;
+  color: #C0504D;
+  margin-top: 2px;
+}
+details.wrong-fidx {
+  margin: 8px 0 2px;
+}
+details.wrong-fidx summary {
+  font-size: 12.5px;
+  color: var(--gold);
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+details.wrong-fidx .wrong-fidx-body { margin-top: 6px; }
+.btn-similar {
+  background: #FCF9F2;
+  border: 1px solid var(--gold);
+  color: #A67C33;
+}
+
+/* ============================================================
+   v51：A4 打印导出（打印视图只在 @media print 显示）
+   ============================================================ */
+#printRoot { display: none; }
+.prt-trigger-btn {
+  background: none;
+  border: 1px solid rgba(180, 148, 90, .5);
+  color: var(--gold);
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+@media print {
+  @page { size: A4; margin: 14mm 13mm; }
+  body { background: #fff !important; }
+  body > *:not(#printRoot) { display: none !important; }
+  #printRoot {
+    display: block !important;
+    color: #000;
+    font-family: "Songti SC", "SimSun", "Noto Serif SC", serif;
+  }
+  .prt-head { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px; }
+  .prt-title { font-size: 18pt; font-weight: 700; letter-spacing: 2px; }
+  .prt-sub { font-size: 10.5pt; margin-top: 4px; }
+  .prt-info { font-size: 11pt; margin-top: 8px; }
+  .prt-sec { font-weight: 700; font-size: 12pt; margin: 12px 0 6px; }
+  .prt-q { margin-bottom: 10px; font-size: 11pt; line-height: 1.75; page-break-inside: avoid; }
+  .prt-no { font-weight: 700; margin-right: 4px; }
+  .prt-diff {
+    font-size: 9pt;
+    border: 1px solid #999;
+    border-radius: 6px;
+    padding: 0 5px;
+    margin-left: 8px;
+    color: #444;
+  }
+  .prt-score { font-size: 10pt; color: #333; margin-left: 8px; }
+  .prt-fig { margin: 6px 0 6px 2em; }
+  .prt-fig svg { width: 150px; height: 125px; }
+  .prt-opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 14px;
+    margin: 4px 0 0 2em;
+    font-size: 11pt;
+  }
+  .prt-optlab { font-weight: 700; }
+  .prt-blank { margin-top: 8px; margin-left: 2em; color: #555; }
+  .prt-answers { page-break-before: always; }
+  .prt-ans-title { font-size: 14pt; font-weight: 700; text-align: center; margin: 10px 0 12px; }
+  .prt-ans-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px 12px;
+    font-size: 11pt;
+    line-height: 1.6;
+  }
+}
