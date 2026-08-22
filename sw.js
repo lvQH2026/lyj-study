@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v45：语文 4/5 年级改造为课本同步结构（上册8+下册8+专项6，与六年级一致）；数学/英语不变
-const CACHE = 'lyj-shell-v45';
+// v46：修复 g6_mul 分数乘法答案 bug（ri()多次调用导致题干乘数≠答案乘数，77%错答率）
+const CACHE = 'lyj-shell-v46';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

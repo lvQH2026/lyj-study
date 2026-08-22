@@ -6934,7 +6934,7 @@ function g_shape_3d(){
 }
 
 // ===== 6年级 =====
-function g6_mul(){let a=ri(1,4),b=ri(2,5);return mf(`${a}/${b}×${ri(2,5)}=？`,fmt(+(a/b*ri(2,5)).toFixed(1)))}
+function g6_mul(){let a=ri(1,4),b=ri(2,5),c=ri(2,5);return mf(`${a}/${b}×${c}=？`,fmt(+(a/b*c).toFixed(1)))}
 function g6_div(){let n=ri(6,15);return mc(`${n}÷(1/3)=？`,n*3,[n/3,n*2,n+3])}
 function g6_ratio(){
   let items=[
