@@ -5735,6 +5735,106 @@ function figSquareView(){
   return `<rect x="${x0}" y="${y0}" width="${s0}" height="${s0}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`
     +figDot(x0,y0)+figDot(x0+s0,y0)+figDot(x0,y0+s0)+figDot(x0+s0,y0+s0);
 }
+// 旋转示意：实线三角形绕点 O 顺时针旋转 90° 得虚线三角形（含旋转弧箭头）
+// 屏幕坐标（y 向下）顺时针旋转 90°：偏移 (dx,dy) → (-dy,dx)
+function figRotate(){
+  const ox=56, oy=54;
+  const pts=[[-12,-4],[4,-16],[2,12]];
+  const r=pts.map(p=>[-p[1],p[0]]);
+  const P=a=>a.map(p=>(ox+p[0])+','+(oy+p[1])).join(' ');
+  let s=figDot(ox,oy)+`<text x="${ox}" y="${oy+14}" text-anchor="middle" font-size="9" fill="${FIG_STROKE}">O</text>`;
+  s+=`<polygon points="${P(pts)}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  s+=`<polygon points="${P(r)}" fill="${FIG_FILL2}" stroke="${FIG_GOLD}" stroke-width="1.6" stroke-dasharray="3 2.5" stroke-linejoin="round"/>`;
+  s+=`<path d="M ${ox} ${oy-30} A 30 30 0 0 1 ${ox+30} ${oy}" fill="none" stroke="${FIG_STROKE}" stroke-width="1.4"/>`;
+  s+=`<path d="M ${ox+30} ${oy} l -4.5 -8 l 9 0 z" fill="${FIG_STROKE}"/>`;
+  return s;
+}
+// 分数条：d 等份长条中前 n 份涂阴影
+function figFracBar(n,d){
+  const x0=20,y0=38,w=80,h=24,cw=w/d;
+  let s=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`;
+  for(let i=0;i<d;i++){
+    if(i<n) s+=`<rect x="${(x0+i*cw).toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${h}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
+    else if(i>0) s+=`<line x1="${(x0+i*cw).toFixed(1)}" y1="${y0}" x2="${(x0+i*cw).toFixed(1)}" y2="${y0+h}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
+  }
+  return s;
+}
+// 分数圆：圆分成 d 等份，其中 n 份涂阴影
+function figFracPie(n,d){
+  const cx=55,cy=52,R=32,step=360/d;
+  let s=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`;
+  for(let i=0;i<n;i++){
+    const a1=(i*step-90)*Math.PI/180, a2=((i+1)*step-90)*Math.PI/180;
+    const x1=(cx+R*Math.cos(a1)).toFixed(1), y1=(cy+R*Math.sin(a1)).toFixed(1);
+    const x2=(cx+R*Math.cos(a2)).toFixed(1), y2=(cy+R*Math.sin(a2)).toFixed(1);
+    const large=step>180?1:0;
+    s+=`<path d="M ${cx},${cy} L ${x1},${y1} A ${R},${R} 0 ${large} 1 ${x2},${y2} Z" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
+  }
+  for(let i=0;i<d;i++){
+    const a=(i*step-90)*Math.PI/180;
+    s+=`<line x1="${cx}" y1="${cy}" x2="${(cx+R*Math.cos(a)).toFixed(1)}" y2="${(cy+R*Math.sin(a)).toFixed(1)}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
+  }
+  return s;
+}
+// 数阵：r 行 c 列小正方形
+function figArray(r,c){
+  const s0=13, x0=Math.round(60-(c*s0)/2), y0=Math.round(52-(r*s0)/2);
+  let s='';
+  for(let i=0;i<r;i++)for(let j=0;j<c;j++)
+    s+=`<rect x="${x0+j*s0}" y="${y0+i*s0}" width="${s0}" height="${s0}" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
+  return s;
+}
+// 线段按 a:b 分成两段（香槟金 + 黛蓝双色，含长度标注）
+function figSegRatio(a,b){
+  const x0=18,y=48,total=84,unit=total/(a+b), mid=x0+a*unit;
+  let s=`<line x1="${x0}" y1="${y}" x2="${mid.toFixed(1)}" y2="${y}" stroke="${FIG_GOLD}" stroke-width="3.5" stroke-linecap="round"/>`;
+  s+=`<line x1="${mid.toFixed(1)}" y1="${y}" x2="${x0+total}" y2="${y}" stroke="${FIG_STROKE}" stroke-width="3.5" stroke-linecap="round"/>`;
+  s+=figDot(x0,y)+figDot(+mid.toFixed(1),y)+figDot(x0+total,y);
+  s+=figLabel(x0+a*unit/2,y-9,a)+figLabel(mid+b*unit/2,y-9,b);
+  return s;
+}
+// 袋中球：袋形轮廓 + 彩色球（colors 为颜色名数组，如 ['红','红','蓝']）
+function figBagBalls(colors){
+  const colorMap={'红':'#C0504D','蓝':'#4472C4','黄':'#E6B422','绿':'#5B8C5A','白':'#F7F6F2'};
+  let s=`<path d="M 32 22 L 30 58 Q 30 80 55 80 Q 80 80 78 58 L 76 22" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  const balls=colors.slice(0,6);
+  balls.forEach((c,i)=>{
+    const x=41+(i%3)*14, y=42+Math.floor(i/3)*15;
+    s+=`<circle cx="${x}" cy="${y}" r="5.5" fill="${colorMap[c]||'#F7F6F2'}" stroke="${FIG_STROKE}" stroke-width="1.2"/>`;
+  });
+  return s;
+}
+// 数轴：-5~5 整数刻度，A 点（香槟金实心）标注在 -n 处
+function figNumLine(n){
+  const x0=22, x1=100, y=54, step=(x1-x0)/10;
+  let s=`<line x1="${x0-8}" y1="${y}" x2="${x1+10}" y2="${y}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`;
+  s+=`<path d="M ${x1+10} ${y} l -7 -4 l 0 8 z" fill="${FIG_STROKE}"/>`;
+  for(let i=0;i<=10;i++){
+    const x=(x0+i*step).toFixed(1), v=i-5;
+    s+=`<line x1="${x}" y1="${y-4}" x2="${x}" y2="${y+4}" stroke="${FIG_STROKE}" stroke-width="1.2"/>`;
+    s+=`<text x="${x}" y="${y+16}" text-anchor="middle" font-size="8" fill="#8A93A6">${v}</text>`;
+  }
+  const ax=(x0+(5-n)*step).toFixed(1);
+  s+=`<circle cx="${ax}" cy="${y}" r="4" fill="${FIG_GOLD}" stroke="${FIG_STROKE}" stroke-width="1.2"/>`;
+  s+=`<text x="${ax}" y="${y-10}" text-anchor="middle" font-size="10" font-weight="700" fill="${FIG_GOLD}">A</text>`;
+  return s;
+}
+// 相遇线段图：两地相距 s 千米，甲乙两车（圆点）相向而行（相向箭头 + 距离标注）
+function figMeet(s){
+  const y=46, x0=26, x1=94;
+  let g=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${FIG_STROKE}" stroke-width="2"/>`;
+  g+=figDot(x0,y)+figDot(x1,y);
+  g+=`<circle cx="${x0-11}" cy="${y}" r="6" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.5"/>`;
+  g+=`<circle cx="${x1+11}" cy="${y}" r="6" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.5"/>`;
+  g+=`<text x="${x0-11}" y="${y-12}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">甲</text>`;
+  g+=`<text x="${x1+11}" y="${y-12}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">乙</text>`;
+  g+=`<line x1="${x0+6}" y1="${y-10}" x2="${x0+22}" y2="${y-10}" stroke="${FIG_GOLD}" stroke-width="2.2" stroke-linecap="round"/>`;
+  g+=`<path d="M ${x0+28} ${y-10} l -7 -4 l 0 8 z" fill="${FIG_GOLD}"/>`;
+  g+=`<line x1="${x1-6}" y1="${y-10}" x2="${x1-22}" y2="${y-10}" stroke="${FIG_STROKE}" stroke-width="2.2" stroke-linecap="round"/>`;
+  g+=`<path d="M ${x1-28} ${y-10} l 7 -4 l 0 8 z" fill="${FIG_STROKE}"/>`;
+  g+=figLabel((x0+x1)/2, y+15, `相距${s}千米`);
+  return g;
+}
 // 带箭头的线段：在 (x2,y2) 处绘制三角箭头头部
 function svgArrow(x1,y1,x2,y2,col,w){
   col=col||'#E53935'; w=w||4;
@@ -6904,7 +7004,13 @@ function g4_bar(){
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
-function g_app_speed(){let v=ri(40,80),t=ri(2,5);return mc(`汽车每小时行${v}千米，${t}小时行多少千米？`,v*t,[v*t-v,v*t+v,v*t*2])}
+// 行程问题三模板：求路程 / 相遇（配线段图）/ 求时间（先定答案反推条件，保证整除）
+function g_app_speed(){
+  let k=ri(0,2);
+  if(k===0){let v=ri(40,80),t=ri(2,5);return mc(`汽车每小时行${v}千米，${t}小时行多少千米？`,v*t,[v*t-v,v*t+v,v*t*2])}
+  if(k===1){let v=ri(40,60),w=ri(50,70),t=ri(2,4),s=(v+w)*t;return msc(`甲、乙两车从相距${s}千米的两地同时相向开出，甲车每小时行${v}千米，乙车每小时行${w}千米，几小时后两车相遇？`,figMeet(s),t,[t+1,t-1,t+2])}
+  let v=ri(50,90),t=ri(3,6),s=v*t;return mc(`一辆汽车每小时行${v}千米，要行驶${s}千米，需要多少小时？`,t,[t+1,t-1,t+2])
+}
 function g4_mixed(){let a=ri(3,8),b=ri(4,8),c=ri(10,50);return mc(`${a}×${b}+${c}=？`,a*b+c,[a*(b+c),a*b+c-1])}
 function g4_law(){
   let items=[
@@ -6953,6 +7059,9 @@ function g_app工程(){
     {q:'一项工程甲队独做10天完成，每天完成工程的几分之几？',a:'1/10',d:['1/5','10','1/100']},
     {q:'一项工程甲队独做8天完成，乙队独做12天完成，两队合做每天完成工程的几分之几？',a:'5/24',d:['1/20','7/24','1/4']},
     {q:'一项工程甲单独做12天完成，甲每天完成几分之几？',a:'1/12',d:['1/6','12','1/24']},
+    {q:'一项工程乙队独做6天完成，乙队每天完成工程的几分之几？',a:'1/6',d:['1/3','6','1/12']},
+    {q:'一项工程甲队独做5天完成，乙队独做20天完成，两队合做每天完成工程的几分之几？',a:'1/4',d:['1/25','5/20','1/15']},
+    {q:'把一项工程看作单位"1"，甲队独做a天完成，甲队的工作效率是？',a:'1/a',d:['a','a/1','1/(a+1)']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -6971,7 +7080,7 @@ function g_shape_symmetry(){
 // ===== 5年级 =====
 function g5_mul(){let a=ri(1,5)+ri(1,9)/10,b=ri(2,5);return mf(`${fmt(a)}×${b}=？`,fmt(+(a*b).toFixed(2)))}
 function g5_div(){let a=ri(5,20),b=ri(2,5);return mc(`${fmt(a)}÷${b}=？`,fmt(+(a/b).toFixed(2)),[fmt(+(a/b+0.5).toFixed(1)),fmt(+(a/b-0.3).toFixed(1))])}
-function g5_equation(){let a=ri(10,30),b=ri(3,9);return mf(`解方程：3x+${b}=${a}, x=？`,(a-b)/3)}
+function g5_equation(){let x=ri(2,12),a=ri(2,9),b=ri(1,30);return mf(`解方程：${a}x+${b}=${a*x+b}, x=？`,x)}
 function g5_area(){
   // 图形多样化：直角三角形 / 平行四边形 / 梯形，配专业制图（直角标记·虚线高·标注）
   let kind=ri(0,2);
@@ -7000,14 +7109,19 @@ function g5_area(){
 }
 function g5_prob(){
   let items=[
-    {q:'袋子里有3个红球1个蓝球，摸到红球的可能性？',a:'较大',d:['较小','一样大','无法判断']},
-    {q:'袋子里有1个红球3个蓝球，摸到蓝球的可能性？',a:'较大',d:['较小','一样大','无法判断']},
+    {s:figBagBalls(['红','红','红','蓝']),q:'图中袋子里有3个红球和1个蓝球，任意摸一个，摸到哪种球的可能性大？',a:'红球',d:['蓝球','一样大','无法判断']},
+    {s:figBagBalls(['红','蓝','蓝','蓝']),q:'图中袋子里有1个红球和3个蓝球，任意摸一个，摸到哪种球的可能性大？',a:'蓝球',d:['红球','一样大','无法判断']},
     {q:'抛一枚硬币，正面朝上的可能性是？',a:'1/2',d:['1','0','1/3']},
     {q:'盒子里全是白球，摸到黑球的可能性？',a:'0（不可能）',d:['1','1/2','较大']},
+    {s:figBagBalls(['红','黄','蓝','绿']),q:'图中袋子里有红、黄、蓝、绿球各1个，任意摸一个，摸到红球的可能性是？',a:'1/4',d:['1/2','1/3','1']},
+    {q:'太阳从西边升起的可能性？',a:'0（不可能）',d:['1','1/2','较大']},
+    {q:'明天会下雨的可能性？',a:'有可能，无法确定',d:['一定是0','一定是1','不可能下雨']},
+    {s:figBagBalls(['蓝','蓝','蓝','蓝']),q:'图中袋子里全是蓝球，任意摸一个，摸到蓝球的可能性是？',a:'1（一定）',d:['1/2','1/4','0']},
+    {q:'可能性的大小与袋中物体的什么有关？',a:'数量的多少',d:['颜色','袋子的大小','摸的次数']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
-function g5_tree(){let l=ri(50,120),g=ri(4,8);return mc(`一条路长${l}米，每隔${g}米种一棵（两端都种），共几棵？`,l/g+1,[l/g,l/g-1,l/g+2])}
+function g5_tree(){let g=pick([4,5,6,8,10]),n=ri(6,15),l=g*(n-1);return mc(`一条路长${l}米，每隔${g}米种一棵（两端都种），共几棵？`,n,[n-1,n+1,n+2])}
 // 专项·植树问题：覆盖 6 大类（两端都种/一端种/两端不种/封闭图形/爬楼梯/敲钟），每类 5 题共 30 题
 function g_tree_special(){
   const pool=[];
@@ -7044,17 +7158,30 @@ function g5_factor(){
     {q:'15的因数有几个？',a:'4个',d:['3个','5个','6个']},
     {q:'下面哪个数是质数？',a:'7',d:['9','15','21']},
     {q:'下面哪个数是合数？',a:'9',d:['2','7','11']},
+    {q:'最小的质数是？',a:'2',d:['1','3','4']},
+    {q:'1是质数还是合数？',a:'既不是质数也不是合数',d:['质数','合数','既是质数又是合数']},
+    {q:'一个数只有1和它本身两个因数，这个数是？',a:'质数',d:['合数','奇数','偶数']},
+    {s:figArray(3,4),q:'上图数阵中共有多少个小正方形？这个数是质数还是合数？',a:'12，合数',d:['12，质数','7，合数','14，合数']},
+    {q:'20以内最大的质数是？',a:'19',d:['17','18','20']},
+    {q:'一个数既是6的因数又是6的倍数，这个数是？',a:'6',d:['3','12','2']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g5_fraction(){
   let items=[
+    {s:figFracBar(3,9),q:'图中阴影部分占几分之几？（约成最简分数）',a:'1/3',d:['3/9','2/3','1/9']},
+    {s:figFracPie(2,4),q:'图中阴影部分占几分之几？（约成最简分数）',a:'1/2',d:['2/4','1/4','3/4']},
+    {s:figFracBar(4,10),q:'图中阴影部分占几分之几？（约成最简分数）',a:'2/5',d:['4/10','1/5','4/5']},
+    {s:figFracPie(2,3),q:'图中阴影部分占几分之几？',a:'2/3',d:['1/3','3/2','1/2']},
     {q:'3/9约分后等于？',a:'1/3',d:['3/9','2/3','1/9']},
     {q:'4/10约分后等于？',a:'2/5',d:['4/10','1/5','4/5']},
     {q:'与1/2相等的分数是？',a:'2/4',d:['1/3','3/4','1/4']},
     {q:'5/8和3/8比较，哪个大？',a:'5/8',d:['3/8','一样大','无法比较']},
+    {q:'6/9约分后等于？',a:'2/3',d:['1/3','3/9','6/9']},
+    {q:'10/15约分后等于？',a:'2/3',d:['5/15','10/3','1/3']},
+    {q:'约分的依据是？',a:'分数的基本性质',d:['加法交换律','乘法分配律','等式的性质']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g5_fraction_calc(){
   let a=ri(2,8);
@@ -7066,8 +7193,14 @@ function g5_shape3(){
     {q:'一个图形旋转90度后，什么不变？',a:'大小和形状',d:['位置','方向','颜色']},
     {q:'图形平移时，什么发生了变化？',a:'位置',d:['大小','形状','颜色']},
     {q:'平移和旋转都不改变图形的什么？',a:'大小和形状',d:['位置','方向','颜色']},
+    {s:figRotate(),q:'上图中的虚线三角形是由实线三角形绕点O怎样得到的？',a:'顺时针旋转90°',d:['逆时针旋转90°','平移','轴对称']},
+    {s:figRotate(),q:'上图中实线三角形绕点O顺时针旋转90°后，得到的图形是？',a:'虚线三角形',d:['一个更大的三角形','一个更小的三角形','位置不变的三角形']},
+    {q:'电风扇叶片的运动属于？',a:'旋转',d:['平移','轴对称','放大缩小']},
+    {q:'把图形绕一个点转过一定角度，这种运动叫？',a:'旋转',d:['平移','对称','折叠']},
+    {q:'旋转图形时，图形上每个点都绕旋转中心转过？',a:'相同的角度',d:['不同的角度','相同的距离','不转动']},
+    {q:'图形旋转后，对应点到旋转中心的距离？',a:'不变',d:['变大','变小','变为0']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g5_line(){
   const temps=[24,26,23,28,30,27,25];
@@ -7114,8 +7247,13 @@ function g6_ratio(){
     {q:'0.2:0.4化成最简整数比是？',a:'1:2',d:['2:4','2:1','1:4']},
     {q:'甲数是乙数的2倍，甲:乙=？',a:'2:1',d:['1:2','1:1','2:2']},
     {q:'把10:15化简后是？',a:'2:3',d:['5:15','10:3','3:2']},
+    {s:figSegRatio(2,3),q:'上图线段被分成两段，两段的长度比是？',a:'2:3',d:['3:2','2:5','3:5']},
+    {s:figSegRatio(1,2),q:'上图线段被分成两段，较短段与较长段的比是？',a:'1:2',d:['2:1','1:3','2:3']},
+    {q:'化简比 12:18 = ？',a:'2:3',d:['3:2','1:2','3:4']},
+    {q:'比的前项和后项同时乘一个不为0的数，比值？',a:'不变',d:['变大','变小','变为0']},
+    {q:'3:4的前项加上3，要使比值不变，后项应加上？',a:'4',d:['3','6','8']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g6_circle(){
   let r=ri(2,6);
@@ -7148,15 +7286,18 @@ function g6_pie(){
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g6_negative(){
-  let a=ri(2,9), k=ri(3,9);
+  let a=ri(2,9), k=ri(3,9), n=ri(1,4);
   let items=[
     {q:'比0小5的数是？',a:'-5',d:['5','0','-4']},
     {q:'海拔-100米表示？',a:'低于海平面100米',d:['高于海平面100米','海平面上100米','平地']},
     {q:'温度从3℃下降到-2℃，下降了？',a:'5℃',d:['1℃','2℃','3℃']},
     {q:`-${a}+${a+k}=？`,a:String(k),d:[String(a),String(-k),'0']},
     {q:`-8-${a}=？`,a:String(-8-a),d:[String(-a-6),String(a-8),'8']},
+    {s:figNumLine(n),q:'上图数轴上A点表示的数是？',a:`-${n}`,d:[String(n),String(-(n+1)),String(-(n-1))]},
+    {s:figNumLine(n),q:'上图数轴上A点表示的数的绝对值是？',a:String(n),d:[String(-n),String(n+1),'0']},
+    {s:figNumLine(n),q:'上图数轴上，A点在原点的哪一边？',a:'左边',d:['右边','原点上','无法确定']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g6_percent2(){
   let items=[
@@ -7192,6 +7333,8 @@ function g6_proportion(){
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g6_stats(){
+  // 扇形统计图：真实数据 + 百分比标签 + 图例（可据图作答）
+  let pie=figPie([['故事书',40,'#B4945A'],['科技书',35,'#3E4A63'],['漫画书',25,'#8FA3C4']]);
   let items=[
     {q:'平均数反映数据的？',a:'总体一般水平（集中趋势）',d:['最大值','最小值','离散程度']},
     {q:'要表示一组数据的多数情况，一般用？',a:'众数',d:['平均数','最大数','最小数']},
@@ -7199,8 +7342,12 @@ function g6_stats(){
     {q:'数据3、5、7、8、12的平均数是？',a:'7',d:['5','8','35']},
     {q:'数据2、4、4、6、9的中位数是？',a:'4',d:['5','6','2']},
     {q:'数据7、7、7、8、9的众数是？',a:'7',d:['8','9','7.6']},
+    {s:pie,q:'上图是图书馆各类图书的扇形统计图，故事书占全部图书的百分之几？',a:'40%',d:['35%','25%','45%']},
+    {s:pie,q:'上图扇形统计图中，科技书比漫画书多占全部图书的百分之几？',a:'10%',d:['5%','15%','20%']},
+    {s:pie,q:'上图扇形统计图中，故事书和漫画书一共占全部图书的百分之几？',a:'65%',d:['40%','50%','75%']},
+    {s:pie,q:'上图扇形统计图中，圆心角最大的扇形是哪类图书？',a:'故事书',d:['科技书','漫画书','一样大']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g6_review(){
   let r=ri(2,6);
@@ -7230,7 +7377,7 @@ function g_app_chicken_rabbit(){
   let heads=ri(8,15),r=ri(1,heads-2),c=heads-r,feet=r*4+c*2;
   return mc(`鸡兔同笼，共${heads}个头${feet}只脚，兔有几只？`,r,[c,r+1,heads-r+1]);
 }
-function g_app_planting(){let l=ri(30,100),g=ri(3,8);return mc(`一条路长${l}米，每隔${g}米种一棵树，共几棵？`,l/g+1,[l/g,l/g-1])}
+function g_app_planting(){let g=pick([3,4,5,6,8,10]),n=ri(6,15),l=g*(n-1);return mc(`一条路长${l}米，每隔${g}米种一棵树，共几棵？`,n,[n-1,n+1,n+2])}
 function g_shape_expand(){
   let net=figNet();
   let items=[
@@ -8619,8 +8766,8 @@ function generateSteps(q) {
     return [`把总数看作单位"1"，总数的 1/${k} 是 ${n}`,
       `总数 = ${n} ÷ 1/${k} = ${n} × ${k} = ${n*k}`];
   }
-  // ── 植树问题 ──
-  m = t.match(/^一条路长(\d+)米，每隔(\d+)米种一棵，共几棵？$/);
+  // ── 植树问题（兼容"种一棵（两端都种）"与"种一棵树"两种题干）──
+  m = t.match(/^一条路长(\d+)米，每隔(\d+)米种一棵(?:（两端都种）|树)?，共几棵？$/);
   if (m) {
     let L=+m[1], g=+m[2];
     return [`先求间隔数：${L} ÷ ${g} = ${L/g}（个间隔）`,
@@ -8670,6 +8817,44 @@ function generateSteps(q) {
     if (op==='+' || op==='-') steps.unshift(`小数点对齐（相同数位对齐），从低位算起`);
     if (op==='÷') steps.unshift(`除数是整数：按整数除法计算，商的小数点与被除数对齐`);
     return steps;
+  }
+
+  // ── 行程·求路程 ──
+  m = t.match(/^汽车每小时行(\d+)千米，(\d+)小时行多少千米？$/);
+  if (m) {
+    let v=+m[1], hh=+m[2];
+    return [`路程 = 速度 × 时间`,
+      `${v} × ${hh} = ${v*hh}（千米）`];
+  }
+  // ── 行程·相遇 ──
+  m = t.match(/^甲、乙两车从相距(\d+)千米的两地同时相向开出，甲车每小时行(\d+)千米，乙车每小时行(\d+)千米，几小时后两车相遇？$/);
+  if (m) {
+    let s=+m[1], v=+m[2], w=+m[3];
+    return [`相遇时间 = 总路程 ÷ 速度和`,
+      `速度和 = ${v} + ${w} = ${v+w}（千米/时）`,
+      `${s} ÷ ${v+w} = ${s/(v+w)}（小时）`];
+  }
+  // ── 行程·求时间 ──
+  m = t.match(/^一辆汽车每小时行(\d+)千米，要行驶(\d+)千米，需要多少小时？$/);
+  if (m) {
+    let v=+m[1], s=+m[2];
+    return [`时间 = 路程 ÷ 速度`,
+      `${s} ÷ ${v} = ${s/v}（小时）`];
+  }
+  // ── 工程·合做效率（通分再相加，须先于独做分支匹配）──
+  m = t.match(/^一项工程(.)队独做(\d+)天完成，(.)队独做(\d+)天完成，两队合做每天完成工程的几分之几？$/);
+  if (m) {
+    let a=+m[2], b=+m[4];
+    return [`把这项工程看作单位"1"：${m[1]}每天完成 1/${a}，${m[3]}每天完成 1/${b}`,
+      `通分：1/${a} + 1/${b} = ${b}/${a*b} + ${a}/${a*b}`,
+      `两队合做每天完成 ${a+b}/${a*b}`];
+  }
+  // ── 工程·独做效率（甲队/乙队/甲单独做，兼容"独做/单独做"两种表述）──
+  m = t.match(/^一项工程.{0,6}(\d+)天完成，.{0,4}每天完成(工程的)?几分之几？$/);
+  if (m) {
+    let d=+m[1];
+    return [`把这项工程看作单位"1"`,
+      `每天完成 = 1 ÷ ${d} = 1/${d}`];
   }
 
   // ── 应用题通用：数量关系 + 列式 ──
@@ -8755,10 +8940,20 @@ function generateExamPaper() {
   // 注意：期末考 units===all（整册），不能用 all.length>units.length 判断，否则期末保底永远不触发。
   const MIN_IMG = 5;
   let imgNow = questions.filter(q => String(q.svg || '').includes('<')).length;
-  // 单元考试只考本单元，禁止从全册拿配图题替换（否则会混入其他单元图形题）。
-  if (imgNow < MIN_IMG && all && examState.type !== 'unit') {
-    let imgPool = buildQuestionPool(all, 50, seen, false)
-      .filter(q => String(q.svg || '').includes('<') && !questions.some(x => x.question === q.question && x.answer === q.answer));
+  // 配图题来源：期末/期中/月考从同册"全册题池"补充；单元考试只从"本单元题池"补充，绝不混入其他单元图形题。
+  const imgSrc = (examState.type === 'unit') ? units : all;
+  if (imgNow < MIN_IMG && imgSrc && imgSrc.length) {
+    // 用独立 seen：初始题池构建时已把大量配图题计入 seen，若沿用会把可补充的配图题全部排除，保底失效。
+    // 去重铁律：按题面文本去重（跨单元模板题题面可能相同而答案不同，按题面+答案去重会导致重复题）。
+    let seenText = new Set(questions.map(q => q.question));
+    // 采样量放大到 200：配图题集中在少数单元（如 6 下仅 9 种），target 过小会漏捞导致保底补不满。
+    let imgPool = [];
+    buildQuestionPool(imgSrc, 200, new Set(), false).forEach(q => {
+      if (!String(q.svg || '').includes('<')) return;
+      if (seenText.has(q.question)) return;
+      seenText.add(q.question);
+      imgPool.push(q);
+    });
     let replSlots = questions.map((q, i) => ({ q, i }))
       .filter(o => o.q.sectionTitle && o.q.sectionTitle.includes('选择') && !String(o.q.svg || '').includes('<'));
     let pi = 0, si = 0;

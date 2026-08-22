@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v47：数学 5/6 年级期中期末试卷全面整改——图形套件重绘（黛蓝/香槟金制图风格：直角标记·虚线高·隐藏棱·数据标签·图例）、解题步骤分题型完整推导、分数答案约分、概念题清出计算/应用区、配图保底修复、mc/msc 负数答案死循环修复
-const CACHE = 'lyj-shell-v47';
+// v48：考试板块单元考试对齐期末规则——单元考试启用同单元配图保底（imgSrc=units，绝不混入他单元）、配图保底题池独立 seen+按题面去重+采样量 200、修复 g5_equation 非整数解与 g5_tree/g_app_planting 不整除红线、行程三模板（求路程/相遇配线段图/求时间）、工程题扩容+专属步骤推导、5 个无图生成器重写扩容配图（旋转/分数条/分数圆/数阵/线段比/袋中球/数轴）、植树步骤正则对齐现行题干
+const CACHE = 'lyj-shell-v48';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
