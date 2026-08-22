@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v44：放大 AI 分析图表 X 轴标签字号（SVG viewBox 缩放导致原 9.5-10px 手机端仅约 5px 看不清），柱状图单元名改 -30° 斜排避免多柱重叠；折线/柱状标签加深适配浅色
-const CACHE = 'lyj-shell-v44';
+// v45：语文 4/5 年级改造为课本同步结构（上册8+下册8+专项6，与六年级一致）；数学/英语不变
+const CACHE = 'lyj-shell-v45';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

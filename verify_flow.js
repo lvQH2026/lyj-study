@@ -29,7 +29,7 @@ w.confirm = () => true;
 if (!w.HTMLElement.prototype.scrollIntoView) w.HTMLElement.prototype.scrollIntoView = function(){};
 
 // 以真实 <script> 元素注入，复现浏览器同一全局作用域（let/const 全局词法绑定共享）
-['js/core.js','js/math.js','js/data.js','js/english.js','js/diagram.js','js/main.js'].forEach(s => {
+['js/core.js','js/math.js','js/data.js','js/english.js','js/chinese.js','js/diagram.js','js/main.js'].forEach(s => {
   const el = w.document.createElement('script');
   el.textContent = fs.readFileSync(path.join(ROOT, s), 'utf8');
   w.document.body.appendChild(el);
@@ -227,7 +227,28 @@ try {
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/chinese.js', 'js/diagram.js', 'js/main.js', 'js/aiAnalysis.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v44 图表标签放大)', /lyj-shell-v44/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|4[0-3])/.test(sw));
+ok('SW 版本号已升级 (v45 语文4/5课本同步)', /lyj-shell-v45/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|4[0-4])/.test(sw));
+
+// ============ 四·四、语文 4/5 年级 课本同步结构守卫（v45） ============
+const cnJs = fs.readFileSync(path.join(ROOT, 'js', 'chinese.js'), 'utf8');
+ok('语文：chinese.js 不再硬编码 grade===6（已泛化为 group===\'课本\'）', !/cnState\.grade\s*===\s*6/.test(cnJs) && !/grade\s*===\s*6/.test(cnJs));
+ok('语文：首页/考试均用 isTbGrade 检测 group===\'课本\'（>=2 处）', (cnJs.match(/units\.some\(function \(u\) \{ return u\.group === '\\u8BFE\\u672C'; \}\)/g) || []).length >= 2);
+const CN = w.CN;
+ok('语文：window.CN 已加载', !!CN);
+if (CN) {
+  for (const g of [4, 5]) {
+    const units = CN.data[g];
+    ok(g + '年级 单元数 = 22 (8+8+6)', units.length === 22, '实际 ' + units.length);
+    const tb = units.filter(u => u.group === '课本');
+    ok(g + '年级 课本单元 = 16 (8上+8下)', tb.length === 16, '实际 ' + tb.length);
+    ok(g + '年级 上册 = 8 且 下册 = 8', tb.filter(u => u.term === '上').length === 8 && tb.filter(u => u.term === '下').length === 8);
+    ok(g + '年级 专项单元 = 6', units.filter(u => u.group === '专项').length === 6);
+    let minN = 999, bad = [];
+    tb.forEach(u => { const n = u.pool().length; if (n < 30) bad.push(u.name + '(' + n + ')'); if (n < minN) minN = n; });
+    ok(g + '年级 每个课本单元 pool >= 30 题', bad.length === 0, '最少 ' + minN + (bad.length ? ' 不足: ' + bad.join(',') : ''));
+  }
+  ok('6年级 结构未被破坏 (20 单元)', CN.data[6].length === 20, '实际 ' + CN.data[6].length);
+}
 
 // ============ 四·零、家长端浅色主题守卫（v43） ============
 const pStyle = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
