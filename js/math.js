@@ -8216,13 +8216,14 @@ function getWrongBank() { return getAllWrongBank().filter(w => !w.module || w.mo
 function addToWrongBank(question, userAnswer, unitName, grade) {
   let data = loadData();
   // 避免重复
-  let existing = data.wrong.find(w => w.question === question.question && w.answer === question.answer);
+  let existing = data.wrong.find(w => (!w.module || w.module === '数学') && w.question && w.question.question === question.question && w.question.answer === question.answer);
   if (existing) {
     existing.count = (existing.count || 1) + 1;
     existing.lastWrong = Date.now();
   } else {
     data.wrong.push({
       id: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+      module: '数学',
       question: question,
       userAnswer: userAnswer,
       unitName: unitName,
