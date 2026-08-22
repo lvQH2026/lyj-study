@@ -4,6 +4,9 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
+// 「最近练习」当前渲染的数据源（本机 history 或云端 study_records，统一归一化结构）
+let _rpRecords = [];
+
 // 把本地/云端的错题对象统一成 {unitName, grade, userAnswer, question:{question,options,answer,explain,svg}}
 function normalizeWrong(rawList) {
   return (rawList || []).map(w => {
@@ -116,7 +119,26 @@ async function parentLogin() {
   const stats = await getChildStats(id, pw);
   const result = document.getElementById('parentResult');
   if (!stats) { result.innerHTML = '<p style="color:#cf1322">未找到该学习ID，或口令不正确。</p>'; return; }
-  result.innerHTML = renderDashboard(stats, true) + '<div id="aiMount"></div>';
+  // v55：远程云端模式也展示「最近练习」（含考试），数据来自 get_child_recent RPC
+  let recentHtml = '';
+  try {
+    const rows = await getChildRecent(id, pw, 20);
+    const recs = (rows || []).map(r => ({
+      module: r.module || '数学',
+      grade: r.grade,
+      unitName: r.unit_name || '',
+      score: r.correct || 0,
+      total: r.total || 0,
+      accuracy: r.accuracy != null ? r.accuracy : (r.total ? Math.round((r.correct || 0) / r.total * 100) : 0),
+      time: r.created_at ? Date.parse(r.created_at) : 0,
+      wrong: Array.isArray(r.wrong_json) ? r.wrong_json : []
+    }));
+    recentHtml = renderRecentPractice(recs);
+  } catch (e) {
+    console.warn('parentLogin getChildRecent', e);
+    recentHtml = '<div class="card rp-card" style="margin-bottom:12px"><div class="section-title">📝 最近练习</div><div class="rp-dim" style="padding:6px 2px 12px">云端最近练习暂时加载失败，请稍后重试。</div></div>';
+  }
+  result.innerHTML = renderDashboard(stats, true) + recentHtml + '<div id="aiMount"></div>';
   mountAiAnalysis('aiMount', 'cloud', stats);
 }
 
@@ -187,22 +209,28 @@ function formatFullTime(ts) {
   return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
 }
 
-function renderRecentPractice() {
-  const data = loadData();
-  const history = (data.history || []).slice();
-  // 旧数学记录无 module 字段，按数学兜底
-  const list = history.slice(0, 5).map(h => ({
-    module: h.module || '数学',
-    grade: h.grade,
-    unitName: h.unitName || '',
-    score: h.score || 0,
-    total: h.total || 0,
-    accuracy: h.accuracy != null ? h.accuracy : (h.total ? Math.round(h.score / h.total * 100) : 0),
-    time: h.time || 0,
-    wrongCount: Array.isArray(h.wrong) ? h.wrong.length : 0
-  }));
+function renderRecentPractice(source) {
+  // 数据来源：远程云端登录传归一化数组；本机预览不传参数则读本地 history
+  if (Array.isArray(source)) {
+    _rpRecords = source;
+  } else {
+    const data = loadData();
+    const history = (data.history || []).slice();
+    // 旧数学记录无 module 字段，按数学兜底
+    _rpRecords = history.map(h => ({
+      module: h.module || '数学',
+      grade: h.grade,
+      unitName: h.unitName || '',
+      score: h.score || 0,
+      total: h.total || 0,
+      accuracy: h.accuracy != null ? h.accuracy : (h.total ? Math.round(h.score / h.total * 100) : 0),
+      time: h.time || 0,
+      wrong: Array.isArray(h.wrong) ? h.wrong : []
+    }));
+  }
+  const list = _rpRecords.slice(0, 5);
   const now = Date.now();
-  const in7 = history.some(h => (now - (h.time || 0)) <= 7 * 24 * 3600 * 1000);
+  const in7 = _rpRecords.some(h => (now - (h.time || 0)) <= 7 * 24 * 3600 * 1000);
 
   const head = '<div class="card rp-card" style="margin-bottom:12px"><div class="section-title">📝 最近练习</div>';
 
@@ -221,8 +249,10 @@ function renderRecentPractice() {
     const mod = isCn ? '语文' : '数学';
     const modCls = isCn ? 'rp-sub-cn' : 'rp-sub-math';
     const accCls = h.accuracy >= 80 ? 'rp-acc-ok' : h.accuracy >= 60 ? 'rp-acc-mid' : 'rp-acc-low';
+    // 期中/期末/月考为考试条目，加考试徽标
+    const isExam = /期中|期末|月考/.test(h.unitName || '');
     return '<div class="rp-item" onclick="showPracticeDetail(' + i + ')">' +
-      '<div class="rp-subject ' + modCls + '">' + mod + '</div>' +
+      '<div class="rp-subject ' + modCls + '">' + mod + (isExam ? ' 📄' : '') + '</div>' +
       '<div class="rp-main">' +
         '<div class="rp-title">' + (h.grade ? esc(String(h.grade)) + '年级 · ' : '') + esc(h.unitName) + '</div>' +
         '<div class="rp-meta">' +
@@ -242,8 +272,7 @@ function renderRecentPractice() {
 }
 
 function showPracticeDetail(i) {
-  const data = loadData();
-  const h = (data.history || [])[i];
+  const h = _rpRecords[i];
   if (!h) return;
   const listEl = document.getElementById('rpList');
   const detEl = document.getElementById('rpDetail');

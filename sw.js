@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v54：家长端新增「最近练习」模块（本机预览）——parent.js renderRecentPractice 列出最近5条（科目/时间/题数/正确率），点击 showPracticeDetail 看答题情况+错题完整明细；近7天无记录显示空状态；数学 history 补 module:'数学' 字段
-const CACHE = 'lyj-shell-v54';
+// v55：远程云端登录模式也展示「最近练习」（含考试 📄 标记）——parentLogin 调新 RPC get_child_recent 拉云端 study_records（含 wrong_json），复用本机那套列表/详情 UI；supabase.js 推送补 module 列（SQL 见 supabase_v55.sql，需在 Supabase 后台执行）
+const CACHE = 'lyj-shell-v55';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

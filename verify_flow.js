@@ -229,7 +229,16 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 {
   const mV = sw.match(/lyj-shell-v(\d+)/);
-  ok('SW 版本号已升级 (v54 最近练习)', !!mV && +mV[1] === 54);
+  ok('SW 版本号已升级 (v55 云端最近练习)', !!mV && +mV[1] === 55);
+}
+// v55 守卫：云端登录「最近练习」
+{
+  const parentJs = fs.readFileSync(path.join(ROOT, 'parent.js'), 'utf8');
+  const sbJs = fs.readFileSync(path.join(ROOT, 'supabase.js'), 'utf8');
+  ok('v55：parentLogin 调 getChildRecent 渲染云端最近练习', parentJs.indexOf('getChildRecent') >= 0 && parentJs.indexOf('parentLogin') >= 0);
+  ok('v55：renderRecentPractice 支持云端数据源 + _rpRecords', parentJs.indexOf('_rpRecords') >= 0 && parentJs.indexOf('wrong_json') >= 0);
+  ok('v55：supabase.js 含 getChildRecent + module 列推送', sbJs.indexOf('async function getChildRecent') >= 0 && sbJs.indexOf("module: h.module || '数学'") >= 0);
+  ok('v55：get_child_recent RPC SQL 已备（supabase_v55.sql）', fs.existsSync(path.join(ROOT, 'supabase_v55.sql')));
 }
 
 // ============ 四·四、语文 4/5 年级 课本同步结构守卫（v45） ============

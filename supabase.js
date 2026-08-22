@@ -46,6 +46,7 @@ async function pushStudyRecords() {
     learning_id: getLearningId(),
     grade: h.grade,
     unit_name: h.unitName,
+    module: h.module || '数学',
     correct: h.score,
     total: h.total,
     accuracy: h.accuracy,
@@ -159,6 +160,14 @@ async function getChildStats(learningId, pw) {
   const c = sbClient(); if (!c) return null;
   const { data, error } = await c.rpc('get_child_stats', { p_learning_id: learningId, p_pw: pw });
   if (error) { console.warn('getChildStats', error); return null; }
+  return data;
+}
+
+// v55：家长端远程登录拉取最近练习（含考试），返回最近 N 条 study_records（含 wrong_json）
+async function getChildRecent(learningId, pw, limit) {
+  const c = sbClient(); if (!c) return null;
+  const { data, error } = await c.rpc('get_child_recent', { p_learning_id: learningId, p_pw: pw, p_limit: limit || 20 });
+  if (error) { console.warn('getChildRecent', error); return null; }
   return data;
 }
 
