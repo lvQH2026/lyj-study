@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v53：错题重练答对即移出错题库——数学 startWrongReview/retryOneWrong、语文 cnStartWrongReview 在答对分支按来源 entry id（quizWrongSourceIds / cnState.quiz.sourceIds）自动 removeFromWrongBank / cnRemoveWrong，附「已掌握」提示
-const CACHE = 'lyj-shell-v53';
+// v54：家长端新增「最近练习」模块（本机预览）——parent.js renderRecentPractice 列出最近5条（科目/时间/题数/正确率），点击 showPracticeDetail 看答题情况+错题完整明细；近7天无记录显示空状态；数学 history 补 module:'数学' 字段
+const CACHE = 'lyj-shell-v54';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

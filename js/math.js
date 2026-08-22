@@ -8252,6 +8252,7 @@ function recordHistory(grade, unitName, score, total, wrong) {
   let data = loadData();
   if (!data.history) data.history = [];
   data.history.unshift({
+    module: '数学',
     grade: grade,
     unitName: unitName,
     score: score,

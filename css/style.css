@@ -1709,3 +1709,150 @@ details.wrong-fidx .wrong-fidx-body { margin-top: 6px; }
     line-height: 1.6;
   }
 }
+
+/* ===== 家长端：最近练习（v54） ===== */
+.rp-card .section-title { margin-top: 0; }
+.rp-list-wrap { margin-top: 4px; }
+.rp-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.rp-item:last-child { border-bottom: none; }
+.rp-item:hover { background: rgba(62,74,99,.04); }
+.rp-item:active { background: rgba(62,74,99,.08); }
+.rp-subject {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.rp-sub-math { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+.rp-sub-cn { background: linear-gradient(135deg, var(--gold), #D4B97E); }
+.rp-main { flex: 1 1 auto; min-width: 0; }
+.rp-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rp-meta { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-lighter); }
+.rp-acc { font-weight: 700; }
+.rp-acc-ok { color: var(--success); }
+.rp-acc-mid { color: var(--warning); }
+.rp-acc-low { color: var(--accent); }
+.rp-count { color: var(--text-light); }
+.rp-arrow { flex: 0 0 auto; color: var(--text-lighter); font-size: 22px; line-height: 1; }
+
+/* 空状态 */
+.rp-empty { text-align: center; padding: 32px 12px; }
+.rp-empty-icon { font-size: 38px; margin-bottom: 8px; }
+.rp-empty-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.rp-empty-sub { font-size: 12px; color: var(--text-lighter); line-height: 1.6; }
+
+/* 详情页 */
+.rp-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.rp-back {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--primary);
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.rp-detail-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.rp-detail-unit { font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
+.rp-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+.rp-summary b { font-size: 15px; margin-left: 2px; }
+.rp-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 16px 0 10px;
+  padding-left: 8px;
+  border-left: 3px solid var(--gold);
+}
+.rp-overview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+.rp-ov {
+  background: rgba(62,74,99,.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 6px;
+  text-align: center;
+}
+.rp-ov-v { font-size: 20px; font-weight: 700; color: var(--primary); }
+.rp-ov-l { font-size: 11px; color: var(--text-lighter); margin-top: 2px; }
+
+/* 错题明细 */
+.rp-wrong-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+.rp-passage {
+  background: #F3EEE3;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.8;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.rp-wq { font-size: 15px; font-weight: 600; margin-bottom: 8px; line-height: 1.6; }
+.rp-svg { margin: 6px 0; overflow-x: auto; }
+.rp-svg svg { max-width: 100%; height: auto; }
+.rp-opts { margin: 6px 0; }
+.rp-opt {
+  font-size: 14px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.rp-opt-ans { border-color: var(--success); background: rgba(78,140,110,.08); color: var(--success); font-weight: 600; }
+.rp-ans-row { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; margin-top: 6px; }
+.rp-ua { color: var(--accent); }
+.rp-ca { color: var(--success); font-weight: 600; }
+.rp-explain { font-size: 12px; color: var(--text-light); margin-top: 6px; line-height: 1.6; }
+.rp-dim { font-size: 13px; color: var(--text-lighter); text-align: center; padding: 12px 0; }
+
+@media (max-width: 480px) {
+  .rp-subject { width: 40px; height: 40px; font-size: 12px; }
+  .rp-title { font-size: 14px; }
+  .rp-meta { font-size: 11px; gap: 8px; }
+  .rp-ov-v { font-size: 18px; }
+}

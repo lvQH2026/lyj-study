@@ -84,14 +84,14 @@ function renderParent() {
     } else {
       syncBox = '<div style="margin:10px 0;font-size:12px;color:var(--success)">✓ 云端同步正常</div>';
     }
-    result.innerHTML = syncBox + renderDashboard(s) + '<div id="aiMount"></div><div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
+    result.innerHTML = syncBox + renderDashboard(s) + renderRecentPractice() + '<div id="aiMount"></div><div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
     mountAiAnalysis('aiMount', 'local', null);
   } else {
     box.style.display = 'none';
     const s = getLocalStats();
     result.innerHTML =
       '<div class="pp-note">当前为「本机预览」模式（数据存在这台手机本地）。部署到云端并填入 Supabase 后，家长可在自己手机上用学习ID+口令远程查看。</div>' +
-      renderDashboard(s) + '<div id="aiMount"></div>';
+      renderDashboard(s) + renderRecentPractice() + '<div id="aiMount"></div>';
     mountAiAnalysis('aiMount', 'local', null);
   }
 }
@@ -159,4 +159,147 @@ function renderDashboard(s) {
     <div class="card" style="margin-bottom:12px"><div class="section-title">🎯 薄弱点</div><div>${weakHtml}</div></div>
     <div class="card"><div class="section-title">❌ 最近错题</div>${wrongHtml}</div>
   `;
+}
+
+// ============================================================
+// 最近练习（家长端本机预览）
+// ============================================================
+
+function formatRelativeTime(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return '刚刚';
+  if (min < 60) return min + ' 分钟前';
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return hr + ' 小时前';
+  const day = Math.floor(hr / 24);
+  if (day < 7) return day + ' 天前';
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+
+function formatFullTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function renderRecentPractice() {
+  const data = loadData();
+  const history = (data.history || []).slice();
+  // 旧数学记录无 module 字段，按数学兜底
+  const list = history.slice(0, 5).map(h => ({
+    module: h.module || '数学',
+    grade: h.grade,
+    unitName: h.unitName || '',
+    score: h.score || 0,
+    total: h.total || 0,
+    accuracy: h.accuracy != null ? h.accuracy : (h.total ? Math.round(h.score / h.total * 100) : 0),
+    time: h.time || 0,
+    wrongCount: Array.isArray(h.wrong) ? h.wrong.length : 0
+  }));
+  const now = Date.now();
+  const in7 = history.some(h => (now - (h.time || 0)) <= 7 * 24 * 3600 * 1000);
+
+  const head = '<div class="card rp-card" style="margin-bottom:12px"><div class="section-title">📝 最近练习</div>';
+
+  if (!in7) {
+    // 近7天无记录：友好空状态
+    return head +
+      '<div class="rp-empty">' +
+        '<div class="rp-empty-icon">📭</div>' +
+        '<div class="rp-empty-title">近 7 天还没有练习记录</div>' +
+        '<div class="rp-empty-sub">鼓励孩子每天坚持练习，进步看得见～</div>' +
+      '</div></div>';
+  }
+
+  const items = list.map((h, i) => {
+    const isCn = h.module === '语文';
+    const mod = isCn ? '语文' : '数学';
+    const modCls = isCn ? 'rp-sub-cn' : 'rp-sub-math';
+    const accCls = h.accuracy >= 80 ? 'rp-acc-ok' : h.accuracy >= 60 ? 'rp-acc-mid' : 'rp-acc-low';
+    return '<div class="rp-item" onclick="showPracticeDetail(' + i + ')">' +
+      '<div class="rp-subject ' + modCls + '">' + mod + '</div>' +
+      '<div class="rp-main">' +
+        '<div class="rp-title">' + (h.grade ? esc(String(h.grade)) + '年级 · ' : '') + esc(h.unitName) + '</div>' +
+        '<div class="rp-meta">' +
+          '<span class="rp-acc ' + accCls + '">' + h.accuracy + '%</span>' +
+          '<span class="rp-count">' + h.total + ' 题</span>' +
+          '<span class="rp-time">' + formatRelativeTime(h.time) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rp-arrow">›</div>' +
+    '</div>';
+  }).join('');
+
+  return head +
+    '<div id="rpList">' + items + '</div>' +
+    '<div id="rpDetail" style="display:none"></div>' +
+    '</div>';
+}
+
+function showPracticeDetail(i) {
+  const data = loadData();
+  const h = (data.history || [])[i];
+  if (!h) return;
+  const listEl = document.getElementById('rpList');
+  const detEl = document.getElementById('rpDetail');
+  if (!listEl || !detEl) return;
+  const isCn = (h.module || '数学') === '语文';
+  const acc = h.accuracy != null ? h.accuracy : (h.total ? Math.round(h.score / h.total * 100) : 0);
+  const wrongs = Array.isArray(h.wrong) ? h.wrong : [];
+  const wrongHtml = wrongs.length
+    ? wrongs.map(w => {
+        const q = w.question || {};
+        const passage = q.passage ? '<div class="rp-passage">' + esc(q.passage) + '</div>' : '';
+        const opts = (Array.isArray(q.options) && q.options.length)
+          ? '<div class="rp-opts">' + q.options.map((o, idx) => {
+              const oStr = String(o);
+              const isAns = (oStr === String(q.answer)) || (oStr.indexOf(String(q.answer) + '.') === 0);
+              return '<div class="rp-opt' + (isAns ? ' rp-opt-ans' : '') + '">' + String.fromCharCode(65 + idx) + '. ' + esc(o) + (isAns ? ' ✓' : '') + '</div>';
+            }).join('') + '</div>'
+          : '';
+        const svg = q.svg ? '<div class="rp-svg">' + q.svg + '</div>' : '';
+        const explain = q.explain ? '<div class="rp-explain">解析：' + esc(q.explain) + '</div>' : '';
+        return '<div class="rp-wrong-item">' +
+          passage +
+          '<div class="rp-wq">' + esc(q.question || '') + '</div>' +
+          svg + opts +
+          '<div class="rp-ans-row"><span class="rp-ua">你的答案：' + esc(w.userAnswer) + '</span><span class="rp-ca">正确答案：' + esc(q.answer) + '</span></div>' +
+          explain +
+        '</div>';
+      }).join('')
+    : '<div class="rp-dim">本次练习全部答对，没有错题 🎉</div>';
+
+  detEl.innerHTML =
+    '<div class="rp-detail-head">' +
+      '<button class="rp-back" onclick="hidePracticeDetail()">‹ 返回</button>' +
+      '<div class="rp-detail-title">' + (isCn ? '语文' : '数学') + (h.grade ? ' · ' + h.grade + '年级' : '') + '</div>' +
+    '</div>' +
+    '<div class="rp-detail-unit">' + esc(h.unitName || '') + '</div>' +
+    '<div class="rp-summary">' +
+      '<span>正确率 <b class="' + (acc >= 80 ? 'rp-acc-ok' : acc >= 60 ? 'rp-acc-mid' : 'rp-acc-low') + '">' + acc + '%</b></span>' +
+      '<span>答对 ' + (h.score || 0) + '/' + (h.total || 0) + ' 题</span>' +
+      '<span>' + formatFullTime(h.time) + '</span>' +
+    '</div>' +
+    '<div class="rp-section-title">答题情况</div>' +
+    '<div class="rp-overview">' +
+      '<div class="rp-ov"><div class="rp-ov-v">' + (h.total || 0) + '</div><div class="rp-ov-l">练习题数</div></div>' +
+      '<div class="rp-ov"><div class="rp-ov-v">' + (h.score || 0) + '</div><div class="rp-ov-l">答对</div></div>' +
+      '<div class="rp-ov"><div class="rp-ov-v">' + wrongs.length + '</div><div class="rp-ov-l">错题</div></div>' +
+    '</div>' +
+    '<div class="rp-section-title">错题汇总（' + wrongs.length + '）</div>' +
+    wrongHtml;
+  listEl.style.display = 'none';
+  detEl.style.display = 'block';
+}
+
+function hidePracticeDetail() {
+  const listEl = document.getElementById('rpList');
+  const detEl = document.getElementById('rpDetail');
+  if (listEl) listEl.style.display = 'block';
+  if (detEl) { detEl.style.display = 'none'; detEl.innerHTML = ''; }
 }
