@@ -35,20 +35,37 @@ w.document.dispatchEvent(new w.Event('DOMContentLoaded', { bubbles: true }));
 w.dispatchEvent(new w.Event('load'));
 
 // === 测试 1: 直接调用 g6_mul 100 次，检查答案正确性 ===
+// v47 起：分数乘法答案为最简分数形式（如 3/2、2），不再用小数截断
+function gcdOf(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { let t = a % b; a = b; b = t; } return a || 1; }
+function fracExpected(num, den) {
+  const g = gcdOf(num, den);
+  let n = num / g, d = den / g;
+  if (d === 1) return String(n);
+  return `${n}/${d}`;
+}
+function parseFracAnswer(s) {
+  // "3/2" → 1.5；"2" → 2；其他 → NaN
+  const m = String(s).match(/^(-?\d+)\/(\d+)$/);
+  if (m) return parseInt(m[1]) / parseInt(m[2]);
+  const n = parseFloat(s);
+  return isNaN(n) ? NaN : n;
+}
 let total = 0, wrong = 0, samples = [];
 for (let i = 0; i < 100; i++) {
   const q = w.eval('g6_mul()');
   if (!q || !q.question) continue;
   total++;
-  // 解析题面 "a/b×c=？" 
+  // 解析题面 "a/b×c=？"
   const m = q.question.match(/^(\d+)\/(\d+)×(\d+)=？/);
   if (!m) { wrong++; samples.push({ q: q.question, a: q.answer, reason: '无法解析题面' }); continue; }
   const a = parseInt(m[1]), b = parseInt(m[2]), c = parseInt(m[3]);
-  const expected = +(a / b * c).toFixed(1);
-  const actual = parseFloat(q.answer);
-  if (Math.abs(expected - actual) > 0.01) {
+  const expected = a / b * c;                    // 数值期望
+  const expectedStr = fracExpected(a * c, b);    // 最简分数形式期望
+  const actual = parseFracAnswer(q.answer);
+  const formOk = String(q.answer) === expectedStr;   // 形式必须为最简分数
+  if (!(Math.abs(expected - actual) < 0.01) || !formOk) {
     wrong++;
-    if (samples.length < 5) samples.push({ q: q.question, expected, actual: q.answer });
+    if (samples.length < 5) samples.push({ q: q.question, expected: expectedStr, actual: q.answer });
   }
 }
 const pass = total - wrong;
@@ -69,9 +86,9 @@ for (let i = 0; i < 10; i++) {
     if (m) {
       examTotal++;
       const a = parseInt(m[1]), b = parseInt(m[2]), c = parseInt(m[3]);
-      const expected = +(a / b * c).toFixed(1);
-      const actual = parseFloat(q.answer);
-      if (Math.abs(expected - actual) > 0.01) examWrong++;
+      const expected = a / b * c;
+      const actual = parseFracAnswer(q.answer);
+      if (!(Math.abs(expected - actual) < 0.01)) examWrong++;
     }
   });
 }

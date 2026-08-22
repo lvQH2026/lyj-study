@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v46：修复 g6_mul 分数乘法答案 bug（ri()多次调用导致题干乘数≠答案乘数，77%错答率）
-const CACHE = 'lyj-shell-v46';
+// v47：数学 5/6 年级期中期末试卷全面整改——图形套件重绘（黛蓝/香槟金制图风格：直角标记·虚线高·隐藏棱·数据标签·图例）、解题步骤分题型完整推导、分数答案约分、概念题清出计算/应用区、配图保底修复、mc/msc 负数答案死循环修复
+const CACHE = 'lyj-shell-v47';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

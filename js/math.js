@@ -5531,6 +5531,15 @@ const KNOWLEDGE_BASE = {
 // --- 工具函数 ---
 function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pick(arr) { return arr[ri(0, arr.length - 1)]; }
+// 最大公约数（约分用）
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { let t = a % b; a = b; b = t; } return a || 1; }
+// 约分成分数形式：返回 '2'（整数）或 '2/3'（最简分数）
+function fracStr(num, den) {
+  let g = gcd(num, den);
+  num /= g; den /= g;
+  if (den === 1) return String(num);
+  return num + '/' + den;
+}
 function fmt(n) {
   if (typeof n === 'string') return n;
   n = Number(n);
@@ -5592,6 +5601,140 @@ function svgC(cx,cy,r,f){return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${
 function svgL(x1,y1,x2,y2,s,w){w=w||2;return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${s||'#333'}" stroke-width="${w}" stroke-linecap="round"/>`}
 function svgTri(x1,y1,x2,y2,x3,y3,f){return `<polygon points="${x1},${y1} ${x2},${y2} ${x3},${y3}" fill="${f||'#81C784'}" stroke="#333" stroke-width="2"/>`}
 function svgTxt(x,y,txt,sz,c){sz=sz||12;c=c||'#333';return `<text x="${x}" y="${y}" text-anchor="middle" font-size="${sz}" fill="${c}">${txt}</text>`}
+// ===== 试卷图形绘制套件（统一制图风格：黛蓝描边 #3E4A63 · 香槟金标注 #B4945A · 柔和填充） =====
+const FIG_STROKE='#3E4A63', FIG_GOLD='#B4945A';
+const FIG_FILL='rgba(180,148,90,0.16)', FIG_FILL2='rgba(62,74,99,0.10)';
+function figLabel(x,y,txt,c){return `<text x="${x}" y="${y}" text-anchor="middle" font-size="9" font-weight="600" fill="${c||FIG_GOLD}">${txt}</text>`}
+function figDot(x,y,c){return `<circle cx="${x}" cy="${y}" r="1.4" fill="${c||FIG_STROKE}"/>`}
+// 直角标记：顶点 (vx,vy)，沿 x 方向 dx、y 方向 dy（±1），边长 s
+function figRightAngle(vx,vy,dx,dy,s){s=s||7;return `<path d="M ${vx+dx*s} ${vy} L ${vx+dx*s} ${vy+dy*s} L ${vx} ${vy+dy*s}" fill="none" stroke="${FIG_STROKE}" stroke-width="1.2"/>`}
+// 直角三角形：底 b cm × 高 h cm，含直角标记 + 顶点点 + 底高标注
+function figRightTri(b,h){
+  const bw=Math.min(88,b*8), hh=Math.min(56,h*8), x0=16,y0=80;
+  let s=`<polygon points="${x0},${y0} ${x0+bw},${y0} ${x0},${y0-hh}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  s+=figRightAngle(x0,y0,1,-1);
+  s+=figDot(x0,y0)+figDot(x0+bw,y0)+figDot(x0,y0-hh);
+  s+=figLabel(x0+bw/2,y0+11,b+'cm');
+  s+=figLabel(x0-11,y0-hh/2,h+'cm');
+  return s;
+}
+// 平行四边形：底 b × 高 h，含虚线高 + 直角标记
+function figPara(b,h){
+  const bw=Math.min(76,b*7), hh=Math.min(46,h*7), x0=22,y0=82, sl=15;
+  let s=`<polygon points="${x0},${y0} ${x0+bw},${y0} ${x0+bw+sl},${y0-hh} ${x0+sl},${y0-hh}" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  const hx=x0+Math.round(bw*0.6)+sl;
+  s+=`<line x1="${hx}" y1="${y0-hh}" x2="${hx}" y2="${y0}" stroke="${FIG_GOLD}" stroke-width="1.3" stroke-dasharray="3 2.5"/>`;
+  s+=`<path d="M ${hx-6} ${y0} L ${hx-6} ${y0-6} L ${hx} ${y0-6}" fill="none" stroke="${FIG_STROKE}" stroke-width="1.1"/>`;
+  s+=figLabel(x0+bw/2,y0+11,b+'cm');
+  s+=figLabel(hx+9,(y0-hh/2),h+'cm');
+  return s;
+}
+// 梯形：上底 a × 下底 b × 高 h
+function figTrap(a,b,h){
+  const bw=Math.min(84,b*7), tw=Math.min(56,a*7), hh=Math.min(42,h*7), x0=17,y0=82;
+  const tx1=x0+(bw-tw)/2, tx2=x0+(bw+tw)/2;
+  let s=`<polygon points="${x0},${y0} ${x0+bw},${y0} ${tx2},${y0-hh} ${tx1},${y0-hh}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  s+=figLabel(x0+bw/2,y0+11,b+'cm');
+  s+=figLabel((tx1+tx2)/2,y0-hh-5,a+'cm');
+  s+=`<line x1="${tx1}" y1="${y0-hh}" x2="${tx1}" y2="${y0}" stroke="${FIG_GOLD}" stroke-width="1.3" stroke-dasharray="3 2.5"/>`;
+  s+=`<path d="M ${tx1} ${y0-6} L ${tx1+6} ${y0-6} L ${tx1+6} ${y0}" fill="none" stroke="${FIG_STROKE}" stroke-width="1.1"/>`;
+  s+=figLabel(tx1-10,y0-hh/2,h+'cm');
+  return s;
+}
+// 圆：柔和填充 + 半径线（圆心→圆周，与 r 标注语义一致）+ 圆心 O
+function figCircle(r){
+  const cx=60,cy=52,R=r*7;
+  let s=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`;
+  s+=`<line x1="${cx}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="${FIG_GOLD}" stroke-width="1.6"/>`;
+  s+=figDot(cx,cy)+figDot(cx+R,cy);
+  s+=`<text x="${cx}" y="${cy+13}" text-anchor="middle" font-size="9" fill="${FIG_STROKE}">O</text>`;
+  s+=`<text x="${cx+R/2}" y="${cy-4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="${FIG_GOLD}">r=${r}</text>`;
+  return s;
+}
+// 扇形统计图：parts=[[名称,百分比,颜色],...]，含百分比标签 + 图例
+function figPie(parts){
+  const cx=52,cy=52,R=33; let ang=-90, s='';
+  parts.forEach(p=>{
+    const a2=ang+p[1]/100*360, large=p[1]>50?1:0;
+    const r1=ang*Math.PI/180, r2=a2*Math.PI/180;
+    const x1=(cx+R*Math.cos(r1)).toFixed(1), y1=(cy+R*Math.sin(r1)).toFixed(1);
+    const x2=(cx+R*Math.cos(r2)).toFixed(1), y2=(cy+R*Math.sin(r2)).toFixed(1);
+    s+=`<path d="M ${cx},${cy} L ${x1},${y1} A ${R},${R} 0 ${large} 1 ${x2},${y2} Z" fill="${p[2]}" stroke="#F7F6F2" stroke-width="1.5" stroke-linejoin="round"/>`;
+    const rm=(r1+r2)/2, lx=(cx+R*0.62*Math.cos(rm)).toFixed(1), ly=(cy+R*0.62*Math.sin(rm)).toFixed(1);
+    s+=`<text x="${lx}" y="${(+ly+3).toFixed(1)}" text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff">${p[1]}%</text>`;
+    ang=a2;
+  });
+  s+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${FIG_STROKE}" stroke-width="1.6"/>`;
+  let ly=16;
+  parts.forEach(p=>{ s+=`<rect x="92" y="${ly-7}" width="8" height="8" rx="1.5" fill="${p[2]}"/><text x="104" y="${ly}" font-size="8" fill="${FIG_STROKE}">${p[0]}</text>`; ly+=13; });
+  return s;
+}
+// 折线统计图：含网格、刻度、数据点与数值标签
+function figLineChart(data,unit){
+  const x0=24,y0=84,W=84,H=54;
+  const xs=data.map((_,i)=>x0+i*(W/(data.length-1)));
+  const mn=Math.min.apply(null,data)-2, mx=Math.max.apply(null,data)+2;
+  const ys=data.map(v=>y0-(v-mn)/(mx-mn)*H);
+  let s='';
+  for(let g=0;g<=3;g++){const gy=(y0-g*H/3).toFixed(1), gv=Math.round(mn+g/3*(mx-mn));
+    s+=`<line x1="${x0}" y1="${gy}" x2="${x0+W}" y2="${gy}" stroke="rgba(62,74,99,0.12)" stroke-width="0.8"/>`;
+    s+=`<text x="${x0-4}" y="${+gy+3}" text-anchor="end" font-size="7" fill="#8A93A6">${gv}</text>`;}
+  s+=`<line x1="${x0}" y1="${y0}" x2="${x0+W+8}" y2="${y0}" stroke="${FIG_STROKE}" stroke-width="1.6"/>`;
+  s+=`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y0-H-8}" stroke="${FIG_STROKE}" stroke-width="1.6"/>`;
+  s+=`<polyline points="${xs.map((x,i)=>x.toFixed(1)+','+ys[i].toFixed(1)).join(' ')}" fill="none" stroke="${FIG_GOLD}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  xs.forEach((x,i)=>{ s+=`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="2.2" fill="#fff" stroke="${FIG_GOLD}" stroke-width="1.6"/>`;
+    s+=`<text x="${x.toFixed(1)}" y="${(ys[i]-5).toFixed(1)}" text-anchor="middle" font-size="7" font-weight="600" fill="${FIG_STROKE}">${data[i]}${unit||''}</text>`; });
+  const wk=['一','二','三','四','五','六','日'];
+  xs.forEach((x,i)=>{ s+=`<text x="${x.toFixed(1)}" y="${y0+10}" text-anchor="middle" font-size="7" fill="#8A93A6">${wk[i]||''}</text>`; });
+  return s;
+}
+// 正方体：三个可见面 + 隐藏棱虚线
+function figCube(){
+  const s0=38,dx=16,dy=12,x0=34,y0=30;
+  let s=`<polygon points="${x0},${y0} ${x0+s0},${y0} ${x0+s0},${y0+s0} ${x0},${y0+s0}" fill="rgba(62,74,99,0.10)" stroke="${FIG_STROKE}" stroke-width="1.7" stroke-linejoin="round"/>`;
+  s+=`<polygon points="${x0},${y0} ${x0+dx},${y0-dy} ${x0+s0+dx},${y0-dy} ${x0+s0},${y0}" fill="rgba(180,148,90,0.20)" stroke="${FIG_STROKE}" stroke-width="1.7" stroke-linejoin="round"/>`;
+  s+=`<polygon points="${x0+s0},${y0} ${x0+s0+dx},${y0-dy} ${x0+s0+dx},${y0-dy+s0} ${x0+s0},${y0+s0}" fill="rgba(180,148,90,0.32)" stroke="${FIG_STROKE}" stroke-width="1.7" stroke-linejoin="round"/>`;
+  s+=`<line x1="${x0}" y1="${y0+s0}" x2="${x0+dx}" y2="${y0+s0-dy}" stroke="${FIG_STROKE}" stroke-width="1.2" stroke-dasharray="3 2.5"/>`;
+  s+=`<line x1="${x0+dx}" y1="${y0+s0-dy}" x2="${x0+s0+dx}" y2="${y0+s0-dy}" stroke="${FIG_STROKE}" stroke-width="1.2" stroke-dasharray="3 2.5"/>`;
+  s+=`<line x1="${x0+dx}" y1="${y0-dy}" x2="${x0+dx}" y2="${y0+s0-dy}" stroke="${FIG_STROKE}" stroke-width="1.2" stroke-dasharray="3 2.5"/>`;
+  return s;
+}
+// 圆柱：柔润立体感 + 底面后半弧虚线
+function figCylinder(){
+  const cx=60,top=22,bot=80,rx=26,ry=9;
+  let s=`<path d="M ${cx-rx},${top} L ${cx-rx},${bot} A ${rx} ${ry} 0 0 0 ${cx+rx},${bot} L ${cx+rx},${top}" fill="rgba(180,148,90,0.16)" stroke="none"/>`;
+  s+=`<line x1="${cx-rx}" y1="${top}" x2="${cx-rx}" y2="${bot}" stroke="${FIG_STROKE}" stroke-width="1.7"/>`;
+  s+=`<line x1="${cx+rx}" y1="${top}" x2="${cx+rx}" y2="${bot}" stroke="${FIG_STROKE}" stroke-width="1.7"/>`;
+  s+=`<ellipse cx="${cx}" cy="${bot}" rx="${rx}" ry="${ry}" fill="rgba(62,74,99,0.10)" stroke="${FIG_STROKE}" stroke-width="1.7"/>`;
+  s+=`<ellipse cx="${cx}" cy="${top}" rx="${rx}" ry="${ry}" fill="rgba(62,74,99,0.10)" stroke="${FIG_STROKE}" stroke-width="1.7"/>`;
+  s+=`<path d="M ${cx-rx},${bot} A ${rx} ${ry} 0 0 1 ${cx+rx},${bot}" fill="none" stroke="${FIG_STROKE}" stroke-width="1.1" stroke-dasharray="3 2.5"/>`;
+  return s;
+}
+// 圆锥：顶点 + 底面椭圆 + 隐藏弧虚线 + 高虚线
+function figCone(){
+  const cx=60,apex=14,base=80,rx=27,ry=9;
+  let s=`<path d="M ${cx},${apex} L ${cx-rx},${base} A ${rx} ${ry} 0 0 0 ${cx+rx},${base} Z" fill="rgba(180,148,90,0.16)" stroke="none"/>`;
+  s+=`<line x1="${cx}" y1="${apex}" x2="${cx-rx}" y2="${base}" stroke="${FIG_STROKE}" stroke-width="1.7"/>`;
+  s+=`<line x1="${cx}" y1="${apex}" x2="${cx+rx}" y2="${base}" stroke="${FIG_STROKE}" stroke-width="1.7"/>`;
+  s+=`<ellipse cx="${cx}" cy="${base}" rx="${rx}" ry="${ry}" fill="rgba(62,74,99,0.10)" stroke="${FIG_STROKE}" stroke-width="1.7"/>`;
+  s+=`<path d="M ${cx-rx},${base} A ${rx} ${ry} 0 0 1 ${cx+rx},${base}" fill="none" stroke="${FIG_STROKE}" stroke-width="1.1" stroke-dasharray="3 2.5"/>`;
+  s+=`<line x1="${cx}" y1="${apex}" x2="${cx}" y2="${base-ry}" stroke="${FIG_GOLD}" stroke-width="1.2" stroke-dasharray="3 2.5"/>`;
+  return s;
+}
+// 正方体 1-4-1 展开图：香槟金上下底 + 黛蓝侧面
+function figNet(){
+  const c=16,x0=26,y0=18;
+  const cell=(x,y,f)=>`<rect x="${x}" y="${y}" width="${c}" height="${c}" fill="${f}" stroke="${FIG_STROKE}" stroke-width="1.4" stroke-linejoin="round"/>`;
+  return cell(x0,y0,'rgba(180,148,90,0.28)')
+    +cell(x0-c,y0+c,'rgba(62,74,99,0.10)')+cell(x0,y0+c,'rgba(62,74,99,0.10)')+cell(x0+c,y0+c,'rgba(62,74,99,0.10)')+cell(x0+2*c,y0+c,'rgba(62,74,99,0.10)')
+    +cell(x0,y0+2*c,'rgba(180,148,90,0.28)')+cell(x0,y0+3*c,'rgba(180,148,90,0.28)');
+}
+// 正方形视图（俯视正方体）
+function figSquareView(){
+  const x0=36,y0=27,s0=46;
+  return `<rect x="${x0}" y="${y0}" width="${s0}" height="${s0}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`
+    +figDot(x0,y0)+figDot(x0+s0,y0)+figDot(x0,y0+s0)+figDot(x0+s0,y0+s0);
+}
 // 带箭头的线段：在 (x2,y2) 处绘制三角箭头头部
 function svgArrow(x1,y1,x2,y2,col,w){
   col=col||'#E53935'; w=w||4;
@@ -6326,13 +6469,14 @@ function g4_angle_special(){
 // ---- 选择题/填空题工厂 ----
 function mc(q,a,d){
   let o=[fmt(a),...d.map(d=>fmt(d))].filter((v,i,A)=>A.indexOf(v)===i).slice(0,4);
-  while(o.length<4){let n=parseFloat(a); if(!isNaN(n)){let x=n+ri(-8,8); if(x>=0&&o.indexOf(fmt(x))<0)o.push(fmt(x))}else o.push('选项'+String.fromCharCode(65+o.length))}
+  while(o.length<4){let n=parseFloat(a); if(!isNaN(n)){let x=n+ri(-8,8); let ok=(n>=0)?(x>=0):true; if(ok&&o.indexOf(fmt(x))<0)o.push(fmt(x))}else o.push('选项'+String.fromCharCode(65+o.length))}
   o.sort(()=>Math.random()-0.5);
   return {type:'choice',question:q,options:o,answer:fmt(a)};
 }
 function mf(q,a){return {type:'fill',question:q,answer:fmt(a)}}
 function msc(q,svg,a,d){
   let o=[fmt(a),...d.map(d=>fmt(d))].filter((v,i,A)=>A.indexOf(v)===i).slice(0,4);
+  while(o.length<4){let n=parseFloat(a); if(!isNaN(n)){let x=n+ri(-8,8); let ok=(n>=0)?(x>=0):true; if(ok&&o.indexOf(fmt(x))<0)o.push(fmt(x))}else o.push('选项'+String.fromCharCode(65+o.length))}
   o.sort(()=>Math.random()-0.5);
   return {type:'shape_choice',question:q,svg:svg,options:o,answer:fmt(a)};
 }
@@ -6829,11 +6973,28 @@ function g5_mul(){let a=ri(1,5)+ri(1,9)/10,b=ri(2,5);return mf(`${fmt(a)}×${b}=
 function g5_div(){let a=ri(5,20),b=ri(2,5);return mc(`${fmt(a)}÷${b}=？`,fmt(+(a/b).toFixed(2)),[fmt(+(a/b+0.5).toFixed(1)),fmt(+(a/b-0.3).toFixed(1))])}
 function g5_equation(){let a=ri(10,30),b=ri(3,9);return mf(`解方程：3x+${b}=${a}, x=？`,(a-b)/3)}
 function g5_area(){
-  let b=ri(5,12),h=ri(4,8);
-  let tri=`<polygon points="10,${14+h*8} 10,14 ${10+b*8},${14+h*8}" fill="#FFE0B2" stroke="#333" stroke-width="2"/>`+svgTxt(10+b*4,14+h*8+12,b+'cm',9)+svgTxt(3,14+h*4,h+'cm',9);
+  // 图形多样化：直角三角形 / 平行四边形 / 梯形，配专业制图（直角标记·虚线高·标注）
+  let kind=ri(0,2);
+  if(kind===0){
+    let b=ri(5,12),h=ri(4,8);
+    let items=[
+      {s:figRightTri(b,h),q:`图中直角三角形的底是${b}cm、高是${h}cm，它的面积是多少平方厘米？`,a:fmt(b*h/2),d:[fmt(b*h),fmt(b*h/3),fmt((b+h)/2)]},
+      {q:`一个直角三角形的底是${b}cm、高是${h}cm，面积是多少平方厘米？`,a:fmt(b*h/2),d:[fmt(b*h),fmt(b*h/3),fmt((b+h)/2)]},
+    ];
+    let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+  }
+  if(kind===1){
+    let b=ri(6,12),h=ri(4,8);
+    let items=[
+      {s:figPara(b,h),q:`图中平行四边形的底是${b}cm、高是${h}cm，它的面积是多少平方厘米？`,a:fmt(b*h),d:[fmt(b*h*2),fmt((b+h)/2),fmt(b+h)]},
+      {q:`一个平行四边形的底是${b}cm、高是${h}cm，面积是多少平方厘米？`,a:fmt(b*h),d:[fmt(b*h*2),fmt((b+h)/2),fmt(b+h)]},
+    ];
+    let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+  }
+  let a=ri(3,7),b=ri(8,14),h=ri(4,8);
   let items=[
-    {s:tri,q:`图中直角三角形底${b}cm、高${h}cm，面积是多少？`,a:fmt(b*h/2),d:[fmt(b*h),fmt(b*h/3)]},
-    {q:`三角形底${b}cm、高${h}cm，面积是多少？`,a:fmt(b*h/2),d:[fmt(b*h),fmt(b*h/3)]},
+    {s:figTrap(a,b,h),q:`图中梯形的上底是${a}cm、下底是${b}cm、高是${h}cm，它的面积是多少平方厘米？`,a:fmt((a+b)*h/2),d:[fmt((a+b)*h),fmt(a*b*h/2),fmt((b-a)*h/2)]},
+    {q:`一个梯形的上底是${a}cm、下底是${b}cm、高是${h}cm，面积是多少平方厘米？`,a:fmt((a+b)*h/2),d:[fmt((a+b)*h),fmt(a*b*h/2),fmt((b-a)*h/2)]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -6871,8 +7032,11 @@ function g5_observe(){
     {q:'从上面看一个圆柱，看到的形状是？',a:'圆形',d:['长方形','正方形','三角形']},
     {q:'从侧面看一个球体，看到的形状是？',a:'圆形',d:['正方形','长方形','三角形']},
     {q:'从正面看一个长方体，通常看到的是？',a:'长方形',d:['正方形','圆形','三角形']},
+    {s:figSquareView(),q:'从上往下看一个正方体，看到的形状是？',a:'正方形',d:['长方形','圆形','三角形']},
+    {s:`<circle cx="60" cy="50" r="30" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`+figDot(60,50),q:'从上面看一个圆柱，看到的形状是？',a:'圆形',d:['正方形','长方形','梯形']},
+    {s:`<rect x="33" y="30" width="54" height="42" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.8" stroke-linejoin="round"/>`+figDot(33,30)+figDot(87,30)+figDot(33,72)+figDot(87,72),q:'从正面看一个圆柱（竖放），看到的形状是？',a:'长方形',d:['圆形','正方形','梯形']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g5_factor(){
   let items=[
@@ -6892,7 +7056,11 @@ function g5_fraction(){
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
-function g5_fraction_calc(){let a=ri(1,4);return mc(`1/${a}+1/${a}=？`,`2/${a}`,[`1/${a}`,`2/${a*2}`])}
+function g5_fraction_calc(){
+  let a=ri(2,8);
+  let ans=fracStr(2, a);   // 2/a 约分（2/2→1、2/4→1/2、2/6→1/3）
+  return mc(`1/${a}+1/${a}=？`, ans, [`2/${a}`, `1/${a}`, `1/${a*2}`].filter(x => x !== ans));
+}
 function g5_shape3(){
   let items=[
     {q:'一个图形旋转90度后，什么不变？',a:'大小和形状',d:['位置','方向','颜色']},
@@ -6902,10 +7070,13 @@ function g5_shape3(){
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g5_line(){
-  let lineSvg=`<polyline points="10,80 30,60 50,65 70,40 90,30" fill="none" stroke="#E53935" stroke-width="2"/><line x1="10" y1="85" x2="95" y2="85" stroke="#333"/><line x1="10" y1="10" x2="10" y2="85" stroke="#333"/>`;
+  const temps=[24,26,23,28,30,27,25];
+  const chart=figLineChart(temps,'℃');
   let items=[
-    {q:'折线统计图适合表示？',a:'变化趋势',d:['比例','绝对数值']},
-    {s:lineSvg,q:'上图折线统计图呈上升趋势，说明数量在？',a:'不断增加',d:['不断减少','保持不变','忽高忽低']},
+    {q:'折线统计图适合表示？',a:'数量的变化趋势',d:['各部分占总数的百分比','数量的具体多少','物体的形状大小']},
+    {s:chart,q:'上图是某地一周每天最高气温的折线统计图，星期几的气温最高？',a:'星期五',d:['星期一','星期三','星期日']},
+    {s:chart,q:'上图折线统计图中，从星期几到星期几气温上升得最快？',a:'星期三到星期四',d:['星期一到星期二','星期四到星期五','星期六到星期日']},
+    {s:chart,q:'上图折线统计图中，星期日比星期六的气温低多少摄氏度？',a:'2℃',d:['1℃','3℃','5℃']},
     {q:'要反映一周气温变化，一般用什么统计图？',a:'折线统计图',d:['条形统计图','扇形统计图','统计表']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
@@ -6920,21 +7091,22 @@ function g5_factor2(){
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g_shape_3d(){
-  let cube=`<rect x="35" y="35" width="34" height="34" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`+
-    `<rect x="47" y="23" width="34" height="34" fill="#90CAF9" stroke="#333" stroke-width="2"/>`+
-    `<line x1="35" y1="35" x2="47" y2="23" stroke="#333" stroke-width="2"/>`+
-    `<line x1="69" y1="35" x2="81" y2="23" stroke="#333" stroke-width="2"/>`+
-    `<line x1="69" y1="69" x2="81" y2="57" stroke="#333" stroke-width="2"/>`;
   let items=[
     {q:'正方体有几个面？',a:'6个',d:['4个','8个','12个']},
     {q:'正方体有几条棱？',a:'12条',d:['6条','8条','10条']},
-    {s:cube,q:'上图立体图形是什么？',a:'正方体',d:['长方体','圆柱','球']},
+    {q:'正方体各个面的形状都是？',a:'完全一样的正方形',d:['不一样的正方形','长方形','圆形']},
+    {s:figCube(),q:'上图立体图形是什么？',a:'正方体',d:['长方体','圆柱','四棱锥']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 
 // ===== 6年级 =====
-function g6_mul(){let a=ri(1,4),b=ri(2,5),c=ri(2,5);return mf(`${a}/${b}×${c}=？`,fmt(+(a/b*c).toFixed(1)))}
+function g6_mul(){
+  let a=ri(1,4), b=ri(2,5);
+  while (gcd(a, b) > 1) { a=ri(1,4); b=ri(2,5); }   // 题面用最简分数
+  let c=ri(2,5);
+  return mf(`${a}/${b}×${c}=？`, fracStr(a*c, b));
+}
 function g6_div(){let n=ri(6,15);return mc(`${n}÷(1/3)=？`,n*3,[n/3,n*2,n+3])}
 function g6_ratio(){
   let items=[
@@ -6947,10 +7119,11 @@ function g6_ratio(){
 }
 function g6_circle(){
   let r=ri(2,6);
-  let circ=`<circle cx="60" cy="50" r="${r*8}" fill="#FFE0B2" stroke="#333" stroke-width="2"/><line x1="${60-r*8}" y1="50" x2="${60+r*8}" y2="50" stroke="#E53935" stroke-width="1.5"/><text x="60" y="46" text-anchor="middle" font-size="9" fill="#333">r=${r}</text>`;
+  let circ=figCircle(r);
   let items=[
-    {q:'圆的周长公式是？',a:'C=2πr',d:['C=πr²','C=πd/2','C=πd']},
+    {q:'圆的周长公式是？',a:'C=2πr',d:['C=πr²','C=πr/2','C=4r']},
     {s:circ,q:`图中圆的半径r=${r}，它的周长约是多少？(π取3.14)`,a:fmt(+(2*3.14*r).toFixed(2)),d:[fmt(+(3.14*r*r).toFixed(2)),fmt(+(3.14*r).toFixed(2)),fmt(+(4*3.14*r).toFixed(2))]},
+    {s:circ,q:`图中圆的半径r=${r}，它的面积约是多少？(π取3.14)`,a:fmt(+(3.14*r*r).toFixed(2)),d:[fmt(+(2*3.14*r).toFixed(2)),fmt(+(3.14*r).toFixed(2)),fmt(+(6.28*r*r).toFixed(2))]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -6964,18 +7137,24 @@ function g6_percent(){
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g6_pie(){
-  let pie=`<circle cx="60" cy="50" r="38" fill="#fff" stroke="#333" stroke-width="2"/><path d="M60,50 L60,12 A38,38 0 0,1 96,70 Z" fill="#EF5350"/><path d="M60,50 L96,70 A38,38 0 0,1 40,86 Z" fill="#42A5F5"/><path d="M60,50 L40,86 A38,38 0 0,1 60,12 Z" fill="#FFCA28"/>`;
+  // 扇形统计图：真实数据 + 百分比标签 + 图例（可据图作答）
+  let pie=figPie([['乒乓球',30,'#B4945A'],['足球',25,'#3E4A63'],['跳绳',20,'#8FA3C4'],['其他',25,'#D8C9A8']]);
   let items=[
-    {q:'扇形统计图适合表示？',a:'各部分占整体的百分比',d:['变化趋势','绝对数值','时间序列']},
-    {s:pie,q:'从扇形统计图中能直接看出？',a:'各部分占整体的百分比',d:['各部分的具体数量','数量的变化趋势','最大值是多少']},
+    {q:'扇形统计图适合表示？',a:'各部分占整体的百分比',d:['数量的变化趋势','数量的具体多少','数量的增减']},
+    {s:pie,q:'上图是六(1)班同学最喜欢运动项目的扇形统计图，喜欢哪种项目的人数最多？',a:'乒乓球',d:['足球','跳绳','无法确定']},
+    {s:pie,q:'上图扇形统计图中，喜欢乒乓球的同学占全班人数的百分之几？',a:'30%',d:['25%','20%','35%']},
+    {s:pie,q:'上图扇形统计图中，喜欢足球和跳绳的同学一共占全班人数的百分之几？',a:'45%',d:['25%','30%','55%']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g6_negative(){
+  let a=ri(2,9), k=ri(3,9);
   let items=[
     {q:'比0小5的数是？',a:'-5',d:['5','0','-4']},
     {q:'海拔-100米表示？',a:'低于海平面100米',d:['高于海平面100米','海平面上100米','平地']},
     {q:'温度从3℃下降到-2℃，下降了？',a:'5℃',d:['1℃','2℃','3℃']},
+    {q:`-${a}+${a+k}=？`,a:String(k),d:[String(a),String(-k),'0']},
+    {q:`-8-${a}=？`,a:String(-8-a),d:[String(-a-6),String(a-8),'8']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -6985,14 +7164,20 @@ function g6_percent2(){
     {q:'75% = 几分之几（约分）？',a:'3/4',d:['75/100','3/10','1/4']},
     {q:'40% = 几分之几（约分）？',a:'2/5',d:['40/100','4/10','1/5']},
     {q:'60% = 几分之几（约分）？',a:'3/5',d:['60/100','6/10','2/5']},
+    {q:'把75%化成小数是？',a:'0.75',d:['7.5','0.075','75']},
+    {q:'把0.6化成百分数是？',a:'60%',d:['6%','0.6%','600%']},
+    {q:'一件商品原价200元，打九折后现价是多少元？',a:'180元',d:['90元','20元','190元']},
+    {q:'某班50人，出勤率是96%，出勤了多少人？',a:'48人',d:['46人','45人','49人']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g6_cylinder(){
-  let cyl=`<rect x="35" y="35" width="50" height="40" fill="#BBDEFB" stroke="#333" stroke-width="2"/><ellipse cx="60" cy="35" rx="25" ry="8" fill="#E3F2FD" stroke="#333" stroke-width="2"/><ellipse cx="60" cy="75" rx="25" ry="8" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`;
   let items=[
     {q:'圆柱有几个底面？',a:'2个',d:['1个','3个','0个']},
-    {s:cyl,q:'上图立体图形是什么？',a:'圆柱',d:['圆锥','长方体','球']},
+    {q:'圆柱的侧面沿高展开后是什么形状？',a:'长方形',d:['三角形','梯形','扇形']},
+    {q:'圆锥有几个底面？',a:'1个',d:['2个','0个','3个']},
+    {s:figCylinder(),q:'上图立体图形是什么？',a:'圆柱',d:['圆锥','长方体','球']},
+    {s:figCone(),q:'上图立体图形是什么？',a:'圆锥',d:['圆柱','四棱锥','球']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -7001,6 +7186,8 @@ function g6_proportion(){
     {q:'若a:b=c:d，则ad=?',a:'bc',d:['ac','bd','ab']},
     {q:'比例的基本性质是？',a:'两外项之积=两内项之积',d:['两外项之和=两内项之和','两外项之差=两内项之差','两外项之积=两内项之差']},
     {q:'2:3=4:x，则x=?',a:'6',d:['5','8','9']},
+    {q:'9:x=3:4，则x=?',a:'12',d:['9','8','15']},
+    {q:'0.5:0.2=x:4，则x=?',a:'10',d:['8','5','16']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -7009,24 +7196,29 @@ function g6_stats(){
     {q:'平均数反映数据的？',a:'总体一般水平（集中趋势）',d:['最大值','最小值','离散程度']},
     {q:'要表示一组数据的多数情况，一般用？',a:'众数',d:['平均数','最大数','最小数']},
     {q:'一组数据按大小排列，处在最中间位置的数叫？',a:'中位数',d:['平均数','众数','最大数']},
+    {q:'数据3、5、7、8、12的平均数是？',a:'7',d:['5','8','35']},
+    {q:'数据2、4、4、6、9的中位数是？',a:'4',d:['5','6','2']},
+    {q:'数据7、7、7、8、9的众数是？',a:'7',d:['8','9','7.6']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g6_review(){
+  let r=ri(2,6);
   let items=[
     {q:'48和36的最大公因数是？',a:'12',d:['6','8','18']},
     {q:'100以内最大的质数是？',a:'97',d:['99','91','95']},
     {q:'一个圆的半径扩大2倍，面积扩大？',a:'4倍',d:['2倍','3倍','不变']},
     {q:'把3/4化成小数是？',a:'0.75',d:['0.34','0.25','0.5']},
+    {s:figCircle(r),q:`总复习：求图中圆的面积。(π取3.14)`,a:fmt(+(3.14*r*r).toFixed(2)),d:[fmt(+(2*3.14*r).toFixed(2)),fmt(+(3.14*r).toFixed(2)),fmt(+(6.28*r*r).toFixed(2))]},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 // 周长应用题（三上）：长方形的周长 = (长+宽)×2，标签与内容一致
 function g_app_perimeter(){
   let w=ri(4,15), h=ri(3,12);
-  let W=Math.min(w*9,90), H=Math.max(h*8,28);
+  let W=Math.min(w*9,90), H=Math.max(Math.min(h*8,56),28);
   return msc(`一个长方形花坛长${w}米、宽${h}米，沿着它的边走一圈是多少米？（求周长）`,
-    svgR(12,16,W,H,'#BBDEFB')+svgTxt(12+W/2,10,w+'米',9)+svgTxt(4,16+H/2,h+'米',9),
+    `<rect x="12" y="16" width="${W}" height="${H}" fill="rgba(180,148,90,0.16)" stroke="#3E4A63" stroke-width="1.8" stroke-linejoin="round"/>`+figDot(12,16)+figDot(12+W,16)+figDot(12,16+H)+figDot(12+W,16+H)+figLabel(12+W/2,10,w+'米')+figLabel(4,16+H/2,h+'米'),
     String(2*(w+h)),[String(w+h),String(w*h),String(2*(w+h)-1)]);
 }
 function g_app_ratio(){
@@ -7040,18 +7232,19 @@ function g_app_chicken_rabbit(){
 }
 function g_app_planting(){let l=ri(30,100),g=ri(3,8);return mc(`一条路长${l}米，每隔${g}米种一棵树，共几棵？`,l/g+1,[l/g,l/g-1])}
 function g_shape_expand(){
-  let net=`<rect x="40" y="10" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="22" y="28" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="40" y="28" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="58" y="28" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="40" y="46" width="18" height="18" fill="#BBDEFB" stroke="#333"/><rect x="40" y="64" width="18" height="18" fill="#BBDEFB" stroke="#333"/>`;
+  let net=figNet();
   let items=[
     {q:'正方体的展开图由几个正方形组成？',a:'6个',d:['4个','8个','12个']},
-    {s:net,q:'上图（6个正方形组成的十字形）可能是哪个立体图形的展开图？',a:'正方体',d:['长方体','圆锥','圆柱']},
+    {s:net,q:'上图是一个立体图形的展开图，它可能是什么立体图形？',a:'正方体',d:['长方体','圆锥','圆柱']},
+    {q:'圆柱的侧面展开图是长方形时，长方形的长等于圆柱的什么？',a:'底面周长',d:['底面半径','高','底面积']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g_shape_view(){
-  let top=`<rect x="35" y="35" width="40" height="40" fill="#BBDEFB" stroke="#333" stroke-width="2"/>`;
   let items=[
     {q:'从上面看一个正方体，看到的形状是？',a:'正方形',d:['长方形','三角形','圆形']},
-    {s:top,q:'从上往下看一个正方体，看到的是？',a:'正方形',d:['长方形','圆形','三角形']},
+    {s:figSquareView(),q:'从上往下看一个正方体，看到的是？',a:'正方形',d:['长方形','圆形','三角形']},
+    {s:`<circle cx="60" cy="50" r="30" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`+figDot(60,50),q:'从上面看一个圆柱，看到的是？',a:'圆形',d:['正方形','长方形','梯形']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -8177,8 +8370,13 @@ function isNumericAnswer(ans) {
 }
 
 // 是否为"文字叙述型"题目（应用题特征）
-function isWordyQuestion(q) {
-  let t = q.question || '';
+// 概念/辨析题判定：题面是概念问答而非计算/应用（如「25%=几分之几」「用什么统计图」「…表示什么」）
+function isConceptOnly(q) {
+  let t = (q.question || '');
+  if (/^[\d.]+[+\-×÷][\d.]+=?？$/.test(t.replace(/\s/g,''))) return false; // 纯算式不算
+  return /几分之几|是什么|叫什么|表示|适合|看到的是|看到的形状|几个面|几条棱|几个底面|可能性|等于多少度|公式是|用什么统计图|统计图|几个正方形|组成|打八折|是原价的|时间间隔/.test(t);
+}
+function isWordyQuestion(q) {  let t = q.question || '';
   return t.length >= 14 && /[，,。？?、；]/.test(t);
 }
 
@@ -8268,10 +8466,11 @@ function pickFromPool(pool, used, n, scorer) {
 // 各分区的选题打分器
 function getSectionScorer(key) {
   if (key === 'app') {
-    // 应用题：优先带生活情境的文字题
+    // 应用题：优先带生活情境的文字题；概念/辨析题一律不进应用区
     return q => {
       let wordy = isWordyQuestion(q);
       let appLike = isApplicationLike(q);
+      if (isConceptOnly(q)) return 0.05;              // 概念题不占 6 分应用位
       if (appLike && wordy && q._unitType === 'application') return 14;
       if (appLike && wordy) return 11;
       if (appLike) return 8;
@@ -8281,9 +8480,10 @@ function getSectionScorer(key) {
     };
   }
   if (key === 'calc') {
-    // 计算题：优先纯算式，答案必须是数
+    // 计算题：优先纯算式，答案必须是数；概念/互化/辨析题降权
     return q => {
       if (!isNumericAnswer(q.answer)) return 0.2;
+      if (isConceptOnly(q)) return 0.4;               // 「25%=几分之几」等概念互化题不进计算区
       if (isPureExpression(q)) return 12;
       if (/[+\-×÷=]/.test(q.question) && !isWordyQuestion(q)) return 8;
       if (q._unitType === 'basic' && !isWordyQuestion(q)) return 5;
@@ -8324,52 +8524,173 @@ function getSectionScorer(key) {
 function generateSteps(q) {
   let t = (q.question || '').replace(/\s/g,'');
   let ans = q.answer !== undefined ? String(q.answer) : '';
-  // 提取算式数字
-  let nums = (t.match(/(\d+\.?\d*)/g) || []).map(Number).filter(n => !isNaN(n));
-  let hasPlus = /\+/.test(t), hasMinus = /-/.test(t), hasMul = /[×xX\*]/.test(t), hasDiv = /[÷\/]/.test(t);
+  let m;
 
-  // 应用题：提取核心算式 + 答
-  if (q.sectionTitle && q.sectionTitle.includes('应用')) {
-    let steps = [];
-    if (hasPlus) steps.push(`由题意可知，需要做加法：${nums[0]} + ${nums[1]} = ${Number(nums[0]) + Number(nums[1])}`);
-    else if (hasMinus) steps.push(`由题意可知，需要做减法：${Math.max(...nums)} - ${Math.min(...nums)} = ${Number(Math.max(...nums)) - Number(Math.min(...nums))}`);
-    else if (hasMul) {
-      let [a,b] = nums.slice(0,2);
-      steps.push(`由题意可知，需要做乘法：${a} × ${b} = ${a*b}`);
-    } else if (hasDiv) {
-      let [a,b] = nums.slice(0,2);
-      steps.push(`由题意可知，需要做除法：${a} ÷ ${b} = ${a/b}`);
-    } else {
-      steps.push(`根据题意计算得出结果：${ans}`);
+  // ── 分数乘法 a/b × c ──
+  m = t.match(/^(\d+)\/(\d+)×(\d+)=？$/);
+  if (m) {
+    let a=+m[1], b=+m[2], c=+m[3];
+    let steps=[`分数乘整数：分子与整数相乘，分母不变`,
+      `${a}/${b} × ${c} = (${a}×${c})/${b} = ${a*c}/${b}`];
+    if (gcd(a*c, b) > 1) steps.push(`约分：${a*c}/${b} = ${fracStr(a*c, b)}`);
+    steps.push(`所以 ${a}/${b} × ${c} = ${fracStr(a*c, b)}`);
+    return steps;
+  }
+  // ── 同分母分数加法 ──
+  m = t.match(/^(\d+)\/(\d+)\+(\d+)\/(\d+)=？$/);
+  if (m) {
+    let n1=+m[1], d1=+m[2], n2=+m[3], d2=+m[4];
+    if (d1 === d2) {
+      let steps=[`同分母分数相加：分母不变，分子相加`,
+        `${n1}/${d1} + ${n2}/${d2} = ${n1+n2}/${d1}`];
+      if (gcd(n1+n2, d1) > 1) steps.push(`约分：${n1+n2}/${d1} = ${fracStr(n1+n2, d1)}`);
+      steps.push(`所以结果是 ${fracStr(n1+n2, d1)}`);
+      return steps;
     }
+    return [`异分母分数相加：先通分，再按同分母分数相加`, `答案：${ans}`];
+  }
+  // ── 除以分数 n ÷ (1/k) ──
+  m = t.match(/^(\d+)÷\(1\/(\d+)\)=？$/);
+  if (m) {
+    let n=+m[1], k=+m[2];
+    return [`除以一个分数等于乘它的倒数，1/${k} 的倒数是 ${k}`,
+      `${n} ÷ (1/${k}) = ${n} × ${k} = ${n*k}`];
+  }
+  // ── 解方程 ax+b=c ──
+  m = t.match(/^解方程：(\d+)x\+(\d+)=(\d+),x=？$/);
+  if (m) {
+    let a=+m[1], b=+m[2], c=+m[3];
+    return [`等式两边同时减去 ${b}`,
+      `${a}x = ${c} - ${b} = ${c-b}`,
+      `两边同时除以 ${a}：x = ${c-b} ÷ ${a} = ${(c-b)/a}`];
+  }
+  // ── 解比例 a:b = x:c ──
+  m = t.match(/^(\d+):(\d+)=x:(\d+)，x=？$/);
+  if (m) {
+    let a=+m[1], b=+m[2], c=+m[3];
+    return [`比例的基本性质：两内项之积 = 两外项之积`,
+      `${a} × ${c} = ${b} × x`,
+      `x = ${a}×${c} ÷ ${b} = ${a*c} ÷ ${b} = ${a*c/b}`];
+  }
+  // ── 百分数 ↔ 分数互化 ──
+  m = t.match(/^(\d+)%=几分之几（约分）？$/);
+  if (m) {
+    let p=+m[1];
+    return [`把百分数写成分数：${p}% = ${p}/100`,
+      `约分：${p}/100 = ${fracStr(p, 100)}`];
+  }
+  // ── 圆周长 / 面积 ──
+  m = t.match(/r=(\d+)/);
+  if (m && /周长/.test(t)) {
+    let r=+m[1];
+    return [`圆的周长公式：C = 2πr`,
+      `C = 2 × 3.14 × ${r} = ${fmt(+(2*3.14*r).toFixed(2))}`];
+  }
+  if (m && /面积/.test(t)) {
+    let r=+m[1];
+    return [`圆的面积公式：S = πr²`,
+      `S = 3.14 × ${r} × ${r} = ${fmt(+(3.14*r*r).toFixed(2))}`];
+  }
+  // ── 三角形面积 ──
+  m = t.match(/三角形的?底是(\d+)cm、高是(\d+)cm/);
+  if (m) {
+    let b=+m[1], h=+m[2];
+    return [`三角形面积公式：S = 底 × 高 ÷ 2`,
+      `S = ${b} × ${h} ÷ 2 = ${b*h} ÷ 2 = ${b*h/2}（平方厘米）`];
+  }
+  // ── 平行四边形面积 ──
+  m = t.match(/平行四边形的?底是(\d+)cm、高是(\d+)cm/);
+  if (m) {
+    let b=+m[1], h=+m[2];
+    return [`平行四边形面积公式：S = 底 × 高`,
+      `S = ${b} × ${h} = ${b*h}（平方厘米）`];
+  }
+  // ── 梯形面积 ──
+  m = t.match(/梯形的?上底是(\d+)cm、下底是(\d+)cm、高是(\d+)cm/);
+  if (m) {
+    let a=+m[1], b=+m[2], h=+m[3];
+    return [`梯形面积公式：S = (上底 + 下底) × 高 ÷ 2`,
+      `S = (${a} + ${b}) × ${h} ÷ 2 = ${a+b} × ${h} ÷ 2 = ${(a+b)*h/2}（平方厘米）`];
+  }
+  // ── 已知部分求总数 ──
+  m = t.match(/^总数的1\/(\d+)是(\d+)，总数是多少？$/);
+  if (m) {
+    let k=+m[1], n=+m[2];
+    return [`把总数看作单位"1"，总数的 1/${k} 是 ${n}`,
+      `总数 = ${n} ÷ 1/${k} = ${n} × ${k} = ${n*k}`];
+  }
+  // ── 植树问题 ──
+  m = t.match(/^一条路长(\d+)米，每隔(\d+)米种一棵，共几棵？$/);
+  if (m) {
+    let L=+m[1], g=+m[2];
+    return [`先求间隔数：${L} ÷ ${g} = ${L/g}（个间隔）`,
+      `两端都种：棵数 = 间隔数 + 1 = ${L/g} + 1 = ${L/g+1}（棵）`];
+  }
+  // ── 负数加减（仅含负号的算式走此分支，纯正数走下方竖式分支）──
+  m = t.match(/^(-?\d+)([+-])(-?\d+)=？$/);
+  if (m && (m[1].indexOf('-')===0 || m[3].indexOf('-')===0)) {
+    let a=+m[1], op=m[2], b=+m[3];
+    if (op === '+') {
+      if ((a<0&&b>0)||(a>0&&b<0)) return [`异号两数相加：取绝对值较大加数的符号，用较大的绝对值减去较小的绝对值`,
+        `${a} + ${b} = ${Math.abs(a)>Math.abs(b)?Math.abs(a):Math.abs(b)} - ${Math.abs(a)>Math.abs(b)?Math.abs(b):Math.abs(a)} = ${a+b}`];
+      if (a<0&&b<0) return [`同号两数相加：取相同的符号（负号），并把绝对值相加`,
+        `${a} + ${b} = -(${Math.abs(a)} + ${Math.abs(b)}) = ${a+b}`];
+      return [`同号两数相加：符号为正，把绝对值相加`, `${a} + ${b} = ${a+b}`];
+    }
+    return [`减去一个数，等于加上这个数的相反数`,
+      `${a} - ${b} = ${a} + (${-b}) = ${a-b}`];
+  }
+  // ── 平均数 ──
+  m = t.match(/^数据((?:\d+、)+\d+)的平均数是？$/);
+  if (m) {
+    let ds=m[1].split('、').map(Number);
+    let sum=ds.reduce((x,y)=>x+y,0);
+    return [`平均数 = 总数量 ÷ 总个数`,
+      `总和 = ${ds.join(' + ')} = ${sum}，个数 = ${ds.length}`,
+      `平均数 = ${sum} ÷ ${ds.length} = ${fmt(+(sum/ds.length).toFixed(2))}`];
+  }
+  // ── 鸡兔同笼 ──
+  m = t.match(/^鸡兔同笼，共(\d+)个头(\d+)只脚，兔有几只？$/);
+  if (m) {
+    let h=+m[1], f=+m[2];
+    return [`假设笼子里全是鸡，则脚应有 ${2*h} 只`,
+      `比实际少 ${f-2*h} 只脚，每把一只鸡换成兔多 2 只脚`,
+      `兔 = (${f} - ${2*h}) ÷ 2 = ${f-2*h} ÷ 2 = ${(f-2*h)/2}（只）`];
+  }
+  // ── 纯算式（竖式/脱式）──
+  m = t.match(/^([\d.]+)([+\-×÷])([\d.]+)=？$/);
+  if (m) {
+    let a=+m[1], op=m[2], b=+m[3];
+    let r = op==='+' ? a+b : op==='-' ? a-b : op==='×' ? a*b : +(a/b).toFixed(2);
+    let steps=[`${a} ${op} ${b} = ${fmt(r)}`];
+    if (op==='×' && (String(a).includes('.') || String(b).includes('.'))) {
+      const da=(String(a).split('.')[1]||'').length, db=(String(b).split('.')[1]||'').length;
+      steps.unshift(`小数乘法：先按整数乘法计算，再看两个因数共有 ${da+db} 位小数，从积的右边起数出 ${da+db} 位点上小数点`);
+    }
+    if (op==='+' || op==='-') steps.unshift(`小数点对齐（相同数位对齐），从低位算起`);
+    if (op==='÷') steps.unshift(`除数是整数：按整数除法计算，商的小数点与被除数对齐`);
+    return steps;
+  }
+
+  // ── 应用题通用：数量关系 + 列式 ──
+  if (q.sectionTitle && q.sectionTitle.includes('应用')) {
+    let nums = (t.match(/(\d+\.?\d*)/g) || []).map(Number).filter(n => !isNaN(n));
+    let steps = [];
+    let an = parseFloat(ans);
+    if (nums.length >= 2) {
+      let [a,b] = nums.slice(0,2);
+      if (a*b === an) steps.push(`根据题意列式：${a} × ${b} = ${a*b}`);
+      else if (b && +(a/b).toFixed(2) === an) steps.push(`根据题意列式：${a} ÷ ${b} = ${fmt(+(a/b).toFixed(2))}`);
+      else steps.push(`根据题意分析数量关系，列式计算`);
+      steps.push(`答：${ans}`);
+      return steps;
+    }
+    steps.push(`根据题意分析数量关系，得出结果`);
     steps.push(`答：${ans}`);
     return steps;
   }
 
-  // 计算题
-  if (q.sectionTitle && q.sectionTitle.includes('计算')) {
-    if (hasMul) {
-      return [`竖式笔算：${nums.slice(0,2).join(' × ')}`, `结果：${ans}`];
-    } else if (hasDiv) {
-      return [`竖式笔算：${nums[0]} ÷ ${nums[1]}`, `结果：${ans}`];
-    } else if (hasPlus) {
-      return [`位数对齐，从个位加起`, `${nums.slice(0,3).join(' + ')} = ${ans}`];
-    } else if (hasMinus) {
-      return [`位数对齐，从个位减起`, `${nums.slice(0,3).join(' - ')} = ${ans}`];
-    }
-  }
-
-  // 填空题
-  if (q.sectionTitle && q.sectionTitle.includes('填空')) {
-    return [`答案：${ans}`];
-  }
-
-  // 选择题
-  if (q.sectionTitle && q.sectionTitle.includes('选择')) {
-    return [`正确答案：${ans}`];
-  }
-
-  // fallback
+  // ── 填空 / 选择 / 兜底 ──
   return [`答案：${ans}`];
 }
 
@@ -8430,11 +8751,12 @@ function generateExamPaper() {
   });
 
   // 配图保底：每套卷至少含 MIN_IMG 张配图题（真实试卷均有图形/图表题）。
-  // 当考查范围本身不含图形题单元时，从同册"全册题池"补充，替换选择题区里的非配图题。
-  const MIN_IMG = 4;
+  // 当考查范围本身不含足够图形题时，从同册"全册题池"补充，替换选择题区里的非配图题。
+  // 注意：期末考 units===all（整册），不能用 all.length>units.length 判断，否则期末保底永远不触发。
+  const MIN_IMG = 5;
   let imgNow = questions.filter(q => String(q.svg || '').includes('<')).length;
   // 单元考试只考本单元，禁止从全册拿配图题替换（否则会混入其他单元图形题）。
-  if (imgNow < MIN_IMG && all && all.length > units.length && examState.type !== 'unit') {
+  if (imgNow < MIN_IMG && all && examState.type !== 'unit') {
     let imgPool = buildQuestionPool(all, 50, seen, false)
       .filter(q => String(q.svg || '').includes('<') && !questions.some(x => x.question === q.question && x.answer === q.answer));
     let replSlots = questions.map((q, i) => ({ q, i }))
@@ -8449,6 +8771,7 @@ function generateExamPaper() {
       item.forceFill = false;
       if (slot.q.sectionTitle.includes('选择') && (!item.options || item.options.length < 2)) item.forceFill = true;
       if (!item.steps) item.steps = generateSteps(item);
+      item.num = slot.q.num;
       questions[slot.i] = item;
       imgNow++;
     }
