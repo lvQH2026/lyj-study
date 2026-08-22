@@ -229,7 +229,7 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 {
   const mV = sw.match(/lyj-shell-v(\d+)/);
-  ok('SW 版本号已升级 (v56 children 数据通道)', !!mV && +mV[1] === 56);
+  ok('SW 版本号已升级 (v57 数学3/4双轨)', !!mV && +mV[1] === 57);
 }
 // v56 守卫：children 表数据通道替代 study_records
 {
@@ -242,6 +242,32 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   const toRowMatch = sbJs.match(/const toRow = \(h\) => \(\{([\s\S]*?)\}\);/);
   ok('v56：supabase.js 不再向 study_records 推 module 列', !!toRowMatch && toRowMatch[1].indexOf('module:') < 0);
 }
+
+// ============ 四·四-二、数学 3/4 年级双轨结构守卫（v57） ============
+(function v57grade34() {
+  const KB = w.eval('KNOWLEDGE_BASE');
+  if (!KB) { ok('v57：KNOWLEDGE_BASE 已加载', false); return; }
+  ok('v57：KNOWLEDGE_BASE[3] 双轨（含 group:课本）', KB[3][1].some(u => u.group === '课本') && KB[3][2].some(u => u.group === '课本'));
+  ok('v57：KNOWLEDGE_BASE[4] 双轨（含 group:课本）', KB[4][1].some(u => u.group === '课本') && KB[4][2].some(u => u.group === '课本'));
+  const expect = { 3: { 1: 9, 2: 8 }, 4: { 1: 8, 2: 9 } };
+  for (const g of [3, 4]) for (const s of [1, 2]) {
+    const tb = KB[g][s].filter(u => u.group === '课本');
+    ok(`v57：${g}年级${s===1?'上':'下'} 课本同步单元数=${expect[g][s]}`, tb.length === expect[g][s], '实际 ' + tb.length);
+    const sp = KB[g][s].filter(u => u.group === '专项');
+    ok(`v57：${g}年级${s===1?'上':'下'} 专项≥5`, sp.length >= 5, '实际 ' + sp.length);
+    let metaBad = [], lowGen = [];
+    tb.forEach(u => {
+      if (!(u.summary && u.summary.length >= 3) || !(u.fidx && u.fidx.length >= 2) || !(u.method && u.method.length >= 2)) metaBad.push(u.name);
+      if (u.gen) {
+        let seen = new Set();
+        for (let i = 0; i < 300; i++) { try { let raw = u.gen(); let c = Array.isArray(raw) ? raw : [raw]; c.forEach(q => { if (q && q.question && q.answer !== undefined && q.answer !== null) seen.add(q.question + '|' + q.answer); }); } catch (e) {} }
+        if (seen.size < 35) lowGen.push(u.name + ':' + seen.size);
+      }
+    });
+    ok(`v57：${g}年级${s===1?'上':'下'} 课本单元含 summary≥3/fidx≥2/method≥2`, metaBad.length === 0, metaBad.join(','));
+    ok(`v57：${g}年级${s===1?'上':'下'} 课本单元 gen 去重键≥35`, lowGen.length === 0, lowGen.join(','));
+  }
+})();
 
 // ============ 四·四、语文 4/5 年级 课本同步结构守卫（v45） ============
 const cnJs = fs.readFileSync(path.join(ROOT, 'js', 'chinese.js'), 'utf8');

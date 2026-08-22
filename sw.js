@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v56：改用 children 表作为「最近练习」数据通道，绕开 study_records 策略/列缺失问题；parentLogin 通过 getRecentHistory 校验口令并取回最近练习，本地组装 stats 渲染面板+AI 分析
-const CACHE = 'lyj-shell-v56';
+// v57：数学 3/4 年级按 5/6 年级规则改造为双轨结构（课本同步+专项，含 summary/fidx/method 知识点、考试只考课本、题库 pool≥30、难度6:3:1、双层去重、参数化图形）；g4_observe 扩容去重键≥35
+const CACHE = 'lyj-shell-v57';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
