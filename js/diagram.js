@@ -1006,7 +1006,7 @@ function getUnitDiagrams(unit, grade, sem){
   // 图形认识 / 识别 / 拼组 / 运动
   if (/图形认识|图形识别|认识图形|图形拼组/.test(name)) add(out, diagShapeGallery, '点一点，认图形');
   if (/图形的运动|运动/.test(name)) add(out, diagShapeGallery, '平移旋转里的图形');
-  if (/观察物体|视图|展开|立体/.test(name)) add(out, diag3DUnfold, '正方体展开与旋转');
+  if (/观察物体|视图|展开|立体|长方体|正方体/.test(name)) add(out, diag3DUnfold, '正方体展开与旋转');
   // 统计
   if (/统计|条形统计|折线统计|扇形统计/.test(name)) {
     if (/扇形/.test(name)) add(out, diagPieChart, '拖动扇区看占比');

@@ -55,12 +55,17 @@ for (let i = 0; i < 100; i++) {
   const q = w.eval('g6_mul()');
   if (!q || !q.question) continue;
   total++;
-  // 解析题面 "a/b×c=？"
-  const m = q.question.match(/^(\d+)\/(\d+)×(\d+)=？/);
+  // v50 新增概念选择题：只做结构校验（答案在选项中）
+  if (q.options) {
+    if (!q.options.includes(q.answer)) { wrong++; samples.push({ q: q.question, a: q.answer, reason: '答案不在选项中' }); }
+    continue;
+  }
+  // 解析题面 "a/b×c=？" 或 "a/b×c×c=？"（v50 新增连乘）
+  const m = q.question.match(/^(\d+)\/(\d+)×(\d+)(?:×(\d+))?=？/);
   if (!m) { wrong++; samples.push({ q: q.question, a: q.answer, reason: '无法解析题面' }); continue; }
-  const a = parseInt(m[1]), b = parseInt(m[2]), c = parseInt(m[3]);
-  const expected = a / b * c;                    // 数值期望
-  const expectedStr = fracExpected(a * c, b);    // 最简分数形式期望
+  const a = parseInt(m[1]), b = parseInt(m[2]), c = parseInt(m[3]), c2 = m[4] ? parseInt(m[4]) : 1;
+  const expected = a / b * c * c2;                // 数值期望
+  const expectedStr = fracExpected(a * c * c2, b); // 最简分数形式期望
   const actual = parseFracAnswer(q.answer);
   const formOk = String(q.answer) === expectedStr;   // 形式必须为最简分数
   if (!(Math.abs(expected - actual) < 0.01) || !formOk) {
@@ -82,11 +87,11 @@ for (let i = 0; i < 10; i++) {
   w.eval('examState.grade=6;examState.semester=1;examState.type="final";');
   const qs = w.eval('generateExamPaper().questions');
   qs.forEach(q => {
-    const m = (q.question || '').match(/^(\d+)\/(\d+)×(\d+)=？/);
+    const m = (q.question || '').match(/^(\d+)\/(\d+)×(\d+)(?:×(\d+))?=？/);
     if (m) {
       examTotal++;
-      const a = parseInt(m[1]), b = parseInt(m[2]), c = parseInt(m[3]);
-      const expected = a / b * c;
+      const a = parseInt(m[1]), b = parseInt(m[2]), c = parseInt(m[3]), c2 = m[4] ? parseInt(m[4]) : 1;
+      const expected = a / b * c * c2;
       const actual = parseFracAnswer(q.answer);
       if (!(Math.abs(expected - actual) < 0.01)) examWrong++;
     }
