@@ -46,7 +46,7 @@ async function pushStudyRecords() {
     learning_id: getLearningId(),
     grade: h.grade,
     unit_name: h.unitName,
-    module: h.module || '数学',
+    // v56：线上 study_records 表未建 module 列，暂不带该字段；最近练习改走 children 表数据通道
     correct: h.score,
     total: h.total,
     accuracy: h.accuracy,
@@ -97,6 +97,64 @@ async function pushStudyRecords() {
   saveData(data);
 }
 
+// v56 新增：通过 children 表的数据通道同步最近练习（绕开 study_records RLS/列缺失问题）
+async function pushRecentHistory() {
+  const c = sbClient(); if (!c) return;
+  const data = loadData();
+  const hist = data.history || [];
+  // 云端只保留最近 30 条，避免 payload 过大；每道错题最多保留 20 题详情
+  const payload = hist.slice(0, 30).map(h => ({
+    module: h.module || '数学',
+    grade: h.grade,
+    unitName: h.unitName,
+    score: h.score,
+    total: h.total,
+    accuracy: h.accuracy,
+    time: h.time,
+    wrong: (h.wrong || []).slice(0, 20).map(w => ({
+      unitName: w.unitName,
+      grade: w.grade,
+      userAnswer: (w.userAnswer === undefined || w.userAnswer === null) ? '' : String(w.userAnswer),
+      question: {
+        question: (w.question && w.question.question) || '',
+        options: (w.question && w.question.options) || [],
+        answer: (w.question && w.question.answer) || '',
+        explain: (w.question && w.question.explain) || '',
+        svg: (w.question && w.question.svg) || '',
+        passage: (w.question && w.question.passage) || '',
+        type: (w.question && w.question.type) || ''
+      }
+    }))
+  }));
+  const recentId = getLearningId() + ':recent';
+  try {
+    const { error } = await c.from('children').upsert({
+      learning_id: recentId,
+      password: JSON.stringify({ records: payload, updated_at: Date.now() }),
+      updated_at: new Date().toISOString()
+    });
+    if (error) console.warn('pushRecentHistory', error);
+  } catch (e) { console.warn('pushRecentHistory ex', e); }
+}
+
+// v56 新增：家长端远程拉取最近练习；先校验 learning_id+pw，再取同账号的 :recent 数据行
+async function getRecentHistory(learningId, pw) {
+  const c = sbClient(); if (!c) return null;
+  try {
+    const { data: child, error: cErr } = await c.from('children')
+      .select('password').eq('learning_id', learningId).single();
+    if (cErr || !child) return null;
+    if (String(child.password).trim() !== String(pw).trim()) return null;
+    const recentId = learningId + ':recent';
+    const { data: row, error: rErr } = await c.from('children')
+      .select('password').eq('learning_id', recentId).single();
+    if (rErr || !row || !row.password) return { ok: true, recent: [] };
+    const payload = JSON.parse(row.password);
+    const records = Array.isArray(payload && payload.records) ? payload.records : [];
+    return { ok: true, recent: records };
+  } catch (e) { console.warn('getRecentHistory', e); return null; }
+}
+
 // 数据驱动的单元生成器（用于 content 覆盖层中的 questions 数组）
 function g_from_data(unitDef) {
   let i = 0; const qs = unitDef.questions || [];
@@ -135,7 +193,7 @@ async function loadAndApplyContent() {
   }
   if (typeof renderSpecialSection === 'function') { try { renderSpecialSection(); } catch (e) {} }
   if (c) { ensureChild(); }   // 云端模式：打开即注册本机学习ID，家长可立即远程查看
-  if (c) { pushStudyRecords(); }  // v39：打开即补同步积压记录（此前 RLS 拒绝被静默标记 synced 的记录）
+  if (c) { pushStudyRecords(); pushRecentHistory(); }  // 打开即补同步
 }
 
 // v39 一次性修复：服务端 RLS 拒绝 insert 时（返回 {error} 而非抛异常），
@@ -174,7 +232,8 @@ async function getChildRecent(learningId, pw, limit) {
 async function syncAfterQuiz() {
   const c = sbClient(); if (!c) return;
   await ensureChild();
-  await pushStudyRecords();
+  await pushStudyRecords();      // 兼容旧通道（云端库如修复可继续落 study_records）
+  await pushRecentHistory();     // v56：稳定的 children 数据通道，用于家长端「最近练习」
 }
 
 // 启动时加载内容覆盖层

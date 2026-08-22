@@ -112,32 +112,47 @@ function mountAiAnalysis(mountId, mode, cloudStats) {
   }
 }
 
+// 根据远程 children 数据通道返回的最近练习，组装出 renderDashboard / mountAiAnalysis 需要的 stats 对象
+function buildStatsFromRecent(records) {
+  const byUnit = {};
+  const byDay = {};
+  let totalScore = 0, count = 0;
+  const wrongs = [];
+  (records || []).forEach(function (h) {
+    count += 1;
+    totalScore += (h.accuracy || 0);
+    const u = h.unitName || '未知单元';
+    if (!byUnit[u]) byUnit[u] = { correct: 0, total: 0, count: 0 };
+    byUnit[u].correct += (h.score || 0);
+    byUnit[u].total += (h.total || 0);
+    byUnit[u].count += 1;
+    const d = new Date(h.time || Date.now()).toISOString().slice(0, 10);
+    byDay[d] = (byDay[d] || 0) + (h.total || 0);
+    (h.wrong || []).forEach(function (w) { wrongs.push(w); });
+  });
+  const units = Object.keys(byUnit).map(function (u) {
+    return {
+      unit: u,
+      accuracy: byUnit[u].total ? Math.round(byUnit[u].correct / byUnit[u].total * 100) : 0,
+      count: byUnit[u].count
+    };
+  }).sort(function (a, b) { return a.accuracy - b.accuracy; });
+  const avg = count ? Math.round(totalScore / count) : 0;
+  const trend = Object.keys(byDay).sort().map(function (d) { return { date: d, count: byDay[d] }; });
+  const weak = units.filter(function (u) { return u.count >= 1 && u.accuracy < 80; }).slice(0, 5);
+  return { total: count, avg: avg, units: units, weak: weak, trend: trend, wrong: normalizeWrong(wrongs.slice(-8)) };
+}
+
 async function parentLogin() {
   const id = document.getElementById('parentId').value.trim();
   const pw = document.getElementById('parentPw').value.trim();
   if (!id || !pw) { alert('请填写学习ID和口令'); return; }
-  const stats = await getChildStats(id, pw);
   const result = document.getElementById('parentResult');
-  if (!stats) { result.innerHTML = '<p style="color:#cf1322">未找到该学习ID，或口令不正确。</p>'; return; }
-  // v55：远程云端模式也展示「最近练习」（含考试），数据来自 get_child_recent RPC
-  let recentHtml = '';
-  try {
-    const rows = await getChildRecent(id, pw, 20);
-    const recs = (rows || []).map(r => ({
-      module: r.module || '数学',
-      grade: r.grade,
-      unitName: r.unit_name || '',
-      score: r.correct || 0,
-      total: r.total || 0,
-      accuracy: r.accuracy != null ? r.accuracy : (r.total ? Math.round((r.correct || 0) / r.total * 100) : 0),
-      time: r.created_at ? Date.parse(r.created_at) : 0,
-      wrong: Array.isArray(r.wrong_json) ? r.wrong_json : []
-    }));
-    recentHtml = renderRecentPractice(recs);
-  } catch (e) {
-    console.warn('parentLogin getChildRecent', e);
-    recentHtml = '<div class="card rp-card" style="margin-bottom:12px"><div class="section-title">📝 最近练习</div><div class="rp-dim" style="padding:6px 2px 12px">云端最近练习暂时加载失败，请稍后重试。</div></div>';
-  }
+  const remote = await getRecentHistory(id, pw);
+  if (!remote || !remote.ok) { result.innerHTML = '<p style="color:#cf1322">未找到该学习ID，或口令不正确。</p>'; return; }
+  const recent = remote.recent || [];
+  const stats = buildStatsFromRecent(recent);
+  const recentHtml = renderRecentPractice(recent);
   result.innerHTML = renderDashboard(stats, true) + recentHtml + '<div id="aiMount"></div>';
   mountAiAnalysis('aiMount', 'cloud', stats);
 }

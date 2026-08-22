@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v55：远程云端登录模式也展示「最近练习」（含考试 📄 标记）——parentLogin 调新 RPC get_child_recent 拉云端 study_records（含 wrong_json），复用本机那套列表/详情 UI；supabase.js 推送补 module 列（SQL 见 supabase_v55.sql，需在 Supabase 后台执行）
-const CACHE = 'lyj-shell-v55';
+// v56：改用 children 表作为「最近练习」数据通道，绕开 study_records 策略/列缺失问题；parentLogin 通过 getRecentHistory 校验口令并取回最近练习，本地组装 stats 渲染面板+AI 分析
+const CACHE = 'lyj-shell-v56';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
