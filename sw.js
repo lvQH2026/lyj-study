@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v52：修复数学版块错题去重失效——addToWrongBank 去重比较由「存储对象===题面字符串」修正为「w.question.question===题面 且 w.question.answer===答案」并按 module:'数学' 过滤；新错题补写 module 字段（与英语/语文一致）
-const CACHE = 'lyj-shell-v52';
+// v53：错题重练答对即移出错题库——数学 startWrongReview/retryOneWrong、语文 cnStartWrongReview 在答对分支按来源 entry id（quizWrongSourceIds / cnState.quiz.sourceIds）自动 removeFromWrongBank / cnRemoveWrong，附「已掌握」提示
+const CACHE = 'lyj-shell-v53';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

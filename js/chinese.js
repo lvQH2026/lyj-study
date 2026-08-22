@@ -3453,6 +3453,11 @@ function cn5x8_pool() {
     if (correct) {
       q.score++;
       el('cnFeedback').innerHTML = '<span style="color:var(--success);font-weight:600">\u2714 回答正确！</span>';
+      // v53：错题重练答对即视为「已掌握」，自动移出错题库
+      if (q.sourceIds && q.sourceIds[q.idx]) {
+        cnRemoveWrong(q.sourceIds[q.idx]);
+        el('cnFeedback').innerHTML += ' <span style="color:var(--success);background:rgba(78,140,110,.14);padding:2px 8px;border-radius:8px;font-size:12px;margin-left:6px">已掌握，自动移出错题本</span>';
+      }
     } else {
       el('cnFeedback').innerHTML = '<span style="color:var(--danger);font-weight:600">\u2718 答错了。</span> <span style="color:var(--text-light)">正确答案：' + item.answer + '</span>';
       // 加入错题库
@@ -3640,8 +3645,12 @@ function cn5x8_pool() {
       alert('\u8FD8\u6CA1\u6709\u8BED\u6587\u9519\u9898\uFF01');
       return;
     }
-    const questions = wrongs.map(function (w) { return w.question; });
-    cnState.quiz = { questions: shuffle(questions).slice(0, 30), idx: 0, score: 0, userAnswers: [], results: [], paper: null };
+    const picked = shuffle(wrongs.slice()).slice(0, 30);
+    cnState.quiz = {
+      questions: picked.map(function (w) { return w.question; }),
+      sourceIds: picked.map(function (w) { return w.id; }), // v53：错题重练记录来源 id，答对即移出
+      idx: 0, score: 0, userAnswers: [], results: [], paper: null
+    };
     el('cnBackBtn').style.display = 'block';
     el('cnBackBtn').onclick = function () { cnSwitchTab('wrong'); };
     cnShowPage('cnPageQuiz');

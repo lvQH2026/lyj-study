@@ -8094,6 +8094,7 @@ let state = {
   quizWrongQuestions: [],
   quizMode: 'unit', // 'unit' | 'quick' | 'wrong'
   quizTitle: '',
+  quizWrongSourceIds: [], // v53：错题重练时记录每题对应的错题库 entry id，答对即移出
   selectedAnswer: null,
   answered: false,
   examPaper: null,
@@ -9037,7 +9038,9 @@ function startWrongReview() {
   state.quizTitle = '错题重练';
   // 从错题库中随机取全部错题，最多30题
   let shuffled = [...wrongBank].sort(() => Math.random() - 0.5);
-  state.quizQuestions = shuffled.slice(0, Math.max(QUIZ_LENGTH, wrongBank.length)).map(w => w.question);
+  let picked = shuffled.slice(0, Math.max(QUIZ_LENGTH, wrongBank.length));
+  state.quizQuestions = picked.map(w => w.question);
+  state.quizWrongSourceIds = picked.map(w => w.id);
   state.quizIndex = 0;
   state.quizScore = 0;
   state.quizCorrect = 0;
@@ -10119,6 +10122,12 @@ function submitAnswer() {
       feedback.className = 'feedback correct show bounce';
       let praises = ['答对了！太棒了！', '真厉害！继续加油！', '完美！你真聪明！', '不错不错！'];
       feedback.innerHTML = `✓ ${pick(praises)}`;
+      // v53：错题重练答对即视为「已掌握」，自动移出错题库
+      if (state.quizMode === 'wrong' && state.quizWrongSourceIds && state.quizWrongSourceIds[state.quizIndex]) {
+        let srcId = state.quizWrongSourceIds[state.quizIndex];
+        removeFromWrongBank(srcId);
+        feedback.innerHTML += ` <span class="master-badge">已掌握，自动移出错题本</span>`;
+      }
     } else {
       state.quizWrong++;
       feedback.className = 'feedback wrong show shake';
@@ -10371,6 +10380,7 @@ function retryOneWrong(id) {
   state.quizMode = 'wrong';
   state.quizTitle = '错题重做';
   state.quizQuestions = [w.question];
+  state.quizWrongSourceIds = [w.id];
   state.quizIndex = 0;
   state.quizScore = 0;
   state.quizCorrect = 0;
