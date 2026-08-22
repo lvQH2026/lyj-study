@@ -267,6 +267,16 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
     ok(`v57：${g}年级${s===1?'上':'下'} 课本单元含 summary≥3/fidx≥2/method≥2`, metaBad.length === 0, metaBad.join(','));
     ok(`v57：${g}年级${s===1?'上':'下'} 课本单元 gen 去重键≥35`, lowGen.length === 0, lowGen.join(','));
   }
+  // 整卷（paper:true）单元直接渲染、不经选题去重，题面必须各不相同（v57 修 专项·角度计算 真实劣化）
+  [3, 4].forEach(g => [1, 2].forEach(s => {
+    (KB[g][s] || []).filter(u => u.paper).forEach(u => {
+      try {
+        const raw = u.gen(); const arr = Array.isArray(raw) ? raw : [raw];
+        const t = new Set(arr.map(q => q && q.question));
+        ok(`v57：${g}年级${s===1?'上':'下'} 整卷「${u.name}」题面无重复`, arr.length >= 18 && t.size === arr.length, arr.length + ' 题/去重 ' + t.size);
+      } catch (e) { ok(`v57：${g}年级${s===1?'上':'下'} 整卷「${u.name}」可渲染`, false, e.message); }
+    });
+  }));
 })();
 
 // ============ 四·四、语文 4/5 年级 课本同步结构守卫（v45） ============

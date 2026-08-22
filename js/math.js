@@ -6668,12 +6668,13 @@ function g4_shape_recognize(){
   const folds=[sq_fold_fill, sq_fold_choice, sq_fold_choice, sq_judge_fold];
   const compl=[sq_setsquare_fill, sq_setsquare_choice, sq_count_angles, sq_clock_shape, sq_triangle_shape];
 
-  let f=drawPool(fills,8).map(g=>g());
-  let j=drawPool(judges,6).map(g=>g());
-  let c=drawPool(choicesC,6).map(g=>g());
-  let r=drawPool(rels,6).map(g=>g());
-  let fd=drawPool(folds,4).map(g=>g());
-  let cp=drawPool(compl,4).map(g=>g());
+  const _seen=new Set();
+  let f=drawUnique(fills,8,_seen);
+  let j=drawUnique(judges,6,_seen);
+  let c=drawUnique(choicesC,6,_seen);
+  let r=drawUnique(rels,6,_seen);
+  let fd=drawUnique(folds,4,_seen);
+  let cp=drawUnique(compl,4,_seen);
 
   f.forEach(q=>{q.sectionTitle=S1;q.score=3;});
   j.forEach(q=>{q.sectionTitle=S2;q.score=2;});
@@ -6840,6 +6841,19 @@ function q_word_fold(){
   return {type:'fill',question:`如图，长方形纸折起后，已知∠2=${a}°，求∠1的度数。`,answer:String(b),svg:svgFoldedAngle(a)};
 }
 function drawPool(pool,n){let copy=[];while(copy.length<n){copy=copy.concat(pool.slice().sort(()=>Math.random()-0.5));}return copy.slice(0,n);}
+// v57：整卷抽题去重。drawPool 会把同一个生成器抽多次，若其内部题池小就会产出题面完全
+// 相同的题，一份卷子里出现重复题。drawUnique 按题面去重后再凑数，抽不满宁缺勿重。
+function drawUnique(pool,n,seen){
+  seen = seen || new Set();
+  const out=[];
+  for(let guard=0; guard<n*80 && out.length<n; guard++){
+    const g=pool[Math.floor(Math.random()*pool.length)];
+    let q; try{ q=g(); }catch(e){ continue; }
+    if(!q || !q.question || seen.has(q.question)) continue;
+    seen.add(q.question); out.push(q);
+  }
+  return out;
+}
 function g4_angle_special(){
   const S1='一、填空（每空3分）', S2='二、判断（每题2分）', S3='三、选择（每题3分）', S4='四、操作·作图（共26分）', S5='五、解决问题（共20分）';
   const fills=[q_fill_basic,q_fill_supp,q_fill_comp,q_fill_triple,q_fill_intersect,q_fill_perp,q_fill_fold,q_fill_overlap];
@@ -6847,11 +6861,12 @@ function g4_angle_special(){
   const choices=[q_choice_basic,q_choice_classify,q_choice_setsquare,q_choice_clock,q_choice_protractor,q_choice_intersect,q_choice_fold,q_choice_overlap,q_choice_complement];
   const ops=[q_op_protractor,q_op_setsquare,q_op_rays,q_op_multiangle,q_op_clock];
   const words=[q_word_supp,q_word_comp,q_word_triple,q_word_intersect,q_word_perp,q_word_fold];
-  let f=drawPool(fills,8).map(g=>g());
-  let j=drawPool(judges,6).map(g=>g());
-  let c=drawPool(choices,6).map(g=>g());
-  let o=drawPool(ops,5).map(g=>g());
-  let w=drawPool(words,3).map(g=>g());
+  const _seen=new Set();
+  let f=drawUnique(fills,8,_seen);
+  let j=drawUnique(judges,6,_seen);
+  let c=drawUnique(choices,6,_seen);
+  let o=drawUnique(ops,5,_seen);
+  let w=drawUnique(words,3,_seen);
   f.forEach(q=>{q.sectionTitle=S1;q.score=3;});
   j.forEach(q=>{q.sectionTitle=S2;q.score=2;});
   c.forEach(q=>{q.sectionTitle=S3;q.score=3;});
@@ -7559,8 +7574,19 @@ const ANGLE_CALC_POOL = (function(){
 
 // 角度计算入口：每次从200题池随机抽20道
 function g_shape_angle_calc(){
-  let copy=ANGLE_CALC_POOL.slice().sort(()=>Math.random()-0.5);
-  return copy.slice(0,20);
+  // v57：整卷（paper:true）直接渲染、不经选题去重，必须保证题面各不相同。
+  // ANGLE_CALC_POOL 第1类「读量角器」40 题题面同为「量出下面角的度数。」，
+  // 原随机抽 20 易在同一份卷里塞入多道同题面（视觉重复）劣化卷面。
+  // 改为按题面去重抽满 20 道不同题面（题库共 111 种题面，绰绰有余）。
+  const seen=new Set(), out=[];
+  const copy=ANGLE_CALC_POOL.slice().sort(()=>Math.random()-0.5);
+  for(const q of copy){
+    if(!q||!q.question) continue;
+    if(seen.has(q.question)) continue;
+    seen.add(q.question); out.push(q);
+    if(out.length>=20) break;
+  }
+  return out;
 }
 
 // ===== 4年级上册 =====
@@ -7606,12 +7632,20 @@ function g4_bignum(){
 function g4_angle(){
   // v56：参数化扩容，去重键 ≥40（读角/分类/角的关系）
   const reps=[];
-  // 1. 用量角器读角（参数化）
-  [20,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,155,160,165].forEach(deg=>{
+  // 1. 用量角器读角（v57：题面用不同顶点字母命名，否则整卷按题面去重后配图题只剩 1 种）
+  const _nm=['∠AOB','∠BOC','∠COD','∠DOE','∠EOF','∠FOG','∠GOH','∠HOK','∠KOL','∠LOM',
+             '∠MON','∠NOP','∠POQ','∠QOR','∠ROS','∠SOT','∠TOU','∠UOV','∠VOW','∠WOX',
+             '∠XOY','∠YOZ','∠AOC','∠BOD','∠COE','∠DOF','∠EOG','∠FOH','∠GOK'];
+  [20,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,155,160,165].forEach((deg,i)=>{
     let ans=deg+'°';
     let ds=[(deg+10)+'°',(deg-10)+'°',(deg+5)+'°'].filter(x=>parseInt(x)!==deg);
     while(ds.length<3){let nx=deg+[-15,15,-20,20][ds.length];if(nx>=0&&nx<=180&&nx+'°'!==ans)ds.push(nx+'°');}
-    reps.push({s:svgAngle(deg),q:'用量角器量出下面角的度数。',a:ans,d:ds.slice(0,3)});
+    reps.push({s:svgAngle(deg),q:`用量角器量出下图中 ${_nm[i%_nm.length]} 的度数。`,a:ans,d:ds.slice(0,3)});
+  });
+  // 1b. 同一图形换问法：判断角的类型（题面也各不相同）
+  [18,32,47,58,72,88,90,96,108,124,137,152,168].forEach((deg,i)=>{
+    let t=deg<90?'锐角':(deg===90?'直角':'钝角');
+    reps.push({s:svgAngle(deg),q:`下图中 ${_nm[(i+7)%_nm.length]} 是什么角？`,a:t,d:['锐角','直角','钝角','平角'].filter(x=>x!==t).slice(0,3)});
   });
   // 2. 角的分类（参数化）
   [['锐角',[12,35,55,78]],['直角',[90]],['钝角',[95,110,135,168]],['平角',[180]],['周角',[360]]].forEach(([name,degs])=>degs.forEach(d=>{
@@ -8991,7 +9025,26 @@ const TRI_RAW = [
   { t: 'f', q: '3 层三角形，底边被分成 5 段，一共有____个三角形。', n: 5, l: 3, d: false, ans: '45' },
   { t: 'f', q: '一个 3 层三角形中共有 45 个三角形，它的底边被分成了____段。', n: 5, l: 3, d: false, ans: '5' },
   { t: 'f', q: '按“标数求和，分层相加”：一个三角形上层底边 3 段、下层底边 3 段，一共有____个三角形。', n: 3, l: 2, d: false, ans: '12' },
+  // v57 扩容 31-38：题库 30→38 题，保证按题面严格去重后仍能组满 30 题单元卷（公式：层数 × n(n+1)/2）
+  { t: 'c', q: '下图是单层三角形（底边 7 段），一共有多少个三角形？', n: 7, l: 1, d: false, o: ['21', '24', '28', '36'], a: 2 },
+  { t: 'f', q: '底边被分成 7 段的单层三角形，一共有____个三角形。', n: 7, l: 1, d: false, ans: '28' },
+  { t: 'c', q: '下图是 2 层三角形（底边 6 段），一共有多少个三角形？', n: 6, l: 2, d: false, o: ['36', '40', '42', '48'], a: 2 },
+  { t: 'f', q: '2 层三角形，底边被分成 6 段，一共有____个三角形。', n: 6, l: 2, d: false, ans: '42' },
+  { t: 'f', q: '5 层三角形，底边被分成 4 段，一共有____个三角形。', n: 4, l: 5, d: false, ans: '50' },
+  { t: 'c', q: '下图是 4 层三角形（底边 4 段），一共有多少个三角形？', n: 4, l: 4, d: false, o: ['30', '36', '40', '44'], a: 2 },
+  { t: 'f', q: '一个 2 层三角形中共有 42 个三角形，它的底边被分成了____段。', n: 6, l: 2, d: false, ans: '6' },
+  { t: 'c', q: '下图是斜线多层三角形（底边 3 段、2 层），按“标数乘层，斜线补全”计算，一共有多少个三角形？', n: 3, l: 2, d: true, o: ['12', '14', '15', '18'], a: 2 },
 ];
+
+// v57：题面去重。原题库有 5 处题面完全相同（只有配图参数不同），整卷按题面严格去重时
+// 会把它们压成 1 题 → 单元卷只能组出 25 题。给重复题面补上图形参数说明即可各自成题。
+const _triSeen = new Set();
+TRI_RAW.forEach(r => {
+  if (_triSeen.has(r.q)) {
+    r.q = r.q.replace(/([？。])$/, '') + `（底边 ${r.n} 段${r.l > 1 ? '、' + r.l + ' 层' : ''}${r.d ? '、含斜线' : ''}）` + (r.t === 'c' ? '？' : '。');
+  }
+  _triSeen.add(r.q);
+});
 
 const TRI_Q = TRI_RAW.map(r => {
   const svg = triSVG(r.n, r.l, r.d);

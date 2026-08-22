@@ -28,7 +28,7 @@ w.dispatchEvent(new w.Event('load'));
 const KB = w.eval('KNOWLEDGE_BASE');
 const N = 3000;
 const rows = [];
-[4, 5, 6].forEach(g => {
+[3, 4, 5, 6].forEach(g => {
   [1, 2].forEach(sem => {
     (KB[g][sem] || []).forEach(u => {
       const keys = new Set();
