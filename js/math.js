@@ -5499,27 +5499,71 @@ const KNOWLEDGE_BASE = {
     ]
   },
   6: {
-    1: [
-      { name: '分数乘法', type: 'basic', gen: g6_mul },
-      { name: '分数除法', type: 'basic', gen: g6_div },
-      { name: '比', type: 'basic', gen: g6_ratio },
-      { name: '圆', type: 'shape', gen: g6_circle },
-      { name: '百分数', type: 'basic', gen: g6_percent },
-      { name: '扇形统计图', type: 'application', gen: g6_pie },
-      { name: '百分数应用题', type: 'application', gen: g_app_fraction },
-      { name: '比例应用题', type: 'application', gen: g_app_ratio },
-      { name: '展开图', type: 'shape', gen: g_shape_expand },
+    1: [ // 六上 · 课本同步（人教版8单元）+ 专项练习
+      { name: '分数乘法', group: '课本', term: '上', unit: 1, type: 'basic', gen: g6_mul,
+        summary: ['分数乘整数：分子与整数相乘，分母不变，能约分的先约分', '分数乘分数：分子乘分子，分母乘分母', '求一个数的几分之几是多少，用乘法计算', '乘大于1的数，积大于原数（0除外）；乘小于1的数，积小于原数', '分数混合运算顺序与整数相同，能简便计算的用运算定律'],
+        fidx: [{ t: '分数×整数', f: 'a/b × n = (a×n)/b，能约分先约分' }, { t: '分数×分数', f: 'a/b × c/d = (a×c)/(b×d)' }, { t: '求几分之几', f: '这个数 × 几分之几' }],
+        method: [{ t: '万能思路', s: '先约分再相乘，计算量减半：能约分的分子分母先划掉约分' }, { t: '大小判断', s: '乘大于1的数积变大，乘小于1的积变小，乘1不变' }] },
+      { name: '位置与方向（二）', group: '课本', term: '上', unit: 2, type: 'application', gen: g6_direction2,
+        summary: ['确定位置三要素：观测点、方向（角度）、距离', '方向以南北为基准：如南偏东30°（先说南北，再说偏东偏西）', '观测点不同，方向完全不同——「谁在谁的什么方向」要看清', '比例尺 = 图上距离 : 实际距离，计算前先统一单位'],
+        fidx: [{ t: '方位角', f: '南偏东30° = 从正南方向向东偏 30°' }, { t: '比例尺', f: '比例尺 = 图上距离 ÷ 实际距离' }],
+        method: [{ t: '方位角三步', s: '① 定观测点 → ② 以南北为基准写方向 → ③ 量角度、按比例尺算距离' }, { t: '易错点', s: '观测点变了方向全变；「北偏东30°」也可以说成「东偏北60°」' }] },
+      { name: '分数除法', group: '课本', term: '上', unit: 3, type: 'basic', gen: g6_div,
+        summary: ['除以一个不为0的数，等于乘这个数的倒数', '分数除法：a/b ÷ c/d = a/b × d/c', '已知一个数的几分之几是多少，求这个数：用除法（或方程）', '倒数：乘积为1的两个数互为倒数；1的倒数是1，0没有倒数'],
+        fidx: [{ t: '除法法则', f: 'a/b ÷ c/d = a/b × d/c（除号变乘号，除数取倒数）' }, { t: '求单位"1"', f: '部分量 ÷ 几分之几 = 单位"1"的量' }],
+        method: [{ t: '找单位"1"', s: '口诀：「是、占、比、相当于」后面的量就是单位"1"。单位"1"已知用乘法，未知用除法或方程' }, { t: '倒数判断', s: '交换分子分母即得倒数；整数n的倒数是1/n' }] },
+      { name: '比', group: '课本', term: '上', unit: 4, type: 'basic', gen: g6_ratio,
+        summary: ['两个数的比表示两个数相除的关系', '比、除法、分数三兄弟：a:b = a÷b = a/b（比的后项不能为0）', '比的基本性质：前项后项同乘或同除相同的数（0除外），比值不变', '化简比的结果仍是一个比；比值是一个数'],
+        fidx: [{ t: '三者关系', f: 'a : b = a ÷ b = a/b（b≠0）' }, { t: '按比分配', f: '部分 = 总量 × 该份数 ÷ 总份数' }],
+        method: [{ t: '化简比', s: '先统一单位，再同除前项后项的最大公因数，化成最简整数比' }, { t: '易错点', s: '比值是一个数（可写成分数）；比是一个关系，不能只写成一个数' }] },
+      { name: '圆', group: '课本', term: '上', unit: 5, type: 'shape', gen: g6_circle,
+        summary: ['圆心O确定位置，半径r确定大小；d=2r', '圆是轴对称图形，有无数条对称轴（每条直径所在的直线）', '圆周率π是圆的周长与直径的比值，π≈3.14', '圆面积推导：把圆剪拼成近似长方形，长=πr（半周长），宽=r'],
+        fidx: [{ t: '直径', f: 'd = 2r' }, { t: '周长', f: 'C = πd = 2πr' }, { t: '面积', f: 'S = πr²' }, { t: '半圆周长', f: 'πr + d', warn: '易漏直径' }, { t: '半圆面积', f: 'πr² ÷ 2' }],
+        method: [{ t: '万能思路', s: '所有公式往 r 上靠：知道 d 先 ÷2，知道 C 先 ÷π 再 ÷2' }, { t: '计算技巧', s: 'π 取 3.14，先约分再相乘；半圆周长别忘了加直径' }] },
+      { name: '百分数（一）', group: '课本', term: '上', unit: 6, type: 'basic', gen: g6_percent,
+        summary: ['百分数表示一个数是另一个数的百分之几，只表示倍比关系，不带单位', '百分数化小数：去掉%，小数点左移两位；小数化百分数：小数点右移两位加%', '常见互化：1/2=50%、1/4=25%、3/4=75%、1/5=20%、1/8=12.5%', '求百分率：命中率 = 命中数 ÷ 总次数 × 100%'],
+        fidx: [{ t: '求百分之几', f: '比较量 ÷ 标准量 × 100%' }, { t: '求百分之几是多少', f: '这个数 × 百分率' }, { t: '已知百分之几求原数', f: '部分量 ÷ 百分率' }, { t: '多/少百分之几', f: '「多20%」= 原数×(1+20%)，「少20%」= 原数×(1−20%)' }],
+        method: [{ t: '互化口诀', s: '百分数变小数，去号左移两位；小数变百分数，右移两位再添号' }, { t: '单位"1"', s: '「是、占、比、相当于」后面是标准量（单位"1"）：已知用乘，未知用除' }] },
+      { name: '扇形统计图', group: '课本', term: '上', unit: 7, type: 'application', gen: g6_pie,
+        summary: ['扇形统计图用整个圆表示总量（单位"1"），扇形表示各部分占比', '扇形圆心角 = 360° × 该项占总数的百分比', '三种统计图选择：条形比多少、折线看变化、扇形看占比', '所有扇形的百分比之和是100%'],
+        fidx: [{ t: '圆心角', f: '圆心角 = 360° × 百分比' }, { t: '部分量', f: '部分量 = 总量 × 百分比' }],
+        method: [{ t: '看图三步', s: '① 看标题和图例 → ② 比较各扇形大小（占比） → ③ 用「总量×百分比」求具体数量' }] },
+      { name: '数学广角——数与形', group: '课本', term: '上', unit: 8, type: 'mixed', gen: g6_numshape,
+        summary: ['正方形数：1+3+5+…+(2n−1) = n²（从1开始的连续奇数之和）', '奇数个数列的和等于项数的平方', '每往外套一层"拐角形"（L形），就增加下一个奇数', '数形结合：复杂的数列规律，画出图形一眼看穿'],
+        fidx: [{ t: '奇数列求和', f: '1+3+5+…+(2n−1) = n²' }, { t: '第n个奇数', f: '第n个奇数是 2n−1' }],
+        method: [{ t: '万能思路', s: '看到从1开始的连续奇数相加，直接数有几个加数，答案就是几的平方' }, { t: '验证法', s: '画小正方形一层层往外拼，每层是下一个奇数，拼成的正是大正方形' }] },
+      // ---- 六上 · 专项练习 ----
+      { name: '专项·百分数应用题', group: '专项', type: 'application', gen: g_app_fraction },
+      { name: '专项·按比分配', group: '专项', type: 'application', gen: g_app_ratio },
+      { name: '专项·展开图', group: '专项', type: 'shape', gen: g_shape_expand },
     ],
-    2: [
-      { name: '负数', type: 'basic', gen: g6_negative },
-      { name: '百分数（二）', type: 'basic', gen: g6_percent2 },
-      { name: '圆柱与圆锥', type: 'shape', gen: g6_cylinder },
-      { name: '比例', type: 'basic', gen: g6_proportion },
-      { name: '统计', type: 'application', gen: g6_stats },
-      { name: '行程问题', type: 'application', gen: g_app_speed },
-      { name: '工程问题', type: 'application', gen: g_app工程 },
-      { name: '视图与展开', type: 'shape', gen: g_shape_view },
-      { name: '总复习', type: 'mixed', gen: g6_review },
+    2: [ // 六下 · 课本同步（人教版5单元）+ 专项练习
+      { name: '负数', group: '课本', term: '下', unit: 1, type: 'basic', gen: g6_negative,
+        summary: ['正负数表示意义相反的量：零上/零下、收入/支出、东/西', '0既不是正数，也不是负数', '数轴上右边的数总比左边的数大；负数都在0的左边', '温差 = 高温 − 低温，如3℃与−5℃相差8℃'],
+        fidx: [{ t: '大小比较', f: '正数 > 0 > 负数；两个负数比，绝对值大的反而小' }, { t: '温差', f: '温差 = 高温 − 低温' }],
+        method: [{ t: '万能思路', s: '比较大小先想数轴：谁在右边谁大；负号后面的数越大，这个负数反而越小' }] },
+      { name: '百分数（二）', group: '课本', term: '下', unit: 2, type: 'basic', gen: g6_percent2,
+        summary: ['折扣：几折就是十分之几，八折 = 原价×80%', '成数：几成就是十分之几，二成五 = 25%', '税率：应纳税额 = 收入 × 税率', '利息：利息 = 本金 × 利率 × 存期', '利润：利润 = 售价 − 成本'],
+        fidx: [{ t: '折扣', f: '现价 = 原价 × 折扣（八折=×80%）' }, { t: '税率', f: '应纳税额 = 收入 × 税率' }, { t: '利息', f: '利息 = 本金 × 利率 × 存期' }, { t: '利润率', f: '利润率 = (售价−成本) ÷ 成本 × 100%' }],
+        method: [{ t: '易错点', s: '先涨10%再降10%不等于原价：1.1×0.9=0.99，反而便宜了' }, { t: '万能思路', s: '折扣、成数、税率、利率全是百分数乘法：找准单位"1"（原价/收入/本金）' }] },
+      { name: '圆柱与圆锥', group: '课本', term: '下', unit: 3, type: 'shape', gen: g6_cylinder,
+        summary: ['圆柱有2个底面（相同的圆）和1个侧面（沿高展开是长方形）', '圆锥有1个底面、1个顶点，侧面展开是扇形', '等底等高时，圆柱体积是圆锥的3倍', '实际应用先想算哪几个面：油桶算全表面积、水管只算侧面积、无盖水桶=侧面+1个底面'],
+        fidx: [{ t: '圆柱侧面积', f: 'S侧 = Ch = 2πrh' }, { t: '圆柱表面积', f: 'S表 = 2πrh + 2πr²' }, { t: '圆柱体积', f: 'V = πr²h' }, { t: '圆锥体积', f: 'V = πr²h ÷ 3', warn: '必须÷3' }],
+        method: [{ t: '倒水实验记忆', s: '圆锥装满水倒进等底等高的圆柱，正好3次倒满——所以圆锥要÷3' }, { t: '万能思路', s: '知道d先÷2求r，全部公式往r上靠；先想清楚算哪几个面再动笔' }] },
+      { name: '比例', group: '课本', term: '下', unit: 4, type: 'basic', gen: g6_proportion,
+        summary: ['表示两个比相等的式子叫比例；a:b=c:d 时 ad=bc', '解比例：内项乘积=外项乘积，再按解方程四步走', '比例尺 = 图上距离 : 实际距离，计算前先统一单位', '正比例：商一定（y/x=k）；反比例：积一定（xy=k）'],
+        fidx: [{ t: '基本性质', f: 'a:b = c:d → ad = bc（内项积=外项积）' }, { t: '比例尺', f: '比例尺 = 图上距离 : 实际距离' }, { t: '正比例', f: 'y ÷ x = k（一定），同扩同缩' }, { t: '反比例', f: 'x × y = k（一定），一扩一缩' }],
+        method: [{ t: '判断正反比例三步', s: '① 找两个相关联的量 → ② 看什么不变 → ③ 商一定成正比例，积一定成反比例' }, { t: '解比例', s: '先写成「内项积=外项积」，再用等式性质解方程，最后代回检验' }] },
+      { name: '数学广角——鸽巢问题', group: '课本', term: '下', unit: 5, type: 'application', gen: g6_pigeonhole,
+        summary: ['鸽巢原理（抽屉原理）：物体数多于抽屉数，总有一个抽屉至少放2个物体', '至少数 = 物体数 ÷ 抽屉数所得的商 + 1', '最不利原则：想「运气最差的情况」', '抽屉原理只保证「一定存在」，不需要知道具体是哪个抽屉'],
+        fidx: [{ t: '至少数', f: '至少数 = 物体数 ÷ 抽屉数的商 + 1', warn: '有余数才+1' }],
+        method: [{ t: '万能思路', s: '先找「物体」和「抽屉」（扑克4种花色是4个抽屉、12生肖是12个抽屉），再用公式算至少数' }, { t: '最不利原则', s: '要「保证」取出，就先想最倒霉的情况全取出来，再多取1个就一定满足' }] },
+      // ---- 六下 · 专项练习 ----
+      { name: '专项·统计', group: '专项', type: 'application', gen: g6_stats },
+      { name: '专项·行程问题', group: '专项', type: 'application', gen: g_app_speed },
+      { name: '专项·工程问题', group: '专项', type: 'application', gen: g_app工程 },
+      { name: '专项·视图与展开', group: '专项', type: 'shape', gen: g_shape_view },
+      { name: '专项·总复习', group: '专项', type: 'mixed', gen: g6_review },
     ]
   }
 };
@@ -5833,6 +5877,40 @@ function figMeet(s){
   g+=`<line x1="${x1-6}" y1="${y-10}" x2="${x1-22}" y2="${y-10}" stroke="${FIG_STROKE}" stroke-width="2.2" stroke-linecap="round"/>`;
   g+=`<path d="M ${x1-28} ${y-10} l 7 -4 l 0 8 z" fill="${FIG_STROKE}"/>`;
   g+=figLabel((x0+x1)/2, y+15, `相距${s}千米`);
+  return g;
+}
+// 罗盘方位图：aDeg 为数学角（0°=东，90°=北/上），金色箭头从圆心指向该方向，含基准虚线与角度弧
+function figCompass(aDeg, label){
+  const cx=55, cy=58, R=30;
+  const a=aDeg*Math.PI/180;
+  const ex=(cx+R*Math.cos(a)).toFixed(1), ey=(cy-R*Math.sin(a)).toFixed(1);
+  // 基准轴（南北方 + 东西向虚线）
+  let g=`<line x1="${cx}" y1="${cy-R-4}" x2="${cx}" y2="${cy+R+4}" stroke="${FIG_STROKE}" stroke-width="1" stroke-dasharray="3 2.5"/>`;
+  g+=`<line x1="${cx-R-4}" y1="${cy}" x2="${cx+R+4}" y2="${cy}" stroke="${FIG_STROKE}" stroke-width="1" stroke-dasharray="3 2.5"/>`;
+  g+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#D8CFC0" stroke-width="1"/>`;
+  g+=`<text x="${cx}" y="${cy-R-7}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">北</text>`;
+  g+=`<text x="${cx}" y="${cy+R+14}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">南</text>`;
+  g+=`<text x="${cx-R-10}" y="${cy+3}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">西</text>`;
+  g+=`<text x="${cx+R+10}" y="${cy+3}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">东</text>`;
+  // 方向箭头（香槟金）
+  g+=`<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="${FIG_GOLD}" stroke-width="2.8" stroke-linecap="round"/>`;
+  const ang=Math.atan2(ey-cy, ex-cx), hl=8, ha=Math.PI/7;
+  g+=`<polygon points="${ex},${ey} ${(ex-hl*Math.cos(ang-ha)).toFixed(1)},${(ey-hl*Math.sin(ang-ha)).toFixed(1)} ${(ex-hl*Math.cos(ang+ha)).toFixed(1)},${(ey-hl*Math.sin(ang+ha)).toFixed(1)}" fill="${FIG_GOLD}"/>`;
+  g+=`<circle cx="${cx}" cy="${cy}" r="2.2" fill="${FIG_STROKE}"/>`;
+  if(label) g+=`<text x="55" y="12" text-anchor="middle" font-size="10" font-weight="700" fill="${FIG_GOLD}">${label}</text>`;
+  return g;
+}
+// 正方形数图：n 层 L 形拼成 n×n 大正方形（1+3+5+…+(2n-1)=n²），层与层颜色交替
+function figSquareNum(n){
+  const s0=Math.min(13, Math.floor(64/n)), x0=Math.round(55-(n*s0)/2), y0=Math.round(56-(n*s0)/2);
+  let g='';
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+    const layer=Math.min(i,j); // 从左上数第 layer 层（0 起），该层含 2*layer+1 个小格
+    const fill=(layer%2===0)?'rgba(180,148,90,.45)':'rgba(62,74,99,.30)';
+    g+=`<rect x="${x0+j*s0}" y="${y0+i*s0}" width="${s0}" height="${s0}" fill="${fill}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
+  }
+  // 标注只给奇数列开头，不写末项与总和——末项(2n−1)与总数(n²)都是题目答案，印在图上等于泄题
+  g+=`<text x="55" y="${y0+n*s0+14}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">1+3+5+…</text>`;
   return g;
 }
 // 带箭头的线段：在 (x2,y2) 处绘制三角箭头头部
@@ -7287,6 +7365,8 @@ function g6_pie(){
 }
 function g6_negative(){
   let a=ri(2,9), k=ri(3,9), n=ri(1,4);
+  // 数轴移动题：移动量放在题面里（A 点数值只在图中）→ 题面随参数变化，避免视觉重复
+  let mv=ri(2,5); if(mv===n) mv++;
   let items=[
     {q:'比0小5的数是？',a:'-5',d:['5','0','-4']},
     {q:'海拔-100米表示？',a:'低于海平面100米',d:['高于海平面100米','海平面上100米','平地']},
@@ -7296,6 +7376,8 @@ function g6_negative(){
     {s:figNumLine(n),q:'上图数轴上A点表示的数是？',a:`-${n}`,d:[String(n),String(-(n+1)),String(-(n-1))]},
     {s:figNumLine(n),q:'上图数轴上A点表示的数的绝对值是？',a:String(n),d:[String(-n),String(n+1),'0']},
     {s:figNumLine(n),q:'上图数轴上，A点在原点的哪一边？',a:'左边',d:['右边','原点上','无法确定']},
+    {s:figNumLine(n),q:`上图数轴上，A点向右移动${mv}个单位长度后，表示的数是？`,a:String(mv-n),d:[String(-mv-n),String(n-mv),String(mv+n)]},
+    {s:figNumLine(n),q:`上图数轴上，A点向左移动${mv}个单位长度后，表示的数是？`,a:String(-n-mv),d:[String(mv-n),String(n-mv),String(n+mv)]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -7313,24 +7395,37 @@ function g6_percent2(){
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g6_cylinder(){
+  // 计算题：r/h 放在题面里 → 题面随参数变化（配图仅示意立体形状，不标数值不泄题）
+  // r 取 3-5：r=2 时 πr²h 与 2πrh 相等、r=3 时圆锥体积会撞「πrh」干扰项
+  let r=pick([3,4,5]), h=ri(4,9), hc=3*ri(2,3);
   let items=[
     {q:'圆柱有几个底面？',a:'2个',d:['1个','3个','0个']},
     {q:'圆柱的侧面沿高展开后是什么形状？',a:'长方形',d:['三角形','梯形','扇形']},
     {q:'圆锥有几个底面？',a:'1个',d:['2个','0个','3个']},
     {s:figCylinder(),q:'上图立体图形是什么？',a:'圆柱',d:['圆锥','长方体','球']},
     {s:figCone(),q:'上图立体图形是什么？',a:'圆锥',d:['圆柱','四棱锥','球']},
+    {s:figCylinder(),q:`一个圆柱（如上图）底面半径${r}厘米、高${h}厘米，它的侧面积是多少平方厘米？(π取3.14)`,a:fmt(+(2*3.14*r*h).toFixed(2)),d:[fmt(+(3.14*r*h).toFixed(2)),fmt(+(3.14*r*r).toFixed(2)),fmt(+(2*3.14*r).toFixed(2))]},
+    {s:figCylinder(),q:`一个圆柱（如上图）底面半径${r}厘米、高${h}厘米，它的体积是多少立方厘米？(π取3.14)`,a:fmt(+(3.14*r*r*h).toFixed(2)),d:[fmt(+(2*3.14*r*h).toFixed(2)),fmt(+(3.14*r*h).toFixed(2)),fmt(+(3.14*r*r).toFixed(2))]},
+    {s:figCone(),q:`一个圆锥（如上图）底面半径${r}厘米、高${hc}厘米，它的体积是多少立方厘米？(π取3.14)`,a:fmt(+(3.14*r*r*hc/3).toFixed(2)),d:[fmt(+(3.14*r*r*hc).toFixed(2)),fmt(+(3.14*r*r).toFixed(2)),fmt(+(2*3.14*r*hc).toFixed(2))]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g6_proportion(){
+  // 图形的放大与缩小（人教版六下比例单元）：尺寸放在题面里，配图标长度
+  // b<a 防止 b*kk 与 a*kk 撞干扰项；面积倍数干扰项避开 kk=2 时 kk²=2kk
+  let a=ri(3,6), b=ri(2,5), kk=pick([2,3,4]);
+  if(b>=a) b=a-1;
+  let rect=`<rect x="34" y="32" width="${a*7}" height="${b*7}" fill="rgba(180,148,90,0.16)" stroke="${FIG_STROKE}" stroke-width="1.8"/>`+figLabel(34+a*7/2,26,a+'厘米')+figLabel(24,32+b*7/2,b+'厘米');
   let items=[
     {q:'若a:b=c:d，则ad=?',a:'bc',d:['ac','bd','ab']},
     {q:'比例的基本性质是？',a:'两外项之积=两内项之积',d:['两外项之和=两内项之和','两外项之差=两内项之差','两外项之积=两内项之差']},
     {q:'2:3=4:x，则x=?',a:'6',d:['5','8','9']},
     {q:'9:x=3:4，则x=?',a:'12',d:['9','8','15']},
     {q:'0.5:0.2=x:4，则x=?',a:'10',d:['8','5','16']},
+    {s:rect,q:`上图长方形（长${a}厘米、宽${b}厘米）按${kk}:1放大后，长是多少厘米？`,a:String(a*kk),d:[String(a+kk),String(a*(kk+1)),String(b*kk)]},
+    {s:rect,q:`上图长方形按${kk}:1放大后，新图形的面积是原图形的几倍？`,a:String(kk*kk)+'倍',d:[String(kk)+'倍',String(kk*kk-1)+'倍',String(kk+1)+'倍']},
   ];
-  let it=pick(items); return mc(it.q,it.a,it.d);
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g6_stats(){
   // 扇形统计图：真实数据 + 百分比标签 + 图例（可据图作答）
@@ -7348,6 +7443,84 @@ function g6_stats(){
     {s:pie,q:'上图扇形统计图中，圆心角最大的扇形是哪类图书？',a:'故事书',d:['科技书','漫画书','一样大']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+// 位置与方向（二）：方位角识图（罗盘图）+ 观测点 + 比例尺换算（六上第2单元）
+function g6_direction2(){
+  // 随机生成一个「基准方向 + 偏移方向 + 角度」的方位角
+  // 数学角：0°=东，90°=北；南=-90°(即270°)，西=180°
+  const bases=[['北',90,],['南',-90]];
+  const offs=[['东',-1],['西',1]]; // 东=角度减小方向（向0°靠），西=角度增大方向
+  let it0=pick(bases), it1=pick(offs);
+  let deg=ri(15,60);
+  let name=it0[0]+'偏'+it1[0]+deg+'°';
+  let aDeg=it0[1]+it1[1]*deg; // 北偏东30°=90-30=60°；南偏西40°=-90-40=-130°
+  // 识图题配图绝不能带方位名标注（把答案印在图顶等于泄题），label 仅留给非答题场景
+  let comp=figCompass(aDeg);
+  // 识图题题面在 3 种说法间轮换：题面固定而参数只在图里，同卷易出现视觉重复题
+  const figQ=pick(['上图中箭头所指的方向是？','看图回答：金色箭头所指的方向是？','上图罗盘中，箭头所指的方向是？']);
+  // 反方向（观测点互换）：角度不变，基准与偏移全部相反
+  let opp={'北':'南','南':'北','东':'西','西':'东'};
+  let nameOpp=opp[it0[0]]+'偏'+opp[it1[0]]+deg+'°';
+  // 比例尺换算：1:n，图上 c 厘米 → 实际 c·n 厘米（换算成千米/米）
+  let scale=pick([100000,200000,300000,600000,50000]); // 1:scale
+  let cm=ri(2,8);
+  let realKm=+(cm*scale/100000).toFixed(cm*scale%100000?1:0); // 厘米→千米
+  let realKmStr=(realKm%1===0)?String(realKm):String(realKm);
+  let items=[
+    {s:comp,q:figQ,a:name,d:[opp[it0[0]]+'偏'+it1[0]+deg+'°',it0[0]+'偏'+opp[it1[0]]+deg+'°',it1[0]+'偏'+it0[0]+deg+'°']},
+    {q:`「${name}」方向的另一种说法是？`,a:it1[0]+'偏'+it0[0]+(90-deg)+'°',d:[it1[0]+'偏'+it0[0]+deg+'°',opp[it0[0]]+'偏'+it1[0]+deg+'°',it0[0]+'偏'+opp[it1[0]]+deg+'°']},
+    {q:`小明在小华的${name}方向上，那么小华在小明的（　）方向上。`,a:nameOpp,d:[name,opp[it0[0]]+'偏'+it1[0]+(90-deg)+'°',it0[0]+'偏'+opp[it1[0]]+(90-deg)+'°']},
+    {q:'确定物体位置的三要素是？',a:'观测点、方向和距离',d:['长度、宽度、高度','方向、速度、时间','人数、份数、平均数']},
+    {q:'描述方向时，一般以哪个方向为基准？',a:'南北方向',d:['东西方向','东南方向','西北方向']},
+    {q:'观测点不同，同一个物体相对观测点的方向？',a:'一定可能不同',d:['一定相同','一定相反','无法比较']},
+    {q:`比例尺是1:${scale.toLocaleString('en-US')}，图上距离${cm}厘米表示实际距离是多少千米？`,a:realKmStr+'千米',d:[String(+((cm*scale/10000).toFixed(1)))+'千米',String(cm*scale)+'千米',String(cm)+'千米']},
+    {q:'比例尺 1:100000 表示图上1厘米相当于实际？',a:'1千米',d:['100米','10千米','100千米']},
+    {q:`在平面图上量得两地图上距离是${cm}厘米，比例尺1:${scale.toLocaleString('en-US')}，两地实际距离是多少千米？`,a:realKmStr+'千米',d:[String(cm*scale)+'千米',String(cm)+'千米',String(+((cm*scale/10000).toFixed(1)))+'千米']},
+    {q:'图上距离、实际距离、比例尺之间的关系是？',a:'图上距离 : 实际距离 = 比例尺',d:['实际距离 : 图上距离 = 比例尺','图上距离 × 实际距离 = 比例尺','图上距离 + 实际距离 = 比例尺']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+// 数与形：正方形数 1+3+5+…+(2n-1)=n²（六上第8单元数学广角）
+function g6_numshape(){
+  let n=ri(4,9), sq=n*n;
+  // 识图题题面在 3 种说法间轮换：题面固定而参数只在图里，同卷易出现视觉重复题
+  const cntQ=pick(['上图由从1开始的连续奇数拼成大正方形，图中一共有多少个小正方形？','数一数、算一算：上图大正方形一共由多少个小正方形拼成？','上图是用从1开始的连续奇数拼成的大正方形，小正方形总数是多少？']);
+  let items=[
+    {q:`1+3+5+…+${2*n-1}=？`,a:String(sq),d:[String(sq+2*n+1),String(sq-2*n+1),String(n*(n+1))]},
+    {s:figSquareNum(n),q:cntQ,a:String(sq),d:[String(sq+1),String(n*(n+1)),String(sq-2*n+1)]},
+    {s:figSquareNum(n),q:`上图最外层（第${n}层）比第${n-1}层多几个小正方形？`,a:String(2*n-1),d:[String(2*n),String(2*n+1),String(n)]},
+    {q:`从1开始的连续奇数相加，和是${sq}，一共有几个加数？`,a:String(n),d:[String(n+1),String(sq-1),String(2*n-1)]},
+    {q:'从1开始的连续奇数相加，和等于？',a:'加数个数的平方',d:['加数个数的2倍','最大加数的平方','加数个数加1的和']},
+    {q:'拼大正方形时，从第n层往外多拼一层，增加的小正方形个数是？',a:'下一个连续奇数（2n+1个）',d:['总是2个','n个','2n个']},
+    {q:`${n}²−${n-1}²=？`,a:String(2*n-1),d:[String(2*n+1),String(n),String(1)]},
+    {q:'1+3+5+7+9+11=？',a:'36',d:['30','42','25']},
+    {q:'数形结合解决问题的核心思想是？',a:'把数的规律画成图形，一眼看穿',d:['所有题目都要画图','数比形更重要','形比数更重要']},
+    {q:`从1开始的连续奇数，第${n}个加数是多少？`,a:String(2*n-1),d:[String(2*n),String(2*n+1),String(sq)]},
+    {q:`已知 1+3+5+…+(2n−1)=n²，当 n=${n} 时，和是多少？`,a:String(sq),d:[String(sq+2),String(2*n-1),String(n+1)]},
+    {q:`拼成的大正方形每边有${n}个小正方形（共${n}层），一共用了多少个小正方形？`,a:String(sq),d:[String(2*n-1),String(n*(n+1)),String(sq+n)]},
+    {q:`大正方形拼到第${n-1}层时用了${(n-1)*(n-1)}个小正方形，再拼上第${n}层后一共有多少个？`,a:String(sq),d:[String((n-1)*(n-1)+2),String(sq-2),String(2*n-1)]},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+// 鸽巢问题（抽屉原理）：至少数 = 物体数÷抽屉数的商+1（六下第5单元数学广角）
+function g6_pigeonhole(){
+  // 随机数铁律：必须保证 n ÷ m 有余数（整除时可平均分，「至少数」是商而非商+1，题目就不成立了）
+  let m=ri(2,4), n=ri(8,17);
+  if(n%m===0) n+=1;
+  let q=Math.floor(n/m), least=q+1;
+  let items=[
+    {q:`${n}支铅笔放进${m}个笔筒里，总有一个笔筒里至少放进几支铅笔？`,a:least+'支',d:[(q)+'支',(q+2)+'支',(least+1)+'支']},
+    {q:'鸽巢问题（抽屉原理）中，「抽屉」指的是？',a:'分类的每一类（如花色、生肖）',d:['装东西的盒子','物体的总数','多余的部分']},
+    {q:'一副扑克牌去掉大小王后，至少抽出几张，才能保证有2张花色相同？',a:'5张',d:['4张','6张','14张']},
+    {q:'一副扑克牌（去掉大小王），至少抽出几张，才能保证有2张点数相同？',a:'14张',d:['13张','5张','15张']},
+    {q:'至少要在多少人中，才能保证有2人的生肖相同？',a:'13人',d:['12人','14人','24人']},
+    {q:'袋中有红、黄、蓝三种颜色的球各6个，至少摸出几个球，才能保证有2个同色？',a:'4个',d:['3个','5个','7个']},
+    {q:'鸽巢原理告诉我们：物体数多于抽屉数时，一定存在？',a:'某个抽屉至少有2个物体',d:['每个抽屉都有2个物体','只有一个抽屉有物体','所有抽屉物体数相同']},
+    {q:'解决「至少……才能保证……」类问题，应采用什么原则思考？',a:'最不利原则（先想运气最差的情况）',d:['最有利原则','平均原则','随机原则']},
+    {q:`${n}本书分给${m}个同学，总有一个同学至少分到几本书？`,a:least+'本',d:[(q)+'本',(q+2)+'本',(least-1>q?least-1:least+1)+'本']},
+    {q:`把${n}只鸽子飞进${m}个鸽巢，${n}÷${m}=${q}……${n-q*m}，总有一个鸽巢至少飞进几只鸽子？`,a:least+'只',d:[(q)+'只',(q+2)+'只',(least+1)+'只']},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g6_review(){
   let r=ri(2,6);
@@ -8019,7 +8192,7 @@ function renderSpecialSection() {
   for (let g = 1; g <= 6; g++) {
     for (let s = 1; s <= 2; s++) {
       KNOWLEDGE_BASE[g][s].forEach((unit, idx) => {
-        if (unit.name.includes('专项')) found.push({ grade: g, sem: s, idx, unit });
+        if (unit.group === '专项' || unit.name.includes('专项')) found.push({ grade: g, sem: s, idx, unit });
       });
     }
   }
@@ -8071,6 +8244,42 @@ function renderUnits() {
   let listEl = document.getElementById('unitList');
   let data = loadData();
 
+  // v49：含「课本」单元的年级（六年级）→ 课本同步 + 专项练习分区展示
+  const isTbGrade = units.some(u => u.group === '课本');
+
+  function unitItemHTML(unit, idx) {
+    let isSpec = unit.group === '专项' || unit.name.includes('专项');
+    let cls = 'unit-item' + (isSpec ? ' special-unit' : '');
+    let records = (data.history || []).filter(h => h.grade === state.currentGrade && h.unitName === unit.name);
+    let bestScore = records.length > 0 ? Math.max(...records.map(r => r.accuracy)) : 0;
+    let metaText = records.length > 0
+      ? `<span class="unit-progress">最高正确率 ${bestScore}%</span>`
+      : `<span style="font-size:12px;color:var(--text-lighter)">${getTypeName(unit.type)}${unit.summary ? ' · 含同步学习' : ''}</span>`;
+    let badge = isSpec ? '专' : (unit.unit ? unit.unit : idx + 1);
+    return `<div class="${cls}" onclick="startUnitQuiz(${idx})">
+      <div class="unit-number">${badge}</div>
+      <div class="unit-info">
+        <div class="unit-name">${unit.name}</div>
+        <div class="unit-meta">${metaText}</div>
+      </div>
+      <div class="unit-arrow">›</div>
+    </div>`;
+  }
+
+  if (isTbGrade) {
+    let html = '';
+    let tb = units.filter(u => u.group === '课本');
+    let sp = units.filter(u => u.group !== '课本');
+    html += `<div class="section-title" style="margin-top:2px">课本同步（${semName}）</div>`;
+    tb.forEach(u => { html += unitItemHTML(u, units.indexOf(u)); });
+    if (sp.length) {
+      html += `<div class="section-title">专项练习</div>`;
+      sp.forEach(u => { html += unitItemHTML(u, units.indexOf(u)); });
+    }
+    listEl.innerHTML = html;
+    return;
+  }
+
   listEl.innerHTML = '';
   units.forEach((unit, idx) => {
     let item = document.createElement('div');
@@ -8118,8 +8327,57 @@ function showUnitDiagrams(unit, grade, sem, idx) {
   const cardsEl = document.getElementById('diagramCards');
   const imgWrap = document.getElementById('specialIntroImgWrap');
   const imgEl = document.getElementById('specialIntroImg');
+  const studyEl = document.getElementById('studyCards');
+  const descEl = document.getElementById('specialIntroDesc');
+  const btnEl = document.getElementById('specialIntroBtn');
   cardsEl.innerHTML = '';
   imgWrap.style.display = 'none';
+
+  // ===== 同步学习三层结构（v49：知识点总结 / 万能公式 / 万能方法） =====
+  const hasStudy = !!(unit.summary && unit.summary.length) || !!(unit.fidx && unit.fidx.length) || !!(unit.method && unit.method.length);
+  if (studyEl) studyEl.innerHTML = '';
+  if (hasStudy) {
+    let h = '';
+    // 1) 知识点总结卡（米白底）
+    if (unit.summary && unit.summary.length) {
+      h += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin:4px 0 8px">知识点总结</div>';
+      h += '<div style="background:var(--bg,#F7F6F2);border:1px solid rgba(180,148,90,.25);border-radius:12px;padding:12px 14px;margin-bottom:14px">';
+      unit.summary.forEach(function (s, i) {
+        h += '<div style="display:flex;gap:8px;margin-bottom:' + (i === unit.summary.length - 1 ? 0 : 9) + 'px;font-size:13.5px;line-height:1.75">';
+        h += '<span style="color:var(--gold);font-weight:700;flex-shrink:0">' + (i + 1) + '.</span><span>' + s + '</span></div>';
+      });
+      h += '</div>';
+    }
+    // 2) 万能公式卡（金色描边）
+    if (unit.fidx && unit.fidx.length) {
+      h += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin:4px 0 8px">万能公式</div>';
+      unit.fidx.forEach(function (f) {
+        h += '<div style="background:#FCF9F2;border:1px solid #E8D9B8;border-left:3px solid var(--gold);border-radius:10px;padding:10px 12px;margin-bottom:9px">';
+        h += '<div style="font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:4px">' + f.t + '</div>';
+        h += '<div style="font-size:13.5px;line-height:1.7;color:var(--primary,#3E4A63)">' + f.f + '</div>';
+        if (f.warn) h += '<div style="font-size:11.5px;color:#C0504D;margin-top:4px">⚠ ' + f.warn + '</div>';
+        h += '</div>';
+      });
+    }
+    // 3) 万能答题方法卡（黛蓝底）
+    if (unit.method && unit.method.length) {
+      h += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin:4px 0 8px">万能答题方法</div>';
+      h += '<div style="background:linear-gradient(135deg,#3E4A63,#2E3648);border-radius:12px;padding:12px 14px;margin-bottom:6px">';
+      unit.method.forEach(function (m, i) {
+        h += '<div style="margin-bottom:' + (i === unit.method.length - 1 ? 0 : 10) + 'px">';
+        h += '<div style="font-size:12px;font-weight:700;color:#D8C9A8;margin-bottom:3px">' + m.t + '</div>';
+        h += '<div style="font-size:13px;line-height:1.75;color:#F2F0EA">' + m.s + '</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+    }
+    if (studyEl) studyEl.innerHTML = h;
+    if (descEl) descEl.textContent = '先看知识点、公式和方法，再开始练习，效果加倍。';
+    if (btnEl) btnEl.textContent = '开始练习';
+  } else {
+    if (descEl) descEl.textContent = '动手拖动下面的图形，先观察再答题。';
+    if (btnEl) btnEl.textContent = '开始答题';
+  }
 
   // 静态方法图（若有）
   if (unit.introImg) {
@@ -8438,30 +8696,34 @@ function renderExamCenter() {
   document.getElementById('startExamBtn').style.display = hasType ? 'block' : 'none';
 
   let units = (KNOWLEDGE_BASE[examState.grade] && KNOWLEDGE_BASE[examState.grade][examState.semester]) || [];
+  // v49：含课本单元的年级，月考次数按课本单元数计算（专项不进整册组卷）
+  let tbUnits = units.filter(u => u.group === '课本');
+  let scopeUnits = tbUnits.length ? tbUnits : units;
 
-  // 单元选择（仅单元考）
+  // 单元选择（仅单元考；索引基于原始数组，含专项）
   let unitRow = document.getElementById('examUnitRow');
   if (examState.type === 'unit') {
     unitRow.style.display = 'flex';
     if (examState.unitIdx >= units.length) examState.unitIdx = 0;
     let uHtml = '';
     units.forEach((u, i) => {
-      uHtml += `<button class="chip chip-sm ${examState.unitIdx === i ? 'selected' : ''}" onclick="selectExamUnit(${i})">第${i + 1}单元 ${u.name}</button>`;
+      let label = (u.group === '课本') ? `第${u.unit}单元 ${u.name}` : u.name;
+      uHtml += `<button class="chip chip-sm ${examState.unitIdx === i ? 'selected' : ''}" onclick="selectExamUnit(${i})">${label}</button>`;
     });
     document.getElementById('examUnitBtns').innerHTML = uHtml;
   } else {
     unitRow.style.display = 'none';
   }
 
-  // 月考次数（仅月考）
+  // 月考次数（仅月考，按课本单元范围）
   let monthRow = document.getElementById('examMonthRow');
   if (examState.type === 'month') {
     monthRow.style.display = 'flex';
-    let maxMonth = Math.max(1, Math.ceil(units.length / 2));
+    let maxMonth = Math.max(1, Math.ceil(scopeUnits.length / 2));
     if (examState.month > maxMonth) examState.month = 1;
     let mHtml = '';
     for (let m = 1; m <= maxMonth; m++) {
-      let cover = Math.min(units.length, m * 2);
+      let cover = Math.min(scopeUnits.length, m * 2);
       mHtml += `<button class="chip chip-sm ${examState.month === m ? 'selected' : ''}" onclick="selectExamMonth(${m})">第${m}次月考（1~${cover}单元）</button>`;
     }
     document.getElementById('examMonthBtns').innerHTML = mHtml;
@@ -8484,12 +8746,17 @@ function selectExamMonth(m) { examState.month = m; renderExamCenter(); }
 
 // 根据考试类型确定考查范围
 function getExamUnits() {
-  let all = (KNOWLEDGE_BASE[examState.grade] && KNOWLEDGE_BASE[examState.grade][examState.semester]) || [];
-  if (all.length === 0) return { units: [], rangeText: '' };
+  let raw = (KNOWLEDGE_BASE[examState.grade] && KNOWLEDGE_BASE[examState.grade][examState.semester]) || [];
+  if (raw.length === 0) return { units: [], rangeText: '' };
+  // v49：含课本单元的年级（六年级），期中/期末/月考只考课本单元（专项不进整册组卷，对齐真实期末范围）
+  let hasTb = raw.some(u => u.group === '课本');
+  let all = hasTb ? raw.filter(u => u.group === '课本') : raw;
 
   if (examState.type === 'unit') {
-    let u = all[examState.unitIdx] || all[0];
-    return { units: [u], all: all, rangeText: `第${examState.unitIdx + 1}单元 ${u.name}` };
+    // 单元考试索引基于原始数组（含专项），任选一个单元
+    let u = raw[examState.unitIdx] || raw[0];
+    let label = (u.group === '课本') ? `第${u.unit}单元 ${u.name}` : u.name;
+    return { units: [u], all: all, rangeText: label };
   }
   if (examState.type === 'month') {
     let n = Math.min(all.length, examState.month * 2);
@@ -8579,7 +8846,11 @@ function buildQuestionPool(units, target, seen, isCore) {
 }
 
 // 从题池中挑选 n 道题：分数越高越优先，同时避免同一单元扎堆
-function pickFromPool(pool, used, n, scorer) {
+// v49 去重铁律：主池构建按「题面|答案」去重（保留参数化图形题的多样答案），
+// 但选题时必须再按「题面文本」严格去重——同题面、参数只在 SVG 图里的题，
+// 在卷面上就是视觉重复题（跨单元模板题同理）。严格模式凑不满时（单元卷题面
+// 种类有限），放宽允许少量重复，保证整卷题量完整。
+function pickFromPool(pool, used, n, scorer, usedText) {
   let out = [];
   let unitCount = {};
   let tplCount = {};
@@ -8587,26 +8858,33 @@ function pickFromPool(pool, used, n, scorer) {
     .replace(/\d+(\.\d+)?/g, '#')
     .replace(/(.)\1+/gu, '$1')   // 折叠重复符号，如 🔟•••• 与 🔟•• 视为同一题型
     .slice(0, 20);
-  while (out.length < n) {
-    let best = -1, bestScore = -1;
-    for (let i = 0; i < pool.length; i++) {
-      if (used.has(i)) continue;
-      let base = scorer(pool[i]);
-      if (base <= 0) continue;
-      if (pool[i]._core === false) base *= 0.35;   // 补充题让位于本次考查范围
-      let c = unitCount[pool[i]._unitName] || 0;
-      let tc = tplCount[tplOf(pool[i])] || 0;
-      let s = base / (1 + 0.7 * c) / (1 + 1.1 * tc) + Math.random() * 0.8;
-      if (s > bestScore) { bestScore = s; best = i; }
+  const run = (allowRepeat) => {
+    while (out.length < n) {
+      let best = -1, bestScore = -1;
+      for (let i = 0; i < pool.length; i++) {
+        if (used.has(i)) continue;
+        // 题面文本已选过的题：严格轮直接跳过（视觉重复）
+        if (!allowRepeat && usedText && usedText.has(pool[i].question)) continue;
+        let base = scorer(pool[i]);
+        if (base <= 0) continue;
+        if (pool[i]._core === false) base *= 0.35;   // 补充题让位于本次考查范围
+        let c = unitCount[pool[i]._unitName] || 0;
+        let tc = tplCount[tplOf(pool[i])] || 0;
+        let s = base / (1 + 0.7 * c) / (1 + 1.1 * tc) + Math.random() * 0.8;
+        if (s > bestScore) { bestScore = s; best = i; }
+      }
+      if (best < 0) return;
+      used.add(best);
+      if (usedText) usedText.add(pool[best].question);
+      let name = pool[best]._unitName;
+      unitCount[name] = (unitCount[name] || 0) + 1;
+      let tpl = tplOf(pool[best]);
+      tplCount[tpl] = (tplCount[tpl] || 0) + 1;
+      out.push(pool[best]);
     }
-    if (best < 0) break;
-    used.add(best);
-    let name = pool[best]._unitName;
-    unitCount[name] = (unitCount[name] || 0) + 1;
-    let tpl = tplOf(pool[best]);
-    tplCount[tpl] = (tplCount[tpl] || 0) + 1;
-    out.push(pool[best]);
-  }
+  };
+  run(false);                    // 第一轮：题面文本严格去重
+  if (out.length < n) run(true); // 第二轮：题面种类不足时放宽，凑满整卷
   return out;
 }
 
@@ -8856,6 +9134,37 @@ function generateSteps(q) {
     return [`把这项工程看作单位"1"`,
       `每天完成 = 1 ÷ ${d} = 1/${d}`];
   }
+  // ── 数与形：连续奇数求和（1+3+5+…+(2n-1)=n²）──
+  m = t.match(/^1\+3\+5\+…\+(\d+)=？$/);
+  if (m) {
+    let last=+m[1], n=(last+1)/2;
+    return [`从1开始的连续奇数相加，和 = 加数个数的平方`,
+      `末项 = ${last} = 2n−1，所以共有 n = ${n} 个加数`,
+      `和 = ${n}² = ${n*n}`];
+  }
+  // ── 数与形：第n层比第n-1层多几个（n²−(n−1)²=2n−1）──
+  m = t.match(/^(\d+)²−(\d+)²=？$/);
+  if (m) {
+    let n=+m[1];
+    return [`大正方形数 − 小正方形数 = 最外层拐角形的小正方形数`,
+      `${n}² − ${n-1}² = ${n*n} − ${(n-1)*(n-1)} = ${2*n-1}`,
+      `规律：第${n}层（L形）比第${n-1}层多 2×${n}−1 = ${2*n-1} 个`];
+  }
+  // ── 鸽巢问题：至少数 = 商 + 1 ──
+  m = t.match(/^(\d+)支铅笔放进(\d+)个笔筒里，总有一个笔筒里至少放进几支铅笔？$/);
+  if (m) {
+    let n=+m[1], d=+m[2], q2=Math.floor(n/d);
+    return [`把铅笔看作物体，笔筒看作抽屉`,
+      `${n} ÷ ${d} = ${q2}……${n-q2*d}`,
+      `至少数 = 商 + 1 = ${q2} + 1 = ${q2+1}（支）`];
+  }
+  m = t.match(/^(\d+)本书分给(\d+)个同学，总有一个同学至少分到几本书？$/);
+  if (m) {
+    let n=+m[1], d=+m[2], q2=Math.floor(n/d);
+    return [`把书看作物体，同学看作抽屉`,
+      `${n} ÷ ${d} = ${q2}……${n-q2*d}`,
+      `至少数 = 商 + 1 = ${q2} + 1 = ${q2+1}（本）`];
+  }
 
   // ── 应用题通用：数量关系 + 列式 ──
   if (q.sectionTitle && q.sectionTitle.includes('应用')) {
@@ -8904,10 +9213,11 @@ function generateExamPaper() {
   }
 
   let used = new Set();
+  let usedText = new Set();   // 跨分区共享的题面文本去重（v49：杜绝视觉重复题）
   let questions = [];
 
   PAPER_STRUCTURE.forEach(sec => {
-    let picked = pickFromPool(pool, used, sec.count, getSectionScorer(sec.key));
+    let picked = pickFromPool(pool, used, sec.count, getSectionScorer(sec.key), usedText);
     picked.forEach(q => {
       let item = Object.assign({}, q);
       item.score = sec.score;

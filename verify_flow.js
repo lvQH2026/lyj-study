@@ -227,7 +227,7 @@ try {
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 ['css/style.css', 'css/english.css', 'js/core.js', 'js/math.js', 'js/data.js', 'js/english.js', 'js/chinese.js', 'js/diagram.js', 'js/main.js', 'js/aiAnalysis.js']
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
-ok('SW 版本号已升级 (v48 单元考试对齐期末规则)', /lyj-shell-v48/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|4[0-7])/.test(sw));
+ok('SW 版本号已升级 (v49 六年级课本同步三层结构)', /lyj-shell-v49/.test(sw) && !/lyj-shell-v(1[0-9]|2[0-9]|3[0-9]|4[0-8])/.test(sw));
 
 // ============ 四·四、语文 4/5 年级 课本同步结构守卫（v45） ============
 const cnJs = fs.readFileSync(path.join(ROOT, 'js', 'chinese.js'), 'utf8');

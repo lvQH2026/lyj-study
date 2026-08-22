@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v48：考试板块单元考试对齐期末规则——单元考试启用同单元配图保底（imgSrc=units，绝不混入他单元）、配图保底题池独立 seen+按题面去重+采样量 200、修复 g5_equation 非整数解与 g5_tree/g_app_planting 不整除红线、行程三模板（求路程/相遇配线段图/求时间）、工程题扩容+专属步骤推导、5 个无图生成器重写扩容配图（旋转/分数条/分数圆/数阵/线段比/袋中球/数轴）、植树步骤正则对齐现行题干
-const CACHE = 'lyj-shell-v48';
+// v49：六年级课本同步三层结构——六上六下 13 课本单元（位置与方向二/数与形/鸽巢问题等 3 新单元）+ summary/fidx/method 三字段 + 同步学习页三层卡片 + 首页三分区；考试组卷铁律（期中/期末/月考只考课本单元）；选题器题面文本严格去重根治视觉重复题；figCompass/figSquareNum 反泄题（图上不再印答案）；负数/圆柱圆锥/比例补参数化配图题
+const CACHE = 'lyj-shell-v49';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
