@@ -5,68 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>吕泳冀学习站</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#4A90D9">
+<meta name="theme-color" content="#3E4A63">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    corePlugins: { preflight: false },
-    theme: {
-      extend: {
-        colors: {
-          ink: '#23262E', muted: '#5C6370', faint: '#9AA0AB',
-          primary: '#3E4A63', 'primary-lt': '#6B7894', 'primary-dk': '#2C354A',
-          gold: '#B4945A', success: '#4E8C6E', warning: '#C08A3E', danger: '#C2554F',
-          paper: '#F7F6F2', surface: '#FFFFFF', line: '#ECEAE4'
-        },
-        fontFamily: { sans: ['Inter','"PingFang SC"','"Hiragino Sans GB"','"Microsoft YaHei"','system-ui','sans-serif'] },
-        borderRadius: { xl: '16px', '2xl': '20px', '3xl': '28px' },
-        boxShadow: {
-          soft: '0 1px 2px rgba(28,32,48,.04), 0 8px 24px rgba(28,32,48,.06)',
-          lift: '0 10px 30px rgba(28,32,48,.10)',
-          glass: '0 12px 32px rgba(0,0,0,.38)'
-        },
-        keyframes: { 'fade-up': { '0%': { opacity:'0', transform:'translateY(10px)' }, '100%': { opacity:'1', transform:'translateY(0)' } } },
-        animation: { 'fade-up': 'fade-up .4s ease both' }
-      }
-    }
-  };
-</script>
+<script src="js/supabase-js.min.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/english.css">
-
-<style type="text/tailwindcss">
-  /* 轻奢极简 · 全局精致化层（在 Tailwind 设计令牌之上叠加，仅改外观，不动逻辑） */
-  body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',system-ui,sans-serif; }
-  .navbar{ box-shadow:0 2px 10px rgba(28,32,48,.08); }
-  .section-title{ font-weight:700; color:var(--text); letter-spacing:.3px; display:flex; align-items:center; }
-  .section-title::before{
-    content:''; width:4px; height:16px; border-radius:2px; margin-right:8px;
-    background:linear-gradient(var(--primary),var(--primary-light)); display:inline-block;
-  }
-  .card{ transition:box-shadow .25s ease, transform .25s ease; }
-  .card:hover{ box-shadow:var(--shadow-lift); }
-  .btn{ border-radius:var(--radius); transition:transform .15s ease, box-shadow .2s ease, background .2s ease; }
-  .btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-lift); }
-  .btn:active{ transform:translateY(0) scale(.98); }
-  .btn-primary{ background:var(--primary); border-color:var(--primary); color:#fff; }
-  .btn-primary:hover{ background:var(--primary-dark); border-color:var(--primary-dark); }
-  .option-btn{ transition:all .2s ease; border:1px solid var(--border); }
-  .option-btn:hover{ border-color:var(--primary-light); box-shadow:var(--shadow); transform:translateY(-1px); }
-  .option-btn.selected{ border-color:var(--primary); background:rgba(62,74,99,.06); }
-  .option-btn.correct{ border-color:var(--success); background:rgba(78,140,110,.10); }
-  .option-btn.wrong{ border-color:var(--danger); background:rgba(194,85,79,.10); }
-  .progress-bar{ background:var(--border); border-radius:99px; overflow:hidden; }
-  .progress-bar-fill{ background:linear-gradient(90deg,var(--primary),var(--primary-light)); border-radius:99px; }
-  .unit-item{ transition:all .2s ease; border:1px solid transparent; border-radius:var(--radius); }
-  .unit-item:hover{ background:var(--card-bg); border-color:var(--border); box-shadow:var(--shadow); transform:translateY(-1px); }
-  .result-stat .num.wrong{ color:var(--danger); }
-  .nav-icon-btn .badge{ background:var(--gold); }
-  .exam-type-card{ transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-  .exam-type-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-lift); }
-</style>
 </head>
 <body><div id="moduleSwitch" class="module-switch">
   <button class="mod-btn active" data-mod="math" onclick="App.switchModule('math')">数学</button>

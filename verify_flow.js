@@ -229,7 +229,7 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 {
   const mV = sw.match(/lyj-shell-v(\d+)/);
-  ok('SW 版本号已升级 (v57 数学3/4双轨)', !!mV && +mV[1] === 57);
+  ok('SW 版本号已升级 (v58 P0去CDN+数学3/4双轨)', !!mV && +mV[1] === 58);
 }
 // v56 守卫：children 表数据通道替代 study_records
 {
@@ -375,6 +375,16 @@ ok('对齐：english.js 首页使用数学 .unit-item 行样式', /class="unit-i
     const e = fs.existsSync(p);
     ok('文件存在 ' + f, e && fs.statSync(p).size > 100, e ? (fs.statSync(p).size + ' B') : '缺失');
   });
+
+// ============ v58、P0 去海外 CDN 依赖守卫 ============
+const idx58 = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+ok('v58：index.html 已无海外 CDN 引用（jsdelivr/tailwindcss）', !/cdn\.jsdelivr|cdn\.tailwindcss|tailwindcss\.com/.test(idx58));
+ok('v58：index.html 已无 Tailwind 运行时（tailwind.config / text/tailwindcss）', !/tailwind\.config|text\/tailwindcss/.test(idx58));
+ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabase-js\.min\.js/.test(idx58) && fs.existsSync(path.join(ROOT, 'js', 'supabase-js.min.js')));
+const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
+ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
+ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
+ok('v58：SW 缓存版本号已升级为 lyj-shell-v58', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v58'));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));

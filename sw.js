@@ -1,10 +1,11 @@
 // 吕泳冀学习站 Service Worker
-// v57：数学 3/4 年级按 5/6 年级规则改造为双轨结构（课本同步+专项，含 summary/fidx/method 知识点、考试只考课本、题库 pool≥30、难度6:3:1、双层去重、参数化图形）；g4_observe 扩容去重键≥35
-const CACHE = 'lyj-shell-v57';
+// v58：P0 去海外 CDN 依赖——supabase-js 自托管为 js/supabase-js.min.js、Tailwind Play CDN 移除并将组件 CSS 静态化进 css/style.css（同域名零跨境请求，内地可达性提升）
+const CACHE = 'lyj-shell-v58';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
   './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js',
+  './js/supabase-js.min.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'
 ];
