@@ -229,7 +229,7 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 {
   const mV = sw.match(/lyj-shell-v(\d+)/);
-  ok('SW 版本号已升级 (v59 家长端自动加载云端+同步状态码)', !!mV && +mV[1] === 59);
+  ok('SW 版本号已升级 (v60 云端合并同步+本机补传恢复)', !!mV && +mV[1] === 60);
 }
 // v56 守卫：children 表数据通道替代 study_records
 {
@@ -384,7 +384,7 @@ ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabas
 const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
-ok('v59：SW 缓存版本号已升级为 lyj-shell-v59', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v59'));
+ok('v60：SW 缓存版本号已升级为 lyj-shell-v60', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v60'));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));

@@ -34,6 +34,26 @@ function syncRefreshBar() {
     + '</div>';
 }
 
+// v60：把「本机」练习记录合并补传云端——用于恢复在某台手机本地、但云端被覆盖丢失的练习
+// （例如孩子做完期中后清过 PWA 缓存，本机本地的那次记录仍在，点此即可补回云端）
+async function repairCloudFromLocal() {
+  const cfg = window.APP_CONFIG || {};
+  const id = cfg.LEARNING_ID || (typeof getLearningId === 'function' ? getLearningId() : null);
+  const pw = cfg.LEARNING_PW || (typeof getLearningPw === 'function' ? getLearningPw() : null);
+  if (!id || !pw) { alert('未配置家庭学习ID，无法补传'); return; }
+  const btn = document.getElementById('repairCloudBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '正在合并本机记录到云端…'; }
+  try {
+    if (typeof pushRecentHistory === 'function') await pushRecentHistory();
+    await renderRemote(id, pw);
+  } catch (e) {
+    if (typeof logSync === 'function') logSync(SYNC_STATUS.NETWORK_ERROR, (e && e.message) || String(e));
+    alert('补传失败：' + ((e && e.message) || String(e)));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '↥ 把本机记录合并同步到云端'; }
+  }
+}
+
 // 拉取并渲染指定学习ID的云端数据；统一处理网络/口令/空/解析四类失败，并显示状态码
 async function renderRemote(id, pw) {
   const result = document.getElementById('parentResult');
@@ -161,7 +181,12 @@ function renderParent() {
     }
     // 已配置固定学习ID/口令（如吕泳冀专属 LYJ-YONGJI）→ 打开即自动拉取家庭云端内容，家长无需手动登录即可看到
     if (cfg.LEARNING_ID && cfg.LEARNING_PW) {
-      result.innerHTML = syncBox + '<div id="syncStatusBar" style="font-size:13px;color:#9AA3BD;padding:8px 0">正在同步家庭学习数据…</div>';
+      result.innerHTML = syncBox
+        + '<div style="margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+        + '<button id="repairCloudBtn" class="btn" style="padding:6px 12px;font-size:12px" onclick="repairCloudFromLocal()">↥ 把本机记录合并同步到云端</button>'
+        + '<span style="font-size:12px;color:#9AA3BD">若某次练习在家长端丢失，用「做过那次练习的手机」点此即可补回</span>'
+        + '</div>'
+        + '<div id="syncStatusBar" style="font-size:13px;color:#9AA3BD;padding:8px 0">正在同步家庭学习数据…</div>';
       renderRemote(cfg.LEARNING_ID, cfg.LEARNING_PW);
     } else {
       // 未配置固定凭证 → 本机预览 + 手动登录框

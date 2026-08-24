@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v59：家长端修复——打开即自动加载家庭云端(免手动登录)、放宽最近练习"近7天"硬门槛、统一同步状态码(SYNC-401/403/500)+刷新重试；子端加 logSync/withRetry 与网络恢复/回到前台自动补推
-const CACHE = 'lyj-shell-v59';
+// v60：修复「云端被本机镜像整体覆盖→本机重置后家长端丢记录」。pushRecentHistory 改为读取云端已有记录+合并本机新增(去重)再回写(保留上限50)；家长端加「把本机记录合并同步到云端」按钮做即时恢复；多设备可累积
+const CACHE = 'lyj-shell-v60';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

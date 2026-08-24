@@ -130,8 +130,8 @@ async function pushRecentHistory() {
   const c = sbClient(); if (!c) return;
   const data = loadData();
   const hist = data.history || [];
-  // 云端只保留最近 30 条，避免 payload 过大；每道错题最多保留 20 题详情
-  const payload = hist.slice(0, 30).map(h => ({
+  // v60：本地最近 50 条（recordHistory 本地上限即 50）映射为精简结构，每道错题最多保留 20 题详情
+  const localPayload = hist.slice(0, 50).map(h => ({
     module: h.module || '数学',
     grade: h.grade,
     unitName: h.unitName,
@@ -157,14 +157,29 @@ async function pushRecentHistory() {
   const recentId = getLearningId() + ':recent';
   try {
     await withRetry(async function () {
+      // v60：先取云端已有记录，合并而非整体覆盖——避免本机重置/重装后清空云端历史，
+      // 也支持多设备累积（任一设备补传都不会抹掉其它设备已上传的记录）
+      let existing = [];
+      try {
+        const { data: row } = await c.from('children').select('password').eq('learning_id', recentId).single();
+        if (row && row.password) {
+          const p = JSON.parse(row.password);
+          if (Array.isArray(p.records)) existing = p.records;
+        }
+      } catch (e) { /* 首条记录：云端尚无数据行 */ }
+      const keyOf = r => [r.grade, r.unitName, r.time, r.score, r.total].map(x => String(x)).join('|');
+      const map = {};
+      existing.forEach(r => { if (r && r.time) map[keyOf(r)] = r; });                 // 保留已上传记录（含其错题详情）
+      localPayload.forEach(r => { if (r && r.time && !map[keyOf(r)]) map[keyOf(r)] = r; }); // 仅补入本地新增
+      const merged = Object.values(map).sort((a, b) => (b.time || 0) - (a.time || 0)).slice(0, 50);
       const { error } = await c.from('children').upsert({
         learning_id: recentId,
-        password: JSON.stringify({ records: payload, updated_at: Date.now() }),
+        password: JSON.stringify({ records: merged, updated_at: Date.now() }),
         updated_at: new Date().toISOString()
       });
       if (error) throw error;
     }, 'pushRecentHistory');
-    logSync('OK', 'pushRecentHistory records=' + payload.length);
+    logSync('OK', 'pushRecentHistory merged ok');
   } catch (e) {
     console.warn('pushRecentHistory ex', e);
     logSync('FAIL', (e && e.message) || String(e));
