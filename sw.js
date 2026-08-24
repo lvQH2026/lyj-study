@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v58：P0 去海外 CDN 依赖——supabase-js 自托管为 js/supabase-js.min.js、Tailwind Play CDN 移除并将组件 CSS 静态化进 css/style.css（同域名零跨境请求，内地可达性提升）
-const CACHE = 'lyj-shell-v58';
+// v59：家长端修复——打开即自动加载家庭云端(免手动登录)、放宽最近练习"近7天"硬门槛、统一同步状态码(SYNC-401/403/500)+刷新重试；子端加 logSync/withRetry 与网络恢复/回到前台自动补推
+const CACHE = 'lyj-shell-v59';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

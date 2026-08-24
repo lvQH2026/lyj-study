@@ -26,6 +26,32 @@ function getLearningPw() {
   return pw;
 }
 
+// ===== 同步状态日志（供排查「家长端看不到内容」类问题）=====
+let _lastSync = { code: 'INIT', time: 0, msg: '' };
+function logSync(code, msg) {
+  _lastSync = { code: code, time: Date.now(), msg: String(msg == null ? '' : msg).slice(0, 200) };
+  console.log('[sync]', code, _lastSync.msg);
+}
+function getSyncStatus() { return _lastSync; }
+
+// 仅网络类瞬时错误重试；RLS/口径错误（带 code 或非网络特征）直接抛出，避免无效重试放大故障
+async function withRetry(fn, label, retries) {
+  retries = retries || 3;
+  let lastErr = null;
+  for (let i = 0; i < retries; i++) {
+    try { return await fn(); }
+    catch (e) {
+      lastErr = e;
+      const m = (e && e.message) ? e.message : String(e);
+      const transient = !e.code && /failed to fetch|network|timeout|econn|socket|abort/i.test(m);
+      logSync('RETRY_' + (i + 1), label + ': ' + m.slice(0, 120));
+      if (!transient) throw e;
+      if (i < retries - 1) await new Promise(function (r) { setTimeout(r, 800 * (i + 1)); });
+    }
+  }
+  throw lastErr;
+}
+
 async function ensureChild() {
   const c = sbClient(); if (!c) return false;
   try {
@@ -91,8 +117,10 @@ async function pushStudyRecords() {
   // 同步状态落盘：成功清空，失败记错误（家长本机页可见，避免静默失败）
   if (syncErr) {
     data.syncError = { time: Date.now(), msg: String(syncErr).slice(0, 300) };
+    logSync('FAIL', syncErr);
   } else {
     delete data.syncError;
+    logSync('OK', 'pushStudyRecords pending=' + pending.length);
   }
   saveData(data);
 }
@@ -128,13 +156,19 @@ async function pushRecentHistory() {
   }));
   const recentId = getLearningId() + ':recent';
   try {
-    const { error } = await c.from('children').upsert({
-      learning_id: recentId,
-      password: JSON.stringify({ records: payload, updated_at: Date.now() }),
-      updated_at: new Date().toISOString()
-    });
-    if (error) console.warn('pushRecentHistory', error);
-  } catch (e) { console.warn('pushRecentHistory ex', e); }
+    await withRetry(async function () {
+      const { error } = await c.from('children').upsert({
+        learning_id: recentId,
+        password: JSON.stringify({ records: payload, updated_at: Date.now() }),
+        updated_at: new Date().toISOString()
+      });
+      if (error) throw error;
+    }, 'pushRecentHistory');
+    logSync('OK', 'pushRecentHistory records=' + payload.length);
+  } catch (e) {
+    console.warn('pushRecentHistory ex', e);
+    logSync('FAIL', (e && e.message) || String(e));
+  }
 }
 
 // v56 新增：家长端远程拉取最近练习；先校验 learning_id+pw，再取同账号的 :recent 数据行
@@ -238,3 +272,21 @@ async function syncAfterQuiz() {
 
 // 启动时加载内容覆盖层
 loadAndApplyContent();
+
+// 子端健壮性：网络恢复 / 回到前台时自动补推，保证云端是最新（修复「家长端看不到最新内容」）
+(function scheduleBackgroundSync() {
+  if (typeof window === 'undefined') return;
+  let timer = null;
+  const trigger = function () {
+    if (timer) return;
+    timer = setTimeout(function () {
+      timer = null;
+      const c = sbClient();
+      if (c) syncAfterQuiz();   // 幂等 upsert，重复触发无副作用
+    }, 1500);
+  };
+  window.addEventListener('online', trigger);
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) trigger(); });
+  }
+})();

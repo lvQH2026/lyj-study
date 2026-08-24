@@ -4,6 +4,78 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
+// ===== 同步状态码与错误提示（便于定位「家长端看不到内容」类问题）=====
+const SYNC_STATUS = {
+  INIT: 'INIT',                 // 未同步
+  OK: 'OK',                     // 成功
+  LOADING: 'LOADING',           // 同步中
+  NETWORK_ERROR: 'NETWORK_ERROR', // SYNC-401 网络异常
+  AUTH_FAIL: 'AUTH_FAIL',       // SYNC-403 学习ID/口令错误
+  EMPTY: 'EMPTY',               // 该账号暂无记录
+  PARSE_ERROR: 'PARSE_ERROR'    // SYNC-500 数据解析失败
+};
+let _lastRemoteId = '', _lastRemotePw = '';   // 供「刷新」按钮复用上次凭证
+
+function syncInfoBox(title, detail, kind) {
+  const bg = kind === 'err' ? '#fff1f0' : '#eef7f0';
+  const bd = kind === 'err' ? '#cf1322' : '#4E8C6E';
+  const fg = kind === 'err' ? '#cf1322' : '#2c6b4f';
+  return '<div style="margin:10px 0;padding:12px;border:1px solid ' + bd + ';border-radius:10px;background:' + bg + ';color:' + fg + ';font-size:13px;line-height:1.6">'
+    + '<div style="font-weight:700">' + esc(title) + '</div>'
+    + (detail ? '<div style="color:#8c8c8c;margin-top:4px">' + esc(detail) + '</div>' : '')
+    + '<button class="btn" style="margin-top:8px" onclick="renderRemote(_lastRemoteId,_lastRemotePw)">刷新重试</button>'
+    + '</div>';
+}
+
+function syncRefreshBar() {
+  return '<div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#9AA3BD">'
+    + '<span>数据来自云端（最新同步）</span>'
+    + '<button class="btn" style="padding:4px 12px;font-size:12px" onclick="renderRemote(_lastRemoteId,_lastRemotePw)">↻ 刷新</button>'
+    + '</div>';
+}
+
+// 拉取并渲染指定学习ID的云端数据；统一处理网络/口令/空/解析四类失败，并显示状态码
+async function renderRemote(id, pw) {
+  const result = document.getElementById('parentResult');
+  if (!result) return;
+  _lastRemoteId = id; _lastRemotePw = pw;
+  const bar = document.getElementById('syncStatusBar');
+  if (bar) bar.textContent = '正在同步 ' + id + ' …';
+  let remote;
+  try {
+    remote = await getRecentHistory(id, pw);
+  } catch (e) {
+    const msg = (e && e.message) ? e.message : String(e);
+    if (typeof logSync === 'function') logSync(SYNC_STATUS.NETWORK_ERROR, msg);
+    if (bar) bar.outerHTML = '';
+    result.insertAdjacentHTML('afterbegin', syncInfoBox('网络异常，无法连接云端（SYNC-401）', '请检查网络后点「刷新」重试。', 'err'));
+    return;
+  }
+  if (bar) bar.outerHTML = '';
+  // getRecentHistory 返回 null = 主行未找到 / 口令不匹配 / 查询异常
+  if (!remote) {
+    if (typeof logSync === 'function') logSync(SYNC_STATUS.AUTH_FAIL, 'getRecentHistory=null');
+    result.insertAdjacentHTML('afterbegin', syncInfoBox('未找到该学习ID，或口令不正确（SYNC-403）', '请核对学习ID与口令后重试。', 'err'));
+    return;
+  }
+  const recent = remote.recent || [];
+  if (!recent.length) {
+    if (typeof logSync === 'function') logSync(SYNC_STATUS.EMPTY, 'no records');
+    result.innerHTML = syncInfoBox('该账号暂无练习记录', '孩子完成练习后会自动同步到这里。', 'ok');
+    return;
+  }
+  try {
+    const stats = buildStatsFromRecent(recent);
+    const recentHtml = renderRecentPractice(recent);
+    result.innerHTML = renderDashboard(stats, true) + recentHtml + '<div id="aiMount"></div>' + syncRefreshBar();
+    mountAiAnalysis('aiMount', 'cloud', stats);
+    if (typeof logSync === 'function') logSync(SYNC_STATUS.OK, 'records=' + recent.length);
+  } catch (e) {
+    if (typeof logSync === 'function') logSync(SYNC_STATUS.PARSE_ERROR, (e && e.message) || String(e));
+    result.insertAdjacentHTML('afterbegin', syncInfoBox('数据解析失败（SYNC-500）', '云端返回内容异常，请点「刷新」重试。', 'err'));
+  }
+}
+
 // 「最近练习」当前渲染的数据源（本机 history 或云端 study_records，统一归一化结构）
 let _rpRecords = [];
 
@@ -87,8 +159,16 @@ function renderParent() {
     } else {
       syncBox = '<div style="margin:10px 0;font-size:12px;color:var(--success)">✓ 云端同步正常</div>';
     }
-    result.innerHTML = syncBox + renderDashboard(s) + renderRecentPractice() + '<div id="aiMount"></div><div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
-    mountAiAnalysis('aiMount', 'local', null);
+    // 已配置固定学习ID/口令（如吕泳冀专属 LYJ-YONGJI）→ 打开即自动拉取家庭云端内容，家长无需手动登录即可看到
+    if (cfg.LEARNING_ID && cfg.LEARNING_PW) {
+      result.innerHTML = syncBox + '<div id="syncStatusBar" style="font-size:13px;color:#9AA3BD;padding:8px 0">正在同步家庭学习数据…</div>';
+      renderRemote(cfg.LEARNING_ID, cfg.LEARNING_PW);
+    } else {
+      // 未配置固定凭证 → 本机预览 + 手动登录框
+      const s = getLocalStats();
+      result.innerHTML = syncBox + renderDashboard(s) + renderRecentPractice() + '<div id="aiMount"></div><div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
+      mountAiAnalysis('aiMount', 'local', null);
+    }
   } else {
     box.style.display = 'none';
     const s = getLocalStats();
@@ -148,13 +228,8 @@ async function parentLogin() {
   const pw = document.getElementById('parentPw').value.trim();
   if (!id || !pw) { alert('请填写学习ID和口令'); return; }
   const result = document.getElementById('parentResult');
-  const remote = await getRecentHistory(id, pw);
-  if (!remote || !remote.ok) { result.innerHTML = '<p style="color:#cf1322">未找到该学习ID，或口令不正确。</p>'; return; }
-  const recent = remote.recent || [];
-  const stats = buildStatsFromRecent(recent);
-  const recentHtml = renderRecentPractice(recent);
-  result.innerHTML = renderDashboard(stats, true) + recentHtml + '<div id="aiMount"></div>';
-  mountAiAnalysis('aiMount', 'cloud', stats);
+  result.innerHTML = '<div id="syncStatusBar" style="font-size:13px;color:#9AA3BD;padding:8px 0">正在同步 ' + esc(id) + ' …</div>';
+  renderRemote(id, pw);
 }
 
 function renderDashboard(s) {
@@ -227,7 +302,7 @@ function formatFullTime(ts) {
 function renderRecentPractice(source) {
   // 数据来源：远程云端登录传归一化数组；本机预览不传参数则读本地 history
   if (Array.isArray(source)) {
-    _rpRecords = source;
+    _rpRecords = source.slice().sort((a, b) => (b.time || 0) - (a.time || 0));
   } else {
     const data = loadData();
     const history = (data.history || []).slice();
@@ -241,20 +316,18 @@ function renderRecentPractice(source) {
       accuracy: h.accuracy != null ? h.accuracy : (h.total ? Math.round(h.score / h.total * 100) : 0),
       time: h.time || 0,
       wrong: Array.isArray(h.wrong) ? h.wrong : []
-    }));
+    })).sort((a, b) => (b.time || 0) - (a.time || 0));
   }
-  const list = _rpRecords.slice(0, 5);
-  const now = Date.now();
-  const in7 = _rpRecords.some(h => (now - (h.time || 0)) <= 7 * 24 * 3600 * 1000);
+  const list = _rpRecords.slice(0, 8);
 
   const head = '<div class="card rp-card" style="margin-bottom:12px"><div class="section-title">📝 最近练习</div>';
 
-  if (!in7) {
-    // 近7天无记录：友好空状态
+  if (!_rpRecords.length) {
+    // 真正没有任何练习记录时才显示空状态（不再以「近 7 天」为门槛，避免历史内容被隐藏）
     return head +
       '<div class="rp-empty">' +
         '<div class="rp-empty-icon">📭</div>' +
-        '<div class="rp-empty-title">近 7 天还没有练习记录</div>' +
+        '<div class="rp-empty-title">还没有练习记录</div>' +
         '<div class="rp-empty-sub">鼓励孩子每天坚持练习，进步看得见～</div>' +
       '</div></div>';
   }
