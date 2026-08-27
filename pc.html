@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>吕泳冀学习站 · 电脑端工作台</title>
+<link rel="stylesheet" href="css/pc.css" />
+</head>
+<body>
+<div class="pc-app" id="pcApp">
+  <aside class="pc-sidebar">
+    <div class="pc-sidebar-accent"></div>
+    <div class="pc-brand">
+      <div class="pc-brand-logo">吕</div>
+      <div>
+        <div class="pc-brand-name">吕泳冀学习站</div>
+        <div class="pc-brand-sub">电脑端工作台</div>
+      </div>
+    </div>
+
+    <div class="pc-role-toggle" id="pcRoleToggle">
+      <button data-role="student" class="active">学生</button>
+      <button data-role="parent">家长</button>
+    </div>
+
+    <nav class="pc-nav" id="pcNav"></nav>
+
+    <div class="pc-side-foot">
+      <div>v60 · 与手机端数据互通</div>
+      <div class="pc-foot-id" id="pcFootId"></div>
+    </div>
+  </aside>
+
+  <main class="pc-main">
+    <header class="pc-topbar">
+      <div class="pc-crumb" id="pcCrumb">学生 · 数学</div>
+      <div class="pc-top-actions">
+        <span class="pc-sync-chip" id="pcSyncChip">本地</span>
+        <button class="pc-btn ghost" id="pcRefreshBtn">刷新</button>
+        <button class="pc-btn gold" id="pcMergeBtn">合并补传云端</button>
+      </div>
+    </header>
+    <section class="pc-content" id="pcContent"></section>
+  </main>
+</div>
+
+<div class="pc-narrow" id="pcNarrow">
+  <div class="pc-narrow-box">
+    <div class="pc-narrow-logo">吕</div>
+    <h2>请在电脑端打开</h2>
+    <p>本工作台为桌面（宽度 ≥ 1024px）设计。<br />请使用电脑浏览器访问本页面。</p>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/math.js"></script>
+<script src="js/diagram.js"></script>
+<script src="js/data.js"></script>
+<script src="js/chinese.js"></script>
+<script src="js/supabase-js.min.js"></script>
+<script src="supabase.js"></script>
+<script src="js/aiAnalysis.js"></script>
+<script src="js/pc.js"></script>
+</body>
+</html>

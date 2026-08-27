@@ -902,12 +902,430 @@ function diag3DUnfold(container){
 // 单元 → 交互动图 映射
 // 依据单元名称关键词 + 类型，给每个单元返回 1~3 个交互动图
 // ============================================================
+// ============================================================
+// 专属交互动图（补齐此前只走「兜底数轴/柱状图」的单元）
+// 全部复用 dg*/lux* 引擎与品牌色（黛蓝/香槟金/米白）
+// 这些函数同时被手机端 showUnitDiagrams 复用（diagram.js 共享）
+// ============================================================
+
+// 通用按钮（SVG rect + 文本，可点击）
+function svgBtn(svg, x, y, w, h, label, color, onClick) {
+  const r = dg('rect', { x: x, y: y, width: w, height: h, rx: 8, fill: color, style: 'cursor:pointer' }, svg);
+  const t = dgt(svg, x + w / 2, y + h / 2 + 5, label, 12, '#fff');
+  r.addEventListener('click', onClick);
+  t.addEventListener('click', onClick);
+  return { r: r, t: t };
+}
+
+// 生活应用题：部分—整体模型（看图列式）
+function diagWordProblem(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '部分—整体模型（看图列式）', 13, DC.gold);
+  const T = 18;
+  const card = luxCard(svg, 24, 46, 312, 92);
+  const bx = card.x + 12, by = card.y + 30, bw = card.w - 24, bh = 38;
+  let a = 7;
+  const eq = luxInfo(svg, 24, 150, 312, 30);
+  const layer = dg('g', {}, svg);
+  function draw() {
+    layer.innerHTML = '';
+    const w1 = bw * a / T;
+    dg('rect', { x: bx, y: by, width: bw, height: bh, rx: 6, fill: '#EDE7DA' }, layer);
+    dg('rect', { x: bx, y: by, width: w1, height: bh, rx: 6, fill: DC.gold }, layer);
+    dg('rect', { x: bx + w1, y: by, width: bw - w1, height: bh, rx: 6, fill: DC.blue }, layer);
+    dgt(layer, bx + w1 / 2, by + bh / 2 + 5, '已知 ' + a, 12, '#fff');
+    dgt(layer, bx + w1 + (bw - w1) / 2, by + bh / 2 + 5, '? ' + (T - a), 12, '#fff');
+    eq('一共有 *' + T + '* 个，已知 *' + a + '* 个，未知 = *' + (T - a) + '*');
+  }
+  draw();
+  dgt(svg, 40, 192, '拖动滑块改变“已知”数量', 11, DC.light, 'start');
+  luxSlider(svg, 40, 206, 280, 0, T, a, function (v) { a = Math.round(v); draw(); }, function (v) { return '已知：' + Math.round(v); });
+}
+
+// 混合运算：先乘除后加减（点击步骤）
+function diagMixOps(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '混合运算：先乘除，后加减', 13, DC.gold);
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 24, 200, 312, 30);
+  let steps = [];
+  const defs = [
+    { label: '先算 6 × 2', key: 'mul' },
+    { label: '先算 4 ÷ 2', key: 'div' },
+    { label: '再算相加', key: 'add' }
+  ];
+  function onClick(key) {
+    if (steps.indexOf(key) >= 0) return;
+    if (key === 'add' && (steps.indexOf('mul') < 0 || steps.indexOf('div') < 0)) {
+      info('✗ 先算乘除，再算加减！'); return;
+    }
+    steps.push(key);
+    if (steps.length === 3) info('✓ 正确顺序！ 6×2+4÷2 = *14*');
+    else info('继续…');
+    render();
+  }
+  function render() {
+    layer.innerHTML = '';
+    dgt(layer, 180, 78, '6 × 2 + 4 ÷ 2 = ?', 26, DC.ink);
+    defs.forEach(function (d, i) {
+      const x = 24 + i * 104, y = 110, w = 96, h = 40;
+      const done = steps.indexOf(d.key) >= 0;
+      const r = dg('rect', { x: x, y: y, width: w, height: h, rx: 8, fill: done ? DC.green : '#EDE7DA', style: 'cursor:pointer' }, layer);
+      const t = dgt(layer, x + w / 2, y + h / 2 + 5, d.label, 11, done ? '#fff' : DC.ink);
+      const fn = function () { onClick(d.key); };
+      r.addEventListener('click', fn); t.addEventListener('click', fn);
+    });
+  }
+  render();
+  info('点按钮，按正确顺序计算');
+}
+
+// 图形计数 / 巧数图形：数三角形
+function diagCountShapes(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '巧数图形：图中有几个三角形？', 13, DC.gold);
+  const cx = 180, cy = 120, s = 70;
+  const pts = [[cx - s, cy - s], [cx + s, cy - s], [cx + s, cy + s], [cx - s, cy + s]];
+  const layer = dg('g', {}, svg);
+  let guess = 0, revealed = false;
+  const info = luxInfo(svg, 60, 206, 240, 28);
+  function draw() {
+    layer.innerHTML = '';
+    dg('polygon', { points: pts.map(function (p) { return p.join(','); }).join(' '), fill: '#EDE7DA', stroke: DC.ink, 'stroke-width': 1.5 }, layer);
+    dg('line', { x1: pts[0][0], y1: pts[0][1], x2: pts[2][0], y2: pts[2][1], stroke: DC.blue, 'stroke-width': 1.5 }, layer);
+    dg('line', { x1: pts[1][0], y1: pts[1][1], x2: pts[3][0], y2: pts[3][1], stroke: DC.blue, 'stroke-width': 1.5 }, layer);
+    if (revealed) {
+      const tris = [[pts[0], pts[1], [cx, cy]], [pts[1], pts[2], [cx, cy]], [pts[2], pts[3], [cx, cy]], [pts[3], pts[0], [cx, cy]]];
+      const cols = [DC.gold, DC.green, DC.blue, DC.red];
+      tris.forEach(function (tr, i) {
+        dg('polygon', { points: tr.map(function (p) { return p.join(','); }).join(' '), fill: cols[i], 'fill-opacity': 0.45, stroke: cols[i], 'stroke-width': 1.5 }, layer);
+        dgt(layer, (tr[0][0] + tr[1][0] + tr[2][0]) / 3, (tr[0][1] + tr[1][1] + tr[2][1]) / 3, String(i + 1), 14, '#fff');
+      });
+    }
+  }
+  draw();
+  luxSlider(svg, 40, 178, 200, 0, 8, 0, function (v) { guess = Math.round(v); info('你的答案：*' + guess + '*'); }, function (v) { return '猜：' + Math.round(v); });
+  svgBtn(svg, 260, 166, 80, 34, '验证', DC.gold, function () { revealed = true; draw(); info(guess === 4 ? '✓ 正确，一共 *4* 个三角形' : '✗ 再数数，其实有 *4* 个'); });
+  info('拖动滑块猜数量，点验证');
+}
+
+// 测量：用尺子量长度
+function diagMeasure(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '测量：用尺子量一量', 13, DC.gold);
+  const x0 = 30, y0 = 80, w = 300, cm = 20, pxPer = w / cm;
+  for (let i = 0; i <= cm; i++) {
+    const x = x0 + i * pxPer, big = (i % 5 === 0);
+    dg('line', { x1: x, y1: y0, x2: x, y2: y0 - (big ? 16 : 8), stroke: DC.ink, 'stroke-width': big ? 2 : 1 }, svg);
+    if (big) dgt(svg, x, y0 + 18, String(i), 11, DC.light);
+  }
+  let end = 12;
+  const seg = dg('rect', { x: x0, y: y0 - 26, width: end * pxPer, height: 16, rx: 3, fill: DC.gold, 'fill-opacity': 0.5 }, svg);
+  const handle = dg('circle', { cx: x0 + end * pxPer, cy: y0, r: 9, fill: DC.red, stroke: '#fff', 'stroke-width': 2, style: 'cursor:grab' }, svg);
+  const info = luxInfo(svg, 30, 200, 300, 30);
+  dgDrag(svg, handle, function (p) {
+    end = Math.max(0, Math.min(cm, (p.x - x0) / pxPer));
+    const ex = x0 + end * pxPer;
+    handle.setAttribute('cx', ex); seg.setAttribute('width', end * pxPer);
+    info('长度 = *' + Math.round(end) + '* 厘米（1 米 = 100 厘米）');
+  });
+  info('拖动红色手柄测量长度');
+}
+
+// 倍的认识：几个几（点阵模型）
+function diagMultiples(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '倍的认识：几个几', 13, DC.gold);
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 30, 200, 300, 30);
+  let rows = 3, cols = 4;
+  function draw() {
+    layer.innerHTML = '';
+    const ox = 70, oy = 50, gw = 22, gh = 22, gap = 6;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const x = ox + c * (gw + gap), y = oy + r * (gh + gap);
+      dg('circle', { cx: x + gw / 2, cy: y + gh / 2, r: gw / 2 - 2, fill: r % 2 ? DC.blue : DC.gold, 'fill-opacity': 0.85 }, layer);
+    }
+    info('每行 *' + cols + '* 个，*' + rows + '* 行，共 *' + (rows * cols) + '* 个 = *' + rows + '* 个 *' + cols + '*');
+  }
+  draw();
+  luxSlider(svg, 30, 150, 130, 1, 6, cols, function (v) { cols = Math.round(v); draw(); }, function (v) { return '每行 ' + Math.round(v); });
+  luxSlider(svg, 200, 150, 130, 1, 5, rows, function (v) { rows = Math.round(v); draw(); }, function (v) { return '行数 ' + Math.round(v); });
+}
+
+// 位置与方向（3下）：上下左右
+function diagPosition(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '位置与方向：上下左右', 13, DC.gold);
+  const ox = 120, oy = 44, g = 38;
+  for (let c = 0; c < 3; c++) for (let r = 0; r < 3; r++) {
+    dg('rect', { x: ox + c * g, y: oy + r * g, width: g, height: g, fill: '#fff', stroke: DC.line, 'stroke-width': 1 }, svg);
+  }
+  dgt(svg, ox + 1.5 * g, oy - 8, '北', 12, DC.ink);
+  dgt(svg, ox + 1.5 * g, oy + 3 * g + 16, '南', 12, DC.ink);
+  dgt(svg, ox - 14, oy + 1.5 * g, '西', 12, DC.ink);
+  dgt(svg, ox + 3 * g + 10, oy + 1.5 * g, '东', 12, DC.ink);
+  let tc = 0, tr = 0;
+  const info = luxInfo(svg, 30, 214, 300, 22);
+  const layer = dg('g', {}, svg);
+  function draw() {
+    layer.innerHTML = '';
+    const me = { x: ox + 1 * g, y: oy + 1 * g };
+    dg('circle', { cx: me.x + g / 2, cy: me.y + g / 2, r: 13, fill: DC.blue }, layer);
+    dgt(layer, me.x + g / 2, me.y + g / 2 + 5, '我', 12, '#fff');
+    const tp = { x: ox + tc * g, y: oy + tr * g };
+    dg('text', { x: tp.x + g / 2, y: tp.y + g / 2 + 6, 'font-size': 16, fill: DC.red, 'text-anchor': 'middle' }, layer).textContent = '★';
+    const dir = (tc < 1 ? '左(西)' : tc > 1 ? '右(东)' : '') + ' ' + (tr < 1 ? '上(北)' : tr > 1 ? '下(南)' : '');
+    info('旗在“我”的 *' + (dir.trim() || '正中心') + '*');
+  }
+  draw();
+  svgBtn(svg, 50, 184, 44, 26, '←', DC.gold, function () { tc = Math.max(0, Math.min(2, tc - 1)); draw(); });
+  svgBtn(svg, 104, 184, 44, 26, '→', DC.gold, function () { tc = Math.max(0, Math.min(2, tc + 1)); draw(); });
+  svgBtn(svg, 158, 184, 44, 26, '↑', DC.gold, function () { tr = Math.max(0, Math.min(2, tr - 1)); draw(); });
+  svgBtn(svg, 212, 184, 44, 26, '↓', DC.gold, function () { tr = Math.max(0, Math.min(2, tr + 1)); draw(); });
+}
+
+// 搭配问题：树状图
+function diagTree(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 24, '搭配问题 · 树状图', 13, DC.gold);
+  dgt(svg, 180, 44, '2 件上衣 × 3 条裤子 = ？种搭配', 12, DC.ink);
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 40, 204, 280, 28);
+  let hl = -1;
+  const tops = [['红上衣', DC.red, 60], ['蓝上衣', DC.blue, 150]];
+  const bots = [['黑裤', DC.ink], ['白裤', DC.gold], ['绿裤', DC.green]];
+  function draw() {
+    layer.innerHTML = '';
+    dg('circle', { cx: 36, cy: 105, r: 7, fill: DC.ink }, layer);
+    tops.forEach(function (tp, ti) {
+      const ty = tp[2];
+      dg('line', { x1: 43, y1: 105, x2: 120, y2: ty, stroke: DC.line, 'stroke-width': 1.5 }, layer);
+      dg('circle', { cx: 120, cy: ty, r: 7, fill: tp[1] }, layer);
+      dgt(layer, 128, ty + 4, tp[0], 11, DC.ink);
+      bots.forEach(function (bp, bi) {
+        const by = 50 + bi * 28;
+        dg('line', { x1: 127, y1: ty, x2: 230, y2: by, stroke: (hl === ti ? tp[1] : DC.line), 'stroke-width': (hl === ti ? 2 : 1.2) }, layer);
+        dg('circle', { cx: 230, cy: by, r: 6, fill: bp[1] }, layer);
+        if (hl === ti || hl === -1) dgt(layer, 238, by + 4, bp[0], 11, DC.ink);
+      });
+    });
+    dgt(layer, 300, 105, '6 种', 16, DC.gold);
+    info(hl === -1 ? '共 *6* 种搭配（点上方上衣高亮它的 3 种）' : ('已高亮 *3* 种：' + tops[hl][0] + ' 的搭配'));
+  }
+  draw();
+  svgBtn(svg, 40, 176, 130, 26, tops[0][0], DC.red, function () { hl = 0; draw(); });
+  svgBtn(svg, 185, 176, 130, 26, tops[1][0], DC.blue, function () { hl = 1; draw(); });
+}
+
+// 公顷和平方千米：面积单位换算
+function diagAreaUnits(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 24, '面积单位：1 公顷 = 10000 平方米', 13, DC.gold);
+  const ox = 95, oy = 40, S = 140;
+  const layer = dg('g', {}, svg);
+  let m2 = 25000;
+  function draw() {
+    layer.innerHTML = '';
+    dg('rect', { x: ox, y: oy, width: S, height: S, fill: '#EDE7DA', stroke: DC.ink, 'stroke-width': 2 }, layer);
+    const n = Math.round(m2 / 10000 * 100);
+    const cell = S / 10;
+    for (let i = 0; i < 100; i++) {
+      if (i < n) { const c = i % 10, r = Math.floor(i / 10); dg('rect', { x: ox + c * cell, y: oy + r * cell, width: cell, height: cell, fill: DC.gold, 'fill-opacity': 0.7 }, layer); }
+    }
+    dgt(layer, ox + S / 2, oy - 8, '1 公顷', 12, DC.ink);
+    dgt(svg, 180, 196, (m2 / 10000).toFixed(2) + ' 公顷 = ' + m2 + ' 平方米', 12, DC.ink);
+  }
+  draw();
+  luxSlider(svg, 30, 218, 300, 0, 100000, m2, function (v) { m2 = Math.round(v / 1000) * 1000; draw(); }, function (v) { return '平方米 ' + Math.round(v); });
+}
+
+// 图形认知：点一点看特征
+function diagShapeProps(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '图形认知：点一点看特征', 13, DC.gold);
+  const shapes = [
+    { name: '三角形', draw: function (c) { dg('polygon', { points: '180,55 222,118 138,118', fill: DC.gold, 'fill-opacity': 0.7, stroke: DC.ink, 'stroke-width': 1.5 }, c); }, txt: '3 条边 · 3 个角' },
+    { name: '正方形', draw: function (c) { dg('rect', { x: 150, y: 55, width: 60, height: 60, fill: DC.blue, 'fill-opacity': 0.6, stroke: DC.ink, 'stroke-width': 1.5 }, c); }, txt: '4 条边相等 · 4 个直角' },
+    { name: '圆', draw: function (c) { dg('circle', { cx: 180, cy: 88, r: 32, fill: DC.green, 'fill-opacity': 0.6, stroke: DC.ink, 'stroke-width': 1.5 }, c); }, txt: '没有边 · 没有角' }
+  ];
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 30, 200, 300, 30);
+  let cur = -1;
+  function draw() {
+    layer.innerHTML = '';
+    const sh = shapes[cur >= 0 ? cur : 0];
+    sh.draw(layer);
+    dgt(layer, 180, 150, sh.name, 13, DC.ink);
+    info(cur >= 0 ? ('*' + sh.name + '*：' + sh.txt) : '点下方按钮，认识图形特征');
+  }
+  draw();
+  shapes.forEach(function (s, i) { svgBtn(svg, 30 + i * 100, 168, 90, 28, s.name, DC.gold, function () { cur = i; draw(); }); });
+}
+
+// 位置（数对）：坐标系
+function diagCoordPlane(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '用数对确定位置 (列,行)', 13, DC.gold);
+  const ox = 70, oy = 60, g = 34, N = 5;
+  for (let c = 0; c <= N; c++) dg('line', { x1: ox + c * g, y1: oy, x2: ox + c * g, y2: oy + N * g, stroke: DC.line, 'stroke-width': 1 }, svg);
+  for (let r = 0; r <= N; r++) dg('line', { x1: ox, y1: oy + r * g, x2: ox + N * g, y2: oy + r * g, stroke: DC.line, 'stroke-width': 1 }, svg);
+  dgt(svg, ox - 12, oy - 8, '(0,0)', 10, DC.light);
+  let ccol = 2, rrow = 3;
+  const marker = dg('circle', { cx: ox + (ccol + 0.5) * g, cy: oy + (rrow + 0.5) * g, r: 10, fill: DC.red, stroke: '#fff', 'stroke-width': 2, style: 'cursor:grab' }, svg);
+  const info = luxInfo(svg, 30, 224, 300, 20);
+  dgDrag(svg, marker, function (p) {
+    ccol = Math.max(0, Math.min(N - 1, Math.floor((p.x - ox) / g)));
+    rrow = Math.max(0, Math.min(N - 1, Math.floor((p.y - oy) / g)));
+    marker.setAttribute('cx', ox + (ccol + 0.5) * g);
+    marker.setAttribute('cy', oy + (rrow + 0.5) * g);
+    info('位置数对 = (*' + (ccol + 1) + '* , *' + (rrow + 1) + '*)');
+  });
+  info('拖动红点，看它的(列,行)');
+}
+
+// 因数与倍数：找因数对
+function diagFactors(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '因数与倍数：找因数对', 13, DC.gold);
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 30, 206, 300, 26);
+  let N = 12;
+  function draw() {
+    layer.innerHTML = '';
+    dgt(layer, 180, 58, '数 ' + N + ' 的因数', 15, DC.ink);
+    const pairs = [];
+    for (let i = 1; i <= N; i++) if (N % i === 0) pairs.push([i, N / i]);
+    dgt(layer, 180, 86, pairs.map(function (p) { return p[0] + '×' + p[1]; }).join('   '), 12, DC.green);
+    dgt(layer, 180, 114, '因数有 ' + (pairs.length * 2) + ' 个；最小因数是 1', 12, DC.ink);
+    dgt(layer, 180, 142, '前 5 个倍数：' + [1, 2, 3, 4, 5].map(function (k) { return N * k; }).join('、'), 12, DC.blue);
+    info('*' + N + '* 的因数对已列出');
+  }
+  draw();
+  luxSlider(svg, 30, 176, 300, 1, 60, N, function (v) { N = Math.round(v); draw(); }, function (v) { return '选数 ' + Math.round(v); });
+}
+
+// 位置与方向（二）：辨认方向（罗盘）
+function diagBearing(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '方向与位置：辨认方向', 13, DC.gold);
+  const cx = 180, cy = 120, R = 66;
+  const dirs = [['北', 0], ['东北', 45], ['东', 90], ['东南', 135], ['南', 180], ['西南', 225], ['西', 270], ['西北', 315]];
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 60, 212, 240, 24);
+  let ang = 0;
+  function draw() {
+    layer.innerHTML = '';
+    dg('circle', { cx: cx, cy: cy, r: R, fill: '#fff', stroke: DC.ink, 'stroke-width': 1.5 }, layer);
+    dirs.forEach(function (d) { const a = rad(d[1] - 90); dgt(layer, cx + R * Math.cos(a), cy + R * Math.sin(a) + 4, d[0], 11, DC.ink); });
+    const a = rad(ang - 90);
+    const ex = cx + R * 0.8 * Math.cos(a), ey = cy + R * 0.8 * Math.sin(a);
+    dg('line', { x1: cx, y1: cy, x2: ex, y2: ey, stroke: DC.red, 'stroke-width': 3 }, layer);
+    dg('circle', { cx: ex, cy: ey, r: 5, fill: DC.red }, layer);
+    const name = dirs.reduce(function (best, d) { return Math.abs(((d[1] - ang + 540) % 360) - 180) < Math.abs(((best[1] - ang + 540) % 360) - 180) ? d : best; });
+    info('箭头指向 *' + name[0] + '*');
+  }
+  draw();
+  svgBtn(svg, 40, 176, 80, 28, '↺ 左转', DC.gold, function () { ang = (ang - 45 + 360) % 360; draw(); });
+  svgBtn(svg, 240, 176, 80, 28, '右转 ↻', DC.gold, function () { ang = (ang + 45) % 360; draw(); });
+}
+
+// 按比分配：把总数按比例分
+function diagRatioSplit(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '按比分配：把总数按比例分', 13, DC.gold);
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 30, 206, 300, 26);
+  let T = 100, a = 2, b = 3;
+  function draw() {
+    layer.innerHTML = '';
+    const total = a + b;
+    const x = 30, y = 70, w = 300, h = 40;
+    const w1 = w * a / total, w2 = w * b / total;
+    dg('rect', { x: x, y: y, width: w1, height: h, rx: 6, fill: DC.gold }, layer);
+    dg('rect', { x: x + w1, y: y, width: w2, height: h, rx: 6, fill: DC.blue }, layer);
+    dgt(layer, x + w1 / 2, y + h / 2 + 5, '甲 ' + Math.round(T * a / total), 12, '#fff');
+    dgt(layer, x + w1 + w2 / 2, y + h / 2 + 5, '乙 ' + Math.round(T * b / total), 12, '#fff');
+    info('总数 *' + T + '* 按 *' + a + ':' + b + '* 分 → 甲 *' + Math.round(T * a / total) + '*，乙 *' + Math.round(T * b / total) + '*');
+  }
+  draw();
+  luxSlider(svg, 30, 130, 140, 20, 200, T, function (v) { T = Math.round(v); draw(); }, function (v) { return '总数 ' + Math.round(v); });
+  luxSlider(svg, 190, 130, 140, 1, 5, a, function (v) { a = Math.round(v); draw(); }, function (v) { return '甲比 ' + Math.round(v); });
+  luxSlider(svg, 190, 160, 140, 1, 5, b, function (v) { b = Math.round(v); draw(); }, function (v) { return '乙比 ' + Math.round(v); });
+}
+
+// 总复习：知识卡片回顾
+function diagReviewMap(container, opts) {
+  const svg = dgMake(container, 360, 240);
+  dgBg(svg, 360, 240);
+  dgt(svg, 180, 26, '六下总复习 · 点卡片回顾', 13, DC.gold);
+  const topics = [
+    { t: '分数', f: '分子/分母，同分母加减' },
+    { t: '百分数', f: '百分数就是百分之几' },
+    { t: '比', f: 'a:b = a÷b' },
+    { t: '圆柱圆锥', f: '体积 V=πr²h' },
+    { t: '正比例', f: 'y/x = k（一定）' },
+    { t: '统计', f: '条形/折线/扇形' }
+  ];
+  const layer = dg('g', {}, svg);
+  const info = luxInfo(svg, 30, 210, 300, 26);
+  let cur = -1;
+  function draw() {
+    layer.innerHTML = '';
+    topics.forEach(function (tp, i) {
+      const c = i % 3, r = Math.floor(i / 3);
+      const x = 30 + c * 110, y = 50 + r * 70;
+      const on = (cur === i);
+      const rect = dg('rect', { x: x, y: y, width: 100, height: 56, rx: 10, fill: on ? DC.gold : '#fff', stroke: DC.line, 'stroke-width': 1.5, style: 'cursor:pointer' }, layer);
+      const t = dgt(layer, x + 50, y + 22, tp.t, 14, on ? '#fff' : DC.ink);
+      const fn = function () { cur = i; draw(); };
+      rect.addEventListener('click', fn); t.addEventListener('click', fn);
+    });
+    if (cur >= 0) info('*' + topics[cur].t + '*：' + topics[cur].f);
+    else info('点上面任意卡片，回顾核心知识');
+  }
+  draw();
+}
+
 function getUnitDiagrams(unit, grade, sem){
   const name = unit.name || '';
   const type = unit.type || '';
   const L = name.toLowerCase();
   const add = (arr, fn, title, opts, hint) => arr.push({ fn, title, opts: opts || {}, hint: hint || '' });
   let out = [];
+  let dedicated = false;
+
+  // ===== 专属交互动图（补齐此前只走兜底的单元）=====
+  if (/生活应用题/.test(name)) { add(out, diagWordProblem, '看图列式（部分—整体）', {}, '👆 拖动滑块改变“已知”数量，看算式'); dedicated = true; }
+  if (/混合运算/.test(name) && grade !== 4) { add(out, diagMixOps, '混合运算顺序', {}, '👆 点按钮，按先乘除后加减的顺序计算'); dedicated = true; }
+  if (/图形计数/.test(name)) { add(out, diagCountShapes, '巧数图形（数三角形）', {}, '👆 拖动滑块猜数量，点验证'); dedicated = true; }
+  if (/测量/.test(name)) { add(out, diagMeasure, '用尺子量长度', {}, '👆 拖动红色手柄测量长度'); dedicated = true; }
+  if (/倍的认识/.test(name)) { add(out, diagMultiples, '倍的认识（几个几）', {}, '👆 拖滑块改变每行/行数，看总数'); dedicated = true; }
+  if (/巧数图形/.test(name)) { add(out, diagCountShapes, '巧数图形（数三角形）', {}, '👆 拖动滑块猜数量，点验证'); dedicated = true; }
+  if (/位置与方向/.test(name) || /位置（数对）/.test(name)) {
+    const isPair = /数对/.test(name), isTwo = /（二）/.test(name);
+    add(out, isPair ? diagCoordPlane : (isTwo ? diagBearing : diagPosition), isPair ? '用数对确定位置' : (isTwo ? '方向与位置（辨认方向）' : '位置与方向（上下左右）'), {}, '👆 看位置怎样描述');
+    dedicated = true;
+  }
+  if (/搭配问题/.test(name)) { add(out, diagTree, '搭配问题（树状图）', {}, '👆 点上方上衣，高亮它的 3 种搭配'); dedicated = true; }
+  if (/公顷和平方千米|公顷与平方千米/.test(name)) { add(out, diagAreaUnits, '面积单位换算', {}, '👆 拖滑块看平方米与公顷的关系'); dedicated = true; }
+  if (/图形认知/.test(name)) { add(out, diagShapeProps, '图形认知', {}, '👆 点按钮认识图形特征'); dedicated = true; }
+  if (/因数与倍数/.test(name)) { add(out, diagFactors, '因数与倍数', {}, '👆 拖滑块选数，看它的因数对'); dedicated = true; }
+  if (/按比分配/.test(name)) { add(out, diagRatioSplit, '按比分配', {}, '👆 拖滑块改总数与比例'); dedicated = true; }
+  if (/总复习/.test(name)) { add(out, diagReviewMap, '六下总复习', {}, '👆 点卡片回顾核心知识'); dedicated = true; }
 
   // ===== 四年级优先：按参考页「四年级下册数学乐园」升级为精美交互动画 =====
   if (grade === 4) {
@@ -1027,7 +1445,7 @@ function getUnitDiagrams(unit, grade, sem){
   if (/鸡兔/.test(name)) add(out, diagChickenRabbit, '鸡兔同笼：数头数脚');
   if (/面积应用|周长应用/.test(name)) add(out, diagAreaRect, '画图算面积/周长');
   if (/工程问题|价格应用|分数应用/.test(name)) add(out, diagBarChart, '用图表示数量关系');
-  if (/方向|位置/.test(name)) add(out, diagNumberLine, '用数轴表示方向与位置', {min:-5, max:5});
+  if (/方向|位置/.test(name) && !dedicated) add(out, diagNumberLine, '用数轴表示方向与位置', {min:-5, max:5});
 
   // 兜底：若仍为空，按类型给一个通用动图
   if (out.length === 0) {
