@@ -1510,6 +1510,419 @@ function diagCylinderCone(container, opts){
   setTab('derive');
 }
 
+// ============================================================
+// 长方体和正方体 / 多边形的面积 / 圆：专属四段交互动图
+// 移植自《圆柱和圆锥的体积·交互动画》范式，但每段按各单元真实课本推导量身定制
+// （长方体=摆小正方体累加体积；多边形=剪拼转化；圆=剪拼成长方形），不硬套切拼/倒水
+// 自包含：原生 SVG + 内联样式，移动端「同步学习」与 PC 工作台共用
+// ============================================================
+
+// ---------- 长方体和正方体：摆一摆 / 表面积 / 体积计算 / 随堂挑战 ----------
+function diagCuboid(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F',
+              faceTop:'#EFE3C8', faceFront:'#DCC79C', faceSide:'#CBB488' };
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '用小正方体把长方体一层层摆出来，自己数出体积；再看看表面积怎么算。');
+
+  const TABS=[{id:'build',label:'摆一摆'},{id:'surface',label:'表面积'},{id:'calc',label:'体积计算'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){ for(const k in panels) panels[k].style.display=(k===id)?'block':'none'; TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id]; b.style.background=on?C.primary:'#fff'; b.style.color=on?'#fff':C.ink2; b.style.borderColor=on?C.primary:C.line; }); }
+  TABS.forEach(function(t){ const b=el('button','flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;',tabBar,t.label); b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b; panels[t.id]=el('div','',root); });
+  function cardOf(p,no,title){ const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p); if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card,no+' '+title); return card; }
+
+  /* ① 摆一摆 */
+  (function(){
+    const p=panels.build;
+    const card=cardOf(p,'①','用小正方体把长方体摆出来');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '每行 <b>a</b> 个，摆 <b>b</b> 行是一层，共 <b>h</b> 层。总个数 = a × b × h，这就是长方体的体积！');
+    const ctrl=el('div','display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:13px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='120px'; return s; }
+    const sa=slider('长 a（个）',1,5,3), sb=slider('宽 b（个）',1,5,2), sh=slider('高 h（层）',1,5,2);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 330',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const cap=el('div','text-align:center;font-size:15px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function drawN(a,b,h,n){ svg.innerHTML=''; const ux=18,uy=10,vx=18,vy=-10,z=20; const ox=150,oy=278;
+      function P(i,j,k){ return [ox+i*ux+j*vx, oy-i*uy-j*vy-k*z]; }
+      function poly(pts,fill){ svg.appendChild(svgEl('polygon',{points:pts.map(function(pp){return pp[0].toFixed(1)+','+pp[1].toFixed(1);}).join(' '),fill:fill,stroke:C.goldDeep,'stroke-width':0.7,'stroke-linejoin':'round'})); }
+      let idx=0;
+      for(let k=0;k<h;k++){ for(let j=0;j<b;j++){ for(let i=0;i<a;i++){ if(idx>=n) continue; const o=P(i,j,k);
+        poly([o,[o[0]+ux,o[1]-uy],[o[0]+ux+vx,o[1]-uy-vy],[o[0]+vx,o[1]-vy]], C.faceTop);
+        poly([o,[o[0]+ux,o[1]-uy],[o[0]+ux,o[1]-uy-z],[o[0],o[1]-z]], C.faceFront);
+        poly([o,[o[0]+vx,o[1]-vy],[o[0]+vx,o[1]-vy-z],[o[0],o[1]-z]], C.faceSide);
+        idx++; } } }
+      const A=P(0,0,0), B=P(a,0,0);
+      svg.appendChild(svgEl('line',{x1:A[0],y1:A[1]+6,x2:B[0],y2:B[1]+6,stroke:C.goldDeep,'stroke-width':1.4}));
+      txt(svg,(A[0]+B[0])/2,A[1]+22,'a = '+a,13,C.goldDeep,700);
+      const back=P(0,b,0); svg.appendChild(svgEl('line',{x1:A[0]-6,y1:A[1],x2:back[0]-6,y2:back[1],stroke:C.goldDeep,'stroke-width':1.4}));
+      txt(svg,back[0]-18,(A[1]+back[1])/2,'b = '+b,13,C.goldDeep,700);
+      const top=P(0,0,h); svg.appendChild(svgEl('line',{x1:A[0]-28,y1:A[1],x2:top[0]-28,y2:top[1],stroke:C.goldDeep,'stroke-width':1.4}));
+      txt(svg,top[0]-42,(A[1]+top[1])/2,'h = '+h,13,C.goldDeep,700);
+    }
+    function refresh(){ const a=+sa.value,b=+sb.value,h=+sh.value; drawN(a,b,h,a*b*h); cap.textContent='体积 = a × b × h = '+a+' × '+b+' × '+h+' = '+(a*b*h)+'（个体积单位）'; }
+    [sa,sb,sh].forEach(function(s){ s.addEventListener('input',refresh); });
+    const btnRow=el('div','display:flex;gap:10px;justify-content:center;margin-top:10px;',card);
+    const btnFill=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',btnRow,'摆满它');
+    btnFill.onclick=function(){ const a=+sa.value,b=+sb.value,h=+sh.value,total=a*b*h; tween(0,total,900,function(v){ drawN(a,b,h,Math.round(v)); cap.textContent='已经摆了 '+Math.round(v)+' / '+total+' 个…'; },function(){ cap.textContent='体积 = a × b × h = '+a+' × '+b+' × '+h+' = '+(a*b*h)+'（个体积单位）'; }); };
+    refresh();
+  })();
+
+  /* ② 表面积 */
+  (function(){
+    const p=panels.surface;
+    const card=cardOf(p,'②','长方体（正方体）的表面积');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '长方体 6 个面：上下面、前后面、左右面各一对。表面积 = 2(ab + ah + bh)；正方体 6 个面相同，S = 6a²。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    const mSel=el('div','display:inline-flex;background:'+C.goldSoft+';border:1px solid '+C.line+';border-radius:10px;padding:3px;gap:3px;',ctrl);
+    const modes=[{k:'cuboid',t:'长方体'},{k:'cube',t:'正方体'}]; const mBtns={};
+    const M={k:'cuboid'};
+    modes.forEach(function(m){ const b=el('button',(m.k==='cuboid'?'background:#fff;color:'+C.primary+';':'background:transparent;color:'+C.ink2+';')+'min-height:44px;padding:0 14px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;',mSel,m.t); b.onclick=function(){ modes.forEach(function(x){mBtns[x.k].style.background='transparent';mBtns[x.k].style.color=C.ink2;}); b.style.background='#fff'; b.style.color=C.primary; M.k=m.k; render(); }; mBtns[m.k]=b; });
+    const aS=el('input',null,ctrl), bS=el('input',null,ctrl), hS=el('input',null,ctrl);
+    [['长 a',aS],['宽 b',bS],['高 h',hS]].forEach(function(pr){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,pr[0]); pr[1].type='range'; pr[1].min=1; pr[1].max=10; pr[1].value=4; pr[1].style.width='100px'; w.appendChild(pr[1]); });
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;margin-top:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 300',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const cap=el('div','text-align:center;font-size:15px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function render(){ const cuboid=M.k==='cuboid'; const la=cuboid?+aS.value:+aS.value; const lb=cuboid?+bS.value:+aS.value; const lh=cuboid?+hS.value:+aS.value;
+      svg.innerHTML=''; const ux=18,uy=10,vx=18,vy=-10,z=18; const ox=175,oy=235;
+      function P(i,j,k){ return [ox+i*ux+j*vx, oy-i*uy-j*vy-k*z]; }
+      function face(p1,p2,p3,p4,fill){ svg.appendChild(svgEl('polygon',{points:[p1,p2,p3,p4].map(function(pp){return pp[0].toFixed(1)+','+pp[1].toFixed(1);}).join(' '),fill:fill,stroke:C.goldDeep,'stroke-width':1.2,'stroke-linejoin':'round'})); }
+      face(P(0,0,lh),P(la,0,lh),P(la,lb,lh),P(0,lb,lh), C.faceTop);
+      face(P(0,0,0),P(la,0,0),P(la,0,lh),P(0,0,lh), C.faceFront);
+      face(P(0,0,0),P(0,lb,0),P(0,lb,lh),P(0,0,lh), C.faceSide);
+      function edge(p1,p2){ svg.appendChild(svgEl('line',{x1:p1[0],y1:p1[1],x2:p2[0],y2:p2[1],stroke:C.primary,'stroke-width':1.6})); }
+      edge(P(0,0,0),P(la,0,0)); edge(P(la,0,0),P(la,0,lh)); edge(P(la,0,lh),P(0,0,lh)); edge(P(0,0,lh),P(0,0,0));
+      edge(P(0,0,0),P(0,lb,0)); edge(P(0,lb,0),P(0,lb,lh)); edge(P(0,lb,lh),P(0,0,lh));
+      edge(P(0,lb,0),P(la,lb,0)); edge(P(la,lb,0),P(la,0,0));
+      edge(P(0,lb,lh),P(la,lb,lh)); edge(P(la,lb,lh),P(la,0,lh)); edge(P(la,lb,lh),P(la,lb,0));
+      txt(svg,(P(0,0,0)[0]+P(la,0,0)[0])/2,P(0,0,0)[1]+20,'a',13,C.goldDeep,700);
+      txt(svg,P(0,lb,0)[0]-16,(P(0,0,0)[1]+P(0,lb,0)[1])/2,'b',13,C.goldDeep,700);
+      txt(svg,P(0,0,0)[0]-30,(P(0,0,0)[1]+P(0,0,lh)[1])/2,'h',13,C.goldDeep,700);
+      if(cuboid) cap.textContent='表面积 S = 2(ab+ah+bh) = 2('+la+'×'+lb+'+'+la+'×'+lh+'+'+lb+'×'+lh+') = '+ (2*(la*lb+la*lh+lb*lh));
+      else cap.textContent='正方体 S = 6a² = 6×'+la+'² = '+(6*la*la);
+    }
+    [aS,bS,hS].forEach(function(s){ s.addEventListener('input',render); });
+    render();
+  })();
+
+  /* ③ 体积计算 */
+  (function(){
+    const p=panels.calc;
+    const card=cardOf(p,'③','体积怎么算');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '长方体体积 = 长×宽×高 = 底面积×高；正方体体积 = 棱长³。拖动改一改，看结果实时变。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='100px'; return s; }
+    const aS=slider('长 a (cm)',1,10,5), bS=slider('宽 b (cm)',1,10,4), hS=slider('高 h (cm)',1,10,3);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const a=+aS.value,b=+bS.value,h=+hS.value; out.innerHTML='V<sub>长方体</sub> = a·b·h = '+a+'×'+b+'×'+h+' = <b style="color:'+C.goldDeep+';font-size:20px">'+ (a*b*h) +'</b> cm³<br>也 = 底面积×高 = '+(a*b)+'×'+h+' = '+(a*b*h)+' cm³'; }
+    [aS,bS,hS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+    const note=el('div','font-size:13px;color:'+C.ink2+';margin-top:10px;line-height:1.7;padding-left:10px;border-left:3px solid #E8D9B8;',card,
+       '正方体是特殊的长方体（a=b=h），所以 V<sub>正</sub> = a³。例：棱长 3cm → 3×3×3 = 27 cm³。');
+  })();
+
+  /* ④ 随堂挑战 */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战');
+    const Q=[
+      {q:'一个长方体，长 5cm、宽 4cm、高 3cm，体积是多少？', a:'60', hint:'体积 = 长×宽×高 = 5×4×3', ok:function(v){return +v===60;}},
+      {q:'棱长为 4cm 的正方体，体积是多少？', a:'64', hint:'V = 4³ = 4×4×4', ok:function(v){return +v===64;}},
+      {q:'一个长方体底面积 24cm²、高 5cm，体积是？', a:'120', hint:'体积 = 底面积×高 = 24×5', ok:function(v){return +v===120;}}
+    ];
+    let qi=0, wrong=0; const box=el('div','',card);
+    function show(){ box.innerHTML=''; const it=Q[qi];
+      el('div','font-size:15px;font-weight:600;color:'+C.primary+';margin-bottom:10px;',box,'第 '+(qi+1)+' 题 / 共 '+Q.length+' 题');
+      el('div','font-size:14.5px;line-height:1.8;margin-bottom:12px;',box, it.q);
+      const inp=el('input',null,box); inp.type='number'; inp.style.cssText='width:120px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
+      const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
+      const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！体积 = '+it.a; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
+    }
+    show();
+  })();
+
+  setTab('build');
+}
+
+// ---------- 多边形的面积：平行四边形剪拼 / 三角·梯形拼组 / 面积计算 / 随堂挑战 ----------
+function diagPolygonArea(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F' };
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '把图形剪开、拼一拼，自己推出面积公式。');
+
+  const TABS=[{id:'para',label:'平行四边形'},{id:'tt',label:'三角·梯形'},{id:'calc',label:'面积计算'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){ for(const k in panels) panels[k].style.display=(k===id)?'block':'none'; TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id]; b.style.background=on?C.primary:'#fff'; b.style.color=on?'#fff':C.ink2; b.style.borderColor=on?C.primary:C.line; }); }
+  TABS.forEach(function(t){ const b=el('button','flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;',tabBar,t.label); b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b; panels[t.id]=el('div','',root); });
+  function cardOf(p,no,title){ const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p); if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card,no+' '+title); return card; }
+
+  /* ① 平行四边形剪拼 */
+  (function(){
+    const p=panels.para;
+    const card=cardOf(p,'①','平行四边形 → 长方形');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '沿着高剪下一个三角形，平移到右边，就拼成了一个长方形。长方形面积 = 底×高，所以平行四边形 S = ah。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='100px'; return s; }
+    const bS=slider('底 a',3,9,6), hS=slider('高 h',2,7,4);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 300',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const cap=el('div','text-align:center;font-size:15px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    const btnRow=el('div','display:flex;gap:10px;justify-content:center;margin-top:10px;',card);
+    const btnCut=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',btnRow,'开始剪拼');
+    const btnReset=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',btnRow,'还原');
+    let anim=false, morph=0;
+    function draw(m){ const a=+bS.value,h=+hS.value; const baseY=240, x0=120, skew=40, sc=22; svg.innerHTML='';
+      const A=[x0,baseY], B=[x0+a*sc,baseY], D=[x0+skew,baseY-h*sc], Cc=[x0+a*sc+skew,baseY-h*sc];
+      const E=[x0, baseY-h*sc];
+      const triOff=m*(a*sc);
+      function poly(pts,fill){ svg.appendChild(svgEl('polygon',{points:pts.map(function(pp){return pp[0].toFixed(1)+','+pp[1].toFixed(1);}).join(' '),fill:fill,stroke:C.goldDeep,'stroke-width':1.3,'stroke-linejoin':'round'})); }
+      if(m<0.5){
+        poly([A,B,Cc,D],'#E7D6AE');
+        poly([A,D,E],'#D9C498');
+        txt(svg,(A[0]+B[0])/2,baseY+22,'a = '+a,13,C.goldDeep,700);
+        txt(svg,E[0]-14,(A[1]+E[1])/2,'h = '+h,13,C.goldDeep,700);
+      } else {
+        const Rx=x0+a*sc;
+        poly([[x0,baseY],[Rx,baseY],[Rx,baseY-h*sc],[x0,baseY-h*sc]],'#E7D6AE');
+        poly([[Rx,baseY],[Rx+ (E[0]-A[0]+skew),baseY],[Rx+(E[0]-A[0]+skew),baseY-h*sc],[Rx,baseY-h*sc]],'#D9C498');
+        txt(svg,(x0+Rx)/2,baseY+22,'长 = a = '+a,13,C.goldDeep,700);
+        txt(svg,x0-14,(baseY+baseY-h*sc)/2,'宽 = h = '+h,13,C.goldDeep,700);
+      }
+    }
+    function refresh(){ draw(morph); cap.textContent='S = a × h = '+(+bS.value)+' × '+(+hS.value)+' = '+((+bS.value)*(+hS.value)); }
+    [bS,hS].forEach(function(s){ s.addEventListener('input',function(){ morph=0; btnCut.textContent='开始剪拼'; refresh(); }); });
+    btnCut.onclick=function(){ if(anim) return; anim=true; this.disabled=true; tween(0,1,1000,function(v){ draw(v); }, function(){ anim=false; btnCut.disabled=false; btnCut.textContent='已拼好'; }); };
+    btnReset.onclick=function(){ if(anim) return; morph=0; btnCut.textContent='开始剪拼'; refresh(); };
+    refresh();
+  })();
+
+  /* ② 三角·梯形拼组 */
+  (function(){
+    const p=panels.tt;
+    const card=cardOf(p,'②','两个一样图形 → 拼成平行四边形');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '两个完全一样的三角形，拼成平行四边形 → 三角形面积 = 平行四边形÷2 = ah÷2；两个一样的梯形 → 梯形面积 = (a+b)h÷2。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    const mSel=el('div','display:inline-flex;background:'+C.goldSoft+';border:1px solid '+C.line+';border-radius:10px;padding:3px;gap:3px;',ctrl);
+    const ms=[{k:'tri',t:'三角形'},{k:'trap',t:'梯形'}]; const mB={}; const M={k:'tri'};
+    ms.forEach(function(m){ const b=el('button',(m.k==='tri'?'background:#fff;color:'+C.primary+';':'background:transparent;color:'+C.ink2+';')+'min-height:44px;padding:0 14px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;',mSel,m.t); b.onclick=function(){ ms.forEach(function(x){ mB[x.k].style.background='transparent'; mB[x.k].style.color=C.ink2; }); b.style.background='#fff'; b.style.color=C.primary; M.k=m.k; render(); }; mB[m.k]=b; });
+    const aS=el('input',null,ctrl), bS=el('input',null,ctrl), hS=el('input',null,ctrl);
+    function lab(s,tx){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,tx); s.type='range'; s.min=2; s.max=9; s.value=5; s.style.width='90px'; w.appendChild(s); }
+    lab(aS,'底 a'); lab(bS,'底 b'); lab(hS,'高 h');
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;margin-top:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 300',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const cap=el('div','text-align:center;font-size:15px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function render(){ const tri=M.k==='tri'; const a=+aS.value,b=+bS.value,h=+hS.value; svg.innerHTML=''; const x0=120, baseY=240, sc=22;
+      function poly(pts,fill){ svg.appendChild(svgEl('polygon',{points:pts.map(function(pp){return pp[0].toFixed(1)+','+pp[1].toFixed(1);}).join(' '),fill:fill,stroke:C.goldDeep,'stroke-width':1.3,'stroke-linejoin':'round'})); }
+      if(tri){
+        const A=[x0,baseY], B=[x0+a*sc,baseY], T=[x0+a*sc/2,baseY-h*sc];
+        poly([A,B,T],'#E7D6AE');
+        poly([A,T,[x0-a*sc/2,baseY-h*sc]],'#D9C498');
+        txt(svg,(A[0]+B[0])/2,baseY+22,'底 a = '+a,13,C.goldDeep,700);
+        txt(svg,T[0],T[1]-10,'h = '+h,13,C.goldDeep,700);
+        cap.textContent='三角形 S = a × h ÷ 2 = '+a+' × '+h+' ÷ 2 = '+(a*h/2);
+      } else {
+        const A=[x0,baseY], B=[x0+a*sc,baseY], T=[x0+a*sc/2,baseY-h*sc], Tt=[x0+b*sc+a*sc/2,baseY-h*sc];
+        poly([A,B,Tt,T],'#E7D6AE');
+        poly([T,Tt,[Tt[0]+a*sc,Tt[1]],[T[0]+a*sc,T[1]]],'#D9C498');
+        txt(svg,(A[0]+B[0]+ (b*sc))/2,baseY+22,'(a+b) = '+(a+b),13,C.goldDeep,700);
+        cap.textContent='梯形 S = (a+b) × h ÷ 2 = '+(a+b)+' × '+h+' ÷ 2 = '+((a+b)*h/2);
+      }
+    }
+    [aS,bS,hS].forEach(function(s){ s.addEventListener('input',render); }); render();
+  })();
+
+  /* ③ 面积计算 */
+  (function(){
+    const p=panels.calc;
+    const card=cardOf(p,'③','面积计算');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '拖动改底和高，看三个图形面积实时变化。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='90px'; return s; }
+    const aS=slider('底 a',2,9,6), bS=slider('下底 b',2,9,4), hS=slider('高 h',2,8,4);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:15.5px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const a=+aS.value,b=+bS.value,h=+hS.value; out.innerHTML='平行四边形 S = a·h = '+a+'×'+h+' = <b style="color:'+C.goldDeep+'">'+ (a*h) +'</b><br>三角形 S = a·h÷2 = '+ (a*h/2) +'<br>梯形 S = (a+b)·h÷2 = ('+a+'+'+b+')×'+h+'÷2 = <b style="color:'+C.goldDeep+'">'+ ((a+b)*h/2) +'</b>'; }
+    [aS,bS,hS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ④ 随堂挑战 */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战');
+    const Q=[
+      {q:'平行四边形底 8cm、高 5cm，面积？', a:'40', hint:'S=a×h=8×5', ok:function(v){return +v===40;}},
+      {q:'三角形底 10cm、高 6cm，面积？', a:'30', hint:'S=a×h÷2=10×6÷2', ok:function(v){return +v===30;}},
+      {q:'梯形上底 4cm、下底 6cm、高 5cm，面积？', a:'25', hint:'S=(4+6)×5÷2', ok:function(v){return +v===25;}}
+    ];
+    let qi=0, wrong=0; const box=el('div','',card);
+    function show(){ box.innerHTML=''; const it=Q[qi];
+      el('div','font-size:15px;font-weight:600;color:'+C.primary+';margin-bottom:10px;',box,'第 '+(qi+1)+' 题 / 共 '+Q.length+' 题');
+      el('div','font-size:14.5px;line-height:1.8;margin-bottom:12px;',box, it.q);
+      const inp=el('input',null,box); inp.type='number'; inp.style.cssText='width:120px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
+      const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
+      const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
+    }
+    show();
+  })();
+
+  setTab('para');
+}
+
+// ---------- 圆：剪拼成长方形 / 周长与面积 / 圆环与半圆 / 随堂挑战 ----------
+function diagCircleArea(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F' };
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '把圆剪拼成长方形，自己推出面积公式。');
+
+  const TABS=[{id:'derive',label:'剪拼成长方形'},{id:'measure',label:'周长与面积'},{id:'ring',label:'圆环与半圆'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){ for(const k in panels) panels[k].style.display=(k===id)?'block':'none'; TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id]; b.style.background=on?C.primary:'#fff'; b.style.color=on?'#fff':C.ink2; b.style.borderColor=on?C.primary:C.line; }); }
+  TABS.forEach(function(t){ const b=el('button','flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;',tabBar,t.label); b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b; panels[t.id]=el('div','',root); });
+  function cardOf(p,no,title){ const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p); if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card,no+' '+title); return card; }
+
+  /* ① 剪拼成长方形 */
+  (function(){
+    const p=panels.derive;
+    const card=cardOf(p,'①','圆剪拼成长方形');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '把圆平均分成很多份，切开拼一拼，就接近一个长方形：长≈πr（半个圆周），宽=r，所以 S=πr²。');
+    const segWrap=el('div','display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;',card);
+    const seg=el('div','display:inline-flex;background:'+C.goldSoft+';border:1px solid '+C.line+';border-radius:10px;padding:3px;gap:3px;',segWrap);
+    const segData=[8,16,32]; const segB={};
+    const CUT={N:16,r:70,cx:120,cy:165,rx:350,ry:165,morph:0,anim:false,wedges:[],layout:[]};
+    segData.forEach(function(n){ const sb=el('button',(n===16?'background:#fff;color:'+C.primary+';':'background:transparent;color:'+C.ink2+';')+'min-height:44px;padding:0 14px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;',seg,n+' 份'); sb.onclick=function(){ segData.forEach(function(m){ segB[m].style.background='transparent'; segB[m].style.color=C.ink2; }); sb.style.background='#fff'; sb.style.color=C.primary; CUT.N=n; CUT.morph=0; btnMorph.textContent='开始切拼'; cutFormula.style.display='none'; cutBuild(); }; segB[n]=sb; });
+    el('div','font-size:12.5px;color:'+C.ink2+';',segWrap,'份数越多 → 越像长方形');
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 330',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const btnRow=el('div','display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;',card);
+    const btnMorph=el('button','min-height:46px;padding:0 22px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',btnRow,'开始切拼');
+    const btnReset=el('button','min-height:46px;padding:0 22px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',btnRow,'还原成圆');
+    const cutFormula=el('div','display:none;margin-top:12px;border-radius:12px;padding:12px 16px;text-align:center;font-size:16px;font-weight:700;color:'+C.primary+';background:'+C.goldSoft+';border:1px solid #E8D9B8;',card,'长方形的面积 = 长 × 宽 → S<sub>圆</sub> = πr × r = πr²');
+    function cutWedgePath(r,alpha){ const x1=r*Math.cos(-alpha/2),y1=r*Math.sin(-alpha/2),x2=r*Math.cos(alpha/2),y2=r*Math.sin(alpha/2); return 'M0,0 L'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 0 1 '+x2.toFixed(2)+','+y2.toFixed(2)+' Z'; }
+    function cutComputeLayout(){ const N=CUT.N,r=CUT.r,alpha=2*Math.PI/N,W=Math.PI*r,s=W/N,x0=CUT.rx-W/2,yB=CUT.ry+r/2,yT=CUT.ry-r/2; CUT.layout=[]; for(let i=0;i<N;i++){ if(i%2===0) CUT.layout.push({x:x0+(i+1)*s,y:yB,deg:-90}); else CUT.layout.push({x:x0+(i+1)*s,y:yT,deg:90}); } }
+    function cutBuild(){ cutComputeLayout(); const N=CUT.N,alpha=2*Math.PI/N; svg.innerHTML=''; CUT.wedges=[];
+      txt(svg,CUT.cx,58,'圆（俯视）',13,C.ink2,600); txt(svg,CUT.rx,58,'拼一拼',13,C.ink2,600);
+      svg.appendChild(svgEl('circle',{cx:CUT.cx,cy:CUT.cy,r:3,fill:C.goldDeep}));
+      for(let i=0;i<N;i++){ const g=svgEl('g',{}); const pa=svgEl('path',{d:cutWedgePath(CUT.r,alpha),fill:i%2===0?'#E5D5B6':'#D9C498',stroke:C.goldDeep,'stroke-width':0.9,'stroke-linejoin':'round'}); g.appendChild(pa); svg.appendChild(g); CUT.wedges.push({g:g,p:pa,i:i,circleDeg:i*360/N,rect:CUT.layout[i]}); }
+      cutApply(CUT.morph); cutDims(CUT.morph>.5); }
+    function cutApply(m){ CUT.morph=m; CUT.wedges.forEach(function(w){ const cx=CUT.cx+(w.rect.x-CUT.cx)*m, cy=CUT.cy+(w.rect.y-CUT.cy)*m, deg=w.circleDeg+(w.rect.deg-w.circleDeg)*m; w.g.setAttribute('transform','translate('+cx.toFixed(2)+','+cy.toFixed(2)+') rotate('+deg.toFixed(2)+')'); }); }
+    function cutDims(show){ const old=svg.querySelector('.dims'); if(old) old.remove(); if(!show) return; const W=Math.PI*CUT.r,r=CUT.r,x0=CUT.rx-W/2,x1=CUT.rx+W/2,yT=CUT.ry-r/2-14,yB=CUT.ry+r/2+30; const g=svgEl('g',{class:'dims'});
+      g.appendChild(svgEl('line',{x1:x0,y1:yT,x2:x1,y2:yT,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:x0,y1:yT-5,x2:x0,y2:yT+5,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:x1,y1:yT-5,x2:x1,y2:yT+5,stroke:C.goldDeep,'stroke-width':1.4}));
+      txt(g,(x0+x1)/2,yT-8,'长 ≈ πr（半个圆周）',14,C.goldDeep,700);
+      const xr=x1+22; g.appendChild(svgEl('line',{x1:xr,y1:CUT.ry-r/2,x2:xr,y2:CUT.ry+r/2,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:xr-5,y1:CUT.ry-r/2,x2:xr+5,y2:CUT.ry-r/2,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:xr-5,y1:CUT.ry+r/2,x2:xr+5,y2:CUT.ry+r/2,stroke:C.goldDeep,'stroke-width':1.4}));
+      txt(g,xr+10,CUT.ry+5,'宽 ≈ r',14,C.goldDeep,700);
+      txt(g,CUT.rx,yB,'S = πr × r = πr²',14.5,C.primary,700); svg.appendChild(g); }
+    btnMorph.onclick=function(){ if(CUT.anim) return; CUT.anim=true; const b=this; b.disabled=true; const target=CUT.morph<.5?1:0; tween(CUT.morph,target,1100,function(v){ cutApply(v); }, function(){ CUT.anim=false; b.disabled=false; b.textContent=CUT.morph>.5?'还原成圆':'开始切拼'; cutDims(CUT.morph>.5); cutFormula.style.display=CUT.morph>.5?'block':'none'; }); };
+    btnReset.onclick=function(){ if(CUT.anim) return; cutApply(0); cutDims(false); btnMorph.textContent='开始切拼'; cutFormula.style.display='none'; };
+    cutBuild();
+  })();
+
+  /* ② 周长与面积 */
+  (function(){
+    const p=panels.measure;
+    const card=cardOf(p,'②','周长和面积');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '拖动改变半径 r：C = 2πr，S = πr²（π 取 3.14）。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,'半径 r'); const rS=el('input',null,w); rS.type='range'; rS.min=2; rS.max=10; rS.value=5; rS.style.width='160px'; w.appendChild(rS);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 300',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const out=el('div','text-align:center;font-size:16px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function refresh(){ const r=+rS.value,PI=3.14; const C=r*22; svg.innerHTML='';
+      svg.appendChild(svgEl('circle',{cx:200,cy:160,r:C,fill:'#E7D6AE',stroke:C.goldDeep,'stroke-width':2}));
+      svg.appendChild(svgEl('line',{x1:200,y1:160,x2:200,y2:160-C,stroke:C.primary,'stroke-width':1.6}));
+      txt(svg,210,150,'r='+r,13,C.primary,700);
+      txt(svg,200,160+C+22,'C = 2πr = 2×3.14×'+r+' = '+(2*PI*r).toFixed(2),13,C.goldDeep,700);
+      out.innerHTML='半径 r = '+r+' → 周长 C = 2πr ≈ '+(2*PI*r).toFixed(2)+' ，面积 S = πr² ≈ '+(PI*r*r).toFixed(2);
+    }
+    rS.addEventListener('input',refresh); refresh();
+  })();
+
+  /* ③ 圆环与半圆 */
+  (function(){
+    const p=panels.ring;
+    const card=cardOf(p,'③','圆环与半圆');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '圆环面积 = π(R²−r²)；半圆面积 = πr²÷2。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='90px'; return s; }
+    const RS=slider('外半径 R',3,9,6), rs=slider('内半径 r',1,8,3);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:15.5px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const R=+RS.value, r=Math.min(+rs.value,R-1); const PI=3.14; out.innerHTML='圆环 S = π(R²−r²) = 3.14×('+R+'²−'+r+'²) = <b style="color:'+C.goldDeep+'">'+ (PI*(R*R-r*r)).toFixed(2) +'</b><br>半圆 S = πr²÷2 = '+(PI*r*r/2).toFixed(2); }
+    [RS,rs].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ④ 随堂挑战 */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战');
+    const Q=[
+      {q:'圆的半径 4cm，面积是多少（π取3.14）？', a:'50.24', hint:'S=πr²=3.14×4²', ok:function(v){return Math.abs(+v-50.24)<0.01;}},
+      {q:'圆的半径 10cm，周长约是多少？', a:'62.8', hint:'C=2πr=2×3.14×10', ok:function(v){return Math.abs(+v-62.8)<0.01;}},
+      {q:'圆环外半径5cm、内半径3cm，面积？', a:'50.24', hint:'S=π(25−9)=3.14×16', ok:function(v){return Math.abs(+v-50.24)<0.01;}}
+    ];
+    let qi=0, wrong=0; const box=el('div','',card);
+    function show(){ box.innerHTML=''; const it=Q[qi];
+      el('div','font-size:15px;font-weight:600;color:'+C.primary+';margin-bottom:10px;',box,'第 '+(qi+1)+' 题 / 共 '+Q.length+' 题');
+      el('div','font-size:14.5px;line-height:1.8;margin-bottom:12px;',box, it.q);
+      const inp=el('input',null,box); inp.type='number'; inp.style.cssText='width:140px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
+      const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
+      const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
+    }
+    show();
+  })();
+
+  setTab('derive');
+}
+
 function getUnitDiagrams(unit, grade, sem){
   const name = unit.name || '';
   const type = unit.type || '';
@@ -1520,6 +1933,13 @@ function getUnitDiagrams(unit, grade, sem){
 
   // ===== 圆柱与圆锥：专属四段交互动图（切拼·倒水·计算·挑战）=====
   if (/圆柱与圆锥|圆柱圆锥/.test(name)) { add(out, diagCylinderCone, '圆柱与圆锥的体积（切拼·倒水·计算·挑战）', {}, '👆 点标签切换：切拼探究 / 倒水实验 / 体积计算 / 随堂挑战'); return out; }
+
+  // ===== 长方体和正方体：专属四段交互动图（摆一摆·表面积·计算·挑战）=====
+  if (name === '长方体和正方体') { add(out, diagCuboid, '长方体和正方体的体积（摆一摆·表面积·计算·挑战）', {}, '👆 点标签切换：摆一摆 / 表面积 / 体积计算 / 随堂挑战'); return out; }
+  // ===== 多边形的面积：专属四段交互动图（剪拼推导·计算·挑战）=====
+  if (name === '多边形的面积') { add(out, diagPolygonArea, '多边形的面积（剪拼推导·计算·挑战）', {}, '👆 点标签切换：平行四边形 / 三角·梯形 / 面积计算 / 随堂挑战'); return out; }
+  // ===== 圆：专属四段交互动图（剪拼成长方形·计算·挑战）=====
+  if (name === '圆') { add(out, diagCircleArea, '圆的面积（剪拼成长方形·计算·挑战）', {}, '👆 点标签切换：剪拼成长方形 / 周长与面积 / 圆环与半圆 / 随堂挑战'); return out; }
 
   // ===== 专属交互动图（补齐此前只走兜底的单元）=====
   if (/生活应用题/.test(name)) { add(out, diagWordProblem, '看图列式（部分—整体）', {}, '👆 拖动滑块改变“已知”数量，看算式'); dedicated = true; }

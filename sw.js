@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v62：圆柱与圆锥单元接入专属四段交互动图（切拼探究/倒水实验/体积计算/随堂挑战），移植自《圆柱和圆锥的体积·交互动画》。diagram.js 在 SHELL 内，升版本强制重装
-const CACHE = 'lyj-shell-v62';
+// v63：长方体和正方体/多边形的面积/圆 三个单元接入专属四段交互动图（摆一摆·表面积·计算 / 剪拼推导·计算 / 剪拼成长方形·计算），各自按课本真实推导量身定制。diagram.js 在 SHELL 内，升版本强制重装
+const CACHE = 'lyj-shell-v63';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
