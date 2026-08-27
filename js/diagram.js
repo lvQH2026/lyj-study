@@ -1319,10 +1319,10 @@ function diagCylinderCone(container, opts){
   container.innerHTML='';
   const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
   el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
-     '像做实验一样学数学：动手切一切、倒一倒，自己发现 <b>V = Sh</b> 与 <b>V = ⅓Sh</b> 的秘密。');
+     '像做实验一样学数学：动手切一切、倒一倒、剪开看一看，自己发现 <b>V = Sh</b>、<b>V = ⅓Sh</b> 与 <b>S表 = 2πrh + 2πr²</b> 的秘密。');
 
   // Tab 栏
-  const TABS=[{id:'derive',label:'切拼探究'},{id:'pour',label:'倒水实验'},{id:'calc',label:'体积计算'},{id:'quiz',label:'随堂挑战'}];
+  const TABS=[{id:'derive',label:'切拼探究'},{id:'pour',label:'倒水实验'},{id:'calc',label:'体积计算'},{id:'surf',label:'侧面展开·表面积'},{id:'quiz',label:'随堂挑战'}];
   const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
   const panels={}; const tabBtns={};
   function setTab(id){
@@ -1469,10 +1469,72 @@ function diagCylinderCone(container, opts){
     rgR.inp.addEventListener('input',calcUpdate); rgH.inp.addEventListener('input',calcUpdate); calcUpdate();
   })();
 
-  /* ---------- 4. 随堂挑战 ---------- */
+  /* ---------- 4. 侧面展开·表面积 ---------- */
+  (function(){
+    const p=panels.surf;
+    const card=cardOf(p,'④','把圆柱剪开，侧面变成了什么？');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '沿着圆柱侧面的一条高剪开、再展开，侧面会平铺成一个长方形：它的长 = 底面周长 2πr，宽 = 圆柱的高 h，所以 <b>侧面积 S侧 = 2πrh</b>。再加上上下两个底面圆，就是圆柱的 <b>表面积 S表</b>。');
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 340',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const readout=el('div','display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;',card);
+    const boxSide=el('div','flex:1;min-width:150px;border:1px solid '+C.line+';border-radius:12px;padding:12px;',readout);
+    const boxTotal=el('div','flex:1;min-width:150px;border:1px solid '+C.line+';border-radius:12px;padding:12px;',readout);
+    el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',boxSide,'侧面积'); el('div','font-size:13px;color:'+C.primary+';margin-top:4px;',boxSide,'S侧 = 2πrh'); const vSide=el('div','font-size:19px;font-weight:700;margin-top:6px;color:'+C.primary+';',boxSide,'—'); el('div','font-size:11px;color:'+C.ink2+';',boxSide,'平方厘米（cm²）');
+    el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',boxTotal,'表面积'); el('div','font-size:13px;color:'+C.primary+';margin-top:4px;',boxTotal,'S表 = 2πrh + 2πr²'); const vTotal=el('div','font-size:19px;font-weight:700;margin-top:6px;color:'+C.goldDeep+';',boxTotal,'—'); el('div','font-size:11px;color:'+C.ink2+';',boxTotal,'平方厘米（cm²）');
+    el('div','font-size:12px;color:'+C.ink2+';line-height:1.7;margin-top:10px;padding-left:10px;border-left:3px solid #E8D9B8;',card,
+       '记住：侧面积只算“弯弯的侧面”一圈；表面积还要把上下两个底面圆（各 πr²）都加上。');
+    const btnRow=el('div','display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;',card);
+    const btnUnroll=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;background:'+C.primary+';color:#fff;',btnRow,'展开侧面');
+    const btnBase=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:1px solid '+C.line+';font-size:15px;font-weight:600;cursor:pointer;background:#fff;color:'+C.primary+';',btnRow,'加上两个底面');
+    const btnReset=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:1px solid '+C.line+';font-size:15px;font-weight:600;cursor:pointer;background:#fff;color:'+C.primary+';',btnRow,'还原');
+
+    const SURF={r:3,h:6,morph:0,showBase:false,anim:false};
+    const RS=5, HS=10;
+    function sliderRow(label,min,max,val){ const row=el('div','display:flex;align-items:center;gap:12px;margin:14px 0;',card); el('label','font-size:14px;font-weight:600;flex:none;width:86px;',row,label); const inp=el('input','flex:1;-webkit-appearance:none;height:44px;background:transparent;cursor:pointer;',row); inp.type='range'; inp.min=min; inp.max=max; inp.step=1; inp.value=val; const out=el('output','font-size:15px;font-weight:700;color:'+C.goldDeep+';width:64px;text-align:right;flex:none;',row,val+' cm'); return {inp:inp,out:out}; }
+    const rgR=sliderRow('半径 r',1,10,SURF.r); const rgH=sliderRow('高 h',2,15,SURF.h);
+
+    function drawSurf(){
+      const r=SURF.r,h=SURF.h,rw=r*RS,hh=h*HS;
+      const cx=100,baseY=260,topY=baseY-hh,ry=rw*0.30;
+      const circ=2*Math.PI*r*RS;
+      const rectLeft=cx+rw+18, rectTop=topY, rectW=circ*SURF.morph;
+      svg.innerHTML='';
+      const cylBody='M'+(cx-rw)+','+topY+' L'+(cx-rw)+','+baseY+' A'+rw+','+ry+' 0 0 0 '+(cx+rw)+','+baseY+' L'+(cx+rw)+','+topY+' A'+rw+','+ry+' 0 0 1 '+(cx-rw)+','+topY+' Z';
+      svg.appendChild(svgEl('path',{d:cylBody,fill:'#EFE9DC',stroke:C.primary,'stroke-width':2,'stroke-linejoin':'round'}));
+      svg.appendChild(svgEl('ellipse',{cx:cx,cy:topY,rx:rw,ry:ry,fill:'#F4EEE0',stroke:C.primary,'stroke-width':2}));
+      svg.appendChild(svgEl('line',{x1:cx+rw,y1:topY,x2:cx+rw,y2:baseY,stroke:C.accent,'stroke-width':1.6,'stroke-dasharray':'5 4'}));
+      txt(svg,cx,topY-12,'圆柱',13.5,C.ink2,600);
+      if(SURF.morph>0.01){
+        svg.appendChild(svgEl('rect',{x:rectLeft,y:rectTop,width:rectW,height:hh,fill:'#EAD9B0',stroke:C.goldDeep,'stroke-width':2,'stroke-linejoin':'round'}));
+        if(SURF.morph>0.5){
+          const cyC=rectTop+hh/2;
+          const ly=SURF.showBase?topY-rw-22:rectTop-10;
+          txt(svg,rectLeft+rectW/2,ly,'长 = 底面周长 2πr',14,C.goldDeep,700);
+          txt(svg,rectLeft-8,cyC,'宽 = h',13,C.goldDeep,700,'end');
+        }
+        if(SURF.showBase && SURF.morph>0.5){
+          const ccx=rectLeft+rectW/2;
+          svg.appendChild(svgEl('ellipse',{cx:ccx,cy:rectTop-rw-4,rx:rw,ry:rw*0.30,fill:'#F4EEE0',stroke:C.primary,'stroke-width':2}));
+          svg.appendChild(svgEl('ellipse',{cx:ccx,cy:rectTop+hh+rw+4,rx:rw,ry:rw*0.30,fill:'#F4EEE0',stroke:C.primary,'stroke-width':2}));
+          txt(svg,ccx,rectTop-rw-rw*0.30-12,'底面',12.5,C.ink2,600);
+          txt(svg,ccx,rectTop+hh+rw+rw*0.30+16,'底面',12.5,C.ink2,600);
+        }
+      }
+    }
+    function updateNums(){ const r=SURF.r,h=SURF.h; vSide.textContent=(2*PI*r*h).toFixed(2); vTotal.textContent=(2*PI*r*h+2*PI*r*r).toFixed(2); }
+    function onSlide(){ SURF.r=+rgR.inp.value; SURF.h=+rgH.inp.value; rgR.out.textContent=SURF.r+' cm'; rgH.out.textContent=SURF.h+' cm'; drawSurf(); updateNums(); }
+    rgR.inp.addEventListener('input',onSlide); rgH.inp.addEventListener('input',onSlide);
+    btnUnroll.onclick=function(){ if(SURF.anim) return; SURF.anim=true; const b=this; b.disabled=true; const target=SURF.morph<.5?1:0; tween(SURF.morph,target,1100,function(v){SURF.morph=v; drawSurf();},function(){ SURF.anim=false; b.disabled=false; b.textContent=SURF.morph>.5?'卷回圆柱':'展开侧面'; }); };
+    btnBase.onclick=function(){ if(SURF.morph<0.5){ btnUnroll.onclick(); } SURF.showBase=!SURF.showBase; this.textContent=SURF.showBase?'去掉底面':'加上两个底面'; drawSurf(); };
+    btnReset.onclick=function(){ SURF.morph=0; SURF.showBase=false; btnUnroll.textContent='展开侧面'; btnBase.textContent='加上两个底面'; drawSurf(); };
+    onSlide();
+  })();
+
+  /* ---------- 5. 随堂挑战 ---------- */
   (function(){
     const p=panels.quiz;
-    const card=cardOf(p,'④','随堂挑战 · 你学会了吗');
+    const card=cardOf(p,'⑤','随堂挑战 · 你学会了吗');
     el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,'共 3 题。答错不要紧——先看提示再想一想，实在想不出再看答案。');
     const quizBox=el('div','',card);
     const quizScore=el('div','display:none;text-align:center;padding:14px;',card);
@@ -1932,7 +1994,7 @@ function getUnitDiagrams(unit, grade, sem){
   let dedicated = false;
 
   // ===== 圆柱与圆锥：专属四段交互动图（切拼·倒水·计算·挑战）=====
-  if (/圆柱与圆锥|圆柱圆锥/.test(name)) { add(out, diagCylinderCone, '圆柱与圆锥的体积（切拼·倒水·计算·挑战）', {}, '👆 点标签切换：切拼探究 / 倒水实验 / 体积计算 / 随堂挑战'); return out; }
+  if (/圆柱与圆锥|圆柱圆锥/.test(name)) { add(out, diagCylinderCone, '圆柱与圆锥的体积和表面积（切拼·倒水·展开·计算·挑战）', {}, '👆 点标签切换：切拼探究 / 倒水实验 / 体积计算 / 侧面展开·表面积 / 随堂挑战'); return out; }
 
   // ===== 长方体和正方体：专属四段交互动图（摆一摆·表面积·计算·挑战）=====
   if (name === '长方体和正方体') { add(out, diagCuboid, '长方体和正方体的体积（摆一摆·表面积·计算·挑战）', {}, '👆 点标签切换：摆一摆 / 表面积 / 体积计算 / 随堂挑战'); return out; }

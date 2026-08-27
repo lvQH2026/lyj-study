@@ -387,6 +387,7 @@ ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --dange
 ok('v60：SW 缓存版本号已升级为 lyj-shell-v60', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v60'));
 ok('v62：圆柱与圆锥接入专属四段交互动图 + SW 缓存升级为 lyj-shell-v62', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v62') && /diagCylinderCone/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
 ok('v63：长方体和正方体/多边形的面积/圆 接入专属四段交互动图 + SW 缓存升级为 lyj-shell-v63', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v63') && /diagCuboid/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagPolygonArea/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagCircleArea/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
+ok('v64：圆柱与圆锥新增侧面展开·表面积 tab（S侧=2πrh / S表=2πrh+2πr²）+ SW 缓存升级为 lyj-shell-v64', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v64') && /diagCylinderCone/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /侧面展开·表面积/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /S表 = 2πrh \+ 2πr²/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));

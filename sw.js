@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v63：长方体和正方体/多边形的面积/圆 三个单元接入专属四段交互动图（摆一摆·表面积·计算 / 剪拼推导·计算 / 剪拼成长方形·计算），各自按课本真实推导量身定制。diagram.js 在 SHELL 内，升版本强制重装
-const CACHE = 'lyj-shell-v63';
+// v64：圆柱与圆锥单元新增「侧面展开·表面积」tab（沿高剪开→侧面展开成长方形→S侧=2πrh→加两底面得 S表=2πrh+2πr²），与已上线体积推导成组。diagram.js 在 SHELL 内，升版本强制重装
+const CACHE = 'lyj-shell-v64';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
