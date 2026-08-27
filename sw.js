@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v60：修复「云端被本机镜像整体覆盖→本机重置后家长端丢记录」。pushRecentHistory 改为读取云端已有记录+合并本机新增(去重)再回写(保留上限50)；家长端加「把本机记录合并同步到云端」按钮做即时恢复；多设备可累积
-const CACHE = 'lyj-shell-v60';
+// v62：圆柱与圆锥单元接入专属四段交互动图（切拼探究/倒水实验/体积计算/随堂挑战），移植自《圆柱和圆锥的体积·交互动画》。diagram.js 在 SHELL 内，升版本强制重装
+const CACHE = 'lyj-shell-v62';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

@@ -1300,6 +1300,216 @@ function diagReviewMap(container, opts) {
   draw();
 }
 
+// ============================================================
+// 圆柱与圆锥的体积：切拼探究 / 倒水实验 / 体积计算 / 随堂挑战
+// 移植自《圆柱和圆锥的体积·交互动画》（OpenMAIC 模拟型互动组件范式）
+// 自包含：原生 SVG + 内联样式，移动端「同步学习」与 PC 工作台共用
+// ============================================================
+function diagCylinderCone(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F',
+              liquid:'#C9AC74', liquidDeep:'#B4945A' };
+  const PI = 3.14;
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '像做实验一样学数学：动手切一切、倒一倒，自己发现 <b>V = Sh</b> 与 <b>V = ⅓Sh</b> 的秘密。');
+
+  // Tab 栏
+  const TABS=[{id:'derive',label:'切拼探究'},{id:'pour',label:'倒水实验'},{id:'calc',label:'体积计算'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){
+    for(const k in panels) panels[k].style.display = (k===id)?'block':'none';
+    TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id];
+      b.style.background = on?C.primary:'#fff'; b.style.color = on?'#fff':C.ink2; b.style.borderColor = on?C.primary:C.line; });
+  }
+  TABS.forEach(function(t){
+    const b=el('button', 'flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;', tabBar, t.label);
+    b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b;
+    panels[t.id]=el('div', '', root);
+  });
+  function cardOf(p, no, title){
+    const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p);
+    if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card, no+' '+title);
+    return card;
+  }
+
+  /* ---------- 1. 切拼探究 ---------- */
+  (function(){
+    const p=panels.derive;
+    const card=cardOf(p,'①','圆柱的底面能变成长方形吗？');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '把圆柱的底面圆平均分成若干份，切开后再拼一拼——猜猜会变成什么形状？分的份数越多，越接近什么？');
+    const segWrap=el('div','display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;',card);
+    const seg=el('div','display:inline-flex;background:'+C.goldSoft+';border:1px solid '+C.line+';border-radius:10px;padding:3px;gap:3px;',segWrap);
+    const segData=[8,16,32]; const segBtns={};
+    segData.forEach(function(n){ const sb=el('button',(n===16?'background:#fff;color:'+C.primary+';':'background:transparent;color:'+C.ink2+';')+'min-height:44px;padding:0 14px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;',seg, n+' 份'); sb.onclick=function(){ segData.forEach(function(m){ segBtns[m].style.background='transparent'; segBtns[m].style.color=C.ink2; }); sb.style.background='#fff'; sb.style.color=C.primary; CUT.N=n; CUT.morph=0; btnMorph.textContent='开始切拼'; cutFormula.style.display='none'; cutBuild(); }; segBtns[n]=sb; });
+    el('div','font-size:12.5px;color:'+C.ink2+';',segWrap,'份数越多 → 越像长方形');
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 330',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const btnRow=el('div','display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;',card);
+    const btnMorph=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;background:'+C.primary+';color:#fff;',btnRow,'开始切拼');
+    const btnReset=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:1px solid '+C.line+';font-size:15px;font-weight:600;cursor:pointer;background:#fff;color:'+C.primary+';',btnRow,'还原成圆');
+    const cutFormula=el('div','display:none;margin-top:12px;border-radius:12px;padding:12px 16px;text-align:center;font-size:16px;font-weight:700;color:'+C.primary+';background:'+C.goldSoft+';border:1px solid #E8D9B8;',card,
+       '长方体体积 = 底面积 × 高 → V<sub>柱</sub> = πr²h <br><span style="font-size:12px;font-weight:400;color:'+C.ink2+';">拼成的长方形：长 ≈ πr（半个圆周），宽 ≈ r，所以底面积 S = πr × r = πr²</span>');
+    el('div','font-size:12.5px;color:'+C.ink2+';line-height:1.7;margin-top:10px;padding-left:10px;border-left:3px solid #E8D9B8;',card,
+       '发现了吗？圆柱切拼后得到一个近似的长方体——它的高就是圆柱的高 h，底面积就是圆的面积 πr²，所以圆柱的体积 = 底面积 × 高。');
+
+    const CUT={N:16,r:70,cx:120,cy:165,rx:350,ry:165,morph:0,anim:false,wedges:[],layout:[]};
+    function cutWedgePath(r,alpha){ const x1=r*Math.cos(-alpha/2),y1=r*Math.sin(-alpha/2),x2=r*Math.cos(alpha/2),y2=r*Math.sin(alpha/2); return 'M0,0 L'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 0 1 '+x2.toFixed(2)+','+y2.toFixed(2)+' Z'; }
+    function cutComputeLayout(){ const N=CUT.N,r=CUT.r,alpha=2*Math.PI/N,W=PI*r,s=W/N,x0=CUT.rx-W/2,yB=CUT.ry+r/2,yT=CUT.ry-r/2; CUT.layout=[]; for(let i=0;i<N;i++){ if(i%2===0) CUT.layout.push({x:x0+(i+1)*s,y:yB,deg:-90}); else CUT.layout.push({x:x0+(i+1)*s,y:yT,deg:90}); } }
+    function cutBuild(){ cutComputeLayout(); const N=CUT.N,alpha=2*Math.PI/N; svg.innerHTML=''; CUT.wedges=[];
+      txt(svg,CUT.cx,58,'底面圆（俯视）',13,C.ink2,600);
+      txt(svg,CUT.rx,58,'切开后拼一拼',13,C.ink2,600);
+      svg.appendChild(svgEl('circle',{cx:CUT.cx,cy:CUT.cy,r:3,fill:C.goldDeep}));
+      for(let i=0;i<N;i++){ const g=svgEl('g',{}); const pa=svgEl('path',{d:cutWedgePath(CUT.r,alpha),fill:i%2===0?'#E5D5B6':'#D9C498',stroke:C.goldDeep,'stroke-width':0.9,'stroke-linejoin':'round'}); g.appendChild(pa); svg.appendChild(g); CUT.wedges.push({g:g,p:pa,i:i,circleDeg:i*360/N,rect:CUT.layout[i]}); }
+      cutApply(CUT.morph); cutDims(CUT.morph>.5); }
+    function cutApply(m){ CUT.morph=m; CUT.wedges.forEach(function(w){ const cx=CUT.cx+(w.rect.x-CUT.cx)*m, cy=CUT.cy+(w.rect.y-CUT.cy)*m, deg=w.circleDeg+(w.rect.deg-w.circleDeg)*m; w.g.setAttribute('transform','translate('+cx.toFixed(2)+','+cy.toFixed(2)+') rotate('+deg.toFixed(2)+')'); }); }
+    function cutDims(show){ const old=svg.querySelector('.dims'); if(old) old.remove(); if(!show) return; const W=PI*CUT.r,r=CUT.r,x0=CUT.rx-W/2,x1=CUT.rx+W/2,yT=CUT.ry-r/2-14,yB=CUT.ry+r/2+30; const g=svgEl('g',{class:'dims'});
+      g.appendChild(svgEl('line',{x1:x0,y1:yT,x2:x1,y2:yT,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:x0,y1:yT-5,x2:x0,y2:yT+5,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:x1,y1:yT-5,x2:x1,y2:yT+5,stroke:C.goldDeep,'stroke-width':1.4}));
+      txt(g,(x0+x1)/2,yT-8,'长 ≈ πr（半个圆周）',14,C.goldDeep,700);
+      const xr=x1+22; g.appendChild(svgEl('line',{x1:xr,y1:CUT.ry-r/2,x2:xr,y2:CUT.ry+r/2,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:xr-5,y1:CUT.ry-r/2,x2:xr+5,y2:CUT.ry-r/2,stroke:C.goldDeep,'stroke-width':1.4}));
+      g.appendChild(svgEl('line',{x1:xr-5,y1:CUT.ry+r/2,x2:xr+5,y2:CUT.ry+r/2,stroke:C.goldDeep,'stroke-width':1.4}));
+      txt(g,xr+10,CUT.ry+5,'宽 ≈ r',14,C.goldDeep,700);
+      txt(g,CUT.rx,yB,'底面积 S = πr × r = πr²',14.5,C.primary,700);
+      svg.appendChild(g); }
+    btnMorph.onclick=function(){ if(CUT.anim) return; CUT.anim=true; const b=this; b.disabled=true; const target=CUT.morph<.5?1:0; tween(CUT.morph,target,1100,function(v){cutApply(v);},function(){ CUT.anim=false; b.disabled=false; b.textContent=CUT.morph>.5?'还原成圆':'开始切拼'; cutDims(CUT.morph>.5); cutFormula.style.display=CUT.morph>.5?'block':'none'; }); };
+    btnReset.onclick=function(){ if(CUT.anim) return; cutApply(0); cutDims(false); btnMorph.textContent='开始切拼'; cutFormula.style.display='none'; };
+    cutBuild();
+  })();
+
+  /* ---------- 2. 倒水实验 ---------- */
+  (function(){
+    const p=panels.pour;
+    const card=cardOf(p,'②','圆锥要倒几次才能装满圆柱？');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '准备一个圆锥形容器和与它<b>等底等高</b>的圆柱形容器。把圆锥装满水，倒进圆柱里……倒几次能正好装满？先猜一猜，再动手试。');
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 320',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const pourCount=el('div','text-align:center;font-size:14px;font-weight:600;color:'+C.ink2+';margin-top:10px;',card,'已倒入 <b style="color:'+C.goldDeep+';font-size:17px">0</b> 次，圆柱里的水占了 <b style="color:'+C.goldDeep+';font-size:17px">0 / 3</b> 份');
+    const btnRow=el('div','display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;',card);
+    const btnPour=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#C4A266,#B4945A);color:#fff;',btnRow,'倒一次');
+    const btnReset=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:1px solid '+C.line+';font-size:15px;font-weight:600;cursor:pointer;background:#fff;color:'+C.primary+';',btnRow,'重新开始');
+    const conclusion=el('div','display:none;margin-top:12px;border-radius:12px;padding:14px 16px;text-align:center;background:linear-gradient(135deg,'+C.goldSoft+',#F5EDDD);border:1.5px solid '+C.gold+';',card,
+       '<div style="font-size:17px;font-weight:700;color:'+C.primary+';">倒了整整 3 次，正好装满！</div><div style="font-size:13px;color:'+C.ink2+';margin-top:6px;line-height:1.7;">等底等高时：圆锥体积 = 圆柱体积 × ⅓<br>即 V<sub>锥</sub> = ⅓ · πr²h = ⅓ · S · h</div>');
+    el('div','font-size:12.5px;color:'+C.ink2+';line-height:1.7;margin-top:10px;padding-left:10px;border-left:3px solid #E8D9B8;',card,
+       '实验结论：圆锥的体积是与它等底等高圆柱体积的三分之一。记住「等底等高」这个前提——如果底或高不同，就不是简单的 3 倍关系了。');
+
+    const POUR={pours:0,anim:false};
+    const PG={coneX:170,cylX:390,baseY:105,tipY:275,rw:78,rh:20};
+    function appendText(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+    function buildPour(){ svg.innerHTML=''; const g=PG;
+      const coneG=svgEl('g',{});
+      coneG.appendChild(svgEl('path',{d:'M'+g.coneX+','+g.baseY+' L'+(g.coneX-g.rw)+','+(g.tipY-g.rh)+' A'+g.rw+','+g.rh+' 0 0 0 '+(g.coneX-g.rw)+','+(g.tipY+g.rh)+' L'+g.coneX+','+g.tipY+' Z',fill:'#EFE9DC',stroke:C.primary,'stroke-width':2,'stroke-linejoin':'round'}));
+      const clip=svgEl('clipPath',{id:'coneClipCC'}); clip.appendChild(svgEl('rect',{id:'coneClipRectCC',x:g.coneX-g.rw-4,y:g.tipY-4,width:g.rw*2+8,height:4})); svg.appendChild(clip);
+      const coneLiq=svgEl('path',{d:'M'+g.coneX+','+g.baseY+' L'+(g.coneX-g.rw)+','+(g.tipY-g.rh)+' A'+g.rw+','+g.rh+' 0 0 0 '+(g.coneX-g.rw)+','+(g.tipY+g.rh)+' L'+g.coneX+','+g.tipY+' Z',fill:'url(#liqGradCC)','clip-path':'url(#coneClipCC)'});
+      const defs=svgEl('defs',{}); const lg=svgEl('linearGradient',{id:'liqGradCC',x1:0,y1:0,x2:0,y2:1}); lg.appendChild(svgEl('stop',{offset:'0%','stop-color':'#D8BC85'})); lg.appendChild(svgEl('stop',{offset:'100%','stop-color':C.liquidDeep})); defs.appendChild(lg); svg.appendChild(defs);
+      svg.appendChild(coneG); svg.appendChild(coneLiq);
+      svg.appendChild(svgEl('ellipse',{cx:g.coneX,cy:g.baseY,rx:g.rw,ry:g.rh,fill:'none',stroke:C.primary,'stroke-width':2}));
+      appendText(svg,g.coneX,g.baseY-34,'圆锥容器（满的）',13.5,C.ink2,600);
+      appendText(svg,g.coneX,g.tipY+34,'等底 · 等高',12.5,C.goldDeep,700);
+      const cylG=svgEl('g',{});
+      cylG.appendChild(svgEl('path',{d:'M'+(g.cylX-g.rw)+','+g.baseY+' L'+(g.cylX-g.rw)+','+g.tipY+' A'+g.rw+','+g.rh+' 0 0 0 '+(g.cylX+g.rw)+','+g.tipY+' L'+(g.cylX+g.rw)+','+g.baseY+' A'+g.rw+','+g.rh+' 0 0 1 '+(g.cylX-g.rw)+','+g.baseY+' Z',fill:'#EFE9DC',stroke:C.primary,'stroke-width':2,'stroke-linejoin':'round'})); svg.appendChild(cylG);
+      const clip2=svgEl('clipPath',{id:'cylClipCC'}); clip2.appendChild(svgEl('rect',{id:'cylClipRectCC',x:g.cylX-g.rw-4,y:g.tipY,width:g.rw*2+8,height:0})); svg.appendChild(clip2);
+      const cylLiq=svgEl('path',{d:'M'+(g.cylX-g.rw)+','+g.baseY+' L'+(g.cylX-g.rw)+','+g.tipY+' A'+g.rw+','+g.rh+' 0 0 0 '+(g.cylX+g.rw)+','+g.tipY+' L'+(g.cylX+g.rw)+','+g.baseY+' A'+g.rw+','+g.rh+' 0 0 1 '+(g.cylX-g.rw)+','+g.baseY+' Z',fill:'url(#liqGradCC)','clip-path':'url(#cylClipCC)'}); svg.appendChild(cylLiq);
+      svg.appendChild(svgEl('ellipse',{cx:g.cylX,cy:g.baseY,rx:g.rw,ry:g.rh,fill:'none',stroke:C.primary,'stroke-width':2}));
+      for(let k=1;k<=3;k++){ const yy2=g.tipY+(g.baseY-g.tipY)*(k/3); svg.appendChild(svgEl('line',{x1:g.cylX+g.rw-26,y1:yy2,x2:g.cylX+g.rw+4,y2:yy2,stroke:C.goldDeep,'stroke-width':1.2,'stroke-dasharray':'3 3'})); appendText(svg,g.cylX+g.rw+10,yy2+4,k===3?'满':(k+'/3'),11.5,C.goldDeep,700); }
+      appendText(svg,g.cylX,g.baseY-34,'圆柱容器（等底等高）',13.5,C.ink2,600);
+      const stream=svgEl('rect',{id:'streamCC',x:g.coneX-3,y:g.tipY,width:6,height:0,fill:C.liquid,opacity:0,rx:3}); svg.appendChild(stream);
+      appendText(svg,(g.coneX+g.cylX)/2+10,g.baseY-60,'装满圆锥 → 倒入圆柱',12.5,C.ink2,400);
+    }
+    function setPourLevels(coneLv,cylLv){ const g=PG,coneH=g.tipY-g.baseY; const cr=svg.querySelector('#coneClipRectCC'); const lv=Math.max(0,Math.min(1,coneLv)); cr.setAttribute('y',g.tipY-coneH*lv); cr.setAttribute('height',coneH*lv+g.rh+8); const cc=svg.querySelector('#cylClipRectCC'); const lv2=Math.max(0,Math.min(1,cylLv)); cc.setAttribute('y',g.tipY-(g.tipY-g.baseY)*lv2+1); cc.setAttribute('height',(g.tipY-g.baseY)*lv2+g.rh+8); }
+    function updatePourCount(){ pourCount.innerHTML='已倒入 <b style="color:'+C.goldDeep+';font-size:17px">'+POUR.pours+'</b> 次，圆柱里的水占了 <b style="color:'+C.goldDeep+';font-size:17px">'+POUR.pours+' / 3</b> 份'; }
+    btnPour.onclick=function(){ if(POUR.anim||POUR.pours>=3) return; POUR.anim=true; const b=this; b.disabled=true; const stream=svg.querySelector('#streamCC'); stream.setAttribute('opacity',1); tween(1,0,750,function(v){setPourLevels(v,POUR.pours/3);},function(){ tween(POUR.pours/3,(POUR.pours+1)/3,750,function(v){setPourLevels(0,v);},function(){ stream.setAttribute('opacity',0); POUR.pours++; POUR.anim=false; updatePourCount(); if(POUR.pours>=3){ conclusion.style.display='block'; b.textContent='实验完成'; setPourLevels(1,1); } else { setPourLevels(1,POUR.pours/3); b.disabled=false; b.textContent='倒一次（第 '+(POUR.pours+1)+' 次）'; } }); }); };
+    btnReset.onclick=function(){ if(POUR.anim) return; POUR.pours=0; setPourLevels(1,0); updatePourCount(); conclusion.style.display='none'; btnPour.disabled=false; btnPour.textContent='倒一次'; };
+    buildPour(); setPourLevels(1,0);
+  })();
+
+  /* ---------- 3. 体积计算 ---------- */
+  (function(){
+    const p=panels.calc;
+    const card=cardOf(p,'③','拖动滑块，看体积怎么变');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '自己选一个半径 r 和高 h（π 取 3.14），看看圆柱和圆锥的体积各是多少、它们之间差多少。');
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 300',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    function appendText(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+    const defs=svgEl('defs',{}); const g1=svgEl('linearGradient',{id:'cgCalc1',x1:0,y1:0,x2:0,y2:1}); g1.appendChild(svgEl('stop',{offset:'0%','stop-color':'#EFE6D3'})); g1.appendChild(svgEl('stop',{offset:'100%','stop-color':'#E3D5BC'})); defs.appendChild(g1); const g2=svgEl('linearGradient',{id:'cgCalc2',x1:0,y1:0,x2:0,y2:1}); g2.appendChild(svgEl('stop',{offset:'0%','stop-color':'#E7EBF2'})); g2.appendChild(svgEl('stop',{offset:'100%','stop-color':'#D5DBE7'})); defs.appendChild(g2); svg.appendChild(defs);
+    function drawCalc(r,h){ svg.innerHTML=''; svg.appendChild(defs); const rw=18+r*5.4,hh=40+h*10,rh=rw*0.24,baseY=265,coneX=155,cylX=385; const topY=baseY-hh;
+      svg.appendChild(svgEl('path',{d:'M'+coneX+','+baseY+' L'+(coneX-rw)+','+topY+' A'+rw+','+rh+' 0 0 0 '+(coneX+rw)+','+topY+' Z',fill:'url(#cgCalc1)',stroke:C.primary,'stroke-width':2,'stroke-linejoin':'round'}));
+      svg.appendChild(svgEl('ellipse',{cx:coneX,cy:topY,rx:rw,ry:rh,fill:'#EFE9DC',stroke:C.primary,'stroke-width':2}));
+      appendText(svg,coneX,topY-26,'圆锥',13.5,C.ink2,600); appendText(svg,coneX,baseY+30,'V = ⅓πr²h',14,C.goldDeep,700);
+      const cTop=baseY-hh; svg.appendChild(svgEl('path',{d:'M'+(cylX-rw)+','+cTop+' L'+(cylX-rw)+','+baseY+' A'+rw+','+rh+' 0 0 0 '+(cylX+rw)+','+baseY+' L'+(cylX+rw)+','+cTop+' A'+rw+','+rh+' 0 0 1 '+(cylX-rw)+','+cTop+' Z',fill:'url(#cgCalc2)',stroke:C.primary,'stroke-width':2,'stroke-linejoin':'round'}));
+      svg.appendChild(svgEl('ellipse',{cx:cylX,cy:cTop,rx:rw,ry:rh,fill:'#EFE9DC',stroke:C.primary,'stroke-width':2}));
+      appendText(svg,cylX,cTop-26,'圆柱',13.5,C.ink2,600); appendText(svg,cylX,baseY+30,'V = πr²h',14,C.primary,700);
+      appendText(svg,coneX+rw+16,baseY+5,'r='+r,12.5,C.ink2,600,'start');
+      appendText(svg,cylX-rw-16,(cTop+baseY)/2+5,'h='+h,12.5,C.ink2,600,'end'); }
+    function sliderRow(label,min,max,val){ const row=el('div','display:flex;align-items:center;gap:12px;margin:14px 0;',card); el('label','font-size:14px;font-weight:600;flex:none;width:86px;',row,label); const inp=el('input','flex:1;-webkit-appearance:none;height:44px;background:transparent;cursor:pointer;',row); inp.type='range'; inp.min=min; inp.max=max; inp.step=1; inp.value=val; const out=el('output','font-size:15px;font-weight:700;color:'+C.goldDeep+';width:64px;text-align:right;flex:none;',row,val+' cm'); return {inp:inp,out:out}; }
+    const rgR=sliderRow('半径 r',1,10,3); const rgH=sliderRow('高 h',2,15,6);
+    const grid=el('div','display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;',card);
+    const boxCyl=el('div','border:1px solid '+C.line+';border-radius:12px;padding:12px;text-align:center;',grid);
+    const boxCon=el('div','border:1px solid '+C.line+';border-radius:12px;padding:12px;text-align:center;',grid);
+    el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',boxCyl,'圆柱体积'); el('div','font-size:13px;color:'+C.primary+';margin-top:6px;line-height:1.7;',boxCyl,'V = πr²h'); const vCyl_v=el('div','font-size:20px;font-weight:700;margin-top:6px;color:'+C.primary+';',boxCyl,'169.56'); el('div','font-size:11px;color:'+C.ink2+';',boxCyl,'立方厘米（cm³）');
+    el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',boxCon,'圆锥体积'); el('div','font-size:13px;color:'+C.primary+';margin-top:6px;line-height:1.7;',boxCon,'V = ⅓πr²h'); const vCon_v=el('div','font-size:20px;font-weight:700;margin-top:6px;color:'+C.goldDeep+';',boxCon,'56.52'); el('div','font-size:11px;color:'+C.ink2+';',boxCon,'立方厘米（cm³）');
+    const ratioBar=el('div','margin-top:14px;',card);
+    el('div','font-size:12.5px;color:'+C.ink2+';margin-bottom:8px;text-align:center;',ratioBar,'体积对比（等底等高：圆柱 = 圆锥 × 3）');
+    const rbCyl=el('div','margin-bottom:8px;display:flex;align-items:center;gap:8px;',ratioBar); el('span','font-size:12.5px;font-weight:600;width:52px;flex:none;',rbCyl,'圆柱'); const rbTrackCyl=el('div','flex:1;height:22px;background:'+C.goldSoft+';border-radius:6px;overflow:hidden;',rbCyl); const rbFillCyl=el('div','height:100%;border-radius:6px;background:linear-gradient(90deg,#4A5878,#3E4A63);transition:width .3s ease;',rbTrackCyl); const rbNumCyl=el('span','font-size:12.5px;font-weight:700;width:66px;flex:none;text-align:right;',rbCyl,'169.56');
+    const rbCon=el('div','margin-bottom:8px;display:flex;align-items:center;gap:8px;',ratioBar); el('span','font-size:12.5px;font-weight:600;width:52px;flex:none;',rbCon,'圆锥'); const rbTrackCon=el('div','flex:1;height:22px;background:'+C.goldSoft+';border-radius:6px;overflow:hidden;',rbCon); const rbFillCon=el('div','height:100%;border-radius:6px;background:linear-gradient(90deg,#C9AC74,#B4945A);transition:width .3s ease;',rbTrackCon); const rbNumCon=el('span','font-size:12.5px;font-weight:700;width:66px;flex:none;text-align:right;',rbCon,'56.52');
+    function calcUpdate(){ const r=+rgR.inp.value,h=+rgH.inp.value; rgR.out.textContent=r+' cm'; rgH.out.textContent=h+' cm'; const vC=PI*r*r*h,vK=vC/3; vCyl_v.textContent=vC.toFixed(2); vCon_v.textContent=vK.toFixed(2); rbNumCyl.textContent=vC.toFixed(2); rbNumCon.textContent=vK.toFixed(2); rbFillCyl.style.width='100%'; rbFillCon.style.width=(vC>0?vK/vC*100:0).toFixed(1)+'%'; drawCalc(r,h); }
+    rgR.inp.addEventListener('input',calcUpdate); rgH.inp.addEventListener('input',calcUpdate); calcUpdate();
+  })();
+
+  /* ---------- 4. 随堂挑战 ---------- */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战 · 你学会了吗');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,'共 3 题。答错不要紧——先看提示再想一想，实在想不出再看答案。');
+    const quizBox=el('div','',card);
+    const quizScore=el('div','display:none;text-align:center;padding:14px;',card);
+    const QUIZ=[
+      { q:'一个圆柱与一个圆锥等底等高，圆柱的体积是圆锥体积的（　）倍。', opts:['2','3','6','⅓'], ans:1,
+        hint:'回忆一下倒水实验：圆锥装满水倒入等底等高的圆柱，倒了整整几次才装满？',
+        exp:'实验里倒了 3 次正好装满，所以等底等高时圆柱体积是圆锥的 3 倍。' },
+      { q:'一个圆锥形沙堆，底面半径 3 m，高 6 m。它的体积是多少立方米？（π 取 3.14）', opts:['56.52','169.56','18.84','28.26'], ans:0,
+        hint:'圆锥体积要先算圆柱体积 πr²h = 3.14 × 9 × 6，再除以 3。算一算：3.14 × 9 × 6 = ? 除以 3 呢？',
+        exp:'V = ⅓ × 3.14 × 3² × 6 = ⅓ × 169.56 = 56.52（m³）。注意别忘了除以 3！' },
+      { q:'一个圆柱的体积是 45 cm³，与它等底等高的圆锥体积是多少？', opts:['135 cm³','45 cm³','15 cm³','30 cm³'], ans:2,
+        hint:'等底等高时，圆锥体积是圆柱的三分之一——把 45 平均分成 3 份是多少？',
+        exp:'V锥 = 45 ÷ 3 = 15（cm³）。圆锥是圆柱的 ⅓，用除法。' }
+    ];
+    const qs={idx:0,score:0,tries:0};
+    function renderQuiz(){ quizScore.style.display='none';
+      if(qs.idx>=QUIZ.length){ quizScore.style.display='block';
+        quizScore.innerHTML='<div style="font-size:30px;font-weight:700;color:'+C.primary+';">'+qs.score+'<small style="font-size:14px;color:'+C.ink2+';font-weight:400;"> / 3 题</small></div><div style="font-size:13.5px;color:'+C.ink2+';margin-top:6px;">'+(qs.score===3?'全对！圆柱和圆锥的体积你已经完全掌握了。':qs.score===2?'很不错！再回顾一下错的那道题。':'没关系，回到「倒水实验」再看一遍，你会发现规律其实很简单。')+'</div><div style="margin-top:10px;"><button id="restartBtnCC" style="min-height:48px;padding:0 22px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;">再来一轮</button></div>';
+        const rb=quizScore.querySelector('#restartBtnCC'); rb.onclick=function(){ qs.idx=0; qs.score=0; qs.tries=0; renderQuiz(); }; return; }
+      const q=QUIZ[qs.idx]; let h='<div style="margin-bottom:16px;"><div style="font-size:14.5px;font-weight:600;line-height:1.7;margin-bottom:10px;"><span style="color:'+C.goldDeep+';margin-right:4px;">第 '+(qs.idx+1)+' 题</span>'+q.q+'</div><div style="display:grid;gap:8px;">';
+      q.opts.forEach(function(o,i){ h+='<button data-oi="'+i+'" style="min-height:48px;border:1.5px solid '+C.line+';border-radius:12px;background:#fff;font-size:14.5px;color:'+C.primary+';text-align:left;padding:0 14px;cursor:pointer;display:flex;align-items:center;gap:10px;"><span style="width:24px;height:24px;border-radius:8px;background:'+C.goldSoft+';border:1px solid '+C.line+';font-size:12.5px;font-weight:700;color:'+C.ink2+';display:inline-flex;align-items:center;justify-content:center;flex:none;">'+'ABCD'[i]+'</span><span>'+o+'</span></button>'; });
+      h+='</div><div data-fb style="display:none;margin-top:10px;border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.8;"></div></div>';
+      quizBox.innerHTML=h; const fb=quizBox.querySelector('[data-fb]');
+      quizBox.querySelectorAll('button[data-oi]').forEach(function(b){ b.onclick=function(){ quizPick(+b.dataset.oi, b, fb, quizBox); }; });
+    }
+    function quizPick(i,btn,fb,box){ const q=QUIZ[qs.idx]; const opts=box.querySelectorAll('button[data-oi]');
+      if(i===q.ans){ opts.forEach(function(b,k){ b.disabled=true; if(k===q.ans){ b.style.borderColor=C.success; b.style.background='#F0F7F3'; } }); fb.style.display='block'; fb.style.background='#F0F7F3'; fb.style.border='1px solid #CBE3D6'; fb.style.color='#2F6B50'; fb.innerHTML='<strong>✓ 回答正确！</strong><br>'+q.exp; qs.score++; setTimeout(function(){ qs.idx++; qs.tries=0; renderQuiz(); },1600); }
+      else { qs.tries++; btn.style.borderColor=C.accent; btn.style.background='#FAF0EF'; btn.disabled=true;
+        if(qs.tries===1){ fb.style.display='block'; fb.style.background=C.goldSoft; fb.style.border='1px solid #E8D9B8'; fb.style.color='#7A5F2E'; fb.innerHTML='<strong>再想一想：</strong>'+q.hint; }
+        else { opts.forEach(function(b,k){ b.disabled=true; if(k===q.ans){ b.style.borderColor=C.success; b.style.background='#F0F7F3'; } }); fb.style.display='block'; fb.style.background='#FAF0EF'; fb.style.border='1px solid #EBCFCD'; fb.style.color='#96453F'; fb.innerHTML='<strong>✗ 正确答案是 '+['A','B','C','D'][q.ans]+'。</strong><br>'+q.exp; setTimeout(function(){ qs.idx++; qs.tries=0; renderQuiz(); },2400); } }
+    }
+    renderQuiz();
+  })();
+
+  setTab('derive');
+}
+
 function getUnitDiagrams(unit, grade, sem){
   const name = unit.name || '';
   const type = unit.type || '';
@@ -1307,6 +1517,9 @@ function getUnitDiagrams(unit, grade, sem){
   const add = (arr, fn, title, opts, hint) => arr.push({ fn, title, opts: opts || {}, hint: hint || '' });
   let out = [];
   let dedicated = false;
+
+  // ===== 圆柱与圆锥：专属四段交互动图（切拼·倒水·计算·挑战）=====
+  if (/圆柱与圆锥|圆柱圆锥/.test(name)) { add(out, diagCylinderCone, '圆柱与圆锥的体积（切拼·倒水·计算·挑战）', {}, '👆 点标签切换：切拼探究 / 倒水实验 / 体积计算 / 随堂挑战'); return out; }
 
   // ===== 专属交互动图（补齐此前只走兜底的单元）=====
   if (/生活应用题/.test(name)) { add(out, diagWordProblem, '看图列式（部分—整体）', {}, '👆 拖动滑块改变“已知”数量，看算式'); dedicated = true; }

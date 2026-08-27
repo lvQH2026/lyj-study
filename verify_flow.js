@@ -385,6 +385,7 @@ const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
 ok('v60：SW 缓存版本号已升级为 lyj-shell-v60', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v60'));
+ok('v62：圆柱与圆锥接入专属四段交互动图 + SW 缓存升级为 lyj-shell-v62', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v62') && /diagCylinderCone/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));
