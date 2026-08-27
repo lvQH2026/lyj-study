@@ -389,6 +389,12 @@
 
   PC.setSubject = function (k) { S.activeQuiz = false; S.subject = k; S.view = 'home'; renderNav(); renderContent(); };
   PC.go = function (v) { S.activeQuiz = false; S.view = v; renderNav(); renderContent(); };
+  // 返回：退出当前练习，回到进入练习前的页面（单元列表 / 考试中心 / 错题库 / 首页 / 同步学习）
+  PC.back = function () {
+    const v = (S.quiz && S.quiz.fromView) || S.view || 'home';
+    S.activeQuiz = false; S.quiz = null;
+    PC.go(v === 'study' ? 'study' : v);
+  };
   PC.pickGrade = function (g) { S.activeQuiz = false; S.grade = g; S.view = 'units'; renderNav(); renderContent(); };
   PC.refresh = function () { renderContent(); toast('已刷新'); };
   PC.merge = async function () {
@@ -719,7 +725,7 @@
   /* ---------------- 答题引擎 ---------------- */
   function beginQuiz(questions, mode, title, module, grade, isExam, restart) {
     S.activeQuiz = true;
-    S.quiz = { questions: questions, idx: 0, score: 0, wrongList: [], userAnswers: [], results: [], mode: mode, title: title, module: module, grade: grade, isExam: isExam, restart: restart || null };
+    S.quiz = { questions: questions, idx: 0, score: 0, wrongList: [], userAnswers: [], results: [], mode: mode, title: title, module: module, grade: grade, isExam: isExam, restart: restart || null, fromView: S.view || 'home' };
     renderQuiz();
   }
   function renderQuiz() {
@@ -728,7 +734,7 @@
     const inHint = !!(res && !res.correct && !res.revealed);
 
     let h = '<div class="pc-quiz-wrap">';
-    h += '<div class="pc-quiz-head"><div class="pc-quiz-title">' + esc(q.title) + '</div><div class="pc-quiz-progress">第 ' + (i + 1) + ' / ' + total + ' 题</div></div>';
+    h += '<div class="pc-quiz-head"><div class="pc-quiz-title"><button class="pc-quiz-back" onclick="PC.back()" title="返回上一页">←</button>' + esc(q.title) + '</div><div class="pc-quiz-progress">第 ' + (i + 1) + ' / ' + total + ' 题</div></div>';
     h += '<div class="pc-progress-track"><div class="pc-progress-fill" style="width:' + (total ? i / total * 100 : 0) + '%"></div></div>';
     h += '<div class="pc-q-card" id="pcQCard">';
     if (item.passage) h += '<div class="pc-passage">' + item.passage + '</div>';
@@ -895,7 +901,7 @@
     h += '<div class="pc-result-ring" style="--p:' + acc + ';--c:' + ringColor + '"><span>' + score + '<small>/' + total + '</small></span></div>';
     h += '<div class="pc-result-stars">' + stars + '</div>';
     h += '<div class="pc-result-stats"><div class="rs"><div class="n good">' + score + '</div><div class="l">答对</div></div><div class="rs"><div class="n bad">' + (total - score) + '</div><div class="l">答错</div></div><div class="rs"><div class="n">' + acc + '%</div><div class="l">正确率</div></div></div>';
-    h += '<div class="pc-row" style="justify-content:center"><button class="pc-btn primary" onclick="PC.retry()">再练一次</button><button class="pc-btn ghost" onclick="PC.go(\'home\')">返回首页</button></div>';
+    h += '<div class="pc-row" style="justify-content:center"><button class="pc-btn primary" onclick="PC.retry()">再练一次</button><button class="pc-btn ghost" onclick="PC.back()">返回</button></div>';
     if (q.isExam) h += '<div class="pc-row" style="justify-content:center"><button class="pc-btn ghost" onclick="PC.printPaper()">打印试卷</button></div>';
     h += '</div>';
     $('pcContent').innerHTML = h;
