@@ -368,31 +368,40 @@
     </div>
   </div>
 
-  <!-- 结果页 -->
+  <!-- 结果页（v75：两步式 批改成绩 → 答案解析） -->
   <div class="page" id="cnPageResult">
-    <div class="card result-card">
-      <div class="result-emoji" id="cnResultEmoji">🎉</div>
-      <div class="result-title" id="cnResultTitle">太棒了！</div>
-      <div class="stars" id="cnResultStars"></div>
-      <div class="result-score"><span id="cnResultScore">0</span><span class="total" id="cnResultTotal">/10</span></div>
-      <div class="result-stats">
-        <div class="result-stat">
-          <div class="num correct" id="cnResultCorrect">0</div>
-          <div class="label">答对</div>
-        </div>
-        <div class="result-stat">
-          <div class="num wrong" id="cnResultWrong">0</div>
-          <div class="label">答错</div>
-        </div>
-        <div class="result-stat">
-          <div class="num" id="cnResultAcc" style="color:var(--primary)">0%</div>
-          <div class="label">正确率</div>
-        </div>
+    <!-- 第一步：批改成绩页 -->
+    <div class="card result-card" id="cnResultScoreCard">
+      <div class="teacher-header">
+        <div class="teacher-score">得分：<span id="cnResultScore">0</span><span id="cnResultTotal">/10</span></div>
+        <div class="teacher-level" id="cnTeacherLevel">优秀</div>
+      </div>
+      <div class="teacher-stars" id="cnResultStars">★★★</div>
+      <div class="result-stats" id="cnResultStats">
+        <div class="result-stat"><div class="num correct" id="cnResultCorrect">0</div><div class="label">答对</div></div>
+        <div class="result-stat"><div class="num wrong" id="cnResultWrong">0</div><div class="label">答错</div></div>
+        <div class="result-stat"><div class="num" id="cnResultAccuracy" style="color:var(--primary)">0%</div><div class="label">正确率</div></div>
+        <div class="result-stat"><div class="num" id="cnResultTime">0秒</div><div class="label">用时</div></div>
+      </div>
+      <div class="teacher-comment" id="cnTeacherComment"></div>
+      <div class="teacher-detail">
+        <div class="detail-title">各题得分明细</div>
+        <div id="cnQuestionScoreList"></div>
       </div>
       <div id="cnResultExtra"></div>
+      <div class="btn-group" id="cnScoreActions">
+        <button class="btn btn-primary" id="cnConfirmScoreBtn" onclick="CN.confirmScore()">✅ 确认成绩</button>
+      </div>
+    </div>
+
+    <!-- 第二步：答案与解析页 -->
+    <div class="card result-card" id="cnExamAnswerKey" style="display:none;text-align:left">
+      <div class="section-title">答案与解析</div>
+      <div id="cnExamAnswerKeyBody"></div>
       <div class="btn-group">
-        <button class="btn btn-outline" onclick="CN.goHome()">返回首页</button>
-        <button class="btn btn-primary" id="cnReplayBtn" onclick="CN.replayQuiz()">再练一次</button>
+        <button class="btn btn-primary" id="cnRetryBtn" onclick="CN.replay()">重新考试</button>
+        <button class="btn btn-outline" onclick="CN.backToStudy()">返回单元学习</button>
+        <button class="btn btn-outline" onclick="CN.printPaper()">🖨 打印试卷</button>
       </div>
     </div>
   </div>

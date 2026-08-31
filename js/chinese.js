@@ -3327,7 +3327,7 @@ function cn5x8_pool() {
       q.paperSection = null;
     });
 
-    cnState.quiz = { questions: questions, idx: 0, score: 0, userAnswers: [], results: [], paper: null };
+    cnState.quiz = { questions: questions, idx: 0, score: 0, userAnswers: [], results: [], paper: null, startTime: Date.now() };
     el('cnBackBtn').style.display = 'block';
     el('cnBackBtn').onclick = cnGoHome;
     cnShowPage('cnPageQuiz');
@@ -3478,6 +3478,7 @@ function cn5x8_pool() {
       questions: paper.questions,
       idx: 0, score: 0, userAnswers: [], results: [],
       paper: { title: paper.title, kind: kind },
+      startTime: Date.now(),
     };
     el('cnBackBtn').style.display = 'block';
     el('cnBackBtn').onclick = cnGoHome;
@@ -3646,38 +3647,52 @@ function cn5x8_pool() {
     }, correct ? 600 : 1500);
   }
 
-  // ---- 结果页 ----
+  // ---- 结果页（v75：两步式 批改成绩 → 答案解析）----
   function cnShowResult() {
     const q = cnState.quiz;
     const total = q.questions.length;
     const score = q.score;
+    const isExam = !!q.paper;
     const acc = Math.round(score / total * 100);
-    const emoji = acc >= 90 ? '\uD83C\uDF89' : acc >= 70 ? '\uD83D\uDC4D' : acc >= 50 ? '\uD83D\uDCAA' : '\uD83D\uDCDD';
-    const title = acc >= 90 ? '太棒了！' : acc >= 70 ? '做得不错！' : acc >= 50 ? '继续努力！' : '加油啊！';
+    const level = getGradeLevel(acc);
+    const timeUsed = formatDuration(Date.now() - (q.startTime || Date.now()));
+    const wrongItems = q.wrongs || [];
+    // 语文批语：错题知识点经 detectMathConcepts（已含语文规则）识别
+    const comment = generateTeacherComment(isExam ? acc : score, isExam ? 100 : total, acc, wrongItems, cnState.grade, isExam);
 
     cnShowPage('cnPageResult');
-    el('cnResultEmoji').textContent = emoji;
-    el('cnResultTitle').textContent = q.paper ? q.paper.title : title;
-    const stars = acc >= 90 ? '\u2605\u2605\u2605' : acc >= 70 ? '\u2605\u2605\u2606' : '\u2605\u2606\u2606';
-    el('cnResultStars').textContent = stars;
 
-    // 考试模式：按百分制显示
-    if (q.paper) {
-      const scaled = Math.round(score / total * 100);
-      el('cnResultScore').textContent = scaled;
-      el('cnResultTotal').textContent = '/100';
-    } else {
-      el('cnResultScore').textContent = score;
-      el('cnResultTotal').textContent = '/' + total;
-    }
+    // 第一步：批改成绩页
+    el('cnResultScore').textContent = isExam ? acc : score;
+    el('cnResultTotal').textContent = isExam ? '/100' : '/' + total;
+    el('cnTeacherLevel').textContent = '等级：' + level.label;
+    el('cnTeacherLevel').className = 'teacher-level ' + level.cls;
+    el('cnResultStars').textContent = level.stars;
     el('cnResultCorrect').textContent = score;
     el('cnResultWrong').textContent = total - score;
-    el('cnResultAcc').textContent = acc + '%';
+    el('cnResultAccuracy').textContent = acc + '%';
+    el('cnResultTime').textContent = timeUsed;
+    el('cnTeacherComment').textContent = comment;
 
-    // 试卷分部分成绩
+    // 各题得分明细
+    let detailHtml = '';
+    q.questions.forEach(function (item, i) {
+      const correct = q.results[i] === true;
+      const qScore = isExam ? Math.round(100 / total) : 1;
+      const got = correct ? qScore : 0;
+      detailHtml += '<div class="m-score-row ' + (correct ? 'ok' : 'bad') + '">';
+      detailHtml += '<span class="m-sr-no">第' + (i + 1) + '题</span>';
+      detailHtml += '<span class="m-sr-type">' + questionTypeLabel(item.type) + '</span>';
+      detailHtml += '<span class="m-sr-mark">' + (correct ? svgHandwrittenCheck(true) : svgHandwrittenCheck(false)) + '</span>';
+      detailHtml += '<span class="m-sr-score">' + got.toFixed(qScore % 1 === 0 ? 0 : 1) + '/' + qScore.toFixed(qScore % 1 === 0 ? 0 : 1) + '分</span>';
+      detailHtml += '</div>';
+    });
+    el('cnQuestionScoreList').innerHTML = detailHtml;
+
+    // 试卷分部分成绩（考试模式）
     const extra = el('cnResultExtra');
     if (extra) {
-      if (q.paper) {
+      if (isExam) {
         const secs = {};
         q.questions.forEach(function (item, i) {
           const s = item.paperSection || '其他';
@@ -3702,28 +3717,123 @@ function cn5x8_pool() {
       }
     }
 
-    // 再练/再考按钮
-    const replay = el('cnReplayBtn');
-    if (replay) {
-      if (q.paper) {
-        replay.textContent = '再考一次';
-        replay.setAttribute('onclick', 'CN.replayExam()');
-      } else {
-        replay.textContent = '再练一次';
-        replay.setAttribute('onclick', 'CN.replayQuiz()');
-      }
-    }
+    // 默认显示成绩页、隐藏答案解析
+    el('cnResultScoreCard').style.display = 'block';
+    el('cnExamAnswerKey').style.display = 'none';
 
     // 记录历史（带本次错题明细，供家长后台/云端同步）
-    if (q.paper) {
-      cnRecordHistory(cnState.grade, q.paper.title, Math.round(score / total * 100), 100, q.wrongs || []);
+    if (isExam) {
+      cnRecordHistory(cnState.grade, q.paper.title, acc, 100, q.wrongs || []);
     } else {
-      cnRecordHistory(cnState.grade, CN_DATA[cnState.grade][cnState.unitIdx].name, score, total, q.wrongs || []);
+      const unitName = (CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx]) ? CN_DATA[cnState.grade][cnState.unitIdx].name : '';
+      cnRecordHistory(cnState.grade, unitName, score, total, q.wrongs || []);
     }
     // 练习情况同步到家长后台（云端模式自动上传，本地模式仅写 localStorage）
     if (typeof syncAfterQuiz === 'function') {
       try { syncAfterQuiz(); } catch (e) { console.warn('cnSyncAfterQuiz', e); }
     }
+  }
+
+  // 第二步：确认成绩 → 显示答案解析
+  function cnConfirmScore() {
+    cnRenderAnswerKeyBody();
+    el('cnResultScoreCard').style.display = 'none';
+    el('cnExamAnswerKey').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 渲染答案解析（逐题：你的答案 / 正确答案 / 解析）
+  function cnRenderAnswerKeyBody() {
+    const q = cnState.quiz;
+    const isExam = !!q.paper;
+    const secs = {};
+    q.questions.forEach(function (item, i) {
+      const key = (isExam && item.paperSection) ? item.paperSection : '练习题';
+      if (!secs[key]) secs[key] = [];
+      secs[key].push({ item: item, idx: i });
+    });
+    let html = '';
+    Object.keys(secs).forEach(function (title) {
+      html += '<div class="m-answer-section">' + title + '</div>';
+      secs[title].forEach(function (o) {
+        const i = o.idx, item = o.item;
+        const correct = q.results[i] === true;
+        const ua = (q.userAnswers[i] !== undefined && q.userAnswers[i] !== null) ? String(q.userAnswers[i]) : '';
+        html += '<div class="m-answer-item ' + (correct ? 'ok' : 'bad') + '">';
+        html += '<div class="m-ai-head">';
+        html += '<span class="m-ai-no">第' + (i + 1) + '题</span>';
+        html += '<span class="m-ai-type">' + questionTypeLabel(item.type) + '</span>';
+        html += '<span class="m-ai-mark">' + (correct ? svgHandwrittenCheck(true) : svgHandwrittenCheck(false)) + '</span>';
+        html += '</div>';
+        if (item.passage) html += '<div class="m-ai-passage">' + item.passage + '</div>';
+        html += '<div class="m-ai-stem">' + item.question + '</div>';
+        if (item.options && item.options.length) {
+          html += '<div class="m-ai-opts">';
+          item.options.forEach(function (opt, idx) {
+            const txt = String(opt);
+            let cls = '';
+            if (txt === String(item.answer)) cls = ' correct';
+            else if (txt === ua && !correct) cls = ' wrong';
+            html += '<div class="m-ai-opt' + cls + '">' + String.fromCharCode(65 + idx) + '. ' + txt + '</div>';
+          });
+          html += '</div>';
+        }
+        html += '<div class="m-ai-ans-row">';
+        html += '<span>你的答案：<b class="' + (correct ? 'ok' : 'bad') + '">' + (ua !== '' ? ua : '未作答') + '</b></span>';
+        html += '<span>正确答案：<b class="ok">' + item.answer + '</b></span>';
+        html += '</div>';
+        if (item.explain) html += '<div class="m-ai-explain"><b>解析：</b>' + item.explain + '</div>';
+        html += '</div>';
+      });
+    });
+    el('cnExamAnswerKeyBody').innerHTML = html;
+  }
+
+  // 返回单元学习（语文学情：直接回首页）
+  function cnBackToStudy() { cnGoHome(); }
+
+  // 重新考试 / 再练一次
+  function cnReplayFlow() {
+    el('cnExamAnswerKey').style.display = 'none';
+    if (cnState.quiz && cnState.quiz.paper) cnReplayExam();
+    else cnReplayQuiz();
+  }
+
+  // 打印试卷（复用全局 #printRoot + .prt-* 打印样式）
+  function cnPrintPaper() {
+    const q = cnState.quiz;
+    if (!q || !q.questions.length) { if (typeof showToast === 'function') showToast('当前没有可打印的试卷'); return; }
+    const isExam = !!q.paper;
+    const title = isExam ? q.paper.title : ((CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx]) ? CN_DATA[cnState.grade][cnState.unitIdx].name + ' 练习卷' : '语文练习卷');
+    const d = new Date();
+    const dateStr = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    let h = '<div class="prt-head"><div class="prt-title">' + title + '</div>';
+    h += '<div class="prt-sub">共 ' + q.questions.length + ' 题 · ' + dateStr + '</div>';
+    h += '<div class="prt-info">姓名：＿＿＿＿＿＿＿　班级：＿＿＿＿＿＿＿　得分：＿＿＿＿＿＿＿</div></div>';
+    let no = 0;
+    q.questions.forEach(function (item) {
+      no++;
+      h += '<div class="prt-q"><div class="prt-qtext"><span class="prt-no">' + no + '.</span>' + String(item.question || '').replace(/\n/g, '<br>') + '</div>';
+      if (item.options && item.options.length >= 2) {
+        h += '<div class="prt-opts">';
+        item.options.forEach(function (o, i2) {
+          h += '<div class="prt-opt"><span class="prt-optlab">' + String.fromCharCode(65 + i2) + '.</span> ' + String(o) + '</div>';
+        });
+        h += '</div>';
+      } else {
+        h += '<div class="prt-blank">答：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</div>';
+      }
+      h += '</div>';
+    });
+    h += '<div class="prt-answers"><div class="prt-ans-title">参考答案</div><div class="prt-ans-grid">';
+    q.questions.forEach(function (item, i) {
+      h += '<div class="prt-ans-item"><b>' + (i + 1) + '.</b> ' + item.answer + '</div>';
+    });
+    h += '</div></div>';
+    let root = document.getElementById('printRoot');
+    if (!root) { root = document.createElement('div'); root.id = 'printRoot'; document.body.appendChild(root); }
+    root.innerHTML = h;
+    window.print();
   }
 
   function cnReplayExam() {
@@ -3810,7 +3920,8 @@ function cn5x8_pool() {
     cnState.quiz = {
       questions: picked.map(function (w) { return w.question; }),
       sourceIds: picked.map(function (w) { return w.id; }), // v53：错题重练记录来源 id，答对即移出
-      idx: 0, score: 0, userAnswers: [], results: [], paper: null
+      idx: 0, score: 0, userAnswers: [], results: [], paper: null,
+      startTime: Date.now(),
     };
     el('cnBackBtn').style.display = 'block';
     el('cnBackBtn').onclick = function () { cnSwitchTab('wrong'); };
@@ -3888,6 +3999,10 @@ function cn5x8_pool() {
     selectOption: cnSelectOption,
     jump: cnJump,                  // v73.2：题号导航跳转
     submit: cnSubmit,
+    confirmScore: cnConfirmScore,  // v75：两步式第二步入口（确认成绩 → 答案解析）
+    backToStudy: cnBackToStudy,    // v75：答案解析页「返回单元学习」
+    printPaper: cnPrintPaper,      // v75：答案解析页「打印试卷」
+    replay: cnReplayFlow,          // v75：答案解析页「重新考试 / 再练一次」
     goHome: cnGoHome,
     switchTab: cnSwitchTab,
     startWrongReview: cnStartWrongReview,
