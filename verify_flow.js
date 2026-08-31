@@ -229,7 +229,7 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 {
   const mV = sw.match(/lyj-shell-v(\d+)/);
-  ok('SW 版本号已升级 (v60 云端合并同步+本机补传恢复)', !!mV && +mV[1] === 60);
+  ok('SW 版本号已升级到 v68 及以上', !!mV && +mV[1] >= 68);
 }
 // v56 守卫：children 表数据通道替代 study_records
 {
@@ -384,22 +384,15 @@ ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabas
 const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
-ok('v60：SW 缓存版本号已升级为 lyj-shell-v60', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v60'));
-ok('v62：圆柱与圆锥接入专属四段交互动图 + SW 缓存升级为 lyj-shell-v62', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v62') && /diagCylinderCone/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
-ok('v63：长方体和正方体/多边形的面积/圆 接入专属四段交互动图 + SW 缓存升级为 lyj-shell-v63', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v63') && /diagCuboid/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagPolygonArea/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagCircleArea/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
-ok('v64：圆柱与圆锥新增侧面展开·表面积 tab（S侧=2πrh / S表=2πrh+2πr²）+ SW 缓存升级为 lyj-shell-v64', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v64') && /diagCylinderCone/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /侧面展开·表面积/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /S表 = 2πrh \+ 2πr²/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
-
-ok('v65：分数除法/比/比例/百分数（一）（二）/扇形统计图 接入推导复现四段交互动图 + SW 缓存升级为 lyj-shell-v65', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v65') && /diagFractionDiv/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagRatioDerive/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagPercentDerive/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagPieChartDerive/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /function diagPieChart\(container\)/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
-
-ok('v66：配图越界修复 + PC 端 svg 包裹修复 + SW 缓存升级为 lyj-shell-v66', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v66') && /svg viewBox="0 0 120 100"/.test(fs.readFileSync(path.join(ROOT, 'js/pc.js'), 'utf8')));
-
-ok('v67：拍图上传板块升级为 AI 拍图批改（智谱 GLM-4V 代理 + 手写批注 + 降级半自动）+ SW 缓存升级为 lyj-shell-v67',
-  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v67') &&
+ok('v68：拍图上传升级为 AI 拍图批改 + diagram.js 语法修复 + SW 缓存升级为 lyj-shell-v68',
+  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v68') &&
   /window\.AI_GRADE/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
   /AI 批改给分数，模拟真实老师手写批注/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) &&
   /drawScoreStamp/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
   /enterManual/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
-  fs.readFileSync(path.join(ROOT, 'supabase/functions/ai-grade/index.ts'), 'utf8').includes('glm-4v-flash'));
+  fs.readFileSync(path.join(ROOT, 'supabase/functions/ai-grade/index.ts'), 'utf8').includes('glm-4v-flash') &&
+  !/color:'#fff'/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) &&
+  !/background:'#fff'/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));

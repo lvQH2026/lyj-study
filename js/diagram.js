@@ -2305,8 +2305,8 @@ function diagPercentDerive(container, opts){
       const inp=el('input',null,box); inp.type='text'; inp.style.cssText='width:160px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
       const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
       const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
-      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:'#fff';font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
-      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:'#fff';color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
       bOk.onclick=function(){ const v=inp.value.trim().replace('%','').replace('％',''); let ok=false;
         if(typeof it.a==='string'){ const f1=fracStr(v), f2=fracStr(it.a); ok = f1&&f2&&f1===f2; }
         else { ok = Math.abs(+v-it.a)<0.01; }
@@ -2416,8 +2416,8 @@ function diagPieChartDerive(container, opts){
       const inp=el('input',null,box); inp.type='text'; inp.style.cssText='width:160px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
       const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
       const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
-      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:'#fff';font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
-      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:'#fff';color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
       bOk.onclick=function(){ const v=inp.value.trim().replace('°','').replace('度',''); if(Math.abs(+v-it.a)<0.01){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
     }

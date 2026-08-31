@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v67：「拍图上传试题」板块升级为 AI 拍图批改 —— 拍照 → 传 Supabase Storage → Edge Function 调智谱 GLM-4V-Flash 逐题判分 → canvas 合成手写批注（红勾/红叉/圈注/旁批/分数印章/总评语）→ PNG 下载 → 错题入库；无 Key 或服务异常自动降级为半自动批改。
-const CACHE = 'lyj-shell-v67';
+// v68：修复 diagram.js 推导动图按钮样式字符串中的 JS 语法错误（color:#fff / background:#fff），确保 v65 四段推导交互在浏览器正常解析执行。
+const CACHE = 'lyj-shell-v68';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
