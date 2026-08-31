@@ -28,7 +28,8 @@
 //      ② 数学考试去操作题分区、整卷重平衡五区固定 30 题 / 100 分；
 //         新增「选择题型」筛选器（移动+PC）；题号导航范围改为全部（练习/考试可点跳转）；
 //         难度命名统一 基础/提高/拓展；单元卷循环 gen 凑满 30（含短单元生成器扩容）。
-const CACHE = 'lyj-shell-v73';
+// v74：考试中心（数学/语文考试）答错不再进入苏格拉底引导，直接揭晓答案并计入错题，可继续往后做。
+const CACHE = 'lyj-shell-v74';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

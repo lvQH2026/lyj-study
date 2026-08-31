@@ -931,16 +931,25 @@
       q.userAnswers[i] = ua;
       renderQuiz();
     } else {
-      // 答错：不直接给答案，进入「苏格拉底引导」——先给第一条提示，让用户继续想。
-      q.results[i] = {
-        correct: false,
-        ua: ua,
-        revealed: false,
-        hints: makeSocraticHints(item),
-        hintStep: 0
-      };
-      q.userAnswers[i] = ua;
-      renderQuiz();
+      if (q.isExam) {
+        // 考试模式（考试中心）：不进入苏格拉底引导，答错直接揭晓答案并记入错题，让用户继续往后做。
+        q.results[i] = { correct: false, ua: ua, revealed: true, hints: [], hintStep: 0 };
+        q.userAnswers[i] = ua;
+        const exist = q.wrongList.find(function (w) { return w.q === item; });
+        if (!exist) q.wrongList.push({ q: item, ua: ua });
+        renderQuiz();
+      } else {
+        // 答错：不直接给答案，进入「苏格拉底引导」——先给第一条提示，让用户继续想。
+        q.results[i] = {
+          correct: false,
+          ua: ua,
+          revealed: false,
+          hints: makeSocraticHints(item),
+          hintStep: 0
+        };
+        q.userAnswers[i] = ua;
+        renderQuiz();
+      }
     }
   };
   // 再要一条提示
