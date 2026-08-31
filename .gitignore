@@ -14,3 +14,21 @@ verify_parent.js
 verify_pp.js
 
 # 说明：verify_refactor.js / verify_flow.js 为回归测试，保留入库
+
+# ===== 审计 / 体检工具链（v72 起，本地保留，不入库）=====
+# 以 _ 开头的一律视为本地脚本与产物，避免误 git add 把测试脚本推上线。
+# 注意：已跟踪的 _preview_dir.js / _smoke_dir.js / _push*.log / _server.log
+#       不受本规则影响（gitignore 对已跟踪文件无效），保持原状。
+_*.js
+_*.json
+_*.txt
+_*.log
+_*.py
+_figcheck/
+
+# 早期遗留的审计 / 调试脚本（同上，本地保留不入库）
+audit*.js
+dbg_*.js
+eval_exam*.js
+build_5xia.py
+fix_cn45.py
