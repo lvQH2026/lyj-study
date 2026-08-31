@@ -5542,7 +5542,7 @@ const KNOWLEDGE_BASE = {
         fidx: [{ t: '试商', f: '四舍五入把除数看作整十数，初商后再调' }, { t: '余数', f: '余数必须比除数小' }],
         method: [{ t: '笔算四步', s: '① 看前两位够除吗 → ② 试商（四舍/五入）→ ③ 乘减得余数(<除数) → ④ 下一位继续' }, { t: '调商', s: '初商偏大就减1，偏小就加1，直到余数小于除数' }] },
       { name: '条形统计图', group: '课本', term: '上', unit: 7, type: 'application', gen: g4_bar,
-        summary: ['条形统计图用直条长短表示数量多少','绘制：写标题、画纵横轴、定刻度、画直条、标数据','1格代表多少数量叫单位长度，可依数据调整','要表示增减变化用折线图，表示占比用扇形图'],
+        summary: ['条形统计图用直条长短表示数量多少','绘制：写标题、画纵横轴、定刻度、画直条、标数据','1格代表多少数量叫单位长度，可依数据调整','复式条形统计图用两种颜色并列，便于比较两组数据'],
         fidx: [{ t: '读图', f: '直条越长数量越多；纵轴1格=单位长度' }, { t: '选图', f: '比多少→条形，看变化→折线，看占比→扇形' }],
         method: [{ t: '制图', s: '先定1格代表几（使最大数能画下），再按数量画对应高度直条，最后标数写标题' }, { t: '复式条形', s: '两组数据用不同颜色直条并列，加图例区分' }] },
       { name: '数学广角·优化', group: '课本', term: '上', unit: 8, type: 'application', gen: g4_optimize,
@@ -5595,8 +5595,17 @@ const KNOWLEDGE_BASE = {
         fidx: [{ t: '假设法', f: '(总脚−鸡脚数×头数)÷(4−2)=兔数' }, { t: '关系', f: '兔脚−鸡脚=2只/每换一只' }],
         method: [{ t: '假设全鸡', s: '假设全是鸡→应有2×头数只脚；实际多出脚÷2=兔数，剩下是鸡' }, { t: '抬脚法', s: '让所有动物抬起2只脚，地上剩的脚÷2就是兔数' }] },
       // ---- 四下 · 专项练习 ----
-      { name: '专项·展开图', group: '专项', type: 'shape', gen: g_shape_expand },
-      { name: '专项·视图与展开', group: '专项', type: 'shape', gen: g_shape_view },
+      // v70 修正：原「专项·展开图」「专项·视图与展开」直接复用了六上/六下的生成器，
+      // 带出圆柱、圆锥、侧面积、棱长、表面积、体积等超纲内容（四下教材没有展开图单元，
+      // 棱长/表面积/体积属五下，圆柱圆锥属六下）。现改为四下课标内的两个专项。
+      { name: '专项·三角形进阶', group: '专项', type: 'shape', gen: g4_triangle_adv,
+        summary: ['三角形内角和是180°；任意两边之和大于第三边','按角分：锐角、直角、钝角三角形；按边分：不等边、等腰、等边三角形','等腰三角形两个底角相等；等边三角形三个角都是60°','三角形具有稳定性，任意三角形至少有2个锐角'],
+        fidx: [{ t: '内角和', f: '三个内角之和 = 180°' }, { t: '三边关系', f: '较短两边之和 > 最长边' }, { t: '求未知角', f: '未知角 = 180° − 已知两角之和' }],
+        method: [{ t: '求未知角', s: '已知两角，第三角 = 180° − 两角和；直角三角形两个锐角互余（和为90°）' }, { t: '判断能否围成三角形', s: '只验「较短两边之和是否大于最长边」一次即可，不用三边两两都验' }] },
+      { name: '专项·观察物体', group: '专项', type: 'shape', gen: g4_shape_view,
+        summary: ['从前面、上面、左面观察同一个立体图形，看到的形状可能不同','用小正方体拼搭立体图形，数方块要分层数、按列数','只看一个方向的视图不能确定唯一的立体图形，要结合多个方向','无论从哪个方向看，看到的都是平面图形'],
+        fidx: [{ t: '三个方向', f: '从前面看 / 从上面看 / 从左面看' }, { t: '数方块', f: '先数看得见的，再想被挡住的' }],
+        method: [{ t: '画视图', s: '先确定看到几列几行，再逐格判断该位置有没有方块，最后描出外轮廓' }, { t: '还原立体图形', s: '单个方向的视图答案不唯一，三个方向合起来才能确定' }] },
       { name: '专项·平均数应用', group: '专项', type: 'application', gen: g_app_planting },
       { name: '专项·对称图形', group: '专项', type: 'shape', gen: g_shape_symmetry },
       { name: '专项·价格应用', group: '专项', type: 'application', gen: g_app_price },
@@ -5797,12 +5806,12 @@ function makeChoice(question, answer, distractors) {
   opts = opts.slice(0, 4);
   // 打乱
   opts.sort(() => Math.random() - 0.5);
-  const labels = ['A', 'B', 'C', 'D'];
   const correctIdx = opts.indexOf(fmtAnswer);
   return {
     type: 'choice',
     question: question,
-    options: opts.map((o, i) => ({ label: labels[i], value: o })),
+    // v69：改回字符串数组。{label,value} 对象格式会让 PC 端 (js/pc.js) 渲染出 [object Object]
+    options: opts,
     answer: fmtAnswer,
     answerIdx: correctIdx
   };
@@ -6641,14 +6650,19 @@ function sq_count_angles(){
 }
 // 钟面角
 function sq_clock_shape(){
+  // v69：两个 bug——
+  //  ① 干扰项固定为 [3时,6时,9时,12时]，当 h 不在这个列表时会出现 5 个选项，
+  //     渲染器只有 A/B/C/D 四个标签，第 5 个显示成 undefined；
+  //  ② 3时和9时都是直角，h=3 时干扰项里却留着 9时（反之亦然）→ 一题两个正确答案。
+  //  改为：按「角类型」表排除所有同类型的时刻，再随机取满 3 个干扰项。
+  const TYPE_OF={1:'锐角',2:'锐角',3:'直角',4:'钝角',5:'钝角',6:'平角',7:'钝角',8:'钝角',9:'直角',10:'锐角',11:'锐角',12:'周角'};
+  const LABEL={'锐角':'锐角','直角':'直角（90°）','钝角':'钝角','平角':'平角（180°）','周角':'周角（360°）'};
   let h=pick([1,2,3,4,6,8,9,10,12]);
-  let type='';
-  if(h===3||h===9) type='直角（90°）';
-  else if(h===1||h===2||h===10||h===11) type='锐角';
-  else if(h===4||h===5||h===7||h===8) type='钝角';
-  else if(h===6) type='平角（180°）';
-  else type='周角（360°）';
-  return mkChoice('钟面上（ ）时整，时针与分针成' + type + '。',h+'时',['3时','6时','9时','12时'].filter(x=>x!==h+'时'),svgClock(h,0));
+  let t=TYPE_OF[h]||'锐角';
+  let pool=[1,2,3,4,5,6,7,8,9,10,11,12].filter(x=>x!==h && TYPE_OF[x]!==t);
+  let opts=[];
+  while(opts.length<3 && pool.length){ let i=ri(0,pool.length-1); opts.push(pool.splice(i,1)[0]+'时'); }
+  return mkChoice('钟面上（ ）时整，时针与分针成' + LABEL[t] + '。',h+'时',opts,svgClock(h,0));
 }
 // 看图辨三角形内角关系
 function sq_triangle_shape(){
@@ -7009,6 +7023,8 @@ function g_remainder(){let a=ri(11,50),b=ri(3,9); if(a%b===0)a+=1;return mc(`${a
 function g2_mixed(){let a=ri(2,6),b=ri(2,6),c=ri(5,20);return mc(`${a}×${b}+${c}=？`,a*b+c,[a*b+c-1,a*b+c+1,a*(b+c)])}
 
 function g2_weight(){
+  // 注意：随机参数必须先算好存进变量，禁止在模板字符串里重复调用 ri()（否则题干与答案用的是两组随机数）
+  let _wa=ri(2,5), _wb=ri(1,3);
   let items=[
     {q:'1千克等于多少克？',a:'1000克',d:['100克','10克','500克']},
     {q:'一个苹果大约多重？',a:'200克',d:['2克','2千克','20克']},
@@ -7017,7 +7033,7 @@ function g2_weight(){
     {q:'2千克等于多少克？',a:'2000克',d:['200克','20克','500克']},
     {q:'一瓶矿泉水约重？',a:'500克',d:['5克','5千克','50克']},
     {q:'一头牛大约重？',a:'500千克',d:['50千克','5000千克','5千克']},
-    {q:`${ri(2,5)}千克+${ri(1,3)}千克=？`,a:`${ri(2,5)+ri(1,3)}千克`,d:[]},
+    {q:`${_wa}千克+${_wb}千克=？`,a:`${_wa+_wb}千克`,d:[]},
   ];
   let it=pick(items); if(!it.d.length){let n=parseInt(it.a);it.d=[String(n-1)+'千克',String(n+1)+'千克']} return mc(it.q,it.a,it.d);
 }
@@ -7475,8 +7491,12 @@ function g3_decimal(){
   }
   // 小数加减
   for(let i=0;i<8;i++){
-    let a=ri(1,9), b=ri(1,9-a);
-    reps.push({q:`0.${a} + 0.${b} = ？`,a:'0.'+(a+b),d:['0.'+(a+b+1),'0.'+(Math.max(0,a+b-1)),'0.'+(a-b)]});
+    // v69：a 取 1..8、b 取 1..(9−a)，保证 a+b ≤ 9。
+    // 旧版 a 可能取 9 → b=ri(1,0) 越界随机成 1 → 出「0.9 + 0.1 = 0.10」这种错误答案。
+    let a=ri(1,8), b=ri(1,9-a), s=a+b;
+    let dOpts=['0.'+(s===9?s-1:s+1), '0.'+Math.max(1,s-1), '0.'+(s%9+1)];
+    if(a!==b) dOpts.push('0.'+Math.abs(a-b));
+    reps.push({q:`0.${a} + 0.${b} = ？`,a:'0.'+s,d:dOpts});
   }
   let it=pick(reps); return mc(it.q,it.a,it.d);
 }
@@ -7631,8 +7651,15 @@ function g4_bignum(){
     reps.push({q:`${n} 四舍五入到万位约是？`,a:(up<=99999999?up:base)+'万',d:[base+'万',n+'万',(n-n%1000)+'万']});
   }
   // 6. 概念辨析（固定）
-  [['最小的六位数','100000','99999'],['最大的七位数','9999999','10000000'],['个级包含的数位','个、十、百、千','万、十万、百万、千万'],['亿级包含的计数单位','亿、十亿、百亿、千亿','万、十万、百万、千万'],['10个一万是','十万','百万']].forEach(([q,a,d])=>{
-    reps.push({q:q+'是？',a:a,d:[d[0],d[1],d[2]]});
+  // v69：旧版第 3 项写的是字符串，却被当数组拆成 d[0]/d[1]/d[2] → 干扰项变成单个汉字、
+  //      第三项 undefined；题干还被拼成「10个一万是是？」。改为 [题干, 答案, [干扰项]]。
+  [['最小的六位数是','100000',['99999','100001','999999']],
+   ['最大的七位数是','9999999',['10000000','9999998','99999999']],
+   ['个级包含的数位是','个、十、百、千',['万、十万、百万、千万','亿、十亿、百亿、千亿','个、十、百']],
+   ['亿级包含的计数单位是','亿、十亿、百亿、千亿',['万、十万、百万、千万','个、十、百、千','十亿、百亿、千亿、万亿']],
+   ['10个一万是','十万',['百万','一千','一万']]
+  ].forEach(([q,a,dd])=>{
+    reps.push({q:q+'？',a:a,d:dd});
   });
   let it=pick(reps); return mc(it.q,it.a,it.d);
 }
@@ -7725,23 +7752,28 @@ function g4_parallel(){
 }
 function g4_bar(){
   // v56：参数化扩容，去重键 ≥37（读图/统计图选择/绘制要素）
+  // v70 修正：四上只学《条形统计图》，折线统计图属五下、扇形统计图属六上，
+  // 原「要看出数量增减变化用折线图」「表示占比用扇形图」两题超纲，已替换为课标内题目；
+  // 各题干扰项中的「比例 / 扇形 / 折线」也一并换成学生已知的统计概念。
   const cats=['苹果','香蕉','橘子','梨','葡萄','西瓜','草莓','桃子'];
   const reps=[
-    {q:'条形统计图用于？',a:'比较数量的多少',d:['表示变化趋势','表示比例','表示时间']},
-    {q:'要看出数量增减变化，一般用？',a:'折线统计图',d:['条形统计图','扇形统计图','统计表']},
+    {q:'条形统计图用于？',a:'比较数量的多少',d:['表示时间先后','表示图形形状','表示位置远近']},
+    {q:'条形统计图是用直条的（　）来表示数量多少的',a:'长短',d:['颜色','宽度','位置']},
     {q:'条形统计图中直条越长表示数量？',a:'越多',d:['越少','不变','无关']},
-    {q:'条形统计图的横轴一般表示？',a:'类别',d:['数量','时间','比例']},
+    {q:'条形统计图的横轴一般表示？',a:'类别',d:['数量','时间','名称']},
     {q:'条形统计图的纵轴一般表示？',a:'数量',d:['类别','时间','名称']},
-    {q:'要清楚表示各部分占总体的百分比，用？',a:'扇形统计图',d:['条形统计图','折线统计图','统计表']},
+    {q:'条形统计图能清楚地看出（　）',a:'数量的多少',d:['地点的远近','物体的形状','时间的先后']},
     {q:'复式条形统计图能同时比较（　）组数据',a:'两组或多组',d:['一组','三组','零组']},
     {q:'画条形统计图时，1格代表多少数量叫？',a:'单位长度（1格表示量）',d:['横轴','纵轴','标题']},
     {q:'绘制条形统计图，直条的宽度应（　）',a:'相同',d:['不同','随意','越宽越好']},
     {q:'统计表中能直观看出数量多少的是？',a:'条形统计图',d:['统计表','文字','平均数']},
     {q:'条形统计图的标题应写在图的（　）',a:'上方',d:['下方','左侧','右侧']},
     {q:'横向条形统计图的直条是（　）方向排列',a:'水平',d:['垂直','斜','圆形']},
-    {q:'比较两组数据并看趋势，最好用？',a:'复式条形统计图',d:['单式条形','扇形','折线']},
-    {q:'直条上标注的数字表示？',a:'具体数量',d:['类别','百分比','时间']},
+    {q:'比较两组数据，最好用？',a:'复式条形统计图',d:['单式条形统计图','统计表','象形图']},
+    {q:'直条上标注的数字表示？',a:'具体数量',d:['类别名称','统计时间','图例']},
     {q:'制作条形统计图最后一步通常是？',a:'填写标题和图例',d:['画直条','写数据','标纵轴']},
+    {q:'条形统计图中，直条之间要（　）',a:'隔开相等的空隙',d:['紧紧挨在一起','随意排列','画成斜的']},
+    {q:'看条形统计图比看统计表更（　）',a:'直观，一眼看出谁多谁少',d:['准确，能看出精确值','麻烦，要数格子','一样，没有区别']},
   ];
   for(let i=0;i<12;i++){
     let v=ri(5,30);
@@ -8364,8 +8396,9 @@ function g5_line(){
   const dseg=segAll.filter(x=>x!==`${names[fi]}到${names[fi+1]}`);
   const mx=Math.max.apply(null,temps), mn=Math.min.apply(null,temps);
   let items=[
-    {q:'折线统计图适合表示？',a:'数量的变化趋势',d:['各部分占总数的百分比','数量的具体多少','物体的形状大小']},
-    {q:'要反映一周气温变化，一般用什么统计图？',a:'折线统计图',d:['条形统计图','扇形统计图','统计表']},
+    // v70 修正：扇形统计图属六上内容，五下《折线统计图》里不宜作为干扰项出现
+    {q:'折线统计图适合表示？',a:'数量的变化趋势',d:['数量的具体多少','物体的形状大小','时间的先后顺序']},
+    {q:'要反映一周气温变化，一般用什么统计图？',a:'折线统计图',d:['条形统计图','统计表','象形图']},
     {q:'折线统计图用折线的起伏表示数量的？',a:'增减变化',d:['多少','大小','颜色']},
     {s:chart,q:'上图是某地一周每天最高气温的折线统计图，星期几的气温最高？',a:names[mi],d:[names[(mi+3)%7],names[(mi+1)%7],names[(mi+5)%7]]},
     {s:chart,q:'上图折线统计图中，星期几的气温最低？',a:names[ni],d:[names[(ni+2)%7],names[(ni+4)%7],names[(ni+6)%7]]},
@@ -8864,26 +8897,109 @@ function g_app_chicken_rabbit(){
   return mc(`鸡兔同笼，共${heads}个头${feet}只脚，兔有几只？`,r,[c,r+1,heads-r+1]);
 }
 function g_app_planting(){let g=pick([3,4,5,6,8,10]),n=ri(6,15),l=g*(n-1);return mc(`一条路长${l}米，每隔${g}米种一棵树，共几棵？`,n,[n-1,n+1,n+2])}
+// 一行 n 个小正方体（四下「观察物体」专用：只用小正方体，不引入圆柱/圆锥/棱长）
+function figCubeRow(n){
+  const c=14, w=n*c, x0=58-w/2, y0=40;
+  let s='';
+  for(let i=0;i<n;i++){
+    const x=x0+i*c;
+    s+=`<rect x="${x}" y="${y0}" width="${c}" height="${c}" fill="${i%2?FIG_FILL:FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.4" stroke-linejoin="round"/>`;
+  }
+  return s;
+}
+// v70 新增：四下「专项·三角形进阶」—— 严格限定在四下第五单元《三角形》课标内
+function g4_triangle_adv(){
+  let a1=ri(30,80), a2=ri(30,Math.max(31,150-a1)), a3=180-a1-a2;
+  let rt=ri(20,70), tp=ri(10,49)*2, base=(180-tp)/2;
+  let s1=ri(3,9), s2=ri(3,9), d12=Math.abs(s1-s2), max3=s1+s2-1, min3=d12+1;
+  let items=[
+    {q:'三角形是由（　）条线段围成的图形',a:'3条',d:['2条','4条','5条']},
+    {q:'三角形有（　）个顶点、（　）条边、（　）个角',a:'3、3、3',d:['3、4、3','4、4、4','3、3、4']},
+    {q:'三角形任意两边之和一定（　）第三边',a:'大于',d:['小于','等于','无法确定']},
+    {q:'三角形的三个内角之和是（　）度',a:'180',d:['90','360','270']},
+    {q:`一个三角形中，∠1=${a1}°，∠2=${a2}°，∠3是多少度？`,a:`${a3}°`,d:[`${a3+10}°`,`${a3-10}°`,`${a1+a2}°`]},
+    {q:`一个直角三角形的一个锐角是${rt}°，另一个锐角是多少度？`,a:`${90-rt}°`,d:[`${rt}°`,`${180-rt}°`,`${90+rt}°`]},
+    {q:`一个等腰三角形的顶角是${tp}°，它的一个底角是多少度？`,a:`${base}°`,d:[`${tp}°`,`${180-tp}°`,`${base+10}°`]},
+    {q:'等边三角形的三个内角各是多少度？',a:'60°',d:['90°','45°','120°']},
+    {q:'一个三角形中最多有（　）个直角',a:'1个',d:['2个','3个','0个']},
+    {q:'一个三角形中最多有（　）个钝角',a:'1个',d:['2个','3个','0个']},
+    {q:'任意一个三角形至少有（　）个锐角',a:'2个',d:['1个','3个','0个']},
+    {q:'三角形按角分，可以分为锐角三角形、直角三角形和（　）',a:'钝角三角形',d:['等腰三角形','等边三角形','不等边三角形']},
+    {q:'三角形按边分，可以分为不等边三角形、等腰三角形和（　）',a:'等边三角形',d:['直角三角形','钝角三角形','锐角三角形']},
+    {q:'等腰三角形的两条腰（　）',a:'长度相等',d:['长度不等','互相垂直','互相平行']},
+    {q:'等边三角形是特殊的（　）',a:'等腰三角形',d:['直角三角形','钝角三角形','不等边三角形']},
+    {q:'三角形具有（　）性，所以房架、自行车架都做成三角形',a:'稳定',d:['不稳定','伸缩','流动']},
+    {q:'从三角形的一个顶点向它的对边画一条垂线，顶点和垂足之间的线段叫做三角形的（　）',a:'高',d:['底','腰','中线']},
+    {q:'一个三角形可以画（　）条高',a:'3条',d:['1条','2条','4条']},
+    {q:`下面哪组小棒能围成三角形？`,a:`${s1}厘米、${s2}厘米、${max3}厘米`,d:[`${s1}厘米、${s2}厘米、${s1+s2}厘米`,`${s1}厘米、${s2}厘米、${s1+s2+1}厘米`,`${s1}厘米、${s2}厘米、${d12}厘米`]},
+    {q:`一个三角形的两条边分别是${s1}厘米和${s2}厘米，第三条边最长是多少厘米？（取整厘米数）`,a:`${max3}厘米`,d:[`${s1+s2}厘米`,`${max3-1}厘米`,`${s1+s2+1}厘米`]},
+    // 干扰项刻意取 min3−1 / min3+1 / min3+2：s1=s2 时 min3=1，用「1厘米」会和答案重复
+    {q:`一个三角形的两条边分别是${s1}厘米和${s2}厘米，第三条边最短是多少厘米？（取整厘米数）`,a:`${min3}厘米`,d:[`${Math.max(0,min3-1)}厘米`,`${min3+1}厘米`,`${min3+2}厘米`]},
+    {q:'四边形的内角和是（　）度',a:'360',d:['180','540','270']},
+    {q:'两个完全一样的三角形一定可以拼成一个（　）',a:'平行四边形',d:['正方形','梯形','圆']},
+    {q:'一个等腰三角形的一个底角是50°，它的顶角是多少度？',a:'80°',d:['50°','100°','130°']},
+    {q:'一个三角形中最大的角是锐角，这个三角形一定是（　）',a:'锐角三角形',d:['直角三角形','钝角三角形','无法确定']},
+    {q:'把一个大三角形分成两个小三角形，每个小三角形的内角和是（　）',a:'180°',d:['90°','360°','60°']},
+    {q:'一个三角形有两个角分别是45°和45°，它是（　）',a:'等腰直角三角形',d:['等边三角形','钝角三角形','锐角三角形']},
+    {q:'钝角三角形中，两个锐角的和一定（　）90°',a:'小于',d:['大于','等于','无法确定']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+// v70 新增：四下「专项·观察物体」—— 四下第二单元《观察物体（二）》专项，
+// 只用小正方体拼摆与三视图辨认，不出现圆柱/圆锥/棱长/表面积/体积。
+function g4_shape_view(){
+  let n=ri(2,6);
+  let items=[
+    {q:'从前面看一个正方体，看到的形状是？',a:'正方形',d:['长方形','三角形','圆形']},
+    {s:figSquareView(),q:'从上往下看一个正方体，看到的是？',a:'正方形',d:['长方形','圆形','三角形']},
+    {s:figCubeRow(3),q:'上图是用3个相同的小正方体横着排成一行，从前面看到的形状是？',a:'长方形',d:['正方形','三角形','圆形']},
+    {q:'用2个相同的小正方体上下叠起来，从前面看到的形状是？',a:'长方形',d:['正方形','圆形','三角形']},
+    {q:'从不同的方向观察同一个立体图形，看到的形状？',a:'可能不同',d:['一定相同','一定不同','无法确定']},
+    {q:'观察一个立体图形，从前面看到的图形叫做？',a:'前面图（主视图）',d:['上面图','侧面图','后面图']},
+    {q:'观察一个立体图形，从上面看到的图形叫做？',a:'上面图（俯视图）',d:['前面图','侧面图','下面图']},
+    {q:'只根据从一个方向看到的图形，能不能确定立体图形的唯一形状？',a:'不能，可能有多种摆法',d:['能，一定只有一种','能，最多两种','无法确定']},
+    {s:figCubeRow(n),q:`上图是用${n}个相同的小正方体排成一行，从前面看到的图形的长，是单个小正方体边长的几倍？`,a:`${n}倍`,d:[`${n-1}倍`,`${n+1}倍`,'2倍']},
+    {s:figCubeRow(n),q:`上图是用${n}个相同的小正方体排成一行，从侧面看到的形状是？`,a:'正方形',d:['长方形','圆形','三角形']},
+    {q:'用小正方体摆立体图形时，被前面的方块挡住的方块，从前面看？',a:'看不到',d:['看得到','看得到一半','变成圆形']},
+    {q:'从一个方向观察立体图形，看到的图形一定是？',a:'平面图形',d:['立体图形','圆形','三角形']},
+    {q:'把一个正方体放在桌上，从上面看和从前面看，看到的形状？',a:'都是正方形',d:['都是长方形','一个正方形一个长方形','都是圆形']},
+    {q:'数一数立体图形中小正方体的个数时，正确的方法是？',a:'分层数、按列数，别漏掉被挡住的',d:['只数看得见的','只数最上面一层','随便数']},
+    {s:figSquareView(),q:'上图是一个正方体从上面看到的图形，它由（　）个小正方形组成',a:'1个',d:['2个','4个','6个']},
+    {q:'从前面看一个用小正方体摆成的立体图形，看到3个并排的小正方形，说明这一层至少有（　）个小正方体',a:'3个',d:['1个','2个','6个']},
+    {q:'要确定一个用小正方体摆成的立体图形的形状，通常要看（　）个方向',a:'3个',d:['1个','2个','4个']},
+    {q:'站在不同位置观察同一个长方体，最多能同时看到它的（　）个面',a:'3个',d:['1个','2个','6个']},
+    {q:'用4个相同的小正方体摆成2行2列的一层，从上面看到的形状是？',a:'大正方形',d:['长方形','三角形','圆形']},
+    {q:'用3个相同的小正方体前后排成一列，从前面看到的形状是？',a:'小正方形',d:['长方形','三角形','圆形']},
+    {s:figCubeRow(n),q:`上图立体图形从上面看到的形状是？`,a:'长方形',d:['正方形','三角形','圆形']},
+    {q:`从上面看一个立体图形，看到${n}个并排的小正方形，这个立体图形至少有（　）个小正方体`,a:`${n}个`,d:[`${n+1}个`,`${Math.max(1,n-1)}个`,'2个']},
+    {q:'两个立体图形从前面看到的图形相同，这两个立体图形？',a:'形状不一定相同',d:['一定完全相同','一定不同','一定都是正方体']},
+    {q:'从一个方向观察一个球，看到的形状是？',a:'圆形',d:['正方形','椭圆形','三角形']},
+    {q:'把一个长方体横着放和竖着放，从前面看到的形状？',a:'可能不同',d:['一定相同','一定不同','都是正方形']},
+    {q:'用小正方体搭立体图形时，从上面看到的图形能告诉我们？',a:'底层摆了几行几列',d:['一共搭了几层','一共用了多少块','摆的是什么颜色']},
+    {q:'下面说法正确的是？',a:'观察物体要从前面、上面、左面多个方向看',d:['只看一个方向就够了','从远处看比近处看准确','看到的图形一定是立体的']},
+  ];
+  let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
 function g_shape_expand(){
   // v50 扩容：参数化圆柱/正方体展开图计算，去重键 ~90
+  // v70 修正：本生成器挂在「六上·专项·展开图」。圆锥、侧面积属六下「圆柱与圆锥」，
+  // 六上尚未学到，已移除；圆柱底面周长相关题目保留（六上第五单元《圆》已学周长）。
   let r=ri(1,9), h=ri(3,12), s=ri(2,8);
   let cyl=figCylinder(), net=figNet();
   let L=+(2*3.14*r).toFixed(2);            // 圆柱侧面展开长
   let items=[
     {q:'正方体的展开图由几个正方形组成？',a:'6个',d:['4个','8个','12个']},
-    {s:net,q:'上图是一个立体图形的展开图，它可能是什么立体图形？',a:'正方体',d:['长方体','圆锥','圆柱']},
+    {s:net,q:'上图是一个立体图形的展开图，它可能是什么立体图形？',a:'正方体',d:['长方体','三棱柱','四棱锥']},
     {q:'圆柱的侧面展开图是长方形时，长方形的长等于圆柱的什么？',a:'底面周长',d:['底面半径','高','底面积']},
     {q:'圆柱的侧面展开图是长方形时，长方形的宽等于圆柱的什么？',a:'高',d:['底面半径','底面周长','底面直径']},
-    {q:'圆锥的侧面展开图是什么图形？',a:'扇形',d:['长方形','正方形','三角形']},
     {q:'长方体的展开图由几个面组成？',a:'6个',d:['4个','8个','12个']},
     {q:'正方体展开图中，每个面的形状都是？',a:'正方形',d:['长方形','圆形','梯形']},
-    {q:'圆柱的侧面沿高剪开，展开图的长是底面周长、宽是高，这个展开图是？',a:'长方形',d:['正方形','扇形','三角形']},
-    {q:'圆柱侧面展开图的面积等于圆柱的什么？',a:'侧面积',d:['底面积','表面积','体积']},
+    {q:'圆柱的侧面沿高剪开，展开图的长是底面周长、宽是高，这个展开图是？',a:'长方形',d:['正方形','圆形','三角形']},
+    {q:'正方体的展开图中，相对的两个面在展开图上一定（　）',a:'不相邻',d:['相邻','重合','垂直']},
     {s:cyl,q:`一个圆柱底面半径是${r}厘米，它的侧面沿高展开后，长方形的长约是多少厘米？(π取3.14)`,a:fmt(L),d:[fmt(+(3.14*r).toFixed(2)),fmt(+(3.14*r*r).toFixed(2)),fmt(r)]},
     {s:cyl,q:`一个圆柱的高是${h}厘米，它的侧面沿高展开后，长方形的宽是多少厘米？`,a:`${h}厘米`,d:[`${h*2}厘米`,`${h+1}厘米`,`${Math.max(1,h-1)}厘米`]},
     {q:`棱长${s}厘米的正方体，它的展开图总面积是多少平方厘米？`,a:`${6*s*s}平方厘米`,d:[`${4*s*s}平方厘米`,`${6*s}平方厘米`,`${s*s}平方厘米`]},
     {q:`棱长${s}厘米的正方体，棱长总和是多少厘米？`,a:`${12*s}厘米`,d:[`${6*s}厘米`,`${4*s}厘米`,`${s*s}厘米`]},
-    {q:`一个圆柱的侧面展开图是长${fmt(L)}厘米、宽${h}厘米的长方形，它的侧面积约是多少平方厘米？`,a:fmt(+(L*h).toFixed(2)),d:[fmt(+(L+h).toFixed(2)),fmt(+(2*(L+h)).toFixed(2)),fmt(L)]},
     {q:'把圆柱的侧面沿高剪开，得到的长方形的长如果是底面直径的π倍，说明剪开方向？',a:'沿高剪开（竖直剪）',d:['斜着剪','沿底面剪','任意剪']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
@@ -9056,10 +9172,10 @@ TRI_RAW.forEach(r => {
 const TRI_Q = TRI_RAW.map(r => {
   const svg = triSVG(r.n, r.l, r.d);
   if (r.t === 'c') {
-    const labels = ['A', 'B', 'C', 'D'];
     return {
       type: 'choice', question: r.q, svg: svg,
-      options: r.o.map((v, i) => ({ label: labels[i], value: v })),
+      // v69：改回字符串数组（对象格式会让 PC 端显示 [object Object]）
+      options: r.o,
       answer: r.o[r.a], answerIdx: r.a
     };
   }
@@ -9586,12 +9702,17 @@ function beginUnitQuiz(idx, grade, sem) {
       state.quizQuestions = first;
     } else {
       // v51：难度分级 6:3:1——多采 3 倍候选，按题面去重后按 基础/提高/拓展 配比挑 20 题
+      // v69：题数自适应。内容量不足的单元（如一年级「图形拼组」只有 1 种题）
+      // 若硬凑 20 题，孩子会连做 20 道一模一样的题。按真实出题能力收缩题数。
+      let want = UNIT_QUIZ_LENGTH;
+      let cap = estimateUnitCapacity(unit, 90);
+      if (cap > 0 && cap < want) want = cap;
       let cands = [first];
-      for (let i = 1; i < UNIT_QUIZ_LENGTH * 3; i++) {
+      for (let i = 1; i < want * 3; i++) {
         let g = unit.gen();
         if (Array.isArray(g)) cands = cands.concat(g); else cands.push(g);
       }
-      state.quizQuestions = pickDifficultyMix(cands, UNIT_QUIZ_LENGTH);
+      state.quizQuestions = pickDifficultyMix(cands, want);
     }
   }
   state.quizIndex = 0;
@@ -9910,6 +10031,28 @@ function isApplicationLike(q) {
   let t = q.question || '';
   if (NOT_APP_PREFIX.test(t)) return false;
   return APP_KEYWORDS.test(t);
+}
+
+// v69：估算一个单元「到底能出多少道互不相同的题」。
+// 去重键 = 题面 + 答案 + 配图：同题面但配图不同的图形题（如「这是什么图形？」配不同图形）
+// 属于不同的题，不能只按题面判重；反过来同题面同答案的就是实打实的重复题。
+// 连续 stagnant 次采样都没新增就提前收手，避免小池子被反复空跑。
+function estimateUnitCapacity(unit, budget) {
+  budget = budget || 120;
+  const seen = new Set();
+  let stagnant = 0;
+  for (let i = 0; i < budget; i++) {
+    let raw;
+    try { raw = unit.gen(); } catch (e) { continue; }
+    const arr = Array.isArray(raw) ? raw : [raw];
+    const before = seen.size;
+    arr.forEach(q => {
+      if (!q || q.question === undefined || q.question === null) return;
+      seen.add(String(q.question) + '|' + String(q.answer) + '|' + String(q.svg || ''));
+    });
+    if (seen.size === before) { if (++stagnant >= 25) break; } else stagnant = 0;
+  }
+  return seen.size;
 }
 
 // 生成候选题池：轮转各单元、全局去重，保证均衡
@@ -10232,7 +10375,7 @@ function generateSteps(q) {
       `两队合做每天完成 ${a+b}/${a*b}`];
   }
   // ── 工程·独做效率（甲队/乙队/甲单独做，兼容"独做/单独做"两种表述）──
-  m = t.match(/^一项工程.{0,6}(\d+)天完成，.{0,4}每天完成(工程的)?几分之几？$/);
+  m = t.match(/^一项工程.{0,6}?(\d+)天完成，.{0,4}?每天完成(工程的)?几分之几？$/);
   if (m) {
     let d=+m[1];
     return [`把这项工程看作单位"1"`,
@@ -10383,9 +10526,66 @@ function pickDifficultyMix(cands, n) {
   return out;
 }
 
+// v69：卷面结构自适应。
+// 单元考试只考本单元，但部分单元可出题量远不足 30（一年级「图形拼组」只有 1 种题），
+// 硬套 30 题卷面会组出「卷头写 30 题、实际只有 4 题」的残卷。
+// 这里按 20/30/20/30 的分区权重等比收缩题数，并用最大余数法把 100 分精确拆到每一题，
+// 保证「卷面题数」与「满分 100」两条承诺同时兑现。
+// v69：可以安全地把一道选择题改成填空题吗？
+// 「平移不改变图形的（　）和（　）」答案是「大小和形状」——题干 2 个空、答案却是 1 段。
+// 强行 forceFill 会渲染出 2 个输入框对 1 个答案，孩子根本填不出来。这类题一律保留选项。
+function canForceFill(q) {
+  if (countFillBlanks(q) < 2) return true;
+  const parts = String(q.answer == null ? '' : q.answer)
+    .split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
+  return parts.length >= 2;
+}
+
+function buildPaperStructure(capQ) {
+  if (capQ >= 30) return PAPER_STRUCTURE.map(s => Object.assign({ scores: null }, s));
+  const W = [20, 30, 20, 30];                       // 四个分区的分值权重
+  let counts = W.map(w => Math.max(1, Math.round(capQ * w / 100)));
+  let diff = capQ - counts.reduce((a, b) => a + b, 0);
+  const order = [1, 3, 0, 2];                       // 余量优先加/减在权重大的区
+  let guard = 0;
+  while (diff !== 0 && guard++ < 400) {
+    let moved = false;
+    for (const i of order) {
+      if (diff > 0) { counts[i]++; diff--; moved = true; }
+      else if (counts[i] > 1) { counts[i]--; diff++; moved = true; }
+      if (diff === 0) break;
+    }
+    if (!moved) break;
+  }
+  // 区内把该区总分平分到每题（余数摊到前几题）
+  let scores = W.map((w, i) => {
+    let n = Math.max(1, counts[i]);
+    let base = Math.floor(w / n), r = w - base * n;
+    let arr = [];
+    for (let k = 0; k < n; k++) arr.push(base + (k < r ? 1 : 0));
+    return arr;
+  });
+  return PAPER_STRUCTURE.map((s, i) => ({
+    key: s.key,
+    title: s.title.replace(/（[^（]*）$/, '') + `（共 ${counts[i]} 小题，${W[i]} 分）`,
+    count: counts[i],
+    score: scores[i][0] || s.score,
+    scores: scores[i],
+  }));
+}
+
 function generateExamPaper() {
   let { units, all, rangeText } = getExamUnits();
   if (!units || units.length === 0) return null;
+
+  // v69：单元考试先探一探本单元的出题能力，据此决定卷面题数
+  let capQ = 30;
+  if (examState.type === 'unit' && units.length === 1) {
+    let cap = estimateUnitCapacity(units[0], 140);
+    if (cap > 0 && cap < 30) capQ = cap;
+  }
+  capQ = Math.max(5, Math.min(30, capQ));
+  let STRUCT = buildPaperStructure(capQ);
 
   let seen = new Set();
   // 题池：目标 90 道候选，保证四个分区都有得挑
@@ -10399,12 +10599,14 @@ function generateExamPaper() {
   }
   if (pool.length === 0) return null;
 
-  // v50：不足 32 道时允许少量重复以凑满整卷（卷面注明共30题，题数必须兑现）。
-  // 单元考试只克隆本单元题池，绝不混入其他单元；但池子过小（<15，题面种类太少）
-  // 时强行重复会得到同题出现数次的劣化卷面，此时保留原有短卷行为，待生成器扩容。
+  // v50：不足整卷需求时允许少量重复以凑满整卷（卷面题数必须兑现）。
+  // 单元考试只克隆本单元题池，绝不混入其他单元。
+  // v69：整卷题数改为 capQ（单元考试会按出题能力收缩），填充目标随之下调，
+  // 避免小池子被无谓地复制成一堆同题。
   let baseLen = pool.length;
-  if (examState.type !== 'unit' || baseLen >= 15) {
-    for (let k = 0; pool.length < 32; k++) {
+  let padTo = Math.max(capQ + 2, 12);
+  if (baseLen > 0) {
+    for (let k = 0; pool.length < padTo; k++) {
       pool.push(Object.assign({}, pool[k % baseLen]));
     }
   }
@@ -10416,7 +10618,7 @@ function generateExamPaper() {
   let usedText = new Set();   // 跨分区共享的题面文本去重（v49：杜绝视觉重复题）
   let questions = [];
 
-  PAPER_STRUCTURE.forEach(sec => {
+  STRUCT.forEach(sec => {
     // v51：分区内部按 6:3:1 难度配比选题（基础→提高→拓展）；
     // 某难度档候选不足时回退为原逻辑按题型分值选题，保证分区题数不减。
     let mix = diffMixFor(sec.count);
@@ -10430,22 +10632,23 @@ function generateExamPaper() {
     if (picked.length < sec.count) {
       picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer(sec.key), usedText));
     }
-    picked.forEach(q => {
+    picked.forEach((q, k) => {
       let item = Object.assign({}, q);
-      item.score = sec.score;
+      // v69：自适应卷面里同一分区各题分值可能差 1 分（最大余数法），逐题取用
+      item.score = (sec.scores && sec.scores[k] != null) ? sec.scores[k] : sec.score;
       item.sectionTitle = sec.title;
       item.forceFill = false;
       if (sec.key === 'fill' || sec.key === 'calc') {
         // 填空/计算：一律书面作答
-        if (isTypableAnswer(item.answer)) item.forceFill = true;
+        if (isTypableAnswer(item.answer) && canForceFill(item)) item.forceFill = true;
       } else if (sec.key === 'app') {
         // 应用题：能算出数值的写答案，否则保留选项
         if (isNumericAnswer(item.answer) || !item.options || item.options.length < 2) {
-          if (isTypableAnswer(item.answer)) item.forceFill = true;
+          if (isTypableAnswer(item.answer) && canForceFill(item)) item.forceFill = true;
         }
       } else if (sec.key === 'choice') {
         // 选择题：没有选项就退化为填空
-        if (!item.options || item.options.length < 2) item.forceFill = true;
+        if ((!item.options || item.options.length < 2) && canForceFill(item)) item.forceFill = true;
       }
       questions.push(item);
     });
@@ -10486,7 +10689,7 @@ function generateExamPaper() {
       item.score = slot.q.score;
       item.sectionTitle = slot.q.sectionTitle;
       item.forceFill = false;
-      if (slot.q.sectionTitle.includes('选择') && (!item.options || item.options.length < 2)) item.forceFill = true;
+      if (slot.q.sectionTitle.includes('选择') && (!item.options || item.options.length < 2) && canForceFill(item)) item.forceFill = true;
       if (!item.steps) item.steps = generateSteps(item);
       item.num = slot.q.num;
       questions[slot.i] = item;
@@ -10619,7 +10822,8 @@ function renderQuestion() {
     let labels = ['A', 'B', 'C', 'D'];
     q.options.forEach((opt, i) => {
       let val = typeof opt === 'object' ? opt.value : opt;
-      let label = typeof opt === 'object' ? opt.label : labels[i];
+      // v69 兜底：选项超过 4 个时，旧代码 labels[i] 为 undefined 会渲染出「undefined」
+      let label = typeof opt === 'object' ? opt.label : (labels[i] || String.fromCharCode(65 + i));
       html += `<button class="option-btn" data-idx="${i}" onclick="selectOption(${i})">
         <span class="option-label">${label}</span>
         <span class="option-value">${val}</span>
@@ -10631,7 +10835,20 @@ function renderQuestion() {
       html += `<div class="shape-container"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">${q.svg}</svg></div>`;
     }
     html += `<div class="question-text${sizeClass}">${qNo}${qHtml}</div>`;
-    html += `<input type="text" class="answer-input" id="answerInput" placeholder="输入答案" inputmode="${q.inputType || 'text'}" onkeydown="if(event.key==='Enter')submitAnswer()">`;
+    // v69：题干含 2 个及以上空位时，逐空渲染输入框（旧版只有 1 个框，孩子根本没法作答）
+    let blanks = countFillBlanks(q);
+    if (blanks >= 2) {
+      html += `<div class="multi-blank-row">`;
+      for (let bi = 0; bi < blanks; bi++) {
+        html += `<span class="mb-item"><span class="mb-no">${bi + 1}</span>` +
+          `<input type="text" class="answer-input answer-input-multi" placeholder="第${bi + 1}空" ` +
+          `inputmode="${q.inputType || 'text'}" onkeydown="if(event.key==='Enter')submitAnswer()"></span>`;
+      }
+      html += `</div>`;
+      html += `<div class="mb-tip">共 ${blanks} 个空，请按顺序分别填写</div>`;
+    } else {
+      html += `<input type="text" class="answer-input" id="answerInput" placeholder="输入答案" inputmode="${q.inputType || 'text'}" onkeydown="if(event.key==='Enter')submitAnswer()">`;
+    }
   }
 
   card.innerHTML = html;
@@ -10642,10 +10859,45 @@ function renderQuestion() {
   // 自动聚焦输入框
   if (q.type === 'fill' || q.forceFill) {
     setTimeout(() => {
-      let input = document.getElementById('answerInput');
+      let input = document.getElementById('answerInput') || document.querySelector('.answer-input-multi');
       if (input) input.focus();
     }, 100);
   }
+}
+
+// v69：数一数题干里有几个空位（（ ）/ ( ) / ＿＿ / __）
+function countFillBlanks(q) {
+  let t = String((q && q.question) || '');
+  let m = t.match(/（\s*）|\(\s*\)|＿+|_{2,}/g);
+  return m ? m.length : 0;
+}
+
+// v69：填空题判分——支持单空、多空（逗号/顿号/斜杠分隔），并保留数值容差
+function fillAnswerEquals(user, correct) {
+  let u = String(user == null ? '' : user).trim();
+  let c = String(correct == null ? '' : correct).trim();
+  if (u === c) return true;
+  if (u !== '' && c !== '' && !isNaN(parseFloat(u)) && !isNaN(parseFloat(c)) && parseFloat(u) === parseFloat(c)) return true;
+  let up = u.split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
+  let cp = c.split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
+  if (up.length > 1 && up.length === cp.length) {
+    return up.every((v, i) => v === cp[i] ||
+      (v !== '' && !isNaN(parseFloat(v)) && !isNaN(parseFloat(cp[i])) && parseFloat(v) === parseFloat(cp[i])));
+  }
+  return false;
+}
+
+// v69：读取填空题作答（自动兼容单框与多框）
+function readFillAnswer() {
+  let multi = document.querySelectorAll('.answer-input-multi');
+  if (multi && multi.length) {
+    let parts = [];
+    multi.forEach(el => parts.push(String(el.value || '').trim()));
+    if (parts.every(p => p === '')) return '';
+    return parts.join(',');
+  }
+  let input = document.getElementById('answerInput');
+  return input ? String(input.value || '').trim() : '';
 }
 
 function getQuestionTypeTag(q) {
@@ -10682,13 +10934,12 @@ function submitAnswer() {
         ? q.options[q.answerIdx].value : q.answer;
       isCorrect = userAnswer === correctOpt || userAnswer === q.answer;
     } else if (q.type === 'fill' || q.forceFill) {
-      let input = document.getElementById('answerInput');
-      userAnswer = input.value.trim();
+      userAnswer = readFillAnswer();
       if (userAnswer === '') {
         showToast('请输入答案');
         return;
       }
-      isCorrect = userAnswer === q.answer || parseFloat(userAnswer) === parseFloat(q.answer);
+      isCorrect = fillAnswerEquals(userAnswer, q.answer);
     }
 
     state.answered = true;
@@ -10704,9 +10955,20 @@ function submitAnswer() {
         }
       });
     } else if (q.type === 'fill' || q.forceFill) {
-      let input = document.getElementById('answerInput');
-      input.classList.add(isCorrect ? 'correct' : 'wrong');
-      input.disabled = true;
+      let multi = document.querySelectorAll('.answer-input-multi');
+      if (multi && multi.length) {
+        let cp = String(q.answer || '').split(/[,，、\/]+/).map(s => s.trim());
+        multi.forEach((el, i) => {
+          el.classList.add(fillAnswerEquals(el.value, cp[i]) ? 'correct' : 'wrong');
+          el.disabled = true;
+        });
+      } else {
+        let input = document.getElementById('answerInput');
+        if (input) {
+          input.classList.add(isCorrect ? 'correct' : 'wrong');
+          input.disabled = true;
+        }
+      }
     }
 
     // 显示反馈

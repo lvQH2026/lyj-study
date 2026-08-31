@@ -747,6 +747,50 @@ body {
   color: var(--accent);
 }
 
+/* v69：多空填空题 */
+.multi-blank-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.multi-blank-row .mb-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 92px;
+}
+.multi-blank-row .mb-no {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  background: #FCF9F2;
+  border: 1px solid #E8D9B8;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
+.multi-blank-row .answer-input-multi {
+  width: 100%;
+  padding-left: 32px;
+  font-size: 20px;
+}
+.mb-tip {
+  text-align: center;
+  font-size: 12px;
+  color: #8A8578;
+  margin-top: 6px;
+}
+
 /* 图形题SVG */
 .shape-container {
   display: flex;

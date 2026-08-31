@@ -40,6 +40,11 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
+  // v69：选项可能是字符串，也可能是 {label,value} 对象（旧生成器遗留），统一取文本
+  function optText(o) {
+    if (o && typeof o === 'object') return String(o.value == null ? (o.label == null ? '' : o.label) : o.value);
+    return String(o == null ? '' : o);
+  }
   function shuffle(a) {
     a = a.slice();
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
@@ -236,7 +241,7 @@
     return null;
   }
   function genericHints(item) {
-    const opts = (item.options || []).map(function (o) { return String(o); });
+    const opts = (item.options || []).map(function (o) { return optText(o); });
     const optCount = opts.length;
     const optionTip = optCount >= 2
       ? ('先看选项之间的「关键差异」（单位、量级、符号、运算顺序等），把明显和题意不符的划掉，再比较剩下的。')
@@ -281,6 +286,14 @@
     const a = q.answer;
     if (String(ua) === String(a)) return true;
     if (!isNaN(parseFloat(ua)) && !isNaN(parseFloat(a)) && parseFloat(ua) === parseFloat(a)) return true;
+    // v69：多空填空题，按逗号/顿号/斜杠逐空比对（容忍中文标点与空格）
+    const up = String(ua).split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
+    const ap = String(a).split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
+    if (up.length > 1 && up.length === ap.length) {
+      return up.every(function (v, i) {
+        return v === ap[i] || (!isNaN(parseFloat(v)) && !isNaN(parseFloat(ap[i])) && parseFloat(v) === parseFloat(ap[i]));
+      });
+    }
     return false;
   }
 
@@ -744,12 +757,26 @@
     if (item.type === 'choice' || item.type === 'judge') {
       h += '<div class="pc-options" id="pcOpts">';
       (item.options || []).forEach(function (opt, oi) {
-        const sel = q.userAnswers[i] === opt;
-        h += '<button class="pc-opt ' + (sel ? 'sel' : '') + '" onclick="PC.choose(' + oi + ')"><span class="pc-opt-key">' + String.fromCharCode(65 + oi) + '</span><span class="pc-opt-txt">' + esc(opt) + '</span></button>';
+        const txt = optText(opt);
+        const sel = q.userAnswers[i] === txt;
+        h += '<button class="pc-opt ' + (sel ? 'sel' : '') + '" onclick="PC.choose(' + oi + ')"><span class="pc-opt-key">' + String.fromCharCode(65 + oi) + '</span><span class="pc-opt-txt">' + esc(txt) + '</span></button>';
       });
       h += '</div>';
     } else {
-      h += '<input class="pc-fill" id="pcFill" placeholder="请输入答案" value="' + esc(q.userAnswers[i] || '') + '" onkeydown="if(event.key===\'Enter\')PC.submit()">';
+      // v69：多空填空题逐空渲染输入框（旧版只有 1 个框，孩子根本没法作答）
+      const nb = (typeof countFillBlanks === 'function') ? countFillBlanks(item) : 0;
+      if (nb >= 2) {
+        const parts = String(q.userAnswers[i] || '').split(/[,，、\/]+/);
+        h += '<div class="pc-multi-blank">';
+        for (let bi = 0; bi < nb; bi++) {
+          h += '<span class="pc-mb-item"><span class="pc-mb-no">' + (bi + 1) + '</span>' +
+            '<input class="pc-fill pc-fill-multi" placeholder="第' + (bi + 1) + '空" value="' + esc((parts[bi] || '').trim()) + '" onkeydown="if(event.key===\'Enter\')PC.submit()"></span>';
+        }
+        h += '</div>';
+        h += '<div class="pc-mb-tip">共 ' + nb + ' 个空，请按顺序分别填写</div>';
+      } else {
+        h += '<input class="pc-fill" id="pcFill" placeholder="请输入答案" value="' + esc(q.userAnswers[i] || '') + '" onkeydown="if(event.key===\'Enter\')PC.submit()">';
+      }
     }
     h += '</div>';
 
@@ -807,7 +834,7 @@
   }
   PC.choose = function (oi) {
     const q = S.quiz; const item = q.questions[q.idx];
-    q.userAnswers[q.idx] = item.options[oi];
+    q.userAnswers[q.idx] = optText(item.options[oi]);
     const opts = $('pcOpts').children;
     for (let k = 0; k < opts.length; k++) opts[k].classList.toggle('sel', k === oi);
   };
@@ -821,7 +848,14 @@
     if (item.type === 'choice' || item.type === 'judge') {
       ua = q.userAnswers[i]; if (ua === undefined) { toast('请先选择答案'); return; }
     } else {
-      const inp = $('pcFill'); ua = inp ? inp.value.trim() : ''; if (ua === '') { toast('请输入答案'); return; }
+      const multi = document.querySelectorAll('.pc-fill-multi');
+      if (multi && multi.length) {
+        const parts = []; multi.forEach(function (el) { parts.push(String(el.value || '').trim()); });
+        ua = parts.every(function (p) { return p === ''; }) ? '' : parts.join(',');
+      } else {
+        const inp = $('pcFill'); ua = inp ? inp.value.trim() : '';
+      }
+      if (ua === '') { toast('请输入答案'); return; }
     }
 
     const correct = pcJudge(item, ua);
