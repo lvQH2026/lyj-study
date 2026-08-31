@@ -2048,3 +2048,112 @@ body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',
   .gz-score-num{ font-size:34px; }
   .gz-drop{ padding:24px 12px; }
 }
+
+/* ==========================================================================
+   v73 · 练习设置弹层（单元练习开始前选难度）
+   结构：.ps-mask > .ps-dialog > .ps-title / .ps-note / .ps-label
+         .ps-options > .ps-opt(.on) > .ps-opt-name + .ps-opt-desc
+         .ps-actions > .ps-btn.cancel + .ps-btn.ok
+   ========================================================================== */
+.ps-mask{
+  position:fixed; inset:0; z-index:4000;
+  background:rgba(24,28,40,.42);
+  display:flex; align-items:center; justify-content:center;
+  padding:22px 18px;
+  opacity:0; visibility:hidden;
+  transition:opacity .18s ease, visibility .18s ease;
+  -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+}
+.ps-mask.show{ opacity:1; visibility:visible; }
+.ps-dialog{
+  width:100%; max-width:380px;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:var(--shadow-lift);
+  padding:20px 18px 16px;
+  transform:translateY(10px) scale(.98);
+  transition:transform .18s ease;
+}
+.ps-mask.show .ps-dialog{ transform:translateY(0) scale(1); }
+.ps-title{
+  font-size:17px; font-weight:700; color:var(--primary);
+  text-align:center; letter-spacing:.5px;
+}
+.ps-note{
+  margin-top:6px; font-size:12.5px; color:var(--text-lighter);
+  text-align:center; line-height:1.5;
+}
+.ps-label{
+  margin:16px 0 8px;
+  font-size:12px; font-weight:600; color:var(--text-light);
+  letter-spacing:.6px;
+}
+.ps-options{ display:flex; flex-direction:column; gap:8px; }
+.ps-opt{
+  display:flex; flex-direction:column; gap:2px;
+  width:100%; text-align:left; cursor:pointer;
+  font-family:inherit;
+  padding:11px 14px;
+  background:#FBFAF7;
+  border:1px solid var(--border);
+  border-radius:12px;
+  transition:background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.ps-opt:active{ transform:scale(.995); }
+.ps-opt-name{ font-size:14.5px; font-weight:600; color:var(--text); }
+.ps-opt-desc{ font-size:11.5px; color:var(--text-lighter); line-height:1.45; }
+.ps-opt.on{
+  background:var(--primary-50, #F1F3F8);
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px rgba(62,74,99,.10);
+}
+.ps-opt.on .ps-opt-name{ color:var(--primary); }
+.ps-opt.on .ps-opt-desc{ color:var(--primary-light, #6B7894); }
+.ps-opt.on .ps-opt-name::after{
+  content:'✓'; margin-left:6px; font-size:13px; color:var(--gold); font-weight:700;
+}
+.ps-actions{
+  display:flex; gap:10px; margin-top:18px;
+}
+.ps-btn{
+  flex:1; height:44px; border:none; border-radius:11px;
+  font-family:inherit; font-size:15px; font-weight:600;
+  cursor:pointer; transition:filter .15s ease, transform .1s ease;
+}
+.ps-btn:active{ transform:scale(.985); }
+.ps-btn.cancel{
+  background:#EDEBE5; color:var(--text-light);
+}
+.ps-btn.ok{
+  background:var(--primary); color:#fff;
+  box-shadow:0 4px 12px rgba(62,74,99,.22);
+}
+.ps-btn.ok:hover{ filter:brightness(1.06); }
+@media (max-width:360px){
+  .ps-dialog{ padding:16px 14px 14px; }
+  .ps-btn{ font-size:14px; }
+}
+
+/* ===== v73.2 题号导航 ===== */
+.quiz-nav{
+  display:flex; flex-wrap:wrap; gap:6px;
+  margin:10px 0 4px; padding:8px;
+  background:var(--card-bg,#fff); border:1px solid var(--border,#e8e8e8);
+  border-radius:12px;
+}
+.qn-num{
+  min-width:30px; height:30px; padding:0 4px;
+  border:1px solid var(--border,#e3e0d6); border-radius:8px;
+  background:#fff; color:var(--text,#333);
+  font-size:13px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s ease;
+}
+.qn-num:active{ transform:scale(.94); }
+.qn-num.ok{ background:#f0f9ec; border-color:#b7dca0; color:#3f8c2f; }
+.qn-num.bad{ background:#fdecea; border-color:#f3b4ab; color:#cf3a2a; }
+.qn-num.current{ background:var(--primary,#3E4A63); border-color:var(--primary,#3E4A63); color:#fff; box-shadow:0 2px 8px rgba(62,74,99,.28); }
+/* 考试模式：导航条更紧凑，贴近真实卷面 */
+#page-quiz.exam-mode .quiz-nav{ background:#fbfaf6; }
+#page-quiz.exam-mode .qn-num{ min-width:28px; height:28px; font-size:12px; }

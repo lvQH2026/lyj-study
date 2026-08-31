@@ -3040,7 +3040,7 @@ function cn5x8_pool() {
       }
       c += '<div style="display:flex;gap:8px">';
       c += '<button class="btn btn-primary" style="flex:1;padding:10px;font-size:13px" onclick="CN.showLearn(' + i + ')">同步学习</button>';
-      c += '<button class="btn btn-outline" style="flex:1;padding:10px;font-size:13px" onclick="CN.beginQuiz(' + i + ')">随机练习 ' + PRAC_N + ' 题</button>';
+      c += '<button class="btn btn-outline" style="flex:1;padding:10px;font-size:13px" onclick="CN.beginQuiz(' + i + ')">练习 ' + PRAC_N + ' 题</button>';
       c += '</div></div>';
       return c;
     }
@@ -3174,7 +3174,7 @@ function cn5x8_pool() {
     html += '</div></details>';
 
     // 开始练习按钮
-    html += '<button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:4px" onclick="CN.beginQuiz(' + idx + ')">开始练习（随机 ' + PRAC_N + ' 题）</button>';
+    html += '<button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:4px" onclick="CN.beginQuiz(' + idx + ')">开始练习（' + PRAC_N + ' 题）</button>';
 
     el('cnBackBtn').style.display = 'block';
     el('cnBackBtn').onclick = cnGoHome;
@@ -3183,10 +3183,83 @@ function cn5x8_pool() {
   }
 
   // ---- 题库采样 ----
-  function cnSamplePool(unit, n) {
-    const pool = shuffle(unit.pool());
-    const out = pool.slice(0, n);
-    while (out.length < n && pool.length) out.push(pool[out.length % pool.length]);
+  // v73：语文题目难度判据（1 基础 / 2 提高 / 3 拓展，与数学同一套命名）。
+  // 语文题原本没有 diff 字段，这里按语文学科自己的规律分层：
+  // 基础 = 字音字形、默写背诵；提高 = 词语句式的运用与变换；拓展 = 阅读中的概括、体会、赏析。
+  function cnDiffScore(q) {
+    const t = String((q && q.question) || '');
+    const a = String((q && q.answer) || '');
+    if (q && q.passage) {
+      if (/体会|赏析|感悟|启示|明白了|懂得了|评价|看法|为什么这样写|好处|感受/.test(t)) return 3;
+      if (/概括|主要写了|主要内容|中心|心情|特点|道理/.test(t)) return 3;
+      return 2;
+    }
+    if (/体会|赏析|感悟|启示|明白了|懂得了|评价|看法|想象|续写|仿写/.test(t)) return 3;
+    if (/概括|主要内容|中心思想|段意/.test(t)) return 3;
+    if (/改成|改为|变换|反问|陈述句|把字句|被字句|缩句|扩句|病句|修辞|比喻|拟人|排比|夸张|关联词/.test(t)) return 2;
+    if (/反义词|近义词|解释|意思|搭配|选词填空/.test(t)) return 2;
+    if (/默写|补充诗句|按原文|背诵|读音|书写正确|笔画|部首|看拼音/.test(t)) return 1;
+    if (a.length >= 10) return 2;          // 答案需要自己组织语言
+    if (t.length >= 30) return 2;
+    return 1;
+  }
+
+  // 单元内相对打标：前 60% 基础 / 中 30% 提高 / 后 10% 拓展（与数学 tagRelativeDifficulty 同口径）
+  function cnTagDifficulty(arr) {
+    if (!arr || !arr.length) return arr;
+    const scored = arr.map(q => ({ q: q, s: cnDiffScore(q) + Math.random() * 0.01 }));
+    scored.sort((a, b) => a.s - b.s);
+    const n = scored.length;
+    const b = Math.round(n * 0.6), m = Math.round(n * 0.9);
+    scored.forEach((o, i) => { o.q.diff = (i < b) ? 1 : (i < m) ? 2 : 3; });
+    return arr;
+  }
+
+  // v73：单元练习选题。diff：0 混合（6:3:1）/ 1 基础 / 2 提高 / 3 拓展。
+  // 语文题库是静态 pool（不像数学那样有 gen() 可反复生成），
+  // 凑不满 30 题时按实际上限出卷——旧版用 pool[i % len] 循环克隆凑数，
+  // 孩子会连着做到两道一模一样的题，那是在浪费他的时间。
+  function cnSamplePool(unit, n, diff, type) {
+    const seen = new Set();
+    const uniq = [];
+    (unit.pool() || []).forEach(function (q) {
+      if (!q || !q.question) return;
+      const k = q.question + '|' + String(q.answer);
+      if (seen.has(k)) return;
+      seen.add(k);
+      uniq.push(q);
+    });
+    // v73.2：题型筛选（语文无计算题；应用题≈阅读/积累类带 passage 的题）
+    if (type && type !== 0 && type !== '0') {
+      uniq = uniq.filter(function (q) {
+        if (type === 'choice') return q.type === 'choice';
+        if (type === 'fill') return q.type === 'fill';
+        if (type === 'judge') return q.type === 'judge';
+        if (type === 'app') return q.type === 'app' || !!q.passage;
+        return false;   // calc：语文无计算题
+      });
+    }
+    if (!uniq.length) return [];
+    cnTagDifficulty(uniq);
+    let by = { 1: [], 2: [], 3: [] };
+    uniq.forEach(function (q) { by[q.diff].push(q); });
+    [1, 2, 3].forEach(function (d) { by[d] = shuffle(by[d]); });
+    const target = Math.min(n, uniq.length);
+    let out = [];
+    if (!diff) {
+      const b = Math.round(target * 0.6), m = Math.round(target * 0.9);
+      const take1 = Math.min(b, by[1].length);
+      const take2 = Math.min(Math.max(0, m - take1), by[2].length);
+      const take3 = Math.min(Math.max(0, target - take1 - take2), by[3].length);
+      out = by[1].slice(0, take1).concat(by[2].slice(0, take2), by[3].slice(0, take3));
+      if (out.length < target) {
+        const rest = by[1].concat(by[2], by[3]).filter(function (q) { return out.indexOf(q) < 0; });
+        out = out.concat(rest.slice(0, target - out.length));
+      }
+    } else {
+      const band = (by[diff] && by[diff].length) ? by[diff] : uniq;
+      out = band.slice(0, target);
+    }
     return out;
   }
 
@@ -3207,16 +3280,45 @@ function cn5x8_pool() {
     return out;
   }
 
+  // v73.2：语文题型选项（无计算题）
+  const CN_TYPE_OPTIONS = [
+    { v: 0, label: '全部题型', desc: '混合各题型' },
+    { v: 'choice', label: '选择题', desc: '四选一' },
+    { v: 'fill', label: '填空题', desc: '直接写答案' },
+    { v: 'app', label: '应用题', desc: '阅读/积累' },
+  ];
+
   // ---- 开始练习（随机30题） ----
-  function cnBeginQuiz(idx) {
+  // v73：先弹「练习设置」选难度，再出题（从错题同类练习等快捷入口进来时直接传 diff 调本函数）
+  function cnAskQuiz(idx) {
+    const units = CN_DATA[cnState.grade] || [];
+    const unit = units[idx];
+    if (typeof openPracticeSettings !== 'function') { cnBeginQuiz(idx, 0); return; }
+    openPracticeSettings({
+      title: '练习设置',
+      note: (unit ? unit.name + ' · ' : '') + '每次固定 ' + PRAC_N + ' 题',
+      okText: '开始练习',
+      typeOptions: CN_TYPE_OPTIONS,
+      onStart: function (d, t) { cnBeginQuiz(idx, d, t); },
+    });
+  }
+
+  // 「再练一次」沿用上次选的难度，不再把设置弹层再弹一遍。
+  function cnReplayQuiz() {
+    cnBeginQuiz(window.CN._lastUnitIdx || 0, window.CN._lastUnitDiff || 0, window.CN._lastUnitType || 0);
+  }
+
+  function cnBeginQuiz(idx, diff, type) {
     const units = CN_DATA[cnState.grade] || [];
     const unit = units[idx];
     if (!unit) return;
     cnState.unitIdx = idx;
     window.CN._lastUnitIdx = idx;
+    window.CN._lastUnitDiff = diff || 0;
+    window.CN._lastUnitType = type || 0;
 
     const fcount = unit.fidx && unit.fidx.length ? 3 : 1;
-    const poolQs = cnSamplePool(unit, PRAC_N - fcount);
+    const poolQs = cnSamplePool(unit, PRAC_N - fcount, diff || 0, type);
     const fq = formulaQuestionsFor(unit, fcount);
     const questions = shuffle(poolQs.concat(fq));
     questions.forEach(function (q) {
@@ -3432,6 +3534,9 @@ function cn5x8_pool() {
 
     el('cnQuestionCard').innerHTML = html;
 
+    // v73.2：题号导航（全部题号可点击跳转，不强制顺序）
+    renderCnQuizNav();
+
     // 按钮区
     let btnHtml = '<div id="cnFeedback" style="min-height:24px;margin-bottom:10px;font-size:14px"></div>';
     btnHtml += '<button class="btn btn-primary" id="cnSubmitBtn" onclick="CN.submit()" style="width:100%">' + (q.paper ? '交本题' : '提交答案') + '</button>';
@@ -3442,6 +3547,32 @@ function cn5x8_pool() {
     const q = cnState.quiz;
     const item = q.questions[q.idx];
     q.userAnswers[q.idx] = item.options[i];
+    cnRenderQuestion();
+  }
+
+  // v73.2：语文题号导航
+  function renderCnQuizNav() {
+    const nav = el('cnQuizNav');
+    if (!nav) return;
+    const q = cnState.quiz;
+    const total = q.questions.length;
+    let h = '';
+    for (let i = 0; i < total; i++) {
+      let cls = 'qn-num';
+      if (i === q.idx) cls += ' current';
+      let r = q.results[i];
+      if (r === true) cls += ' ok';
+      else if (r === false) cls += ' bad';
+      h += '<button class="' + cls + '" onclick="CN.jump(' + i + ')">' + (i + 1) + '</button>';
+    }
+    nav.innerHTML = h;
+  }
+
+  // v73.2：跳转到任意题（不强制顺序）
+  function cnJump(i) {
+    const q = cnState.quiz;
+    if (i < 0 || i >= q.questions.length) return;
+    q.idx = i;
     cnRenderQuestion();
   }
 
@@ -3579,7 +3710,7 @@ function cn5x8_pool() {
         replay.setAttribute('onclick', 'CN.replayExam()');
       } else {
         replay.textContent = '再练一次';
-        replay.setAttribute('onclick', 'CN.beginQuiz(CN._lastUnitIdx||0)');
+        replay.setAttribute('onclick', 'CN.replayQuiz()');
       }
     }
 
@@ -3742,15 +3873,20 @@ function cn5x8_pool() {
   // ---- 暴露接口 ----
   window.CN = {
     _lastUnitIdx: 0,
+    _lastUnitDiff: 0,
     _lastExam: null,
     _buildExam: cnBuildExam,   // 调试/测试钩子：直接生成试卷不进入答题
     init: cnInit,
     selectGrade: cnSelectGrade,
-    beginQuiz: cnBeginQuiz,
+    beginQuiz: cnAskQuiz,          // v73：先弹「练习设置」选难度
+    beginQuizDirect: cnBeginQuiz,  // 跳过弹层直接开练（供自动化 / 测试钩子使用）
+    replayQuiz: cnReplayQuiz,      // 「再练一次」沿用上次难度，不再重复弹设置
+    samplePool: cnSamplePool,      // v73：PC 端按难度抽样共用同一套选题逻辑
     showLearn: cnShowLearn,
     beginExam: cnBeginExam,
     replayExam: cnReplayExam,
     selectOption: cnSelectOption,
+    jump: cnJump,                  // v73.2：题号导航跳转
     submit: cnSubmit,
     goHome: cnGoHome,
     switchTab: cnSwitchTab,

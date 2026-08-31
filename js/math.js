@@ -7032,6 +7032,13 @@ function g1_shape(){
     {q:'下面的物体中，形状是圆柱的是？',a:'电池',d:['魔方','皮球','课本']},
     {q:'长方体和正方体都能？',a:'稳稳地放住',d:['到处滚动','浮在水上','变成圆形']},
     {q:'球的面是平平的吗？',a:'不是，是弯弯的曲面',d:['是平平的','有6个平的面','有2个平的面']},
+    {q:'下面只能滚动、不能站稳的图形是？',a:'球',d:['正方体','长方体','三角板']},
+    {q:'圆柱竖着放在桌上，它？',a:'能站稳不滚',d:['会一直滚动','会飞起来','会变扁']},
+    {q:'搭积木时，一般把什么形状放在最下面当地基？',a:'长方体或正方体',d:['球','横放的圆柱','气球']},
+    {q:'下面几个面全是平平的立体图形是？',a:'正方体',d:['球','圆柱','圆']},
+    {q:'把球、正方体、圆柱放斜坡上，最先滚下来的是？',a:'球',d:['正方体','圆柱','一样快']},
+    {q:'哪种立体图形有弯弯的面？',a:'球（还有圆柱侧面）',d:['正方体','长方体','三角板']},
+    {q:'用同样的小正方体往上叠高塔，最下面应该？',a:'放稳、放平',d:['放一个球','放一个圆柱','随便放都行']},
   ];
   let r=pick(reps); return mc(r.q,r.a,r.d);
 }
@@ -7161,6 +7168,9 @@ function g1_shape2(){
     {q:'围成一个三角形需要几根小棒？',a:'3根',d:['4根','5根','2根']},
     {q:'围成一个正方形至少需要几根同样长的小棒？',a:'4根',d:['3根','5根','6根']},
     {q:'平行四边形的4条边中，相等的边有？',a:'2组，对边相等',d:['4条都相等','都不相等','只有1组']},
+    {q:'正方形和长方形不一样的地方是？',a:'正方形4条边都相等',d:['正方形只有3条边','长方形4条边都相等','它们完全一样']},
+    {q:'下面图形中，4个角都是直角的是？',a:'正方形和长方形',d:['三角形','圆形','平行四边形（一般没有直角）']},
+    {q:'平行四边形的对角？',a:'相等',d:['不相等','一个大一个小','都是直角']},
   ];
   let r=pick(reps); return mc(r.q,r.a,r.d);
 }
@@ -7255,7 +7265,22 @@ function g2_length(){
 function g100_add(){let a=ri(20,70),b=ri(10,99-a);return mc(`竖式计算：${a}+${b}=？`,a+b,[a+b-2,a+b+2,a+b-1])}
 function g100_sub(){let a=ri(40,99),b=ri(10,a);return mc(`竖式计算：${a}-${b}=？`,a-b,[a-b+2,a-b-1,a-b+3])}
 function g_mul_1(){let a=ri(2,5),b=ri(1,9); if(a*b>36)return g_mul_1(); return mc(`${a}×${b}=？`,a*b,[a*b-1,a*b+1,a*b+a])}
-function g_mul_2(){let a=ri(6,9),b=ri(1,9); if(a*b<20)return g_mul_2(); return mc(`${a}×${b}=？`,a*b,[a*b-2,a*b+2])}
+function g_mul_2(){
+  // v73.2 扩容：原单行算式（容量约 27）。补乘法口诀概念题，容量 35+
+  let a=ri(6,9), b=ri(1,9); if(a*b<20) return g_mul_2();
+  let reps=[
+    {q:'一个乘数是7，另一个乘数是8，积是？',a:'56',d:['15','63','54']},
+    {q:'9的乘法口诀一共有几句？',a:'9句',d:['8句','10句','7句']},
+    {q:'8×8的积是？',a:'64',d:['56','72','63']},
+    {q:'一个乘数是6，另一个乘数是7，积是？',a:'42',d:['13','48','49']},
+    {q:'根据"七九六十三"可以写出哪道乘法算式？',a:'7×9=63',d:['7+9=63','9×8=63','7×9=53']},
+    {q:'6×9和9×6的结果？',a:'相同，都是54',d:['不同，54和45','6×9大','9×6大']},
+    {q:'7个8相加，可以写成哪个乘法算式？',a:'7×8',d:['8+7','7+8','8×8']},
+    {q:'积是63的乘法口诀是？',a:'七九六十三',d:['七八五十六','六九五十四','八九七十二']},
+  ];
+  if(Math.random()<0.7) return mc(`${a}×${b}=？`,a*b,[a*b-2,a*b+2]);
+  let r=pick(reps); return mc(r.q,r.a,r.d);
+}
 
 function g2_time(){
   // v71 扩容：原 5 条固定题（容量 5）。改为参数化时×分（5 分一格）+ 时间常识，容量 60+
@@ -9547,7 +9572,11 @@ let state = {
 // ============================================================
 const STORAGE_KEY = 'math_practice_data';
 const QUIZ_LENGTH = 30; // 每套练习题量（快速练习 / 错题重练沿用）
-const UNIT_QUIZ_LENGTH = 20; // 单元 / 专项单元练习：每次随机出 20 题
+// v73：单元 / 专项单元练习固定 30 题（与广西真题整卷题数一致，便于计时与估分）。
+// 旧值 20 是早期为缩短单次练习时长定的，与「一张卷子」的体感不符。
+const UNIT_QUIZ_LENGTH = 30;
+// 反复调用 gen() 凑题时的采样上限：连续这么多次都拿不到「新题面」就判定生成器枯竭。
+const UNIT_GEN_MAX_STALL = 900;
 
 // ============================================================
 // 巧数三角形（专项30题）—— 由外部归档卷子整合而来
@@ -9781,6 +9810,10 @@ function goBack() {
       state.quizCorrect = 0;
       state.quizWrong = 0;
       state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
+      state.qStatus = [];
+      state.wrongMap = {};
     }
     return;
   }
@@ -9800,6 +9833,8 @@ function goHome() {
   state.quizCorrect = 0;
   state.quizWrong = 0;
   state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
   state.selectedAnswer = null;
   state.answered = false;
   state.examPaper = null;
@@ -10077,7 +10112,7 @@ function showUnitDiagrams(unit, grade, sem, idx) {
     catch (e) { console.error('diagram render error', d.title, e); }
   });
 
-  document.getElementById('specialIntroBtn').onclick = () => beginUnitQuiz(idx, grade, sem);
+  document.getElementById('specialIntroBtn').onclick = () => askUnitQuizSettings(idx, grade, sem, unit.name);
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goHome();
   showPage('special-intro');
@@ -10150,7 +10185,77 @@ function renderShapeExplore(container){
   if(s2)s2.addEventListener('input',function(){update(this.value);if(s1)s1.value=this.value;});
 }
 
-function beginUnitQuiz(idx, grade, sem) {
+// v73：6:3:1 配比挑 n 道题，且**绝不重复**。
+// 与 pickDifficultyMix 的区别：旧函数在「某难度档候选不足」时会用 band[k % band.length]
+// 循环复用同一批题，卷面上就是几道题反复出现；练习是给孩子刷熟练度的，
+// 重复题只会浪费时间，故这里某档不够就从相邻档补，凑不满就少出几道。
+function pickDifficultyMixUnique(cands, n) {
+  let byDiff = { 1: [], 2: [], 3: [] };
+  (cands || []).forEach(q => byDiff[questionDifficulty(q)].push(q));
+  [1, 2, 3].forEach(d => shuffleArr(byDiff[d]));
+  let target = Math.min(n, cands.length);
+  let want = diffMixFor(target);
+  let out = [];
+  [1, 2, 3].forEach((d, i) => {
+    out = out.concat(byDiff[d].slice(0, Math.min(want[i], byDiff[d].length)));
+  });
+  if (out.length < target) {
+    let rest = byDiff[1].concat(byDiff[2], byDiff[3]).filter(q => out.indexOf(q) < 0);
+    out = out.concat(rest.slice(0, target - out.length));
+  }
+  return out;
+}
+
+// v73：单元练习出题。
+// diff：0 混合（6:3:1）/ 1 基础 / 2 提高 / 3 拓展（沿用站内既有难度命名）。
+// 策略（用户确认）：反复调用 unit.gen() 生成新题，直到凑满 30 道「视觉上互不相同」的题；
+// 达到采样上限仍凑不满时按实际上限出卷——克隆凑数等于让孩子连做 30 道一模一样的题。
+function buildUnitQuizQuestions(unit, diff, want, typeFilter) {
+  want = want || UNIT_QUIZ_LENGTH;
+  let seen = new Set();
+  let cands = [];
+  let stall = 0;
+  const wantType = (typeFilter && typeFilter !== 0 && typeFilter !== '0') ? String(typeFilter) : null;
+  const push = q => {
+    if (!q || !q.question || q.answer == null || q.answer === undefined) return false;
+    if (wantType && classifyQType(q) !== wantType) return false;   // v73.2：仅收集目标题型
+    let k = visKey(q);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    cands.push(q);
+    return true;
+  };
+  while (cands.length < want && stall < UNIT_GEN_MAX_STALL) {
+    let g;
+    try { g = unit.gen(); } catch (e) { stall++; continue; }
+    let arr = Array.isArray(g) ? g : [g];
+    let got = false;
+    arr.forEach(q => { if (push(q)) got = true; });
+    stall = got ? 0 : stall + 1;      // 连续拿不到新题面 = 生成器已榨干
+  }
+  if (!cands.length) return [];
+  tagRelativeDifficulty(cands);
+  if (!diff) return pickDifficultyMixUnique(cands, want);
+  // 指定难度档：只出该档的题；该单元压根没有这一档时退回全量（否则孩子会看到空白页）
+  let band = cands.filter(q => questionDifficulty(q) === diff);
+  if (band.length === 0) band = cands;
+  shuffleArr(band);
+  return band.slice(0, Math.min(want, band.length));
+}
+
+// v73：单元练习的入口——先弹「练习设置」选难度，再开始练习。
+// 从「错题同类练习」等快捷入口进来时不弹层（那里已经明确知道要练什么）。
+function askUnitQuizSettings(idx, grade, sem, unitName) {
+  if (typeof openPracticeSettings !== 'function') { beginUnitQuiz(idx, grade, sem, 0); return; }
+  openPracticeSettings({
+    title: '练习设置',
+    note: (unitName ? unitName + ' · ' : '') + '每次固定 30 题',
+    okText: '开始练习',
+    onStart: function (diff, type) { beginUnitQuiz(idx, grade, sem, diff, type); },
+  });
+}
+
+function beginUnitQuiz(idx, grade, sem, diff, typeFilter) {
   let unit = KNOWLEDGE_BASE[grade][sem][idx];
   // v51：practiceSimilarWrong 等入口直连时不经过 showUnitDiagrams，须在此确保年级/学期上下文
   state.currentGrade = grade;
@@ -10165,25 +10270,15 @@ function beginUnitQuiz(idx, grade, sem) {
       arr = arr.map(q => Object.assign({}, q));
       tagRelativeDifficulty(arr);
     }
-    state.quizQuestions = arr;
+    state.quizQuestions = (typeFilter && typeFilter !== 0 && typeFilter !== '0') ? arr.filter(q => classifyQType(q) === typeFilter) : arr;
   } else {
     let first = unit.gen();
     if (Array.isArray(first)) {
       // gen 已返回完整题组（如角度计算：一次从题库随机抽 N 道）
-      state.quizQuestions = first;
+      state.quizQuestions = (typeFilter && typeFilter !== 0 && typeFilter !== '0') ? first.filter(q => classifyQType(q) === typeFilter) : first;
     } else {
-      // v51：难度分级 6:3:1——多采 3 倍候选，按题面去重后按 基础/提高/拓展 配比挑 20 题
-      // v69：题数自适应。内容量不足的单元（如一年级「图形拼组」只有 1 种题）
-      // 若硬凑 20 题，孩子会连做 20 道一模一样的题。按真实出题能力收缩题数。
-      let want = UNIT_QUIZ_LENGTH;
-      let cap = estimateUnitCapacity(unit, 90);
-      if (cap > 0 && cap < want) want = cap;
-      let cands = [first];
-      for (let i = 1; i < want * 3; i++) {
-        let g = unit.gen();
-        if (Array.isArray(g)) cands = cands.concat(g); else cands.push(g);
-      }
-      state.quizQuestions = pickDifficultyMix(cands, want);
+      // v73：固定 30 题 + 难度筛选，反复 gen() 直到凑满，绝不出现重复题。
+      state.quizQuestions = buildUnitQuizQuestions(unit, diff || 0, UNIT_QUIZ_LENGTH, typeFilter);
     }
   }
   state.quizIndex = 0;
@@ -10191,6 +10286,8 @@ function beginUnitQuiz(idx, grade, sem) {
   state.quizCorrect = 0;
   state.quizWrong = 0;
   state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
   showPage('quiz');
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goBack();
@@ -10210,6 +10307,8 @@ function startQuickPractice(mode) {
   state.quizCorrect = 0;
   state.quizWrong = 0;
   state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
   showPage('quiz');
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goBack();
@@ -10234,6 +10333,8 @@ function startWrongReview() {
   state.quizCorrect = 0;
   state.quizWrong = 0;
   state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
   showPage('quiz');
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goBack();
@@ -10341,13 +10442,96 @@ const EXAM_TYPES = [
   { key: 'final', icon: '', name: '期末考试', desc: '整册内容综合测试 · 100分' },
 ];
 
-// 试卷结构：30题 = 100分
-const PAPER_STRUCTURE = [
-  { key: 'fill',   title: '一、填空题（每题2分，共20分）', count: 10, score: 2 },
-  { key: 'choice', title: '二、选择题（每题3分，共30分）', count: 10, score: 3 },
-  { key: 'calc',   title: '三、计算题（每题4分，共20分）', count: 5,  score: 4 },
-  { key: 'app',    title: '四、应用题（每题6分，共30分）', count: 5,  score: 6 },
+// ============================================================
+// v73：卷面结构改为「广西近 10 年小学期末真题」结构（人教版）
+//
+// 采样来源（2020-2025 学年各地期末质量监测卷）：
+//   南宁六上（人教版）：填空9 / 作图3 / 选择10 / 计算3 / 解答7 = 32 题
+//   玉林六上（人教版）：填空9 / 选择12 / 计算3 / 作图1 / 解答6 = 31 题
+//   钦州六上（北师版）：选择 8×2 分 / 填空 24 分 / 计算 30 分 / 看图列式 / 解决问题
+//   桂林六上（北师版）：选择 5×2 / 填空 10×2 / 计算 30 / 操作 10 / 解决问题 30
+//   南宁二上（2020 真卷）：选择 / 填空 24 分 / 计算 / 判断 5 分 / 操作 9 分 / 解决问题 27 分
+//
+// 归纳出的共性权重：填空 18~24 · 判断 5~10 · 选择 10~20 · 计算 24~30 ·
+//                   操作 4~10 · 解决问题 20~30，满分 100。
+// 低年级（1-2）判断与操作占比更高（重动手与辨析），
+// 高年级（3-6）解决问题占比更高（重综合应用）。
+//
+// 相比旧结构（填空/选择/计算/应用四区）的实质差异：
+//   ① 新增「判断题」——广西卷 1-6 年级全学段必有，旧题库完全没有这类题；
+//   ② 原 v73 加的「操作题」分区在 v73.2 已移除：屏幕无法真实手绘作图，带图选择题
+//      承担时选项会暴露图形答案造成泄题，故整卷重平衡为五区固定 30 题 / 100 分。
+// ============================================================
+const GX_PAPER_TOTAL = 30;                     // 真题整卷题数（满分 100）
+const GX_CNUM = ['一', '二', '三', '四', '五', '六'];
+// [分区键, 分区名, 题数, 该区总分] —— v73.2 起去掉「操作题」分区（屏幕无法真实作图，
+// 原题用带图选择题承担会出现「无图选项暴露答案」的泄题问题），整卷重平衡为五区固定 30 题 / 100 分。
+const GX_SECTIONS_LOW = [                      // 1-2 年级
+  { key: 'fill',   name: '填空题',   count: 9, score: 18 },
+  { key: 'judge',  name: '判断题',   count: 5, score: 10 },
+  { key: 'choice', name: '选择题',   count: 5, score: 10 },
+  { key: 'calc',   name: '计算题',   count: 5, score: 30 },
+  { key: 'app',    name: '解决问题', count: 6, score: 32 },
 ];
+const GX_SECTIONS_HIGH = [                     // 3-6 年级
+  { key: 'fill',   name: '填空题',   count: 10, score: 20 },
+  { key: 'judge',  name: '判断题',   count: 5, score: 5  },
+  { key: 'choice', name: '选择题',   count: 5, score: 10 },
+  { key: 'calc',   name: '计算题',   count: 5, score: 30 },
+  { key: 'app',    name: '解决问题', count: 5, score: 35 },
+];
+
+// 把 total 分拆到 n 个小题（最大余数法，余数摊到前几题）
+function splitScores(total, n) {
+  n = Math.max(1, n | 0);
+  let base = Math.floor(total / n), r = total - base * n, arr = [];
+  for (let k = 0; k < n; k++) arr.push(base + (k < r ? 1 : 0));
+  return arr;
+}
+
+// 分区小标题的分值说明：各题同分写「每题N分，共M分」，否则写「共M分」
+function gxSectionScoreText(scores) {
+  let total = scores.reduce((a, b) => a + b, 0);
+  let same = scores.every(v => v === scores[0]);
+  return same ? `（每题${scores[0]}分，共${total}分）` : `（共${total}分）`;
+}
+
+// 生成分区配置：capQ 为整卷题数（真题为 30；单元出题能力不足时等比收缩）
+function buildPaperStructure(grade, capQ) {
+  const base = (grade <= 2) ? GX_SECTIONS_LOW : GX_SECTIONS_HIGH;
+  let counts, scoresArr;
+  if (capQ >= GX_PAPER_TOTAL) {
+    counts = base.map(s => s.count);
+    scoresArr = base.map(s => splitScores(s.score, s.count));
+  } else {
+    // 权重等比收缩（最大余数法保证合计 = capQ，且每区至少 1 题）
+    const W = base.map(s => s.score);
+    const sumW = W.reduce((a, b) => a + b, 0);
+    counts = W.map(w => Math.max(1, Math.round(capQ * w / sumW)));
+    let diff = capQ - counts.reduce((a, b) => a + b, 0);
+    const order = [3, 4, 0, 2, 1];             // 余量优先加/减在权重大的区（计算/解决/填空/选择/判断）
+    let guard = 0;
+    while (diff !== 0 && guard++ < 400) {
+      let moved = false;
+      for (const i of order) {
+        if (i >= counts.length) continue;
+        if (diff > 0) { counts[i]++; diff--; moved = true; }
+        else if (counts[i] > 1) { counts[i]--; diff++; moved = true; }
+        if (diff === 0) break;
+      }
+      if (!moved) break;
+    }
+    // 收缩时各区总分按题数占比重算，保证整卷仍是 100 分
+    scoresArr = counts.map((n, i) => splitScores(Math.round(W[i] * n / base[i].count), n));
+  }
+  return base.map((s, i) => ({
+    key: s.key,
+    count: counts[i],
+    scores: scoresArr[i],
+    score: scoresArr[i][0] || 1,
+    title: GX_CNUM[i] + '、' + s.name + '。' + gxSectionScoreText(scoresArr[i]),
+  }));
+}
 
 const examState = {
   type: null,
@@ -10504,6 +10688,16 @@ function isApplicationLike(q) {
   return APP_KEYWORDS.test(t);
 }
 
+// v73.2：把一道题归到「题型筛选」的某一类（与真题分区口径一致）
+// 选择题 / 填空题 / 计算题 / 应用题（判断题不单列，仅在考试卷中出现）
+function classifyQType(q) {
+  if (q.judge) return 'judge';
+  if ((q.type === 'choice' || q.type === 'shape_choice') && !q.forceFill) return 'choice';
+  if (isPureExpression(q) || (q.type === 'calc')) return 'calc';
+  if (isApplicationLike(q) || q._unitType === 'application') return 'app';
+  return 'fill';
+}
+
 // v69：估算一个单元「到底能出多少道互不相同的题」。
 // 去重键 = 题面 + 答案 + 配图：同题面但配图不同的图形题（如「这是什么图形？」配不同图形）
 // 属于不同的题，不能只按题面判重；反过来同题面同答案的就是实打实的重复题。
@@ -10532,6 +10726,7 @@ function buildQuestionPool(units, target, seen, isCore) {
   let pool = [];
   if (!units || units.length === 0) return pool;
   let maxRound = Math.ceil(target / units.length) + 6;
+  let zeroRounds = 0;   // v73.2：连续多轮 0 新增才判枯竭，避免单轮运气差提前收手
   for (let r = 0; r < maxRound && pool.length < target; r++) {
     let addedThisRound = 0;
     for (let u of units) {
@@ -10558,9 +10753,21 @@ function buildQuestionPool(units, target, seen, isCore) {
         break;
       }
     }
-    if (addedThisRound === 0) break; // 生成器已枯竭
+    if (addedThisRound === 0) { if (++zeroRounds >= 5) break; } // 连续 5 轮零新增才判枯竭
+    else zeroRounds = 0;
   }
   return pool;
+}
+
+// v73：视觉去重键。
+// v49 定的「按题面文本严格去重」铁律，对「参数只体现在配图里」的题会误杀：
+// 一年级「认识钟表」整单元只有 1 种题面「钟面上是几时？」，参数（几点）只画在 SVG 里，
+// 按题面去重会把整单元滤到只剩 1 道，卷面只能靠克隆凑数，反而满屏雷同。
+// 配图本身就是题面的一部分——图形不同就是不同的题，故带图题用「题面 + SVG」作键。
+function visKey(q) {
+  let t = String((q && q.question) || '');
+  let svg = String((q && q.svg) || '');
+  return svg.indexOf('<') >= 0 ? (t + '||' + svg) : t;
 }
 
 // 从题池中挑选 n 道题：分数越高越优先，同时避免同一单元扎堆
@@ -10581,8 +10788,8 @@ function pickFromPool(pool, used, n, scorer, usedText) {
       let best = -1, bestScore = -1;
       for (let i = 0; i < pool.length; i++) {
         if (used.has(i)) continue;
-        // 题面文本已选过的题：严格轮直接跳过（视觉重复）
-        if (!allowRepeat && usedText && usedText.has(pool[i].question)) continue;
+        // 视觉上已出现过的题：严格轮直接跳过（v73：带图题按「题面+图形」判重）
+        if (!allowRepeat && usedText && usedText.has(visKey(pool[i]))) continue;
         let base = scorer(pool[i]);
         if (base <= 0) continue;
         if (pool[i]._core === false) base *= 0.35;   // 补充题让位于本次考查范围
@@ -10593,7 +10800,7 @@ function pickFromPool(pool, used, n, scorer, usedText) {
       }
       if (best < 0) return;
       used.add(best);
-      if (usedText) usedText.add(pool[best].question);
+      if (usedText) usedText.add(visKey(pool[best]));
       let name = pool[best]._unitName;
       unitCount[name] = (unitCount[name] || 0) + 1;
       let tpl = tplOf(pool[best]);
@@ -10633,11 +10840,17 @@ function getSectionScorer(key) {
       return 0.8;
     };
   }
+  if (key === 'judge') {
+    // 判断题：分区的题由 deriveJudgeQuestions 在组卷时派生后注入题池，
+    // 这里只负责把它们捞出来（原生题一律不让进，避免判断题区混入普通选择题）。
+    return q => (q.judge ? 12 : 0);
+  }
   if (key === 'choice') {
     // 选择题：必须原生带选项，优先概念辨析类
     return q => {
       let hasOpts = q.options && q.options.length >= 2;
       if (!hasOpts) return 0.1;
+      if (q.judge) return 0.05;                     // 派生判断题不占选择位
       if (isPureExpression(q)) return 3;          // 纯算式留给计算题区
       if (q.type === 'shape_choice') return 11;
       if (q._unitType === 'shape') return 10;
@@ -10648,6 +10861,7 @@ function getSectionScorer(key) {
   }
   // 填空题：简短、答案可直接书写、偏概念与口算
   return q => {
+    if (q.judge) return 0.05;                               // 派生判断题不占填空位（答案是「正确/错误」）
     if (!isTypableAnswer(q.answer)) return 0.15;
     let wordy = isWordyQuestion(q);
     let hasOpts = q.options && q.options.length >= 2;
@@ -11012,73 +11226,224 @@ function canForceFill(q) {
   return parts.length >= 2;
 }
 
-function buildPaperStructure(capQ) {
-  if (capQ >= 30) return PAPER_STRUCTURE.map(s => Object.assign({ scores: null }, s));
-  const W = [20, 30, 20, 30];                       // 四个分区的分值权重
-  let counts = W.map(w => Math.max(1, Math.round(capQ * w / 100)));
-  let diff = capQ - counts.reduce((a, b) => a + b, 0);
-  const order = [1, 3, 0, 2];                       // 余量优先加/减在权重大的区
-  let guard = 0;
-  while (diff !== 0 && guard++ < 400) {
-    let moved = false;
-    for (const i of order) {
-      if (diff > 0) { counts[i]++; diff--; moved = true; }
-      else if (counts[i] > 1) { counts[i]--; diff++; moved = true; }
-      if (diff === 0) break;
-    }
-    if (!moved) break;
+// ============================================================
+// v73：判断题派生器
+// 广西卷 1-6 年级全学段必考判断题（南宁二上真卷「四、我会判断」5 分、
+// 桂林/钦州六上「判断题」5-10 分），但本站题库里一道原生判断题都没有。
+// 与其给 131 个单元逐个手写判断题生成器（工程量大且必然有单元漏配），
+// 不如从本单元题池里的「数值答案题」自动派生：
+//     原题 「25 × 4 = ？」 答案 100
+//     派生 「25 × 4 = 100（　）」答案 正确   ← 50% 走这条
+//     　　 「25 × 4 = 90（　）」 答案 错误   ← 50% 走这条（错值在真值附近扰动）
+// 这样任何有数值答案的单元都能稳定产出判断题，且随单元知识点自然变化。
+// ============================================================
+
+// 把「疑问句题干 + 答案」拼成一句可直接判断对错的陈述
+function judgeStatement(question, value) {
+  let t = String(question || '').trim();
+  if (!t || value === '' || value == null) return '';
+  // 「括号里填几？」「在（　）里填上合适的数」这类元描述句式，
+  // 改造成陈述句后语义是断裂的（"2+3=4，括号里填几"），一律不派生。
+  if (/括号|填几|填上|里填|填一填|填[“"]/.test(t)) return '';
+  // 只在题干末尾留一个判断空位，供孩子打 √ / ×
+  const BLANK = '（　　）';
+  let s = '';
+  if (/=\s*[？?]\s*$/.test(t)) {
+    // 「25 × 4 = ？」→「25 × 4 = 100」
+    s = t.replace(/=\s*[？?]\s*$/, '= ' + value);
+  } else if (/（\s*）|\(\s*\)|＿+|_{2,}/.test(t)) {
+    // 「36 里面有（　）个 6」→「36 里面有 6 个 6」（只填唯一一个空，多空题不派生）
+    if ((t.match(/（\s*）|\(\s*\)|＿+|_{2,}/g) || []).length !== 1) return '';
+    s = t.replace(/（\s*）|\(\s*\)|＿+|_{2,}/, String(value));
+    s = s.replace(/[？?]\s*$/, '');            // 「5/9 里面有（　）个 1/9？」→ 去掉残留问号
+  } else if (/[？?]\s*$/.test(t)) {
+    // 「一个数的 3 倍是 24，这个数是？」
+    s = t.replace(/[？?]\s*$/, '') + String(value);
+  } else {
+    return '';
   }
-  // 区内把该区总分平分到每题（余数摊到前几题）
-  let scores = W.map((w, i) => {
-    let n = Math.max(1, counts[i]);
-    let base = Math.floor(w / n), r = w - base * n;
-    let arr = [];
-    for (let k = 0; k < n; k++) arr.push(base + (k < r ? 1 : 0));
-    return arr;
+  if (/[？?]/.test(s)) return '';              // 还有问号就不是一个陈述句
+  if (s.length > 46) return '';                // 太长的陈述不适合做判断题
+  return s + BLANK;
+}
+
+// 在真值附近造一个「像那么回事但确实错」的值
+function judgeWrongValue(correct) {
+  let c = String(correct).trim();
+  // 分数 a/b：分子分母互换或分子 ±1
+  let fm = c.match(/^(-?\d+)\/(\d+)$/);
+  if (fm) {
+    let a = +fm[1], b = +fm[2];
+    if (a !== b && b !== 0) return a + '/' + (a === 1 ? b + 1 : Math.max(1, a - 1));
+    return a + '/' + (b + 1);
+  }
+  let v = parseFloat(c);
+  if (isNaN(v)) return '';
+  let isInt = /^-?\d+$/.test(c);
+  let mag = Math.max(1, Math.abs(v));
+  let delta = Math.max(1, Math.round(mag * 0.25));       // 25% 幅度的扰动
+  let cand = v + (Math.random() < 0.5 ? delta : -delta);
+  if (cand < 0) cand = v + delta;                        // 小学阶段不出现负数
+  if (isInt) cand = Math.round(cand);
+  else cand = Math.round(cand * 100) / 100;
+  if (String(cand) === c) cand = isInt ? cand + 1 : cand + 0.5;
+  if (String(cand) === c) return '';
+  return String(cand);
+}
+
+// 从题池派生 n 道判断题（题面去重，正确/错误各约一半）
+function deriveJudgeQuestions(pool, n, usedText) {
+  let out = [];
+  if (!pool || !pool.length || n <= 0) return out;
+  let src = shuffleArr(pool.slice());
+  let localText = new Set();
+  let wrongQuota = Math.floor(n / 2);                    // 保证错题（答案=错误）占一半
+  for (let i = 0; i < src.length && out.length < n; i++) {
+    let q = src[i];
+    if (!q || q.judge || q._derived) continue;
+    let ans = String(q.answer == null ? '' : q.answer).trim();
+    if (ans === '' || ans.length > 12) continue;
+    if (!/^-?\d+(\.\d+)?$/.test(ans) && !/^-?\d+\/\d+$/.test(ans)) continue; // 只派生数值/分数答案
+    let wantWrong = wrongQuota > 0 && (n - out.length) <= wrongQuota * 2;
+    let shown = ans;
+    if (wantWrong) {
+      let w = judgeWrongValue(ans);
+      if (w === '') continue;
+      shown = w;
+      wrongQuota--;
+    }
+    let stmt = judgeStatement(q.question, shown);
+    if (!stmt) continue;
+    if (usedText && usedText.has(stmt)) continue;
+    if (localText.has(stmt)) continue;
+    localText.add(stmt);
+    if (usedText) usedText.add(stmt);
+    out.push({
+      type: 'choice',
+      judge: true,
+      question: stmt,
+      options: ['正确', '错误'],
+      answer: (shown === ans) ? '正确' : '错误',
+      answerIdx: (shown === ans) ? 0 : 1,
+      _unitType: q._unitType,
+      _unitName: q._unitName,
+      _core: q._core,
+      _derived: true,
+    });
+  }
+  // 错题配额没用完（可派生的题太少）：把已有的判断题随机翻一半为「错误」
+  if (out.length && wrongQuota > 0) {
+    let flip = shuffleArr(out.slice()).slice(0, Math.min(wrongQuota, Math.floor(out.length / 2)));
+    flip.forEach(j => { j.answer = '错误'; j.answerIdx = 1; });
+  }
+  return out;
+}
+
+// 注：v73 起 buildPaperStructure(grade, capQ) 已上移到 GX_SECTIONS_* 定义处，
+// 按广西真题六分区结构生成（此处不再有旧的四分区版本）。
+
+// v73.2：把「广西真实期末卷」原题替换进已组好卷子的对应分区。
+// 只在 GX_REAL 命中 grade-sem-type 键时生效；未命中的卷（单元考/期中/无真卷年级）
+// 保持程序化生成，由卷头 badget 标注「模拟」。
+// 注：题库题形与题池一致（calc/fill/choice/judge/app），可直接就地替换，不影响分区标签与分值。
+function gxRealKey(g, sem, type) { return g + '-' + sem + '-' + type; }
+function injectRealIntoPaper(questions, STRUCT, grade, sem, type) {
+  let bank = (window.GX_REAL && window.GX_REAL[gxRealKey(grade, sem, type)]) || null;
+  if (!bank) return { realCount: 0, region: '' };
+  let region = (bank.meta && bank.meta.region) || '广西';
+  let realCount = 0;
+  STRUCT.forEach(sec => {
+    let real = (bank[sec.key] || []);
+    if (!real.length) return;
+    real = shuffleArr(real.slice());
+    let idxs = [];
+    questions.forEach((q, i) => { if (q._section === sec.key) idxs.push(i); });
+    let n = Math.min(real.length, idxs.length, sec.count);
+    for (let k = 0; k < n; k++) {
+      let rq = real[k];
+      let item = {
+        question: rq.q,
+        answer: rq.a,
+        type: rq.type,
+        _section: sec.key,
+        sectionTitle: sec.title,
+        score: questions[idxs[k]].score,
+        num: questions[idxs[k]].num,
+        _real: true,
+        _unitName: '广西真题',
+        _region: region,
+        diff: rq.diff || 1,
+      };
+      if (rq.opts) item.options = rq.opts.slice();
+      if (rq.judge) { item.judge = true; if (!item.options) item.options = ['正确', '错误']; }
+      // 填空/计算/应用：答案可书面输入的统一转填空；选择题无选项也降级填空
+      if ((sec.key === 'fill' || sec.key === 'calc' || sec.key === 'app') && isTypableAnswer(item.answer) && canForceFill(item)) {
+        item.forceFill = true;
+      } else if (sec.key === 'choice' && (!item.options || item.options.length < 2) && canForceFill(item)) {
+        item.forceFill = true;
+      }
+      if (!item.steps) item.steps = generateSteps(item);
+      questions[idxs[k]] = item;
+      realCount++;
+    }
   });
-  return PAPER_STRUCTURE.map((s, i) => ({
-    key: s.key,
-    title: s.title.replace(/（[^（]*）$/, '') + `（共 ${counts[i]} 小题，${W[i]} 分）`,
-    count: counts[i],
-    score: scores[i][0] || s.score,
-    scores: scores[i],
-  }));
+  return { realCount: realCount, region: region };
 }
 
 function generateExamPaper() {
   let { units, all, rangeText } = getExamUnits();
   if (!units || units.length === 0) return null;
 
-  // v69：单元考试先探一探本单元的出题能力，据此决定卷面题数
-  let capQ = 30;
-  if (examState.type === 'unit' && units.length === 1) {
-    let cap = estimateUnitCapacity(units[0], 140);
-    if (cap > 0 && cap < 30) capQ = cap;
-  }
-  capQ = Math.max(5, Math.min(30, capQ));
-  let STRUCT = buildPaperStructure(capQ);
-
   let seen = new Set();
-  // 题池：目标 90 道候选，保证四个分区都有得挑
-  let pool = buildQuestionPool(units, 90, seen, true);
+  // v73：候选池 90 → 120。六分区结构下每个分区都要挑 5~9 道，
+  // 池子太小时严格去重轮选不满，会退到「放宽重复」轮，卷面就出现雷同题。
+  let pool = buildQuestionPool(units, 120, seen, true);
 
   // 单元题量不足时，用同册其他单元补充（相当于试卷中的"复习巩固"部分）。
   // 单元考试只考本单元，绝不混入其他单元，故跳过补充。
-  if (pool.length < 45 && all && all.length > units.length && examState.type !== 'unit') {
+  if (pool.length < 60 && all && all.length > units.length && examState.type !== 'unit') {
     let others = all.filter(u => units.indexOf(u) === -1);
-    pool = pool.concat(buildQuestionPool(others, 60 - pool.length, seen, false));
+    pool = pool.concat(buildQuestionPool(others, 90 - pool.length, seen, false));
   }
   if (pool.length === 0) return null;
+
+  // v73：先看清池子有多大，再决定卷面题数（顺序反过来了）。
+  // 旧版是「先定死 30 题、再去组卷」——池子不够时只能靠克隆凑数，
+  // 于是出现「6上·分数乘法 估 40 题、实际只组出 21 题且夹带克隆」的怪相。
+  // 这里用视觉去重口径（题面+图形）数一遍真实容量，据此封顶，
+  // 卷头如实写明题数，让孩子拿到的是一份每题都不同的卷子。
+  let capQ = GX_PAPER_TOTAL;
+  let capLimited = false;
+  let realCap = new Set(pool.map(q => visKey(q))).size;
+  if (realCap > 0 && realCap < capQ) { capQ = realCap; capLimited = true; }
+  capQ = Math.max(5, Math.min(GX_PAPER_TOTAL, capQ));
+  let STRUCT = buildPaperStructure(examState.grade, capQ);
+
+  // v73：派生判断题并注入题池（广西卷 1-6 年级全学段必考「判断题」区）。
+  // 必须在分区选题之前注入，这样判断题也能参与相对难度打标与题面去重。
+  // 多派生 3 倍候选（至少 12 道），保证挑得出 5 道互不重复、且对错各半。
+  let judgeNeed = STRUCT.filter(s => s.key === 'judge').reduce((a, s) => a + s.count, 0);
+  if (judgeNeed > 0) {
+    deriveJudgeQuestions(pool, Math.max(judgeNeed * 3, 12), null).forEach(j => pool.push(j));
+  }
 
   // v50：不足整卷需求时允许少量重复以凑满整卷（卷面题数必须兑现）。
   // 单元考试只克隆本单元题池，绝不混入其他单元。
   // v69：整卷题数改为 capQ（单元考试会按出题能力收缩），填充目标随之下调，
   // 避免小池子被无谓地复制成一堆同题。
   let baseLen = pool.length;
-  let padTo = Math.max(capQ + 2, 12);
-  if (baseLen > 0) {
-    for (let k = 0; pool.length < padTo; k++) {
-      pool.push(Object.assign({}, pool[k % baseLen]));
+  // v73：补位目标由 capQ+2 下调为 capQ。克隆题是卷面雷同的头号来源，
+  // 池子被放大到 120 之后，只有确实凑不够整卷时才需要克隆兜底。
+  let padTo = Math.max(capQ, 12);
+  if (baseLen > 0 && pool.length < padTo) {
+    // v73：克隆补位时跳过派生判断题——判断题题干都从同一批原题派生，
+    // 克隆后必然出现一模一样的陈述句，是最扎眼的一类重复。
+    let plain = [];
+    for (let k = 0; k < baseLen; k++) if (!pool[k].judge) plain.push(k);
+    let src = plain.length ? plain : null;
+    let ki = 0;
+    while (pool.length < padTo && src) {
+      pool.push(Object.assign({}, pool[src[ki++ % src.length]]));
     }
   }
 
@@ -11100,6 +11465,11 @@ function generateExamPaper() {
       let sub = pickFromPool(pool, used, mix[d - 1], q => (questionDifficulty(q) === d ? baseScorer(q) : 0), usedText);
       picked = picked.concat(sub);
     });
+    if (picked.length < sec.count && sec.key === 'judge') {
+      // v73：本单元一道判断题都派生不出来（全部是非数值答案的概念题）
+      // ——降级为普通选择题顶上，保证分区题数不缺。
+      picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer('choice'), usedText));
+    }
     if (picked.length < sec.count) {
       picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer(sec.key), usedText));
     }
@@ -11108,6 +11478,7 @@ function generateExamPaper() {
       // v69：自适应卷面里同一分区各题分值可能差 1 分（最大余数法），逐题取用
       item.score = (sec.scores && sec.scores[k] != null) ? sec.scores[k] : sec.score;
       item.sectionTitle = sec.title;
+      item._section = sec.key;               // v73：分区键，供题型标签与 PC 端排版使用
       item.forceFill = false;
       if (sec.key === 'fill' || sec.key === 'calc') {
         // 填空/计算：一律书面作答
@@ -11121,6 +11492,7 @@ function generateExamPaper() {
         // 选择题：没有选项就退化为填空
         if ((!item.options || item.options.length < 2) && canForceFill(item)) item.forceFill = true;
       }
+      // v73：judge（判断题）一律保留选项作答——「正确 / 错误」二选一，不能转成填空。
       questions.push(item);
     });
   });
@@ -11141,17 +11513,22 @@ function generateExamPaper() {
   if (imgNow < MIN_IMG && imgSrc && imgSrc.length) {
     // 用独立 seen：初始题池构建时已把大量配图题计入 seen，若沿用会把可补充的配图题全部排除，保底失效。
     // 去重铁律：按题面文本去重（跨单元模板题题面可能相同而答案不同，按题面+答案去重会导致重复题）。
-    let seenText = new Set(questions.map(q => q.question));
+    let seenText = new Set(questions.map(q => visKey(q)));
     // 采样量放大到 200：配图题集中在少数单元（如 6 下仅 9 种），target 过小会漏捞导致保底补不满。
     let imgPool = [];
     buildQuestionPool(imgSrc, 200, new Set(), false).forEach(q => {
       if (!String(q.svg || '').includes('<')) return;
-      if (seenText.has(q.question)) return;
-      seenText.add(q.question);
+      if (seenText.has(visKey(q))) return;
+      seenText.add(visKey(q));
       imgPool.push(q);
     });
+    // v73.2：去掉操作题后，配图题优先补进「选择题」区，其次「解决问题」「填空题」区
+    // （替换后保持原分区标签，题型不串区）；判断题区不参与替换（换掉就不成其为判断题了）。
+    const noImg = o => !o.q.judge && !String(o.q.svg || '').includes('<');
     let replSlots = questions.map((q, i) => ({ q, i }))
-      .filter(o => o.q.sectionTitle && o.q.sectionTitle.includes('选择') && !String(o.q.svg || '').includes('<'));
+      .filter(o => (o.q._section === 'choice' || (!o.q._section && o.q.sectionTitle && o.q.sectionTitle.includes('选择'))) && noImg(o))
+      .concat(questions.map((q, i) => ({ q, i }))
+        .filter(o => (o.q._section === 'app' || o.q._section === 'fill') && noImg(o)));
     let pi = 0, si = 0;
     while (imgNow < MIN_IMG && pi < imgPool.length && si < replSlots.length) {
       let cand = imgPool[pi++];
@@ -11159,8 +11536,9 @@ function generateExamPaper() {
       let item = Object.assign({}, cand);
       item.score = slot.q.score;
       item.sectionTitle = slot.q.sectionTitle;
+      item._section = slot.q._section;         // v73：保持原分区（题型标签不能串区）
       item.forceFill = false;
-      if (slot.q.sectionTitle.includes('选择') && (!item.options || item.options.length < 2) && canForceFill(item)) item.forceFill = true;
+      if (slot.q._section === 'choice' && (!item.options || item.options.length < 2) && canForceFill(item)) item.forceFill = true;
       if (!item.steps) item.steps = generateSteps(item);
       item.num = slot.q.num;
       questions[slot.i] = item;
@@ -11175,12 +11553,28 @@ function generateExamPaper() {
   // v51：卷面注明难度分布（基础/提高/拓展）
   let dcnt = { 1: 0, 2: 0, 3: 0 };
   questions.forEach(q => { dcnt[questionDifficulty(q)]++; });
+  // v73：单元出题能力不足导致卷面收缩时，如实告诉孩子/家长，不假装是 30 题卷
+  let capNote = capLimited ? ` · 本单元可出题量仅 ${capQ} 题` : '';
+
+  // v73.2：真题注入——把「广西真实期末卷」原题替换进对应分区（其余程序化生成并标注模拟）
+  let realInfo = injectRealIntoPaper(questions, STRUCT, examState.grade, examState.semester, examState.type);
+  // 注入后重算难度分布，使卷头「基础/提高/拓展」反映真实题目
+  dcnt = { 1: 0, 2: 0, 3: 0 };
+  questions.forEach(q => { dcnt[questionDifficulty(q)]++; });
+
+  // 卷头真题/模拟徽标：含真题干则标真题来源，否则标广西真题风格（模拟）
+  let badge = realInfo.realCount > 0
+    ? `真题（广西·${realInfo.region}）·含 ${realInfo.realCount}/${questions.length} 道真题干`
+    : '模拟卷·广西真题风格';
 
   return {
     title: `${cnGrade}年级数学${semName} ${typeName}`,
-    sub: `考查范围：${rangeText} · 满分100分 · 共${questions.length}题 · 基础${dcnt[1]}／提高${dcnt[2]}／拓展${dcnt[3]}`,
+    sub: `考查范围：${rangeText} · 满分100分 · 共${questions.length}题 · 基础${dcnt[1]}／提高${dcnt[2]}／拓展${dcnt[3]}${capNote} · ${badge}`,
+    badge: badge,
+    realCount: realInfo.realCount,
     questions: questions,
     typeName: typeName,
+    structure: STRUCT.map(s => s.title),      // v73：卷面分区（供 PC 端与打印使用）
   };
 }
 
@@ -11207,6 +11601,8 @@ function startExam() {
     state.quizCorrect = 0;
     state.quizWrong = 0;
     state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
 
     // 考试计时器（70分钟）
     if (state.examTimer) clearInterval(state.examTimer);
@@ -11230,6 +11626,10 @@ function renderQuestion() {
   let q = state.quizQuestions[state.quizIndex];
   state.selectedAnswer = null;
   state.answered = false;
+  // v73.2：题号导航状态（0 未答 / 1 答对 / 2 答错），按当前题量校正长度
+  if (!state.qStatus || state.qStatus.length !== state.quizQuestions.length) {
+    state.qStatus = new Array(state.quizQuestions.length).fill(0);
+  }
 
   // 更新进度
   document.getElementById('quizProgress').textContent = `第 ${state.quizIndex + 1} / ${state.quizQuestions.length} 题`;
@@ -11326,6 +11726,7 @@ function renderQuestion() {
   document.getElementById('feedback').className = 'feedback';
   document.getElementById('submitBtn').textContent = '提交答案';
   document.getElementById('submitBtn').onclick = submitAnswer;
+  renderQuizNav();
 
   // 自动聚焦输入框
   if (q.type === 'fill' || q.forceFill) {
@@ -11372,10 +11773,53 @@ function readFillAnswer() {
 }
 
 function getQuestionTypeTag(q) {
+  // v73：卷面上题型的判定以「真题分区」为准——填空题区里即使保留了选项，
+  // 它在卷面上仍然是填空题；判断题是真题必有的独立题型，优先识别。
+  if (q.judge) return '判断题';
+  if (q._section === 'calc') return '🧮 计算题';
+  if (q._section === 'app') return '📋 解决问题';
+  if (q._section === 'fill') return '✏️ 填空题';
+  if (q._section === 'choice') return '选择题';
+  if (q._section === 'judge') return '判断题';
   if (q.type === 'fill') return '✏️ 填空题';
   if (q.type === 'shape_choice') return '📐 图形题';
   if (q.type === 'choice') return '选择题';
   return '练习题';
+}
+
+// v73.2：题号导航——整卷（练习/考试）全部题号可点击跳转，不强制顺序作答
+function renderQuizNav() {
+  let nav = document.getElementById('quizNav');
+  if (!nav) return;
+  let N = state.quizQuestions.length;
+  let html = '';
+  for (let i = 0; i < N; i++) {
+    let cls = 'qn-num';
+    if (i === state.quizIndex) cls += ' current';
+    let st = state.qStatus[i] || 0;
+    if (st === 1) cls += ' ok';
+    else if (st === 2) cls += ' bad';
+    html += `<button class="${cls}" onclick="jumpToQuestion(${i})">${i + 1}</button>`;
+  }
+  nav.innerHTML = html;
+}
+
+function jumpToQuestion(i) {
+  if (i < 0 || i >= state.quizQuestions.length) return;
+  state.quizIndex = i;
+  state.answered = false;
+  state.selectedAnswer = null;
+  renderQuestion();
+}
+
+// 记录本次作答对错，并校正累计计数（支持回跳改答，避免重复计分）
+function recordAnswer(isCorrect, qScore) {
+  let prev = state.qStatus[state.quizIndex] || 0;
+  if (prev === 1) { state.quizCorrect--; if (state.quizMode === 'exam') state.quizScore -= qScore; }
+  else if (prev === 2) { state.quizWrong--; }
+  if (isCorrect) { state.quizCorrect++; if (state.quizMode === 'exam') state.quizScore += qScore; }
+  else { state.quizWrong++; }
+  state.qStatus[state.quizIndex] = isCorrect ? 1 : 2;
 }
 
 function selectOption(idx) {
@@ -11387,6 +11831,8 @@ function selectOption(idx) {
 }
 
 function submitAnswer() {
+  if (!state.wrongMap) state.wrongMap = {};
+  if (!state.qStatus) state.qStatus = [];
   let q = state.quizQuestions[state.quizIndex];
 
   if (!state.answered) {
@@ -11446,8 +11892,8 @@ function submitAnswer() {
     let feedback = document.getElementById('feedback');
     let qScore = (typeof q.score === 'number') ? q.score : 10;
     if (isCorrect) {
-      state.quizScore += qScore;
-      state.quizCorrect++;
+      recordAnswer(true, qScore);
+      delete state.wrongMap[state.quizIndex];   // v73.2：回跳改答为正确，移出待入库错题
       feedback.className = 'feedback correct show bounce';
       let praises = ['答对了！太棒了！', '真厉害！继续加油！', '完美！你真聪明！', '不错不错！'];
       feedback.innerHTML = `✓ ${pick(praises)}`;
@@ -11458,7 +11904,7 @@ function submitAnswer() {
         feedback.innerHTML += ` <span class="master-badge">已掌握，自动移出错题本</span>`;
       }
     } else {
-      state.quizWrong++;
+      recordAnswer(false, qScore);
       feedback.className = 'feedback wrong show shake';
       // v51 错题公式卡联动：答错时内嵌该单元的万能公式卡（做错 → 回看公式 → 重做）
       let fidxHtml = '';
@@ -11469,13 +11915,13 @@ function submitAnswer() {
       }
       feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}`;
       // 加入错题
-      state.quizWrongQuestions.push({
+      state.wrongMap[state.quizIndex] = {
         index: state.quizIndex,
         question: q,
         userAnswer: userAnswer,
         unitName: state.quizTitle,
         grade: state.currentGrade
-      });
+      };
     }
 
     document.getElementById('submitBtn').textContent = state.quizIndex < state.quizQuestions.length - 1 ? '下一题 →' : '查看结果 →';
@@ -11495,12 +11941,12 @@ function finishQuiz() {
   // 停止计时器
   if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
   // 记录错题
-  state.quizWrongQuestions.forEach(w => {
+  Object.values(state.wrongMap).forEach(w => {
     addToWrongBank(w.question, w.userAnswer, w.unitName, w.grade);
   });
 
   // 组装本次错题详情（供云端/家长端查看）
-  const quizWrongDetails = state.quizWrongQuestions.map(w => ({
+  const quizWrongDetails = Object.values(state.wrongMap).map(w => ({
     unitName: w.unitName,
     grade: w.grade,
     userAnswer: (w.userAnswer === undefined || w.userAnswer === null) ? '' : String(w.userAnswer),
@@ -11561,8 +12007,8 @@ function finishQuiz() {
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultStars').innerHTML = stars;
 
-  let wrongInfo = state.quizWrongQuestions.length > 0
-    ? `${state.quizWrongQuestions.length} 道错题已加入错题库`
+  let wrongInfo = Object.keys(state.wrongMap).length > 0
+    ? `${Object.keys(state.wrongMap).length} 道错题已加入错题库`
     : '🎉 全部答对，没有错题！';
   document.getElementById('wrongAddedInfo').textContent = wrongInfo;
 
@@ -11580,7 +12026,7 @@ function finishQuiz() {
     for (let [title, qs] of Object.entries(secs)) {
       html += `<div style="font-weight:700;font-size:14px;margin:12px 0 6px;color:var(--primary);border-bottom:1px solid #e8e8e8;padding-bottom:4px">${title}</div>`;
       qs.forEach(q => {
-        let userQ = state.quizWrongQuestions.find(w => w.index === q.idx);
+        let userQ = state.wrongMap[q.idx];
         let isWrong = !!userQ;
         let bg = isWrong ? '#fff1f0' : '#f6ffed';
         let ur=userQ?String(userQ.userAnswer||''):'';
@@ -11622,6 +12068,10 @@ function retryQuiz() {
       state.quizCorrect = 0;
       state.quizWrong = 0;
       state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
+      state.qStatus = [];
+      state.wrongMap = {};
       showPage('quiz');
       document.getElementById('backBtn').style.display = 'block';
       document.getElementById('backBtn').onclick = () => goBack();
@@ -11701,6 +12151,8 @@ function retryOneWrong(id) {
   state.quizCorrect = 0;
   state.quizWrong = 0;
   state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
   showPage('quiz');
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goBack();

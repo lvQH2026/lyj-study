@@ -103,6 +103,7 @@
   <div class="progress-bar">
     <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
   </div>
+  <div class="quiz-nav" id="quizNav"></div>
   <div class="question-card" id="questionCard">
     <!-- 动态生成 -->
   </div>
@@ -357,6 +358,7 @@
     <div class="progress-bar">
       <div class="progress-bar-fill" id="cnProgressFill" style="width:10%"></div>
     </div>
+    <div class="quiz-nav" id="cnQuizNav"></div>
     <div class="question-card" id="cnQuestionCard"></div>
     <div class="quiz-bottom">
       <div id="cnQuizActions"></div>
@@ -387,7 +389,7 @@
       <div id="cnResultExtra"></div>
       <div class="btn-group">
         <button class="btn btn-outline" onclick="CN.goHome()">返回首页</button>
-        <button class="btn btn-primary" id="cnReplayBtn" onclick="CN.beginQuiz(CN._lastUnitIdx||0)">再练一次</button>
+        <button class="btn btn-primary" id="cnReplayBtn" onclick="CN.replayQuiz()">再练一次</button>
       </div>
     </div>
   </div>
@@ -419,6 +421,7 @@
 <script src="js/core.js"></script>
 <script src="js/math.js"></script>
 <script src="js/data.js"></script>
+<script src="js/gx_real.js"></script>
 <script src="js/english.js"></script>
 <script src="js/chinese.js"></script>
 <script src="js/diagram.js"></script>

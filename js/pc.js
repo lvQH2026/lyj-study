@@ -465,8 +465,8 @@
     if (seg) bindSeg('semSeg', function (s) { S.semester = +s; renderContent(); });
   }
   PC.startUnit = function (i) {
-    if (S.subject === 'math') startMathUnit(i);
-    else if (S.subject === 'chinese') startCnUnit(i);
+    if (S.subject === 'math') PC.startMathUnit(i);
+    else if (S.subject === 'chinese') PC.startCnUnit(i);
     else startEngUnit(i);
   };
 
@@ -621,10 +621,10 @@
   PC.runExam = function () {
     const t = S.examType || 'unit';
     if (S.subject === 'math') {
-      if (t === 'unit') startMathUnit(S.examUnitIdx || 0);
+      if (t === 'unit') PC.startMathUnit(S.examUnitIdx || 0);
       else startMathExam(t);
     } else if (S.subject === 'chinese') {
-      if (t === 'unit') startCnUnit(S.examUnitIdx || 0);
+      if (t === 'unit') PC.startCnUnit(S.examUnitIdx || 0);
       else startCnExam(t);
     } else { toast('英语暂只支持单元练习'); }
   };
@@ -677,23 +677,41 @@
     const qs = []; for (let i = 0; i < n; i++) qs.push(gen());
     beginQuiz(qs, 'quick', mode === 'basic' ? '基础运算' : '综合练习', '数学', S.grade, false, function () { PC.startMathQuick(mode); });
   };
-  function startMathUnit(idx) {
+  // v73：PC 端单元练习与移动端同构——先弹「练习设置」选难度，再固定抽 30 题，
+  // 复用 math.js 的 buildUnitQuizQuestions（反复 gen() 凑题，绝不出现重复题）。
+  PC.startMathUnit = function (idx) {
+    if (typeof openPracticeSettings !== 'function') { startMathUnitWithDiff(idx, 0); return; }
+    let unit = null;
+    try { unit = KNOWLEDGE_BASE[S.grade][S.semester][idx]; } catch (e) { unit = null; }
+    openPracticeSettings({
+      title: '练习设置',
+      note: (unit && unit.name ? unit.name + ' · ' : '') + '每次固定 30 题',
+      okText: '开始练习',
+      onStart: function (diff, type) { startMathUnitWithDiff(idx, diff, type); },
+    });
+  };
+  function startMathUnitWithDiff(idx, diff, type) {
     const unit = KNOWLEDGE_BASE[S.grade][S.semester][idx];
+    const tf = (type && type !== 0 && type !== '0') ? type : null;
     let qs;
-    if (unit.paper) { let arr = unit.gen(); qs = Array.isArray(arr) ? arr : [arr]; }
-    else {
+    if (unit.paper) { let arr = unit.gen(); qs = Array.isArray(arr) ? arr : [arr]; if (tf) qs = qs.filter(q => classifyQType(q) === tf); }
+    else if (typeof buildUnitQuizQuestions === 'function') {
+      qs = buildUnitQuizQuestions(unit, diff || 0, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 30, tf);
+    } else {
       const first = unit.gen();
       if (Array.isArray(first)) qs = first;
       else {
         const cand = [first];
         const N = (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH * 3 : 60;
         for (let i = 1; i < N; i++) { const g = unit.gen(); if (Array.isArray(g)) cand.push.apply(cand, g); else cand.push(g); }
-        qs = (typeof pickDifficultyMix === 'function') ? pickDifficultyMix(cand, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 20)
-          : shuffle(cand).slice(0, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 20);
+        qs = shuffle(cand).slice(0, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 20);
       }
+      if (tf) qs = qs.filter(q => classifyQType(q) === tf);
     }
-    beginQuiz(qs, 'unit', unit.name, '数学', S.grade, false, function () { startMathUnit(idx); });
+    if (!qs || !qs.length) { toast('该单元暂无此类题型'); return; }
+    beginQuiz(qs, 'unit', unit.name, '数学', S.grade, false, function () { startMathUnitWithDiff(idx, diff, type); });
   }
+  function startMathUnit(idx) { startMathUnitWithDiff(idx, 0); }
   function startMathExam(type) {
     if (typeof examState === 'undefined' || typeof generateExamPaper !== 'function') { toast('考试功能不可用'); return; }
     examState.grade = S.grade; examState.semester = S.semester; examState.type = type;
@@ -701,15 +719,33 @@
     if (type === 'month') examState.month = 2;
     const paper = generateExamPaper();
     if (!paper || !paper.questions || !paper.questions.length) { toast('组卷失败，换个范围试试'); return; }
-    beginQuiz(paper.questions, 'exam', paper.title, '数学', S.grade, true, function () { startMathExam(type); });
+    beginQuiz(paper.questions, 'exam', paper.title, '数学', S.grade, true, function () { startMathExam(type); }, paper.badge);
   }
-  function startCnUnit(idx) {
+  // v73：语文单元练习同样先弹「练习设置」选难度；选题复用 chinese.js 的 cnSamplePool，
+  // 保证 PC 端与移动端拿到的是同一批题、同一套难度分层口径。
+  PC.startCnUnit = function (idx) {
     const units = (window.CN && CN.data[S.grade]) || [];
     const u = units[idx];
     if (!u || !u.pool) { toast('该单元暂无题目'); return; }
-    const qs = shuffle(u.pool()).slice(0, 20);
-    beginQuiz(qs, 'unit', u.name, '语文', S.grade, false, function () { startCnUnit(idx); });
+    if (typeof openPracticeSettings !== 'function') { startCnUnitWithDiff(idx, 0); return; }
+    openPracticeSettings({
+      title: '练习设置',
+      note: u.name + ' · 每次固定 30 题',
+      okText: '开始练习',
+      onStart: function (diff, type) { startCnUnitWithDiff(idx, diff, type); },
+    });
+  };
+  function startCnUnitWithDiff(idx, diff, type) {
+    const units = (window.CN && CN.data[S.grade]) || [];
+    const u = units[idx];
+    if (!u || !u.pool) { toast('该单元暂无题目'); return; }
+    let qs = (window.CN && typeof CN.samplePool === 'function')
+      ? CN.samplePool(u, 30, diff || 0, type)
+      : shuffle(u.pool()).slice(0, 20);
+    if (!qs || !qs.length) { toast('该单元暂无此类题型'); return; }
+    beginQuiz(qs, 'unit', u.name, '语文', S.grade, false, function () { startCnUnitWithDiff(idx, diff, type); });
   }
+  function startCnUnit(idx) { startCnUnitWithDiff(idx, 0); }
   function startCnExam(kind) {
     const units = (window.CN && CN.data[S.grade]) || [];
     const term = S.semester === 1 ? '上' : '下';
@@ -736,9 +772,9 @@
   }
 
   /* ---------------- 答题引擎 ---------------- */
-  function beginQuiz(questions, mode, title, module, grade, isExam, restart) {
+  function beginQuiz(questions, mode, title, module, grade, isExam, restart, badge) {
     S.activeQuiz = true;
-    S.quiz = { questions: questions, idx: 0, score: 0, wrongList: [], userAnswers: [], results: [], mode: mode, title: title, module: module, grade: grade, isExam: isExam, restart: restart || null, fromView: S.view || 'home' };
+    S.quiz = { questions: questions, idx: 0, score: 0, wrongList: [], userAnswers: [], results: [], mode: mode, title: title, module: module, grade: grade, isExam: isExam, restart: restart || null, fromView: S.view || 'home', badge: badge || null };
     renderQuiz();
   }
   function renderQuiz() {
@@ -748,7 +784,19 @@
 
     let h = '<div class="pc-quiz-wrap">';
     h += '<div class="pc-quiz-head"><div class="pc-quiz-title"><button class="pc-quiz-back" onclick="PC.back()" title="返回上一页">←</button>' + esc(q.title) + '</div><div class="pc-quiz-progress">第 ' + (i + 1) + ' / ' + total + ' 题</div></div>';
+    if (q.badge) h += '<div class="pc-quiz-badge">' + esc(q.badge) + '</div>';
     h += '<div class="pc-progress-track"><div class="pc-progress-fill" style="width:' + (total ? i / total * 100 : 0) + '%"></div></div>';
+    // v73.2：题号导航（全部题号可点击跳转，不强制顺序）
+    h += '<div class="pc-quiz-nav" id="pcQuizNav">';
+    for (let ni = 0; ni < total; ni++) {
+      const nr = q.results[ni];
+      let nc = 'pc-qn';
+      if (ni === i) nc += ' current';
+      if (nr && nr.correct) nc += ' ok';
+      else if (nr && !nr.correct) nc += ' bad';
+      h += '<button class="' + nc + '" onclick="PC.jump(' + ni + ')">' + (ni + 1) + '</button>';
+    }
+    h += '</div>';
     h += '<div class="pc-q-card" id="pcQCard">';
     if (item.passage) h += '<div class="pc-passage">' + item.passage + '</div>';
     if (item.paperSection) h += '<div class="pc-section-banner">' + esc(item.paperSection) + '</div>';
@@ -917,6 +965,7 @@
   };
   PC.prev = function () { if (S.quiz.idx > 0) { S.quiz.idx--; renderQuiz(); } };
   PC.next = function () { if (S.quiz.idx < S.quiz.questions.length - 1) { S.quiz.idx++; renderQuiz(); } };
+  PC.jump = function (i) { if (S.quiz && i >= 0 && i < S.quiz.questions.length) { S.quiz.idx = i; renderQuiz(); } };
   PC.finish = function () { finishQuiz(); };
   PC.retry = function () { if (S.quiz && S.quiz.restart) S.quiz.restart(); else PC.go('home'); };
   PC.printPaper = function () { window.print(); };

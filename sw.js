@@ -21,11 +21,18 @@
 //      ④ 《观潮》作者填空题改为选择题（原为两个空共用一个输入框，精确判分下无法作答）。
 //      ⑤ 词语积累专项题干改为「与"X"意思相近/相反的是？」，避免 12 道题雷同。
 //      ⑥ 英语 Level 2/4 补齐凑数造成的 15 个重复单词。
-const CACHE = 'lyj-shell-v72';
+// v73：广西真题注入层（js/gx_real.js）。
+//      ① 期末卷命中真卷的年级（一年级下/二年级下/六年级下）注入真实期末原题，
+//         卷头标注「真题（广西·柳州/钦州等）·含 N/30 道真题干」；
+//         未命中真卷的年级/学期/单元考程序化生成并标注「模拟卷·广西真题风格」。
+//      ② 数学考试去操作题分区、整卷重平衡五区固定 30 题 / 100 分；
+//         新增「选择题型」筛选器（移动+PC）；题号导航范围改为全部（练习/考试可点跳转）；
+//         难度命名统一 基础/提高/拓展；单元卷循环 gen 凑满 30（含短单元生成器扩容）。
+const CACHE = 'lyj-shell-v73';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
-  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
+  './js/core.js', './js/math.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
   './js/supabase-js.min.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'
