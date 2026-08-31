@@ -1,10 +1,10 @@
 // 吕泳冀学习站 Service Worker
-// v66：全量配图体检并修复 195 个越界 SVG：钟表/行程/长方形/量角器/圆/方位/正方形数等居中/缩放；PC 端 pc.js 给 svg 补 <svg viewBox> 与 pc.css 尺寸，解决 PC 带图题空白。
-const CACHE = 'lyj-shell-v66';
+// v67：「拍图上传试题」板块升级为 AI 拍图批改 —— 拍照 → 传 Supabase Storage → Edge Function 调智谱 GLM-4V-Flash 逐题判分 → canvas 合成手写批注（红勾/红叉/圈注/旁批/分数印章/总评语）→ PNG 下载 → 错题入库；无 Key 或服务异常自动降级为半自动批改。
+const CACHE = 'lyj-shell-v67';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
-  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js',
+  './js/core.js', './js/math.js', './js/data.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
   './js/supabase-js.min.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'

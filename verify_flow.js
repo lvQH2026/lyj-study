@@ -393,6 +393,14 @@ ok('v65：分数除法/比/比例/百分数（一）（二）/扇形统计图 �
 
 ok('v66：配图越界修复 + PC 端 svg 包裹修复 + SW 缓存升级为 lyj-shell-v66', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v66') && /svg viewBox="0 0 120 100"/.test(fs.readFileSync(path.join(ROOT, 'js/pc.js'), 'utf8')));
 
+ok('v67：拍图上传板块升级为 AI 拍图批改（智谱 GLM-4V 代理 + 手写批注 + 降级半自动）+ SW 缓存升级为 lyj-shell-v67',
+  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v67') &&
+  /window\.AI_GRADE/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
+  /AI 批改给分数，模拟真实老师手写批注/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) &&
+  /drawScoreStamp/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
+  /enterManual/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
+  fs.readFileSync(path.join(ROOT, 'supabase/functions/ai-grade/index.ts'), 'utf8').includes('glm-4v-flash'));
+
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));
 if (fail.length) { console.log('\n===== 失败 (' + fail.length + ') ====='); fail.forEach(f => console.log('  ✗ ' + f)); }

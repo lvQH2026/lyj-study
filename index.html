@@ -53,7 +53,7 @@
 
   <div class="section-title">拍图上传试题</div>
   <div class="card" style="text-align:center;padding:20px">
-    <p style="color:var(--text-light);font-size:13px;margin-bottom:12px">拍照或选择图片，自动识别题目并生成练习</p>
+    <p style="color:var(--text-light);font-size:13px;margin-bottom:12px">拍照或选择图片，AI 批改给分数，模拟真实老师手写批注。可下载批改后的试卷，错题自动加入错题库</p>
     <button class="btn btn-primary" onclick="showPage('upload');document.getElementById('backBtn').style.display='block';document.getElementById('backBtn').onclick=()=>goHome();" style="max-width:200px;margin:0 auto">拍照 / 选择图片</button>
   </div>
 
@@ -181,46 +181,51 @@
   </div>
 </div>
 
-<!-- ===== 拍图上传页 ===== -->
+<!-- ===== 拍图上传页（AI 批改） ===== -->
 <div class="page" id="page-upload">
   <div class="section-title">拍图上传试题</div>
-  <div class="card" style="text-align:center">
-    <div id="uploadArea" style="border:2px dashed var(--border);border-radius:12px;padding:32px 16px;cursor:pointer;transition:all 0.2s" onclick="document.getElementById('fileInput').click()">
-      <div style="font-size:48px;margin-bottom:8px;color:var(--primary)"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg></div>
-      <div style="font-size:15px;font-weight:600;color:var(--text)">点击拍照或选择图片</div>
-      <div style="font-size:12px;color:var(--text-lighter);margin-top:4px">支持拍照、相册选择</div>
+
+  <div class="card">
+    <div style="font-size:14px;font-weight:600;margin-bottom:10px">选择学科</div>
+    <div class="gz-subs">
+      <button class="gz-sub-btn active" data-sub="数学">数学</button>
+      <button class="gz-sub-btn" data-sub="语文">语文</button>
+      <button class="gz-sub-btn" data-sub="英语">英语</button>
     </div>
-    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none" onchange="handleImageUpload(event)">
   </div>
 
-  <div id="uploadPreview" style="display:none">
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:8px">图片预览</div>
-      <img id="previewImg" style="width:100%;border-radius:8px;margin-bottom:12px" />
-      <div id="recognizeStatus" style="text-align:center;padding:16px 0"></div>
-      <div id="recognizedQuestions"></div>
+  <div class="card" style="text-align:center">
+    <div id="uploadArea" class="gz-drop" onclick="document.getElementById('fileInput').click()">
+      <div class="gz-drop-icon">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
+      </div>
+      <div style="font-size:15px;font-weight:600;color:var(--text)">拍照或选择图片</div>
+      <div style="font-size:12px;color:var(--text-lighter);margin-top:4px">支持拍照、相册选择，拍已做完的卷子</div>
     </div>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
   </div>
+
+  <div id="gradeStatus"></div>
+
+  <div class="card" id="gradeCanvasWrap" style="display:none;padding:12px">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text-light)">批改后的试卷</div>
+    <div id="gradeCanvasHolder"></div>
+  </div>
+
+  <div id="gradeResult"></div>
 
   <div class="card" style="background:#FFFBE6;border:1px solid #FFE58F">
     <div style="font-size:13px;color:var(--text-light);line-height:1.8">
       <strong>使用说明：</strong><br>
-      1. 拍摄或上传数学题目的照片<br>
-      2. 系统自动识别题目内容<br>
-      3. 识别后可直接做题练习<br>
-      4. 支持手写题、打印题、课本拍照<br>
-      <span style="color:var(--accent)">提示：照片越清晰，识别越准确</span>
+      1. 先选学科，再拍下<strong>已经做完</strong>的卷子或作业<br>
+      2. AI 老师逐题批改、判分，并在图上画红勾 / 红叉 / 圈注 / 旁批<br>
+      3. 右上角是分数印章，底部是老师总评语<br>
+      4. 点「下载批改后的试卷」保存 PNG，点「加入错题库」把错题收进去<br>
+      <span style="color:var(--accent)">拍照小技巧：光线均匀、拍正、把整页拍全，批改更准</span>
     </div>
   </div>
 
-  <div class="card">
-    <div style="font-size:14px;font-weight:600;margin-bottom:8px">手动输入题目</div>
-    <p style="font-size:12px;color:var(--text-lighter);margin-bottom:10px">如果识别不准确，可以手动输入</p>
-    <textarea id="manualInput" placeholder="输入题目，如：&#10;3 + 5 = ?&#10;8 × 7 = ?&#10;小明有5个苹果，吃了2个，还剩几个？" style="width:100%;min-height:100px;border:2px solid var(--border);border-radius:10px;padding:10px;font-size:14px;resize:vertical;outline:none;font-family:inherit" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-    <button class="btn btn-primary" style="margin-top:10px" onclick="parseManualInput()">生成练习</button>
-  </div>
-
-  <div id="uploadQuizArea"></div>
+  <div id="gradeHistory"></div>
 </div>
 
 <!-- ===== 考试中心页 ===== -->
@@ -422,6 +427,8 @@
 <script src="config.js"></script>
 <script src="supabase.js"></script>
 <script src="js/aiAnalysis.js"></script>
+<script src="js/aiGrade.js"></script>
+<script>try{AI_GRADE.init();AI_GRADE.renderHistory();}catch(e){console.warn('AI_GRADE init',e);}</script>
 <script src="parent.js"></script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e)));}</script>
 </body>
