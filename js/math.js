@@ -10288,6 +10288,8 @@ function beginUnitQuiz(idx, grade, sem, diff, typeFilter) {
   state.quizWrongQuestions = [];
   state.qStatus = [];
   state.wrongMap = {};
+  state.userAnswers = [];
+  state.quizStartTime = Date.now();
   showPage('quiz');
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goBack();
@@ -10309,6 +10311,8 @@ function startQuickPractice(mode) {
   state.quizWrongQuestions = [];
   state.qStatus = [];
   state.wrongMap = {};
+  state.userAnswers = [];
+  state.quizStartTime = Date.now();
   showPage('quiz');
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goBack();
@@ -10335,6 +10339,8 @@ function startWrongReview() {
   state.quizWrongQuestions = [];
   state.qStatus = [];
   state.wrongMap = {};
+  state.userAnswers = [];
+  state.quizStartTime = Date.now();
   showPage('quiz');
   document.getElementById('backBtn').style.display = 'block';
   document.getElementById('backBtn').onclick = () => goBack();
@@ -11603,6 +11609,8 @@ function startExam() {
     state.quizWrongQuestions = [];
   state.qStatus = [];
   state.wrongMap = {};
+  state.userAnswers = [];
+  state.quizStartTime = Date.now();
 
     // 考试计时器（70分钟）
     if (state.examTimer) clearInterval(state.examTimer);
@@ -11860,6 +11868,7 @@ function submitAnswer() {
     }
 
     state.answered = true;
+    state.userAnswers[state.quizIndex] = userAnswer;
 
     // 标记对错
     if ((q.type === 'choice' || q.type === 'shape_choice') && !q.forceFill) {
@@ -11940,6 +11949,23 @@ function submitAnswer() {
 function finishQuiz() {
   // 停止计时器
   if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
+
+  const total = state.quizQuestions.length;
+  const isExam = state.quizMode === 'exam';
+  state.userAnswers = state.userAnswers || [];
+  state.qStatus = state.qStatus || [];
+
+  // 把未作答的题目统一记为错误，避免成绩页缺项
+  for (let i = 0; i < total; i++) {
+    if (!state.qStatus[i]) {
+      state.qStatus[i] = 2;
+      state.quizWrong++;
+      let q = state.quizQuestions[i];
+      if (!state.wrongMap[i]) state.wrongMap[i] = { index: i, question: q, userAnswer: '', unitName: state.quizTitle, grade: state.currentGrade };
+      if (state.userAnswers[i] === undefined) state.userAnswers[i] = '';
+    }
+  }
+
   // 记录错题
   Object.values(state.wrongMap).forEach(w => {
     addToWrongBank(w.question, w.userAnswer, w.unitName, w.grade);
@@ -11959,94 +11985,121 @@ function finishQuiz() {
     }
   }));
   // 记录历史
-  recordHistory(state.currentGrade, state.quizTitle, state.quizCorrect, state.quizQuestions.length, quizWrongDetails);
+  recordHistory(state.currentGrade, state.quizTitle, state.quizCorrect, total, quizWrongDetails);
   if (typeof syncAfterQuiz === 'function') { syncAfterQuiz(); }
 
-  // 显示结果
-  let isExam = state.quizMode === 'exam';
-  let totalScore = state.quizQuestions.reduce((s, q) => s + ((typeof q.score === 'number') ? q.score : 10), 0);
-  let accuracy = isExam ? Math.round(state.quizScore / totalScore * 100) : Math.round(state.quizCorrect / state.quizQuestions.length * 100);
-  document.getElementById('resultScore').textContent = isExam ? state.quizScore : state.quizCorrect;
-  document.getElementById('resultScore').nextElementSibling.textContent = isExam ? `/${totalScore}` : `/${state.quizQuestions.length}`;
+  // 渲染成绩页（第一步）
+  renderMobileScorePage();
+  showPage('result');
+  document.getElementById('backBtn').style.display = 'none';
+}
+
+function renderMobileScorePage() {
+  const total = state.quizQuestions.length;
+  const isExam = state.quizMode === 'exam';
+  const totalScore = isExam ? 100 : total;
+  const score = isExam ? (state.quizScore || 0) : (state.quizCorrect || 0);
+  const accuracy = totalScore ? Math.round(score / totalScore * 100) : 0;
+  const level = getGradeLevel(accuracy);
+  const timeUsed = formatDuration(Date.now() - (state.quizStartTime || Date.now()));
+  const wrongItems = Object.values(state.wrongMap);
+  const comment = generateTeacherComment(score, totalScore, accuracy, wrongItems, state.currentGrade, isExam);
+
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultTotal').textContent = '/' + totalScore;
+  document.getElementById('teacherLevel').textContent = '等级：' + level.label;
+  document.getElementById('teacherLevel').className = 'teacher-level ' + level.cls;
+  document.getElementById('resultStars').textContent = level.stars;
   document.getElementById('resultCorrect').textContent = state.quizCorrect;
   document.getElementById('resultWrong').textContent = state.quizWrong;
   document.getElementById('resultAccuracy').textContent = accuracy + '%';
+  document.getElementById('resultTime').textContent = timeUsed;
+  document.getElementById('teacherComment').textContent = comment;
 
-  let emoji, title, stars;
-  if (isExam) {
-    // 考试：按百分制评定等级
-    let paperName = state.examPaper ? state.examPaper.title : '考试';
-    if (accuracy >= 90) {
-      emoji = ''; title = `${paperName}｜等级：优秀（${state.quizScore}分）`;
-      stars = '<span class="star-active">★★★</span>';
-    } else if (accuracy >= 80) {
-      emoji = '🎉'; title = `${paperName}｜等级：良好（${state.quizScore}分）`;
-      stars = '<span class="star-active">★★</span><span class="star-inactive">★</span>';
-    } else if (accuracy >= 60) {
-      emoji = '😊'; title = `${paperName}｜等级：及格（${state.quizScore}分）`;
-      stars = '<span class="star-active">★</span><span class="star-inactive">★★</span>';
-    } else {
-      emoji = ''; title = `${paperName}｜等级：待努力（${state.quizScore}分）`;
-      stars = '<span class="star-inactive">★★★</span>';
-    }
-  } else if (accuracy >= 90) {
-    emoji = '🎉'; title = '太棒了！你是数学小达人！';
-    stars = '<span class="star-active">★★★</span>';
-  } else if (accuracy >= 70) {
-    emoji = '😊'; title = '做得不错！继续加油！';
-    stars = '<span class="star-active">★★</span><span class="star-inactive">★</span>';
-  } else if (accuracy >= 50) {
-    emoji = ''; title = '还需要多练习哦！';
-    stars = '<span class="star-active">★</span><span class="star-inactive">★★</span>';
-  } else {
-    emoji = ''; title = '别灰心，多练几遍就会了！';
-    stars = '<span class="star-inactive">★★★</span>';
-  }
+  // 各题得分明细
+  let detailHtml = '';
+  state.quizQuestions.forEach((q, i) => {
+    const st = state.qStatus[i] || 2;
+    const correct = st === 1;
+    const qScore = isExam ? (q.score || 1) : 1;
+    const got = correct ? qScore : 0;
+    detailHtml += `<div class="m-score-row ${correct ? 'ok' : 'bad'}">`;
+    detailHtml += `<span class="m-sr-no">第${i + 1}题</span>`;
+    detailHtml += `<span class="m-sr-type">${questionTypeLabel(q.type)}</span>`;
+    detailHtml += `<span class="m-sr-mark">${correct ? svgHandwrittenCheck(true) : svgHandwrittenCheck(false)}</span>`;
+    detailHtml += `<span class="m-sr-score">${got.toFixed(qScore % 1 === 0 ? 0 : 1)}/${qScore.toFixed(qScore % 1 === 0 ? 0 : 1)}分</span>`;
+    detailHtml += '</div>';
+  });
+  document.getElementById('questionScoreList').innerHTML = detailHtml;
 
-  document.getElementById('resultEmoji').textContent = emoji;
-  document.getElementById('resultTitle').textContent = title;
-  document.getElementById('resultStars').innerHTML = stars;
+  // 默认显示成绩页、隐藏答案解析
+  document.getElementById('resultScoreCard').style.display = 'block';
+  document.getElementById('examAnswerKey').style.display = 'none';
+}
 
-  let wrongInfo = Object.keys(state.wrongMap).length > 0
-    ? `${Object.keys(state.wrongMap).length} 道错题已加入错题库`
-    : '🎉 全部答对，没有错题！';
-  document.getElementById('wrongAddedInfo').textContent = wrongInfo;
+function confirmScore() {
+  renderMobileAnswerKey();
+  document.getElementById('resultScoreCard').style.display = 'none';
+  document.getElementById('examAnswerKey').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-  // 考试模式：展示参考答案
-  const akDiv = document.getElementById('examAnswerKey');
-  const akBody = document.getElementById('examAnswerKeyBody');
-  if (isExam && state.examPaper) {
-    let secs = {};
-    state.quizQuestions.forEach((q, i) => {
-      let key = q.sectionTitle || '题目';
-      if (!secs[key]) secs[key] = [];
-      secs[key].push(Object.assign({}, q, { idx: i }));
+function renderMobileAnswerKey() {
+  const isExam = state.quizMode === 'exam';
+  let secs = {};
+  state.quizQuestions.forEach((q, i) => {
+    const key = q.sectionTitle || '题目';
+    if (!secs[key]) secs[key] = [];
+    secs[key].push(Object.assign({}, q, { idx: i }));
+  });
+
+  let html = '';
+  for (let [title, qs] of Object.entries(secs)) {
+    html += `<div class="m-answer-section">${title}</div>`;
+    qs.forEach(q => {
+      const i = q.idx;
+      const st = state.qStatus[i] || 2;
+      const correct = st === 1;
+      const ua = state.userAnswers[i] !== undefined ? String(state.userAnswers[i]) : '';
+      html += `<div class="m-answer-item ${correct ? 'ok' : 'bad'}">`;
+      html += `<div class="m-ai-head">`;
+      html += `<span class="m-ai-no">第${q.num || (i + 1)}题</span>`;
+      html += `<span class="m-ai-type">${questionTypeLabel(q.type)}</span>`;
+      html += `<span class="m-ai-mark">${correct ? svgHandwrittenCheck(true) : svgHandwrittenCheck(false)}</span>`;
+      html += '</div>';
+      if (q.passage) html += `<div class="m-ai-passage">${q.passage}</div>`;
+      html += `<div class="m-ai-stem">${q.question}</div>`;
+      if (q.svg) html += `<div class="m-ai-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">${q.svg}</svg></div>`;
+      if (q.options && q.options.length) {
+        html += '<div class="m-ai-opts">';
+        q.options.forEach((opt, idx) => {
+          const txt = typeof opt === 'object' ? opt.value : opt;
+          let cls = '';
+          if (txt === String(q.answer)) cls = ' correct';
+          else if (txt === ua && !correct) cls = ' wrong';
+          html += `<div class="m-ai-opt${cls}">${String.fromCharCode(65 + idx)}. ${txt}</div>`;
+        });
+        html += '</div>';
+      }
+      html += `<div class="m-ai-ans-row">`;
+      html += `<span>你的答案：<b class="${correct ? 'ok' : 'bad'}">${ua !== '' ? ua : '未作答'}</b></span>`;
+      html += `<span>正确答案：<b class="ok">${q.answer}</b></span>`;
+      html += '</div>';
+      if (q.explain) html += `<div class="m-ai-explain"><b>解析：</b>${q.explain}</div>`;
+      if (q.steps && q.steps.length) html += `<div class="m-ai-steps"><b>步骤：</b>${q.steps.map((s, idx) => `<span>${idx + 1}. ${s}</span>`).join('')}</div>`;
+      html += '</div>';
     });
-    let html = '';
-    for (let [title, qs] of Object.entries(secs)) {
-      html += `<div style="font-weight:700;font-size:14px;margin:12px 0 6px;color:var(--primary);border-bottom:1px solid #e8e8e8;padding-bottom:4px">${title}</div>`;
-      qs.forEach(q => {
-        let userQ = state.wrongMap[q.idx];
-        let isWrong = !!userQ;
-        let bg = isWrong ? '#fff1f0' : '#f6ffed';
-        let ur=userQ?String(userQ.userAnswer||''):'';
-        let stepsHtml = (q.steps && q.steps.length) ? `<div style="font-size:12px;color:var(--text-light);margin-top:2px">${q.steps.map((s,i)=>`<div>${i>0?'→ ':''}${s}</div>`).join('')}</div>` : '';
-        html += `<div style="background:${bg};border-radius:6px;padding:8px;margin:6px 0;font-size:13px">
-          <div style="font-weight:600">第${q.num||(q.idx+1)}题 ${isWrong?'<span style="color:#cf1322">❌ 答错</span>':'<span style="color:var(--success)">✅</span>'} ${q.score||'?'}分</div>
-          <div style="color:var(--text-light);margin:2px 0">${(q.question||'').substring(0,80)}${(q.question||'').length>80?'…':''}</div>
-          <div>正确答案：<b>${q.answer}</b> ${ur ? '｜ 你的答案：<b style="color:#cf1322">'+ur+'</b>' : ''}</div>
-          ${stepsHtml}
-        </div>`;
-      });
-    }
-    akBody.innerHTML = html;
-    akDiv.style.display = 'block';
-  } else {
-    akDiv.style.display = 'none';
   }
+  document.getElementById('examAnswerKeyBody').innerHTML = html;
+}
 
-  showPage('result');
-  document.getElementById('backBtn').style.display = 'none';
+function backToStudy() {
+  if (state.quizMode === 'unit' && state.quizTitle) {
+    // 返回对应单元：切到单元练习页即可
+    showPage('units');
+  } else {
+    goHome();
+  }
 }
 
 function retryQuiz() {

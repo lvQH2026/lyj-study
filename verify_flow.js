@@ -53,10 +53,13 @@ ok('数学：state 全局词法绑定可用', !!S() && S().currentGrade === 3, '
 let mathQuizOK = false;
 try {
   w.startUnitQuiz(0);
-  // 新流程：进单元先弹「交互动画图解」页，需点「开始答题」才进入真正答题
+  // v73 起：进单元先弹「交互动画图解」页；点「开始练习」后还会弹「练习设置」对话框
   const cards = d.querySelectorAll('#diagramCards .diag-card').length;
   const btn = d.getElementById('specialIntroBtn');
   if (btn && btn.onclick) btn.onclick();
+  // v73：练习设置对话框需再点「开始练习」(data-ps="ok") 才会真正生成题目
+  const psOk = d.querySelector('#practiceSettingsMask [data-ps="ok"]');
+  if (psOk) psOk.click();
   const st = S();
   mathQuizOK = st && Array.isArray(st.quizQuestions) && st.quizQuestions.length > 0;
   ok('数学：进入单元先弹交互动画图解页', cards > 0, '图解卡片数 ' + cards);
@@ -229,7 +232,7 @@ const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
   .forEach(f => ok('SW 预缓存含 ' + f, sw.includes(f)));
 {
   const mV = sw.match(/lyj-shell-v(\d+)/);
-  ok('SW 版本号已升级到 v68 及以上', !!mV && +mV[1] >= 68);
+  ok('SW 版本号已升级到 v75 及以上', !!mV && +mV[1] >= 75);
 }
 // v56 守卫：children 表数据通道替代 study_records
 {
@@ -384,8 +387,8 @@ ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabas
 const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
-ok('v68：拍图上传升级为 AI 拍图批改 + diagram.js 语法修复 + SW 缓存升级为 lyj-shell-v68',
-  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v68') &&
+ok('v75：考试/练习批改结果页 + 答案解析 + SW 缓存升级为 lyj-shell-v75',
+  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v75') &&
   /window\.AI_GRADE/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
   /AI 批改给分数，模拟真实老师手写批注/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) &&
   /drawScoreStamp/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&

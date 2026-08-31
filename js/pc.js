@@ -774,7 +774,13 @@
   /* ---------------- 答题引擎 ---------------- */
   function beginQuiz(questions, mode, title, module, grade, isExam, restart, badge) {
     S.activeQuiz = true;
-    S.quiz = { questions: questions, idx: 0, score: 0, wrongList: [], userAnswers: [], results: [], mode: mode, title: title, module: module, grade: grade, isExam: isExam, restart: restart || null, fromView: S.view || 'home', badge: badge || null };
+    let totalScore = 0;
+    questions.forEach(function (q) {
+      if (typeof q.score !== 'number' || q.score <= 0) q.score = 1;
+      totalScore += q.score;
+      q._origIndex = q._origIndex == null ? 0 : q._origIndex;
+    });
+    S.quiz = { questions: questions, idx: 0, score: 0, totalScore: totalScore, startTime: Date.now(), wrongList: [], userAnswers: [], results: [], mode: mode, title: title, module: module, grade: grade, isExam: isExam, restart: restart || null, fromView: S.view || 'home', badge: badge || null };
     renderQuiz();
   }
   function renderQuiz() {
@@ -911,7 +917,7 @@
       // 第二次及以后提交：要么答对，要么换一条提示。
       if (correct) {
         q.results[i] = { correct: true, ua: ua, revealed: true };
-        q.score++;
+        q.score += (item.score || 1);
         q.userAnswers[i] = ua;
         renderQuiz();
       } else {
@@ -926,7 +932,8 @@
 
     // 首次提交
     if (correct) {
-      q.score++;
+      q.score += (item.score || 1);
+      q.correctCount++;
       q.results[i] = { correct: true, ua: ua, revealed: true };
       q.userAnswers[i] = ua;
       renderQuiz();
@@ -980,21 +987,132 @@
   PC.printPaper = function () { window.print(); };
 
   function finishQuiz() {
-    const q = S.quiz; const total = q.questions.length; const score = q.score;
-    const acc = total ? Math.round(score / total * 100) : 0;
+    const q = S.quiz;
+    const total = q.questions.length;
+    // 把未作答的题目统一记为「已揭晓 / 错误」，避免明细缺项
+    for (let i = 0; i < total; i++) {
+      if (!q.results[i]) {
+        q.results[i] = { correct: false, ua: '', revealed: true, hints: [], hintStep: 0 };
+        q.userAnswers[i] = '';
+      }
+    }
+    // 入库：错题 + 学习记录
     q.wrongList.forEach(function (e) { pcAddWrong(e.q, e.ua, q.title, q.grade, q.module); });
-    pcRecord(q.grade, q.title, score, total, q.wrongList.map(function (e) { return { question: e.q, userAnswer: e.ua }; }), q.module);
+    const correctCount = q.results.filter(function (r) { return r.correct; }).length;
+    pcRecord(q.grade, q.title, correctCount, total, q.wrongList.map(function (e) { return { question: e.q, userAnswer: e.ua }; }), q.module);
     if (useCloud && typeof syncAfterQuiz === 'function') { try { syncAfterQuiz(); } catch (e) { } }
 
-    const stars = acc >= 90 ? '★★★' : acc >= 70 ? '★★☆' : '★☆☆';
-    const ringColor = acc >= 90 ? 'var(--gold)' : acc >= 60 ? 'var(--success)' : 'var(--accent)';
-    let h = '<div class="pc-result">';
-    h += '<div class="pc-result-title">' + (acc >= 90 ? '太棒了！' : acc >= 60 ? '不错，继续加油' : '再来一次') + '</div>';
-    h += '<div class="pc-result-ring" style="--p:' + acc + ';--c:' + ringColor + '"><span>' + score + '<small>/' + total + '</small></span></div>';
-    h += '<div class="pc-result-stars">' + stars + '</div>';
-    h += '<div class="pc-result-stats"><div class="rs"><div class="n good">' + score + '</div><div class="l">答对</div></div><div class="rs"><div class="n bad">' + (total - score) + '</div><div class="l">答错</div></div><div class="rs"><div class="n">' + acc + '%</div><div class="l">正确率</div></div></div>';
-    h += '<div class="pc-row" style="justify-content:center"><button class="pc-btn primary" onclick="PC.retry()">再练一次</button><button class="pc-btn ghost" onclick="PC.back()">返回</button></div>';
-    if (q.isExam) h += '<div class="pc-row" style="justify-content:center"><button class="pc-btn ghost" onclick="PC.printPaper()">打印试卷</button></div>';
+    // 切换到批改成绩页（第一步）
+    renderScorePage();
+  }
+
+  function renderScorePage() {
+    const q = S.quiz;
+    const total = q.questions.length;
+    const correctCount = q.results.filter(function (r) { return r.correct; }).length;
+    const wrongCount = total - correctCount;
+    const totalScore = q.totalScore || total;
+    const score = Math.min(q.score || 0, totalScore);
+    const acc = totalScore ? Math.round(score / totalScore * 100) : 0;
+    const level = getGradeLevel(acc);
+    const timeUsed = formatDuration(Date.now() - (q.startTime || Date.now()));
+    const comment = generateTeacherComment(score, totalScore, acc, q.wrongList, q.grade, q.isExam);
+
+    let detail = '';
+    q.questions.forEach(function (item, i) {
+      const r = q.results[i];
+      const isCorrect = r && r.correct;
+      const qscore = item.score || 1;
+      const got = isCorrect ? qscore : 0;
+      detail += '<div class="pc-score-row' + (isCorrect ? ' ok' : ' bad') + '">';
+      detail += '<span class="pc-sr-no">第' + (i + 1) + '题</span>';
+      detail += '<span class="pc-sr-type">' + questionTypeLabel(item.type) + '</span>';
+      detail += '<span class="pc-sr-mark">' + (isCorrect ? svgHandwrittenCheck(true) : svgHandwrittenCheck(false)) + '</span>';
+      detail += '<span class="pc-sr-score">' + got.toFixed(qscore % 1 === 0 ? 0 : 1) + '/' + qscore.toFixed(qscore % 1 === 0 ? 0 : 1) + '分</span>';
+      detail += '</div>';
+    });
+
+    let h = '<div class="pc-grade-sheet">';
+    h += '<div class="pc-teacher-header">';
+    h += '<div class="pc-teacher-score">得分：<span>' + score.toFixed(totalScore % 1 === 0 && score % 1 === 0 ? 0 : 1) + '</span><span class="pc-teacher-total">/' + totalScore + '</span></div>';
+    h += '<div class="pc-teacher-level ' + level.cls + '">等级：' + level.label + '</div>';
+    h += '</div>';
+    h += '<div class="pc-teacher-stars">' + level.stars + '</div>';
+    h += '<div class="pc-result-stats">';
+    h += '<div class="rs"><div class="n good">' + correctCount + '</div><div class="l">答对</div></div>';
+    h += '<div class="rs"><div class="n bad">' + wrongCount + '</div><div class="l">答错</div></div>';
+    h += '<div class="rs"><div class="n">' + acc + '%</div><div class="l">正确率</div></div>';
+    h += '<div class="rs"><div class="n">' + esc(timeUsed) + '</div><div class="l">用时</div></div>';
+    h += '</div>';
+    h += '<div class="pc-teacher-comment"><span class="pc-tc-tag">老师批语</span>' + esc(comment) + '</div>';
+    h += '<div class="pc-teacher-detail">';
+    h += '<div class="pc-detail-title">各题得分明细</div>';
+    h += '<div class="pc-detail-list">' + detail + '</div>';
+    h += '</div>';
+    h += '<button class="pc-btn primary pc-confirm-btn" onclick="PC.confirmScore()">✅ 确认成绩</button>';
+    h += '</div>';
+    $('pcContent').innerHTML = h;
+  }
+
+  PC.confirmScore = function () {
+    renderAnswerKeyPage();
+  };
+
+  function renderAnswerKeyPage() {
+    const q = S.quiz;
+    const total = q.questions.length;
+    let h = '<div class="pc-answer-key">';
+    h += '<div class="pc-result-title">答案与解析</div>';
+    // 按大题分组
+    let secs = {};
+    q.questions.forEach(function (item, i) {
+      const key = item.sectionTitle || item.paperSection || '题目';
+      if (!secs[key]) secs[key] = [];
+      secs[key].push({ item: item, i: i });
+    });
+    Object.keys(secs).forEach(function (title) {
+      h += '<div class="pc-answer-section">' + esc(title) + '</div>';
+      secs[title].forEach(function (o) {
+        const item = o.item, i = o.i;
+        const r = q.results[i];
+        const isCorrect = r && r.correct;
+        const ua = (r && r.ua !== undefined) ? r.ua : (q.userAnswers[i] || '');
+        h += '<div class="pc-answer-item ' + (isCorrect ? 'ok' : 'bad') + '">';
+        h += '<div class="pc-ai-head">';
+        h += '<span class="pc-ai-no">第' + (i + 1) + '题</span>';
+        h += '<span class="pc-ai-type">' + questionTypeLabel(item.type) + '</span>';
+        h += '<span class="pc-ai-mark">' + (isCorrect ? svgHandwrittenCheck(true) : svgHandwrittenCheck(false)) + '</span>';
+        h += '</div>';
+        if (item.passage) h += '<div class="pc-passage">' + item.passage + '</div>';
+        h += '<div class="pc-ai-stem">' + esc(item.question) + '</div>';
+        if (item.svg) h += '<div class="pc-q-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + item.svg + '</svg></div>';
+        if (item.options && item.options.length) {
+          h += '<div class="pc-ai-opts">';
+          item.options.forEach(function (opt, idx) {
+            const txt = optText(opt);
+            let cls = '';
+            if (txt === String(item.answer)) cls = ' correct';
+            else if (txt === String(ua) && !isCorrect) cls = ' wrong';
+            h += '<div class="pc-ai-opt' + cls + '">' + String.fromCharCode(65 + idx) + '. ' + esc(txt) + '</div>';
+          });
+          h += '</div>';
+        }
+        h += '<div class="pc-ai-ans-row">';
+        h += '<span>你的答案：<b class="' + (isCorrect ? 'ok' : 'bad') + '">' + (ua !== '' ? esc(ua) : '未作答') + '</b></span>';
+        h += '<span>正确答案：<b class="ok">' + esc(item.answer) + '</b></span>';
+        h += '</div>';
+        if (item.explain) h += '<div class="pc-ai-explain"><b>解析：</b>' + esc(item.explain) + '</div>';
+        if (item.steps && item.steps.length) {
+          h += '<div class="pc-ai-steps"><b>步骤：</b>' + item.steps.map(function (s, idx) { return '<span>' + (idx + 1) + '. ' + esc(s) + '</span>'; }).join('') + '</div>';
+        }
+        h += '</div>';
+      });
+    });
+    h += '<div class="pc-row" style="justify-content:center;gap:12px;margin-top:18px">';
+    h += '<button class="pc-btn primary" onclick="PC.retry()">重新考试</button>';
+    h += '<button class="pc-btn ghost" onclick="PC.back()">返回单元学习</button>';
+    if (q.isExam) h += '<button class="pc-btn ghost" onclick="PC.printPaper()">打印试卷</button>';
+    h += '</div>';
     h += '</div>';
     $('pcContent').innerHTML = h;
   }

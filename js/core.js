@@ -127,3 +127,106 @@ function openPracticeSettings(opts) {
   });
   mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
 }
+
+// ============================================================
+// v75：考试/练习批改结果页公共工具函数（PC + 移动端共用）
+// ============================================================
+function formatDuration(ms) {
+  if (!ms || ms < 0) return '0秒';
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  if (m > 0 && s > 0) return m + '分' + s + '秒';
+  if (m > 0) return m + '分';
+  return s + '秒';
+}
+
+function getGradeLevel(accuracy) {
+  if (accuracy >= 90) return { label: '优秀', cls: 'excellent', stars: '★★★' };
+  if (accuracy >= 80) return { label: '良好', cls: 'good', stars: '★★' };
+  if (accuracy >= 60) return { label: '及格', cls: 'pass', stars: '★' };
+  return { label: '需努力', cls: 'needs', stars: '' };
+}
+
+function questionTypeLabel(type) {
+  const map = { choice: '选择', fill: '填空', judge: '判断', calc: '计算', app: '应用', operation: '操作' };
+  return map[type] || map[String(type)] || '其它';
+}
+
+function detectMathConcepts(text) {
+  if (!text) return [];
+  const t = String(text).toLowerCase();
+  const out = [];
+  const rules = [
+    { keys: ['因数','倍数','质数','合数','最小公倍数','最大公因数','公因数','公倍数','分解质因数'], name: '因数与倍数' },
+    { keys: ['分数','约分','通分','分子','分母','真分数','假分数','带分数','倒数'], name: '分数' },
+    { keys: ['小数','循环小数','有限小数','无限小数','小数点','近似数','四舍五入'], name: '小数' },
+    { keys: ['百分数','百分率','折扣','税率','利率','百分比'], name: '百分数' },
+    { keys: ['比','比例','比值','按比分配','正比例','反比例','比例尺'], name: '比和比例' },
+    { keys: ['方程','等式','未知数','解方程','列方程','方程两边'], name: '简易方程' },
+    { keys: ['面积','长方形','正方形','平行四边形','三角形','梯形','圆面积','圆的周长','周长'], name: '图形面积' },
+    { keys: ['体积','容积','立方米','立方分米','立方厘米','圆柱','圆锥','表面积','侧面积'], name: '体积与表面积' },
+    { keys: ['角度','锐角','直角','钝角','平角','周角','量角器','角的度量','三角形内角和'], name: '角与角度' },
+    { keys: ['四则运算','加减乘除','运算顺序','脱式','竖式','简便计算','运算定律','交换律','结合律','分配律'], name: '四则运算' },
+    { keys: ['平均数','统计图','条形统计图','折线统计图','扇形统计图','众数','中位数'], name: '统计' },
+    { keys: ['可能性','概率','一定','不可能','可能','公平','不公平','转盘'], name: '可能性' },
+    { keys: ['行程','速度','时间','路程','相遇','追及','相向','同向'], name: '行程问题' },
+    { keys: ['工程问题','工作效率','工作时间','工作总量'], name: '工程问题' },
+    { keys: ['植树','间隔','两端','一端','封闭'], name: '植树问题' },
+    { keys: ['鸡兔同笼','假设法','抬脚法'], name: '鸡兔同笼' },
+    { keys: ['进一法','去尾法','近似','保留','精确'], name: '近似计算' },
+    { keys: ['平移','旋转','轴对称','对称轴','变换','图形运动'], name: '图形的运动' },
+    { keys: ['位置','方向','坐标','数对','行列','方位','东北','西北','东南','西南'], name: '位置与方向' },
+    { keys: ['负数','正数','数轴','相反意义的量','零下'], name: '负数' },
+    { keys: ['时间','钟表','时分秒','24时','年','月','日','闰年'], name: '时间' },
+    { keys: ['人民币','元','角','分','购物','找零','付钱'], name: '人民币' },
+    { keys: ['长度','米','分米','厘米','毫米','千米','单位换算'], name: '长度单位' },
+    { keys: ['质量','克','千克','吨','公斤','单位换算'], name: '质量单位' },
+    { keys: ['乘法','除法','口诀','九九乘法表','乘数','被除数','除数','商','余数'], name: '乘除法' }
+  ];
+  rules.forEach(function (r) {
+    if (r.keys.some(function (k) { return t.indexOf(k) !== -1; }) && out.indexOf(r.name) === -1) out.push(r.name);
+  });
+  return out;
+}
+
+function generateTeacherComment(score, total, accuracy, wrongItems, grade, isExam) {
+  const level = getGradeLevel(accuracy);
+  const concepts = [];
+  (wrongItems || []).forEach(function (it) {
+    const q = (it && it.q) || (it && it.question) || it;
+    if (!q) return;
+    const parts = [];
+    if (q.question) parts.push(q.question);
+    if (q.sectionTitle) parts.push(q.sectionTitle);
+    if (q._section) parts.push(q._section);
+    if (q._unitName) parts.push(q._unitName);
+    if (q.paperSection) parts.push(q.paperSection);
+    detectMathConcepts(parts.join(' ')).forEach(function (c) { if (concepts.indexOf(c) === -1) concepts.push(c); });
+  });
+  const top = concepts.slice(0, 3);
+  let base = '', focus = '';
+  if (accuracy >= 90) {
+    base = '表现优秀，基础扎实！';
+    focus = top.length ? `注意保持：${top.join('、')}。` : '继续保持，争取次次全对！';
+  } else if (accuracy >= 80) {
+    base = '整体良好，继续保持！';
+    focus = top.length ? `再巩固一下：${top.join('、')}。` : '稳住状态，下次冲刺优秀！';
+  } else if (accuracy >= 60) {
+    base = '基本掌握，还有提升空间。';
+    focus = top.length ? `重点突破：${top.join('、')}。` : '建议把错题再做一遍。';
+  } else {
+    base = '别灰心，先把基础打牢。';
+    focus = top.length ? `重点补一补：${top.join('、')}。` : '多练基础题，继续加油！';
+  }
+  return base + focus + '继续加油！';
+}
+
+function svgHandwrittenCheck(correct) {
+  // 返回一个手绘风格的 ✓ 或 ✗ SVG，用于批改标记
+  const color = correct ? '#c23a2b' : '#c23a2b';
+  const path = correct
+    ? 'M3 12 L9 18 L21 4'
+    : 'M5 5 L19 19 M19 5 L5 19';
+  return '<svg class="teacher-mark" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}

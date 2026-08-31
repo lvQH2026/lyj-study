@@ -115,37 +115,40 @@
   </div>
 </div>
 
-<!-- ===== 结果页 ===== -->
+<!-- ===== 结果页（v75：两步式 批改成绩 → 答案解析） ===== -->
 <div class="page" id="page-result">
-  <div class="card result-card">
-    <div class="result-emoji" id="resultEmoji">🎉</div>
-    <div class="result-title" id="resultTitle">太棒了！</div>
-    <div class="stars" id="resultStars"></div>
-    <div class="result-score"><span id="resultScore">0</span><span class="total">/10</span></div>
-    <div class="result-stats">
-      <div class="result-stat">
-        <div class="num correct" id="resultCorrect">0</div>
-        <div class="label">答对</div>
-      </div>
-      <div class="result-stat">
-        <div class="num wrong" id="resultWrong">0</div>
-        <div class="label">答错</div>
-      </div>
-      <div class="result-stat">
-        <div class="num" id="resultAccuracy" style="color:var(--primary)">0%</div>
-        <div class="label">正确率</div>
-      </div>
+  <!-- 第一步：批改成绩页 -->
+  <div class="card result-card" id="resultScoreCard">
+    <div class="teacher-header">
+      <div class="teacher-score">得分：<span id="resultScore">0</span><span id="resultTotal">/10</span></div>
+      <div class="teacher-level" id="teacherLevel">优秀</div>
     </div>
-    <div id="wrongAddedInfo" style="font-size:13px;color:var(--text-lighter);margin-bottom:16px"></div>
-    <div class="btn-group">
-      <button class="btn btn-outline" onclick="goHome()">返回首页</button>
-      <button class="btn btn-outline" onclick="printCurrentPaper()">🖨 打印试卷</button>
-      <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()">再练一次</button>
+    <div class="teacher-stars" id="resultStars">★★★</div>
+    <div class="result-stats" id="resultStats">
+      <div class="result-stat"><div class="num correct" id="resultCorrect">0</div><div class="label">答对</div></div>
+      <div class="result-stat"><div class="num wrong" id="resultWrong">0</div><div class="label">答错</div></div>
+      <div class="result-stat"><div class="num" id="resultAccuracy" style="color:var(--primary)">0%</div><div class="label">正确率</div></div>
+      <div class="result-stat"><div class="num" id="resultTime">0秒</div><div class="label">用时</div></div>
+    </div>
+    <div class="teacher-comment" id="teacherComment"></div>
+    <div class="teacher-detail">
+      <div class="detail-title">各题得分明细</div>
+      <div id="questionScoreList"></div>
+    </div>
+    <div class="btn-group" id="scoreActions">
+      <button class="btn btn-primary" id="confirmScoreBtn" onclick="confirmScore()">✅ 确认成绩</button>
     </div>
   </div>
-  <div class="card" id="examAnswerKey" style="display:none;text-align:left">
-    <div class="section-title">📋 参考答案</div>
+
+  <!-- 第二步：答案与解析页 -->
+  <div class="card result-card" id="examAnswerKey" style="display:none;text-align:left">
+    <div class="section-title">答案与解析</div>
     <div id="examAnswerKeyBody"></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()">重新考试</button>
+      <button class="btn btn-outline" onclick="backToStudy()">返回单元学习</button>
+      <button class="btn btn-outline" onclick="printCurrentPaper()">🖨 打印试卷</button>
+    </div>
   </div>
 </div>
 

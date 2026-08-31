@@ -2157,3 +2157,105 @@ body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',
 /* 考试模式：导航条更紧凑，贴近真实卷面 */
 #page-quiz.exam-mode .quiz-nav{ background:#fbfaf6; }
 #page-quiz.exam-mode .qn-num{ min-width:28px; height:28px; font-size:12px; }
+
+/* ============================================================
+ * v75：移动端批改成绩页 + 答案解析页（红笔手写风格）
+ * ============================================================ */
+.teacher-mark{ width:18px; height:18px; display:inline-block; vertical-align:middle; }
+.teacher-mark path{ stroke:#C23A2B; stroke-linecap:round; stroke-linejoin:round; }
+
+/* 成绩页 */
+#resultScoreCard{ padding:20px 16px 24px; }
+.teacher-header{ text-align:center; margin-bottom:8px; }
+.teacher-score{
+  font-family:"KaiTi","STKaiti","SimSun",serif;
+  font-size:42px; font-weight:800; color:#C23A2B;
+  letter-spacing:2px; text-shadow:1px 1px 0 rgba(194,58,43,.10);
+}
+.teacher-score span{ display:inline-block; }
+#resultTotal{ font-size:24px; opacity:.85; }
+.teacher-level{
+  display:inline-block; margin-top:8px; padding:5px 18px; border-radius:999px;
+  font-size:16px; font-weight:700; color:#fff;
+  font-family:"KaiTi","STKaiti",serif;
+}
+.teacher-level.excellent{ background:linear-gradient(135deg,#D4A84B,#B4945A); }
+.teacher-level.good{ background:linear-gradient(135deg,#5AAE7A,#4E8C6E); }
+.teacher-level.pass{ background:linear-gradient(135deg,#6D8CB5,#3E4A63); }
+.teacher-level.needs{ background:linear-gradient(135deg,#D97973,#C2554F); }
+.teacher-stars{ text-align:center; font-size:26px; color:#FFC53D; margin:6px 0 14px; letter-spacing:4px; }
+
+/* 4列统计 */
+#resultStats{ display:grid; grid-template-columns:repeat(4,1fr); }
+
+.teacher-time{
+  text-align:center; font-size:13px; color:var(--text-light); margin-bottom:14px;
+}
+.teacher-comment{
+  position:relative; margin:0 0 18px; padding:16px 15px;
+  background:#FFF9F2; border:1px dashed #E7B87A; border-radius:14px;
+  color:#5A4628; font-size:14px; line-height:1.75;
+  font-family:"KaiTi","STKaiti","SimSun",serif;
+}
+.teacher-comment::before{
+  content:'老师批语'; position:absolute; top:-10px; left:12px;
+  padding:2px 9px; background:#B4945A; color:#fff;
+  font-size:11px; font-weight:700; border-radius:999px;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+.teacher-detail{ margin-bottom:18px; }
+.teacher-detail .detail-title{
+  font-size:14px; font-weight:700; color:var(--text); margin-bottom:10px;
+  padding-bottom:6px; border-bottom:1.5px solid var(--border);
+}
+#questionScoreList{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
+.m-score-row{
+  display:flex; align-items:center; gap:6px;
+  padding:8px 10px; border-radius:10px; background:var(--bg); font-size:12px;
+}
+.m-score-row.ok{ background:#EEF7E9; }
+.m-score-row.bad{ background:#FDF2F1; }
+.m-sr-no{ font-weight:700; min-width:38px; }
+.m-sr-type{ color:var(--text-light); flex:1; }
+.m-sr-mark{ width:16px; height:16px; }
+.m-sr-score{ font-weight:700; }
+.m-score-row.ok .m-sr-score{ color:#3F8C2F; }
+.m-score-row.bad .m-sr-score{ color:#C23A2B; }
+
+/* 答案解析页 */
+#examAnswerKey{ padding:18px 16px 24px; }
+.m-answer-section{
+  font-size:14px; font-weight:700; color:var(--primary); margin:16px 0 8px;
+  padding-bottom:5px; border-bottom:1.5px solid var(--border);
+}
+.m-answer-section:first-of-type{ margin-top:0; }
+.m-answer-item{
+  margin:10px 0; padding:12px 13px; border-radius:12px;
+  background:var(--card-bg); border:1px solid var(--border);
+}
+.m-answer-item.ok{ border-left:3px solid var(--success); }
+.m-answer-item.bad{ border-left:3px solid var(--accent); }
+.m-ai-head{ display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+.m-ai-no{ font-weight:700; font-size:13px; }
+.m-ai-type{ font-size:11px; color:var(--text-light); background:var(--bg); padding:2px 7px; border-radius:999px; }
+.m-ai-mark{ width:18px; height:18px; }
+.m-ai-passage{ font-size:13px; color:var(--text-light); background:var(--bg); padding:8px; border-radius:8px; margin:6px 0; }
+.m-ai-stem{ font-size:13px; color:var(--text); line-height:1.6; margin-bottom:6px; }
+.m-ai-svg svg{ width:100%; height:auto; max-width:240px; display:block; margin:6px 0; }
+.m-ai-opts{ display:flex; flex-direction:column; gap:4px; margin:6px 0; }
+.m-ai-opt{
+  padding:5px 8px; border-radius:8px; font-size:12px; background:var(--bg); color:var(--text-light);
+}
+.m-ai-opt.correct{ background:#EEF7E9; color:#2F6B28; font-weight:700; }
+.m-ai-opt.wrong{ background:#FDF2F1; color:#9E2B22; text-decoration:line-through; }
+.m-ai-ans-row{
+  display:flex; flex-wrap:wrap; gap:12px; margin-top:8px; font-size:12px; color:var(--text-light);
+}
+.m-ai-ans-row b.ok{ color:#3F8C2F; }
+.m-ai-ans-row b.bad{ color:#C23A2B; }
+.m-ai-explain,.m-ai-steps{
+  margin-top:8px; padding:9px 11px; border-radius:8px;
+  background:var(--bg); font-size:12px; color:var(--text-light); line-height:1.65;
+}
+.m-ai-steps span{ display:block; margin-top:3px; }
+
