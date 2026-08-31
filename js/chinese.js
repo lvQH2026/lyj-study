@@ -161,14 +161,15 @@
       ['希望', '盼望', ['失望', '绝望', '放弃']],
       ['优秀', '出色', ['差劲', '平庸', '低劣']],
     ];
+    // v72：干扰项改为单词形式，配合下面的「与"X"意思相反的是？」题干
     const antPairs = [
-      ['失败', '成功', ['成功—胜利', '失败—失利', '成功—成就']],
-      ['节约', '浪费', ['节约—节省', '浪费—糟蹋', '浪费—挥霍']],
-      ['谦虚', '骄傲', ['谦虚—虚心', '骄傲—自豪', '骄傲—自满']],
-      ['安静', '喧闹', ['安静—宁静', '喧闹—吵闹', '安静—平静']],
-      ['危险', '安全', ['危险—凶险', '安全—平安', '危险—危急']],
-      ['保护', '破坏', ['保护—爱护', '破坏—损坏', '破坏—毁坏']],
-      ['开始', '结束', ['开始—开端', '结束—完结', '结束—完毕']],
+      ['失败', '成功', ['开始', '继续', '停止']],
+      ['节约', '浪费', ['节省', '爱惜', '勤俭']],
+      ['谦虚', '骄傲', ['虚心', '谨慎', '认真']],
+      ['安静', '喧闹', ['宁静', '平静', '安详']],
+      ['危险', '安全', ['凶险', '危急', '冒险']],
+      ['保护', '破坏', ['爱护', '保卫', '看护']],
+      ['开始', '结束', ['开端', '起始', '动手']],
     ];
     const idioms = [
       ['画蛇添足', '比喻做了多余的事，反而不好', ['比喻画画画得快', '比喻蛇很多', '比喻脚很多']],
@@ -187,11 +188,13 @@
       ['"一____马"应填的量词是？', '匹'], ['"一____桥"应填的量词是？', '座'],
     ];
     const items = [];
+    // v72：题干带上具体词语。原题干「下列哪组词语是近义词？」被 12 道题共用，
+    // 孩子做起来会感觉"怎么又是这道题"，且按题干去重时会被误当成重复题。
     synPairs.forEach(function (p) {
-      items.push(mkChoice('下列哪组词语是近义词？', p[0] + '—' + p[1], [p[0] + '—' + p[2][0], p[1] + '—' + p[2][1], p[0] + '—' + p[2][2]]));
+      items.push(mkChoice('与“' + p[0] + '”意思相近的是？', p[1], p[2]));
     });
     antPairs.forEach(function (p) {
-      items.push(mkChoice('下列哪组词语是反义词？', p[0] + '—' + p[1], p[2]));
+      items.push(mkChoice('与“' + p[0] + '”意思相反的是？', p[1], p[2]));
     });
     idioms.forEach(function (p) {
       items.push(mkChoice('"' + p[0] + '"的意思是？', p[1], p[2]));
@@ -1243,12 +1246,12 @@
     const qs = [];
     qs.push(mkChoice('"咆哮"的读音是？', 'páo xiào', ['bāo xiào', 'páo xiāo', 'báo xiào']));
     qs.push(mkChoice('"狞笑"的"狞"读音是？', 'níng', ['nín', 'lín', 'nìng']));
-    qs.push(mkChoice('"放肆"的"肆"读音是？', 'sì', ['sì', 'shì', 'cì']));
+    qs.push(mkChoice('"放肆"的"肆"读音是？', 'sì', ['shì', 'cì', 'sī']));
     qs.push(mkChoice('"祭奠"的"奠"读音是？', 'diàn', ['dìng', 'zhàn', 'jiàn']));
     qs.push(mkChoice('"忐忑不安"中"忐忑"的意思是？', '心神不定', ['心情舒畅', '非常高兴', '很害怕']));
     qs.push(mkChoice('"魁梧"的"梧"读音是？', 'wú', ['wǔ', 'wù', 'yu']));
     qs.push(mkChoice('"搁板"的"搁"读音是？', 'gē', ['gé', 'gè', 'kē']));
-    qs.push(mkChoice('下列词语书写正确的一项是？', '跌跌撞撞', ['跌跌撞撞', '叠叠撞撞', '跌跌壮壮']));
+    qs.push(mkChoice('下列词语书写正确的一项是？', '跌跌撞撞', ['跌跌幢幢', '叠叠撞撞', '跌跌壮壮']));
     qs.push(mkChoice('《桥》中，老汉是什么身份？', '党支部书记', ['普通村民', '村长', '老师']));
     qs.push(mkChoice('《桥》的结局是？', '老汉和儿子都牺牲了', ['老汉和儿子都获救', '只有儿子牺牲', '只有老汉获救']));
     qs.push(mkChoice('《桥》中反复写"洪水"的作用是？', '渲染紧张气氛，衬托老汉的镇定', ['增加字数', '描写风景', '说明天气']));
@@ -1283,10 +1286,10 @@
     qs.push(mkChoice('"甘蔗"的"蔗"读音是？', 'zhè', ['zhé', 'zhe', 'zhē']));
     qs.push(mkChoice('"菜畦"的"畦"读音是？', 'qí', ['wā', 'guī', 'xī']));
     qs.push(mkChoice('"谚语"的"谚"读音是？', 'yàn', ['yán', 'yǎn', 'yān']));
-    qs.push(mkChoice('"斗篷"的"篷"读音是？', 'péng', ['pēng', 'féng', 'péng']));
+    qs.push(mkChoice('"斗篷"的"篷"读音是？', 'péng', ['pēng', 'féng', 'pèn']));
     qs.push(mkChoice('"窸窸窣窣"的读音是？', 'xī xī sū sū', ['xī xī cuì cuì', 'sū sū xī xī', 'xí xí shuài shuài']));
     qs.push(mkChoice('"嘟囔"的"囔"读音是？', 'nāng', ['náng', 'nǎng', 'nàng']));
-    qs.push(mkChoice('下列词语书写正确的一项是？', '软绵绵', ['软棉棉', '软绵绵', '软棉棉']));
+    qs.push(mkChoice('下列词语书写正确的一项是？', '软绵绵', ['软棉棉', '软绵棉', '阮绵绵']));
     qs.push(mkChoice('《夏天里的成长》的中心句是？', '夏天是万物迅速生长的季节', ['夏天很热', '夏天有很多蚊子', '夏天是旅游的季节']));
     qs.push(mkChoice('《夏天里的成长》写了哪些事物的生长？', '动植物、山水、铁轨柏油路、人', ['只写了庄稼', '只写了人', '只写了动物']));
     qs.push(mkChoice('《夏天里的成长》告诉我们什么道理？', '人也要珍惜时间，赶在最好的时候成长', ['夏天是最危险的季节', '人不用成长', '只有植物需要成长']));
@@ -1321,10 +1324,10 @@
     qs.push(mkChoice('"恩赐"的"赐"读音是？', 'cì', ['tì', 'chì', 'sì']));
     qs.push(mkChoice('"慷慨"的读音是？', 'kāng kǎi', ['kǎng kǎi', 'kāng gài', 'kāng kài']));
     qs.push(mkChoice('"肆虐"的"虐"读音是？', 'nüè', ['niè', 'nuè', 'lüè']));
-    qs.push(mkChoice('"盘踞"的"踞"读音是？', 'jù', ['jū', 'jù', 'jì']));
+    qs.push(mkChoice('"盘踞"的"踞"读音是？', 'jù', ['jū', 'jǔ', 'jì']));
     qs.push(mkChoice('"劲挺"的"劲"读音是？', 'jìng', ['jìn', 'jǐn', 'jīng']));
     qs.push(mkChoice('"枯竭"的"竭"读音是？', 'jié', ['jiē', 'hè', 'jiě']));
-    qs.push(mkChoice('下列词语书写正确的一项是？', '和蔼可亲', ['和蔼可亲', '合蔼可亲', '和蔼可钦']));
+    qs.push(mkChoice('下列词语书写正确的一项是？', '和蔼可亲', ['合蔼可亲', '和蔼可钦', '和霭可亲']));
     qs.push(mkChoice('《浪淘沙》"九曲黄河万里沙"的作者是？', '刘禹锡', ['杜牧', '王安石', '李白']));
     qs.push(mkFill('"千里莺啼绿映红"出自《____》（杜牧）。', '江南春'));
     qs.push(mkChoice('《书湖阴先生壁》中"一水护田将绿绕"的下一句是？', '两山排闼送青来', ['九曲黄河万里沙', '千里莺啼绿映红', '如今直上银河去']));
@@ -1361,8 +1364,8 @@
     qs.push(mkChoice('"琴弦"的"弦"读音是？', 'xián', ['xuán', 'xiàn', 'xuàn']));
     qs.push(mkChoice('"入场券"的"券"读音是？', 'quàn', ['juàn', 'quān', 'juǎn']));
     qs.push(mkChoice('"幽静"的"幽"读音是？', 'yōu', ['yǒu', 'yóu', 'yòu']));
-    qs.push(mkChoice('"莱茵河"的"茵"读音是？', 'yīn', ['yīng', 'yīn', 'yǐn']));
-    qs.push(mkChoice('下列词语书写正确的一项是？', '微波粼粼', ['微波鳞鳞', '微波磷磷', '微波粼粼']));
+    qs.push(mkChoice('"莱茵河"的"茵"读音是？', 'yīn', ['yīng', 'yín', 'yǐn']));
+    qs.push(mkChoice('下列词语书写正确的一项是？', '微波粼粼', ['微波鳞鳞', '微波磷磷', '微波遴遴']));
     qs.push(mkChoice('《伯牙鼓琴》中，伯牙的知音是？', '锺子期', ['戴嵩', '贝多芬', '牧童']));
     qs.push(mkChoice('锺子期称赞伯牙的琴声"巍巍乎若太山"，伯牙弹的是？', '高山', ['流水', '明月', '清风']));
     qs.push(mkChoice('"善哉乎鼓琴，汤汤乎若流水"形容琴声像？', '浩浩荡荡的流水', ['巍峨的高山', '轻快的鸟鸣', '轰隆的雷声']));
@@ -1438,7 +1441,7 @@
     qs.push(mkChoice('"汤匙"的"匙"读音是？', 'chí', ['shi', 'cí', 'shí']));
     qs.push(mkChoice('"肿胀"的"肿"读音是？', 'zhǒng', ['zhōng', 'zǒng', 'chóng']));
     qs.push(mkChoice('"咽下去"的"咽"读音是？', 'yàn', ['yān', 'yè', 'yǎn']));
-    qs.push(mkChoice('下列词语书写正确的一项是？', '万象更新', ['万象更新', '万像更新', '万向更新']));
+    qs.push(mkChoice('下列词语书写正确的一项是？', '万象更新', ['万像更新', '万向更新', '万相更新']));
     qs.push(mkChoice('《北京的春节》的作者是？', '老舍', ['沈从文', '朱自清', '冰心']));
     qs.push(mkChoice('《北京的春节》按什么顺序写？', '时间顺序', ['空间顺序', '事情发展顺序', '倒叙']));
     qs.push(mkChoice('《北京的春节》详写的是？', '除夕、正月初一、元宵节', ['腊八、腊月二十三', '正月初六', '正月十九']));
@@ -1551,8 +1554,8 @@
     qs.push(mkChoice('"军阀"的"阀"读音是？', 'fá', ['fā', 'fà', 'fán']));
     qs.push(mkChoice('"僻静"的"僻"读音是？', 'pì', ['bì', 'pǐ', 'pí']));
     qs.push(mkChoice('"宪兵"的"宪"读音是？', 'xiàn', ['xiān', 'xiǎn', 'xuàn']));
-    qs.push(mkChoice('"鸿毛"的"鸿"读音是？', 'hóng', ['hǒng', 'hóng', 'hēng']));
-    qs.push(mkChoice('"炊事员"的"炊"读音是？', 'chuī', ['cuī', 'chuī', 'cī']));
+    qs.push(mkChoice('"鸿毛"的"鸿"读音是？', 'hóng', ['hǒng', 'hòng', 'hēng']));
+    qs.push(mkChoice('"炊事员"的"炊"读音是？', 'chuī', ['cuī', 'chuí', 'cī']));
     qs.push(mkChoice('《马诗》"何当金络脑"的下一句是？', '快走踏清秋', ['要留清白在人间', '任尔东西南北风', '烈火焚烧若等闲']));
     qs.push(mkChoice('《马诗》的作者是？', '李贺', ['于谦', '郑燮', '王维']));
     qs.push(mkChoice('《石灰吟》中"粉骨碎身浑不怕"的下一句是？', '要留清白在人间', ['烈火焚烧若等闲', '千锤万凿出深山', '任尔东西南北风']));
@@ -1590,7 +1593,7 @@
     qs.push(mkChoice('"司空见惯"的"惯"读音是？', 'guàn', ['guǎn', 'guān', 'kuàn']));
     qs.push(mkChoice('"锲而不舍"的"锲"读音是？', 'qiè', ['qì', 'qǐ', 'xiē']));
     qs.push(mkChoice('"鄙夷"的读音是？', 'bǐ yí', ['bǐ yì', 'pǐ yí', 'bì yí']));
-    qs.push(mkChoice('"领域"的"域"读音是？', 'yù', ['yǔ', 'huò', 'yù']));
+    qs.push(mkChoice('"领域"的"域"读音是？', 'yù', ['yǔ', 'huò', 'yì']));
     qs.push(mkChoice('《学弈》中，弈秋教几个人下棋？', '两个人', ['一个人', '三个人', '十个人']));
     qs.push(mkChoice('《学弈》中，学得好的原因是？', '专心致志，只听弈秋的话', ['天资聪明', '课后补习', '下棋时间久']));
     qs.push(mkChoice('《学弈》告诉我们什么道理？', '做事要专心致志，不能三心二意', ['下棋很难学', '人要聪明', '老师要严厉']));
@@ -1710,7 +1713,7 @@ function cn4s1_pool() {
     qs.push(mkChoice('\'风号浪吼\'的\'号\'读音是？', 'háo', ['hào', 'hǎo', 'hāo']));
     qs.push(mkChoice('《观潮》描写的是哪条江的大潮？', '钱塘江', ['长江', '黄河', '珠江']));
     qs.push(mkChoice('《观潮》是按照什么顺序来写的？', '潮来前—潮来时—潮头过后', ['潮来时—潮来前—潮头过后', '潮头过后—潮来前—潮来时', '潮来前—潮头过后—潮来时']));
-    qs.push(mkFill('《观潮》的作者是____、____。', '赵宗成、朱明元'));
+    qs.push(mkChoice('《观潮》的作者是？', '赵宗成、朱明元', ['朱自清、老舍', '叶圣陶、巴金', '老舍、冰心']));
     qs.push(mkChoice('\'天下奇观\'的\'观\'意思是？', '景象', ['看', '观点', '观众']));
     qs.push(mkChoice('《走月亮》的作者是？', '吴然', ['老舍', '冰心', '巴金']));
     qs.push(mkChoice('《走月亮》中"走月亮"是（    ）的一种风俗。', '南方水乡', ['北方平原', '西北高原', '东北雪乡']));
@@ -3283,12 +3286,15 @@ function cn5x8_pool() {
 
     const questions = [];
     const used = new Set();
+    // v72：同题干不同答案的题（如词语积累里 12 道"下列哪组词语是近义词？"）必须都能进卷。
+    // 此前只按 question 去重，会把它们滤得只剩 1 道，导致卷子组不满 24 题且严重偏科。
+    function qkey(q) { return q.question + '|' + (q.answer == null ? '' : String(q.answer)); }
 
     // 第一部分 · 基础知识（10题）
     let taken = 0;
     shuffle(srcBase).forEach(function (q) {
-      if (taken >= 10 || used.has(q.question)) return;
-      used.add(q.question);
+      if (taken >= 10 || used.has(qkey(q))) return;
+      used.add(qkey(q));
       taken++;
       q.paperSection = '\u7B2C\u4E00\u90E8\u5206 \u00B7 \u57FA\u7840\u77E5\u8BC6';
       questions.push(q);
@@ -3305,29 +3311,53 @@ function cn5x8_pool() {
     keys.slice(0, 2).forEach(function (k) {
       let tk = 0;
       shuffle(groups[k]).forEach(function (q) {
-        if (tk >= 4 || used.has(q.question)) return;
-        used.add(q.question);
+        if (tk >= 4 || used.has(qkey(q))) return;
+        used.add(qkey(q));
         tk++;
         q.paperSection = '\u7B2C\u4E8C\u90E8\u5206 \u00B7 \u9605\u8BFB\u7406\u89E3';
         questions.push(q);
       });
     });
+    // v72：专项单元常凑不满 2 篇（分组要求 >=3 题），导致卷子只有 20 题。
+    // 这里用剩余阅读题把第二部分补到 8 题。
+    const readNow = questions.length - 10;
+    if (readNow < 8) {
+      let needR = 8 - readNow;
+      shuffle(srcRead).forEach(function (q) {
+        if (needR <= 0 || used.has(qkey(q))) return;
+        used.add(qkey(q));
+        q.paperSection = '\u7B2C\u4E8C\u90E8\u5206 \u00B7 \u9605\u8BFB\u7406\u89E3';
+        questions.push(q);
+        needR--;
+      });
+    }
 
     // 第三部分 · 积累与运用（6题）
     const p3 = [];
     shuffle(srcAcc).forEach(function (q) {
-      if (p3.length >= 6 || used.has(q.question)) return;
-      used.add(q.question);
+      if (p3.length >= 6 || used.has(qkey(q))) return;
+      used.add(qkey(q));
       p3.push(q);
     });
     if (p3.length < 6) {
       shuffle(srcBase).forEach(function (q) {
-        if (p3.length >= 6 || used.has(q.question)) return;
-        used.add(q.question);
+        if (p3.length >= 6 || used.has(qkey(q))) return;
+        used.add(qkey(q));
         p3.push(q);
       });
     }
     p3.forEach(function (q) { q.paperSection = '\u7B2C\u4E09\u90E8\u5206 \u00B7 \u79EF\u7D2F\u4E0E\u8FD0\u7528'; questions.push(q); });
+
+    // v72：收尾补齐到 24 题。专项单元题库较薄，三个分区都可能取不满，
+    // 这里用全池未用过的题补足，避免考试卷缺题。
+    if (questions.length < 24) {
+      shuffle(fallback).forEach(function (q) {
+        if (questions.length >= 24 || used.has(qkey(q))) return;
+        used.add(qkey(q));
+        q.paperSection = '\u7B2C\u56DB\u90E8\u5206 \u00B7 \u7EFC\u5408\u7EC3\u4E60';
+        questions.push(q);
+      });
+    }
 
     questions.forEach(function (q) {
       if (!q.section) q.section = '\u8BED\u6587\u8003\u8BD5';
