@@ -5865,7 +5865,7 @@ function figTrap(a,b,h){
 }
 // 圆：柔和填充 + 半径线（圆心→圆周，与 r 标注语义一致）+ 圆心 O
 function figCircle(r){
-  const cx=60,cy=52,R=r*7;
+  const cx=60, cy=50, R=Math.min(r*7, 46);
   let s=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`;
   s+=`<line x1="${cx}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="${FIG_GOLD}" stroke-width="1.6"/>`;
   s+=figDot(cx,cy)+figDot(cx+R,cy);
@@ -6043,13 +6043,13 @@ function figNumLine(n){
 }
 // 相遇线段图：两地相距 s 千米，甲乙两车（圆点）相向而行（相向箭头 + 距离标注）
 function figMeet(s){
-  const y=46, x0=26, x1=94;
+  const y=46, x0=30, x1=90;
   let g=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${FIG_STROKE}" stroke-width="2"/>`;
   g+=figDot(x0,y)+figDot(x1,y);
-  g+=`<circle cx="${x0-11}" cy="${y}" r="6" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.5"/>`;
-  g+=`<circle cx="${x1+11}" cy="${y}" r="6" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.5"/>`;
-  g+=`<text x="${x0-11}" y="${y-12}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">甲</text>`;
-  g+=`<text x="${x1+11}" y="${y-12}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">乙</text>`;
+  g+=`<circle cx="${x0}" cy="${y}" r="5" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1.5"/>`;
+  g+=`<circle cx="${x1}" cy="${y}" r="5" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.5"/>`;
+  g+=`<text x="${x0}" y="${y-12}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">甲</text>`;
+  g+=`<text x="${x1}" y="${y-12}" text-anchor="middle" font-size="9" font-weight="600" fill="${FIG_STROKE}">乙</text>`;
   g+=`<line x1="${x0+6}" y1="${y-10}" x2="${x0+22}" y2="${y-10}" stroke="${FIG_GOLD}" stroke-width="2.2" stroke-linecap="round"/>`;
   g+=`<path d="M ${x0+28} ${y-10} l -7 -4 l 0 8 z" fill="${FIG_GOLD}"/>`;
   g+=`<line x1="${x1-6}" y1="${y-10}" x2="${x1-22}" y2="${y-10}" stroke="${FIG_STROKE}" stroke-width="2.2" stroke-linecap="round"/>`;
@@ -6059,7 +6059,7 @@ function figMeet(s){
 }
 // 罗盘方位图：aDeg 为数学角（0°=东，90°=北/上），金色箭头从圆心指向该方向，含基准虚线与角度弧
 function figCompass(aDeg, label){
-  const cx=55, cy=58, R=30;
+  const cx=60, cy=55, R=28;
   const a=aDeg*Math.PI/180;
   const ex=(cx+R*Math.cos(a)).toFixed(1), ey=(cy-R*Math.sin(a)).toFixed(1);
   // 基准轴（南北方 + 东西向虚线）
@@ -6075,12 +6075,12 @@ function figCompass(aDeg, label){
   const ang=Math.atan2(ey-cy, ex-cx), hl=8, ha=Math.PI/7;
   g+=`<polygon points="${ex},${ey} ${(ex-hl*Math.cos(ang-ha)).toFixed(1)},${(ey-hl*Math.sin(ang-ha)).toFixed(1)} ${(ex-hl*Math.cos(ang+ha)).toFixed(1)},${(ey-hl*Math.sin(ang+ha)).toFixed(1)}" fill="${FIG_GOLD}"/>`;
   g+=`<circle cx="${cx}" cy="${cy}" r="2.2" fill="${FIG_STROKE}"/>`;
-  if(label) g+=`<text x="55" y="12" text-anchor="middle" font-size="10" font-weight="700" fill="${FIG_GOLD}">${label}</text>`;
+  if(label) g+=`<text x="60" y="12" text-anchor="middle" font-size="10" font-weight="700" fill="${FIG_GOLD}">${label}</text>`;
   return g;
 }
 // 正方形数图：n 层 L 形拼成 n×n 大正方形（1+3+5+…+(2n-1)=n²），层与层颜色交替
 function figSquareNum(n){
-  const s0=Math.min(13, Math.floor(64/n)), x0=Math.round(55-(n*s0)/2), y0=Math.round(56-(n*s0)/2);
+  const s0=Math.min(13, Math.floor(64/n)), x0=Math.round(55-(n*s0)/2), y0=Math.round(50-(n*s0)/2);
   let g='';
   for(let i=0;i<n;i++)for(let j=0;j<n;j++){
     const layer=Math.min(i,j); // 从左上数第 layer 层（0 起），该层含 2*layer+1 个小格
@@ -6140,11 +6140,12 @@ function svgArrow(x1,y1,x2,y2,col,w){
 }
 function svgClock(h,m){
   let ha=(h%12)*30+m*0.5, ma=m*6, s='';
-  s+=`<circle cx="60" cy="60" r="50" fill="#fff" stroke="#333" stroke-width="2"/>`;
-  for(let i=1;i<=12;i++){let a=i*30*Math.PI/180; s+=`<text x="${60+38*Math.sin(a)}" y="${60-38*Math.cos(a)+4}" text-anchor="middle" font-size="10">${i}</text>`}
-  s+=`<line x1="60" y1="60" x2="${60+25*Math.sin(ha*Math.PI/180)}" y2="${60-25*Math.cos(ha*Math.PI/180)}" stroke="#333" stroke-width="3" stroke-linecap="round"/>`;
-  s+=`<line x1="60" y1="60" x2="${60+40*Math.sin(ma*Math.PI/180)}" y2="${60-40*Math.cos(ma*Math.PI/180)}" stroke="#E57373" stroke-width="2" stroke-linecap="round"/>`;
-  s+=`<circle cx="60" cy="60" r="3" fill="#333"/>`;
+  const cx=60, cy=50, R=38, rNum=28, rHour=20, rMin=32;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#fff" stroke="#333" stroke-width="2"/>`;
+  for(let i=1;i<=12;i++){let a=i*30*Math.PI/180; s+=`<text x="${(cx+rNum*Math.sin(a)).toFixed(1)}" y="${(cy-rNum*Math.cos(a)+4).toFixed(1)}" text-anchor="middle" font-size="10">${i}</text>`}
+  s+=`<line x1="${cx}" y1="${cy}" x2="${(cx+rHour*Math.sin(ha*Math.PI/180)).toFixed(1)}" y2="${(cy-rHour*Math.cos(ha*Math.PI/180)).toFixed(1)}" stroke="#333" stroke-width="3" stroke-linecap="round"/>`;
+  s+=`<line x1="${cx}" y1="${cy}" x2="${(cx+rMin*Math.sin(ma*Math.PI/180)).toFixed(1)}" y2="${(cy-rMin*Math.cos(ma*Math.PI/180)).toFixed(1)}" stroke="#E57373" stroke-width="2" stroke-linecap="round"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="3" fill="#333"/>`;
   return s;
 }
 // 半圆量角器：0° 在右、90° 在上、180° 在左，带刻度与数字
@@ -6164,7 +6165,7 @@ function svgProtractor(cx, cy, R){
 }
 // 正确的角：从水平向右的射线起，逆时针（向上）张开 deg 度，并叠加量角器供读数
 function svgAngle(deg, showDeg){
-  let cx=60, cy=72, R=44, r=34;
+  let cx=60, cy=50, R=38, r=30;
   let s = svgProtractor(cx, cy, R);
   let a = Math.PI*deg/180, ex = cx + r*Math.cos(a), ey = cy - r*Math.sin(a);
   s += `<line x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#3E4A63" stroke-width="2.2" stroke-linecap="round"/>`;
@@ -7333,8 +7334,11 @@ function g3_fraction(){
 }
 function g3_rect(){
   let w=ri(3,10),h=ri(2,8);
+  const unit=Math.min(100/w, 70/h, 12);
+  const pw=w*unit, ph=Math.max(h*unit, 22);
+  const x0=(120-pw)/2, y0=(100-ph)/2+1;
   return msc(`下面长方形的周长是多少？(长${w}cm 宽${h}cm)`,
-    svgR(5,10,w*15,Math.max(h*10,20),'#BBDEFB')+svgTxt(5+w*15/2,8,w+'cm',9)+svgTxt(2,25,h+'cm',9),
+    svgR(x0,y0,pw,ph,'#BBDEFB')+svgTxt(x0+pw/2,y0-2,w+'cm',9)+svgTxt(x0-10,y0+ph/2+3,h+'cm',9),
     String(2*(w+h)),[String(w+h),String(w*h),String(2*(w+h)-1)]);
 }
 // ---- 三年级下册·位置与方向（含方向图） ----
@@ -7441,8 +7445,11 @@ function g3_div(){let a=ri(200,800),b=ri(2,9);if(a%b!==0)a+=b-a%b;return mc(`${a
 function g3_mul2(){let a=ri(15,50),b=ri(15,30);return mc(`${a}×${b}=？`,a*b,[a*b-5,a*b+5])}
 function g3_area(){
   let w=ri(3,10),h=ri(2,8);
+  const unit=Math.min(100/w, 70/h, 12);
+  const pw=w*unit, ph=Math.max(h*unit, 22);
+  const x0=(120-pw)/2, y0=(100-ph)/2+1;
   return msc(`下面长方形的面积是多少？(长${w}cm 宽${h}cm)`,
-    svgR(5,10,w*15,h*10,'#BBDEFB')+svgTxt(5+w*15/2,8,w+'cm',9)+svgTxt(2,15+h*5,w+'cm',9),
+    svgR(x0,y0,pw,ph,'#BBDEFB')+svgTxt(x0+pw/2,y0-2,w+'cm',9)+svgTxt(x0-10,y0+ph/2+3,h+'cm',9),
     String(w*h),[String(w+h),String(2*(w+h)),String(w*h-1)]);
 }
 function g3_decimal(){

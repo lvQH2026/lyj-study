@@ -389,6 +389,10 @@ ok('v62：圆柱与圆锥接入专属四段交互动图 + SW 缓存升级为 lyj
 ok('v63：长方体和正方体/多边形的面积/圆 接入专属四段交互动图 + SW 缓存升级为 lyj-shell-v63', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v63') && /diagCuboid/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagPolygonArea/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagCircleArea/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
 ok('v64：圆柱与圆锥新增侧面展开·表面积 tab（S侧=2πrh / S表=2πrh+2πr²）+ SW 缓存升级为 lyj-shell-v64', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v64') && /diagCylinderCone/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /侧面展开·表面积/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /S表 = 2πrh \+ 2πr²/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
 
+ok('v65：分数除法/比/比例/百分数（一）（二）/扇形统计图 接入推导复现四段交互动图 + SW 缓存升级为 lyj-shell-v65', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v65') && /diagFractionDiv/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagRatioDerive/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagPercentDerive/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /diagPieChartDerive/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) && /function diagPieChart\(container\)/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
+
+ok('v66：配图越界修复 + PC 端 svg 包裹修复 + SW 缓存升级为 lyj-shell-v66', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v66') && /svg viewBox="0 0 120 100"/.test(fs.readFileSync(path.join(ROOT, 'js/pc.js'), 'utf8')));
+
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));
 if (fail.length) { console.log('\n===== 失败 (' + fail.length + ') ====='); fail.forEach(f => console.log('  ✗ ' + f)); }

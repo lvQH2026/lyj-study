@@ -1985,6 +1985,448 @@ function diagCircleArea(container, opts){
   setTab('derive');
 }
 
+function diagFractionDiv(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F' };
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+  function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+  function frac(a,b){ if(b===0) return '0'; a=Math.round(a); b=Math.round(b); const g=gcd(a,b); a=a/g; b=b/g; if(b===1) return ''+a; return a+'/'+b; }
+  function toVal(v){ v=(''+v).trim(); if(v.indexOf('/')>=0){ const pa=v.split('/'); return (+pa[0])/(+pa[1]||1); } return +v; }
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '分数除法有个秘密：<b>除以一个数 = 乘这个数的倒数</b>。用条形模型把它推出来。');
+
+  const TABS=[{id:'bar',label:'等分除演示'},{id:'recip',label:'倒数推导'},{id:'calc',label:'除法计算'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){ for(const k in panels) panels[k].style.display=(k===id)?'block':'none'; TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id]; b.style.background=on?C.primary:'#fff'; b.style.color=on?'#fff':C.ink2; b.style.borderColor=on?C.primary:C.line; }); }
+  TABS.forEach(function(t){ const b=el('button','flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;',tabBar,t.label); b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b; panels[t.id]=el('div','',root); });
+  function cardOf(p,no,title){ const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p); if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card,no+' '+title); return card; }
+
+  /* ① 等分除演示 */
+  (function(){
+    const p=panels.bar;
+    const card=cardOf(p,'①','把 分数 平均分成几份（等分除）');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '把 <b>a/b</b> 平均分成 c 份，每份 = <b>a/(b·c)</b> = (a/b) × (1/c)。拖动滑块看看。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='104px'; return s; }
+    const aS=slider('分子 a',1,9,4), bS=slider('分母 b',2,10,5), cS=slider('分成 c 份',1,5,2);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:10px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 210',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const out=el('div','text-align:center;font-size:15.5px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function refresh(){ let a=+aS.value, b=+bS.value, c=+cS.value; if(a>b){ a=b; aS.value=b; } const cellW=Math.min(44, 470/b); const x0=40, y=100, h=46, totalW=cellW*b;
+      svg.innerHTML='';
+      svg.appendChild(svgEl('rect',{x:x0,y:y,width:totalW,height:h,fill:'#fff',stroke:C.line,'stroke-width':1.5,rx:6}));
+      for(let i=0;i<b;i++){ const cx=x0+i*cellW; svg.appendChild(svgEl('rect',{x:cx+1,y:y+1,width:cellW-2,height:h-2,fill:(i<a)?'#E7D6AE':'#fff',stroke:'#E8D9B8','stroke-width':1})); }
+      for(let g=1;g<c;g++){ const gx=x0+Math.round(a*g/c)*cellW; svg.appendChild(svgEl('line',{x1:gx,y1:y-7,x2:gx,y2:y+h+7,stroke:C.accent,'stroke-width':2})); }
+      txt(svg, x0, y-16, '1 个整体（'+b+' 等份，涂色的是 '+a+'/'+b+'）', 12, C.ink2, 600, 'start');
+      const oneW=Math.min(totalW, (a/c)*cellW);
+      svg.appendChild(svgEl('rect',{x:x0+1,y:y-3,width:Math.max(2,oneW),height:h+6,fill:'none',stroke:C.primary,'stroke-width':2.5,'stroke-dasharray':'4 3'}));
+      txt(svg, x0+oneW/2, y+h+24, '一份 = '+frac(a,b*c), 13, C.primary, 700);
+      out.innerHTML='<b>'+a+'/'+b+' ÷ '+c+'</b> = '+frac(a,b)+' × 1/'+c+' = <b style="color:'+C.goldDeep+'">'+frac(a,b*c)+'</b>';
+    }
+    [aS,bS,cS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ② 倒数推导 */
+  (function(){
+    const p=panels.recip;
+    const card=cardOf(p,'②','分数 ÷ 分数 = 乘倒数');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '除以一个分数 <b>c/d</b>，等于乘它的倒数 <b>d/c</b>（因为 (c/d)×(d/c)=1）。拖动看每一步。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='92px'; return s; }
+    const aS=slider('a',1,8,2), bS=slider('b',2,9,3), cS=slider('c',1,8,1), dS=slider('d',2,9,2);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const a=+aS.value,b=+bS.value,c=+cS.value,d=+dS.value;
+      out.innerHTML='<b>'+a+'/'+b+' ÷ '+c+'/'+d+'</b><br>= '+a+'/'+b+' × '+d+'/'+c+'　（乘倒数）<br>= '+(a*d)+'/'+(b*c)+' = <b style="color:'+C.goldDeep+'">'+frac(a*d,b*c)+'</b>';
+    }
+    [aS,bS,cS,dS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ③ 除法计算（综合）*/
+  (function(){
+    const p=panels.calc;
+    const card=cardOf(p,'③','算一算：分数除法');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '综合练习：被除数 a/b，除数可以是整数 n，也可以是分数 c/d。都变成“乘倒数”来算。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='86px'; return s; }
+    const aS=slider('a',1,9,3), bS=slider('b',2,9,4), nS=slider('整数除数 n',1,6,2), cS=slider('分数除数 c',1,6,1), dS=slider('d',2,7,2);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:15.5px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const a=+aS.value,b=+bS.value,n=+nS.value,c=+cS.value,d=+dS.value;
+      out.innerHTML='整数除：<b>'+a+'/'+b+' ÷ '+n+'</b> = '+a+'/'+b+' × 1/'+n+' = <b style="color:'+C.goldDeep+'">'+frac(a,b*n)+'</b><br>'+
+                    '分数除：<b>'+a+'/'+b+' ÷ '+c+'/'+d+'</b> = '+a+'/'+b+' × '+d+'/'+c+' = <b style="color:'+C.goldDeep+'">'+frac(a*d,b*c)+'</b>';
+    }
+    [aS,bS,nS,cS,dS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ④ 随堂挑战 */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战');
+    const Q=[
+      {q:'算一算：4/5 ÷ 2 = ？', a:0.4, hint:'4/5 × 1/2 = 4/10 = 2/5'},
+      {q:'算一算：2/3 ÷ 1/3 = ？', a:2, hint:'2/3 × 3/1 = 6/3 = 2'},
+      {q:'算一算：3/4 ÷ 3/8 = ？', a:2, hint:'3/4 × 8/3 = 24/12 = 2'}
+    ];
+    let qi=0, wrong=0; const box=el('div','',card);
+    function show(){ box.innerHTML=''; const it=Q[qi];
+      el('div','font-size:15px;font-weight:600;color:'+C.primary+';margin-bottom:10px;',box,'第 '+(qi+1)+' 题 / 共 '+Q.length+' 题');
+      el('div','font-size:14.5px;line-height:1.8;margin-bottom:12px;',box, it.q);
+      const inp=el('input',null,box); inp.type='text'; inp.style.cssText='width:160px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
+      const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
+      const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      bOk.onclick=function(){ const v=inp.value.trim(); if(Math.abs(toVal(v)-it.a)<0.01){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
+    }
+    show();
+  })();
+
+  setTab('bar');
+}
+
+function diagRatioDerive(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F' };
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+  function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+  function frac(a,b){ const g=gcd(a,b); a=a/g; b=b/g; if(b===1) return ''+a; return a+'/'+b; }
+  function normRatio(s){ s=(''+s).trim(); const m=s.match(/^(\d+)\s*[:：]\s*(\d+)$/); if(!m) return null; const a=+m[1], b=+m[2], g=gcd(a,b); return (a/g)+':'+(b/g); }
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '比表示两个量之间的关系：<b>a:b = a÷b</b>。还能化简、还能组成比例。');
+
+  const TABS=[{id:'bar',label:'比即分数'},{id:'simp',label:'化简比'},{id:'prop',label:'比例'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){ for(const k in panels) panels[k].style.display=(k===id)?'block':'none'; TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id]; b.style.background=on?C.primary:'#fff'; b.style.color=on?'#fff':C.ink2; b.style.borderColor=on?C.primary:C.line; }); }
+  TABS.forEach(function(t){ const b=el('button','flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;',tabBar,t.label); b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b; panels[t.id]=el('div','',root); });
+  function cardOf(p,no,title){ const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p); if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card,no+' '+title); return card; }
+
+  /* ① 比即分数 */
+  (function(){
+    const p=panels.bar;
+    const card=cardOf(p,'①','比就是“两个数相除”');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '前项 : 后项 = 前项 ÷ 后项。拖动看两量的条形和比值。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='104px'; return s; }
+    const aS=slider('前项 a',1,9,6), bS=slider('后项 b',1,9,4);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:10px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 200',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const out=el('div','text-align:center;font-size:15.5px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function refresh(){ const a=+aS.value, b=+bS.value; const maxV=Math.max(a,b,1); const uw=420/maxV; const x0=60;
+      svg.innerHTML='';
+      const hA=70, yA=40; svg.appendChild(svgEl('rect',{x:x0,y:yA,width:a*uw,height:hA,fill:'#E7D6AE',stroke:C.goldDeep,'stroke-width':1.5,rx:6}));
+      const hB=70, yB=130; svg.appendChild(svgEl('rect',{x:x0,y:yB,width:b*uw,height:hB,fill:'#CDD6E6',stroke:C.primary,'stroke-width':1.5,rx:6}));
+      txt(svg, x0-12, yA+hA/2, 'a', 13, C.primary, 700, 'end'); txt(svg, x0+a*uw+8, yA+hA/2, ''+a, 13, C.goldDeep, 700, 'start');
+      txt(svg, x0-12, yB+hB/2, 'b', 13, C.primary, 700, 'end'); txt(svg, x0+b*uw+8, yB+hB/2, ''+b, 13, C.primary, 700, 'start');
+      out.innerHTML='<b>a : b = '+a+' : '+b+'</b> = '+a+' ÷ '+b+' = <b style="color:'+C.goldDeep+'">'+(a/b).toFixed(3).replace(/\.?0+$/,'')+'</b>　（即 '+frac(a,b)+'）';
+    }
+    [aS,bS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ② 化简比 */
+  (function(){
+    const p=panels.simp;
+    const card=cardOf(p,'②','化简比：同除以最大公因数');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       'a:b 的前、后项同时除以它们的最大公因数，得到最简整数比。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='104px'; return s; }
+    const aS=slider('前项 a',2,18,12), bS=slider('后项 b',2,18,8);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const a=+aS.value, b=+bS.value, g=gcd(a,b);
+      out.innerHTML='<b>'+a+' : '+b+'</b> = ('+a+'÷'+g+') : ('+b+'÷'+g+') = <b style="color:'+C.goldDeep+'">'+(a/g)+' : '+(b/g)+'</b>';
+    }
+    [aS,bS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ③ 比例 */
+  (function(){
+    const p=panels.prop;
+    const card=cardOf(p,'③','比例：比值相等');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       'a:b = c:d 表示两组比的比值相等。拖动放大倍数 k，看第二组怎么放大。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='100px'; return s; }
+    const aS=slider('a',1,6,2), bS=slider('b',1,6,3), kS=slider('放大 k',1,4,2);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:10px;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 560 200',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
+    const out=el('div','text-align:center;font-size:15.5px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function refresh(){ const a=+aS.value,b=+bS.value,k=+kS.value,c=a*k,d=b*k; const uw=380/Math.max(c,d,1); const x0=50;
+      svg.innerHTML='';
+      const yA=50; svg.appendChild(svgEl('rect',{x:x0,y:yA,width:a*uw,height:46,fill:'#E7D6AE',stroke:C.goldDeep,'stroke-width':1.5,rx:6}));
+      svg.appendChild(svgEl('rect',{x:x0+a*uw,y:yA,width:b*uw,height:46,fill:'#CDD6E6',stroke:C.primary,'stroke-width':1.5,rx:6}));
+      const yB=130; svg.appendChild(svgEl('rect',{x:x0,y:yB,width:c*uw,height:46,fill:'#E7D6AE',stroke:C.goldDeep,'stroke-width':1.5,rx:6}));
+      svg.appendChild(svgEl('rect',{x:x0+c*uw,y:yB,width:d*uw,height:46,fill:'#CDD6E6',stroke:C.primary,'stroke-width':1.5,rx:6}));
+      txt(svg, x0-10, yA+23, 'a', 13, C.primary, 700, 'end'); txt(svg, x0+a*uw-6, yA+23, ''+a, 12, C.goldDeep, 700, 'end');
+      txt(svg, x0+a*uw+6, yA+23, ''+b, 12, C.primary, 700, 'start');
+      txt(svg, x0-10, yB+23, 'c', 13, C.primary, 700, 'end'); txt(svg, x0+c*uw-6, yB+23, ''+c, 12, C.goldDeep, 700, 'end');
+      txt(svg, x0+c*uw+6, yB+23, ''+d, 12, C.primary, 700, 'start');
+      out.innerHTML='<b>'+a+' : '+b+' = '+c+' : '+d+'</b>　比值都是 <b style="color:'+C.goldDeep+'">'+(a/b).toFixed(3).replace(/\.?0+$/,'')+'</b>';
+    }
+    [aS,bS,kS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
+  })();
+
+  /* ④ 随堂挑战 */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战');
+    const Q=[
+      {q:'把 6:4 化成最简整数比（写 a:b）', a:'3:2', hint:'同除以 2'},
+      {q:'2:3 = 4:？ （填后项）', a:3, hint:'2:3 前后同乘 2 得 4:6'},
+      {q:'a:b = 2:3，若 a=8，则 b = ？', a:12, hint:'2:3 = 8:12'}
+    ];
+    let qi=0, wrong=0; const box=el('div','',card);
+    function show(){ box.innerHTML=''; const it=Q[qi];
+      el('div','font-size:15px;font-weight:600;color:'+C.primary+';margin-bottom:10px;',box,'第 '+(qi+1)+' 题 / 共 '+Q.length+' 题');
+      el('div','font-size:14.5px;line-height:1.8;margin-bottom:12px;',box, it.q);
+      const inp=el('input',null,box); inp.type='text'; inp.style.cssText='width:160px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
+      const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
+      const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      bOk.onclick=function(){ const v=inp.value.trim(); let ok=false;
+        if(typeof it.a==='string'){ const nv=normRatio(v), na=normRatio(it.a); ok = nv&&na&&nv===na; }
+        else { ok = Math.abs(+v-it.a)<0.01; }
+        if(ok){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } }
+        else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); }
+      };
+      bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
+    }
+    show();
+  })();
+
+  setTab('bar');
+}
+
+function diagPercentDerive(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F' };
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+  function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+  function frac(a,b){ const g=gcd(a,b); a=a/g; b=b/g; if(b===1) return ''+a; return a+'/'+b; }
+  function fracStr(s){ s=(''+s).trim(); if(s.indexOf('/')>=0){ const pa=s.split('/'); const a=+pa[0], b=+pa[1]; if(!b) return null; return frac(a,b); } return (Math.round(+s*100)/100)+''; }
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '百分数就是“百分之几”：<b>p% = p/100</b>。一张 100 格图就够了。');
+
+  const TABS=[{id:'grid',label:'百分格模型'},{id:'frac',label:'百分数↔分数'},{id:'dec',label:'百分数↔小数'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){ for(const k in panels) panels[k].style.display=(k===id)?'block':'none'; TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id]; b.style.background=on?C.primary:'#fff'; b.style.color=on?'#fff':C.ink2; b.style.borderColor=on?C.primary:C.line; }); }
+  TABS.forEach(function(t){ const b=el('button','flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;',tabBar,t.label); b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b; panels[t.id]=el('div','',root); });
+  function cardOf(p,no,title){ const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p); if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card,no+' '+title); return card; }
+
+  /* ① 百分格模型 */
+  (function(){
+    const p=panels.grid;
+    const card=cardOf(p,'①','100 格图 = 百分数');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '涂满 p 格就是 p%。百分号“%”就是“每一百”。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,'百分数 p'); const pS=el('input',null,w); pS.type='range'; pS.min=1; pS.max=100; pS.value=46; pS.style.width='160px'; w.appendChild(pS);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:10px;display:flex;justify-content:center;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 240 240',style:'width:240px;height:240px;display:block;'}); stage.appendChild(svg);
+    const out=el('div','text-align:center;font-size:15.5px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function refresh(){ const p=+pS.value; const cell=24, gx=0, gy=0; svg.innerHTML='';
+      for(let r=0;r<10;r++) for(let c=0;c<10;c++){ const idx=r*10+c+1; const fill=(idx<=p)?'#E7D6AE':'#fff'; svg.appendChild(svgEl('rect',{x:gx+c*cell,y:gy+r*cell,width:cell-1,height:cell-1,fill:fill,stroke:'#E8D9B8','stroke-width':1})); }
+      out.innerHTML='涂了 <b>'+p+'</b> 格 → <b style="color:'+C.goldDeep+'">'+p+'%</b> = '+p+'/100';
+    }
+    pS.addEventListener('input',refresh); refresh();
+  })();
+
+  /* ② 百分数↔分数 */
+  (function(){
+    const p=panels.frac;
+    const card=cardOf(p,'②','百分数 写成分数');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       'p% = p/100，再约分。拖动看它怎么化成分数。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,'百分数 p'); const pS=el('input',null,w); pS.type='range'; pS.min=1; pS.max=100; pS.value=25; pS.style.width='160px'; w.appendChild(pS);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const p=+pS.value;
+      out.innerHTML='<b>'+p+'%</b> = '+p+'/100 = <b style="color:'+C.goldDeep+'">'+frac(p,100)+'</b>';
+    }
+    pS.addEventListener('input',refresh); refresh();
+  })();
+
+  /* ③ 百分数↔小数 */
+  (function(){
+    const p=panels.dec;
+    const card=cardOf(p,'③','百分数 写成小数');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       'p% = p/100 = 0.p（把小数点左移两位）。也试试小数→百分数。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,'百分数 p'); const pS=el('input',null,w); pS.type='range'; pS.min=1; pS.max=100; pS.value=75; pS.style.width='160px'; w.appendChild(pS);
+    const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
+    function refresh(){ const p=+pS.value;
+      out.innerHTML='<b>'+p+'%</b> = '+p+'/100 = <b style="color:'+C.goldDeep+'">'+(p/100).toFixed(2).replace(/\.?0+$/,'')+'</b><br>（反过来：'+(p/100).toFixed(2).replace(/\.?0+$/,'')+' = '+p+'%）';
+    }
+    pS.addEventListener('input',refresh); refresh();
+  })();
+
+  /* ④ 随堂挑战 */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战');
+    const Q=[
+      {q:'把 25% 写成分数（最简）', a:'1/4', hint:'25/100 = 1/4'},
+      {q:'0.35 写成百分数 = ？', a:35, hint:'0.35 = 35/100 = 35%'},
+      {q:'把 3/5 写成百分数 = ？', a:60, hint:'3/5 = 60/100 = 60%'}
+    ];
+    let qi=0, wrong=0; const box=el('div','',card);
+    function show(){ box.innerHTML=''; const it=Q[qi];
+      el('div','font-size:15px;font-weight:600;color:'+C.primary+';margin-bottom:10px;',box,'第 '+(qi+1)+' 题 / 共 '+Q.length+' 题');
+      el('div','font-size:14.5px;line-height:1.8;margin-bottom:12px;',box, it.q);
+      const inp=el('input',null,box); inp.type='text'; inp.style.cssText='width:160px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
+      const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
+      const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:'#fff';font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:'#fff';color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      bOk.onclick=function(){ const v=inp.value.trim().replace('%','').replace('％',''); let ok=false;
+        if(typeof it.a==='string'){ const f1=fracStr(v), f2=fracStr(it.a); ok = f1&&f2&&f1===f2; }
+        else { ok = Math.abs(+v-it.a)<0.01; }
+        if(ok){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } }
+        else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); }
+      };
+      bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
+    }
+    show();
+  })();
+
+  setTab('grid');
+}
+
+function diagPieChartDerive(container, opts){
+  opts = opts || {};
+  const C = { primary:'#3E4A63', gold:'#B4945A', goldDeep:'#9A7B42', goldSoft:'#FCF9F2',
+              line:'#E8E2D6', ink2:'#6B7590', success:'#4E8C6E', accent:'#C2554F' };
+  function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg', tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function el(tag, st, parent, html){ const e=document.createElement(tag); if(st) e.style.cssText=st; if(parent) parent.appendChild(e); if(html!=null) e.innerHTML=html; return e; }
+  function txt(parent,x,y,s,size,fill,weight,anchor){ const t=svgEl('text',{x:x,y:y,'font-size':size,fill:fill,'font-weight':weight||400,'text-anchor':anchor||'middle'}); t.textContent=s; parent.appendChild(t); return t; }
+  function tween(from,to,dur,onStep,onDone){ const t0=(window.performance&&performance.now)?performance.now():Date.now(); function frame(now){ const k=Math.min(1,(now-t0)/dur); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; onStep(from+(to-from)*e); if(k<1) requestAnimationFrame(frame); else if(onDone) onDone(); } requestAnimationFrame(frame); }
+  function arcPath(cx,cy,r,startDeg,endDeg){ const PI=Math.PI/180; const s=startDeg*PI, en=endDeg*PI; const x1=cx+r*Math.cos(s), y1=cy+r*Math.sin(s), x2=cx+r*Math.cos(en), y2=cy+r*Math.sin(en); const large=(endDeg-startDeg)>180?1:0; return 'M'+cx+','+cy+' L'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 '+large+' 1 '+x2.toFixed(2)+','+y2.toFixed(2)+' Z'; }
+  const PAL=['#E7D6AE','#CDD6E6','#D8C7E0','#C9E0D2','#E8C9C2'];
+
+  container.innerHTML='';
+  const root = el('div', 'font-family:inherit;color:'+C.primary+';', container);
+  el('div', 'font-size:13px;color:'+C.ink2+';line-height:1.7;margin-bottom:10px;', root,
+     '扇形统计图的每一块，角度 = <b>360° × 百分比</b>。拖一拖就明白。');
+
+  const TABS=[{id:'angle',label:'圆心角推导'},{id:'draw',label:'画扇形'},{id:'read',label:'读图'},{id:'quiz',label:'随堂挑战'}];
+  const tabBar = el('div', 'display:flex;gap:6px;margin-bottom:12px;', root);
+  const panels={}; const tabBtns={};
+  function setTab(id){ for(const k in panels) panels[k].style.display=(k===id)?'block':'none'; TABS.forEach(function(t){ const on=(t.id===id); const b=tabBtns[t.id]; b.style.background=on?C.primary:'#fff'; b.style.color=on?'#fff':C.ink2; b.style.borderColor=on?C.primary:C.line; }); }
+  TABS.forEach(function(t){ const b=el('button','flex:1;min-height:48px;border:1px solid '+C.line+';background:#fff;border-radius:12px;color:'+C.ink2+';font-size:14px;font-weight:600;cursor:pointer;',tabBar,t.label); b.onclick=function(){ setTab(t.id); }; tabBtns[t.id]=b; panels[t.id]=el('div','',root); });
+  function cardOf(p,no,title){ const card=el('div','background:#fff;border:1px solid '+C.line+';border-radius:16px;padding:16px;margin-bottom:12px;',p); if(title) el('div','font-size:16px;font-weight:700;margin-bottom:8px;',card,no+' '+title); return card; }
+
+  /* ① 圆心角推导 */
+  (function(){
+    const p=panels.angle;
+    const card=cardOf(p,'①','百分比 → 圆心角');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '整个圆 360°。占 p% 的那一块，圆心角 = 360 × p%。');
+    const ctrl=el('div','display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;',card);
+    const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,'百分比 p'); const pS=el('input',null,w); pS.type='range'; pS.min=5; pS.max=95; pS.value=25; pS.style.width='160px'; w.appendChild(pS);
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:10px;display:flex;justify-content:center;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 320 320',style:'width:280px;height:280px;display:block;'}); stage.appendChild(svg);
+    const out=el('div','text-align:center;font-size:15.5px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
+    function refresh(){ const p=+pS.value, ang=360*p/100; const cx=160, cy=160, r=110; svg.innerHTML='';
+      svg.appendChild(svgEl('circle',{cx:cx,cy:cy,r:r,fill:'#fff',stroke:C.line,'stroke-width':1.5}));
+      svg.appendChild(svgEl('path',{d:arcPath(cx,cy,r,0,ang),fill:'#E7D6AE',stroke:C.goldDeep,'stroke-width':1.5}));
+      svg.appendChild(svgEl('path',{d:arcPath(cx,cy,34,0,ang),fill:'none',stroke:C.accent,'stroke-width':2}));
+      txt(svg, cx, cy-14, 'p%', 14, C.primary, 700);
+      txt(svg, cx, cy+8, ''+p+'%', 16, C.goldDeep, 700);
+      const mid=ang/2*Math.PI/180; const lx=cx+(r+30)*Math.cos(mid), ly=cy+(r+30)*Math.sin(mid);
+      txt(svg, lx, ly, ang.toFixed(0)+'°', 15, C.accent, 700);
+      out.innerHTML='圆心角 = 360° × '+p+'% = <b style="color:'+C.goldDeep+'">'+ang.toFixed(0)+'°</b>';
+    }
+    pS.addEventListener('input',refresh); refresh();
+  })();
+
+  /* ② 画扇形 */
+  (function(){
+    const p=panels.draw;
+    const card=cardOf(p,'②','按比例画出整张图');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '各块百分比之和 = 100%，对应的圆心角之和 = 360°。');
+    const data=[{n:'苹果',v:40},{n:'香蕉',v:30},{n:'橘子',v:20},{n:'其他',v:10}];
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:10px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:center;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 320 280',style:'width:240px;height:210px;display:block;'}); stage.appendChild(svg);
+    const lg=el('div','font-size:13.5px;line-height:2;color:'+C.primary+';',stage,'');
+    svg.innerHTML=''; const cx=130, cy=130, r=100; let start=0;
+    data.forEach(function(d,i){ const ang=360*d.v/100; svg.appendChild(svgEl('path',{d:arcPath(cx,cy,r,start,start+ang),fill:PAL[i%PAL.length],stroke:'#fff','stroke-width':1.5}));
+      const mid=(start+ang/2)*Math.PI/180; const lx=cx+(r*0.62)*Math.cos(mid), ly=cy+(r*0.62)*Math.sin(mid); txt(svg, lx, ly, d.v+'%', 12.5, C.primary, 700); start+=ang; });
+    data.forEach(function(d,i){ const le=el('div','',lg, '■ '+d.n+'：'+d.v+'%（'+(360*d.v/100).toFixed(0)+'°）'); le.style.color=C.primary; });
+  })();
+
+  /* ③ 读图 */
+  (function(){
+    const p=panels.read;
+    const card=cardOf(p,'③','从图里读出百分比');
+    el('div','font-size:13.5px;color:'+C.ink2+';line-height:1.8;margin-bottom:10px;',card,
+       '看下面这张图，最大的那块是哪种？它占百分之几？');
+    const data=[{n:'步行',v:35},{n:'骑车',v:25},{n:'公交',v:25},{n:'地铁',v:15}];
+    const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:10px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:center;',card);
+    const svg=svgEl('svg',{viewBox:'0 0 320 280',style:'width:240px;height:210px;display:block;'}); stage.appendChild(svg);
+    const lg=el('div','font-size:13.5px;line-height:2;color:'+C.primary+';',stage,'');
+    svg.innerHTML=''; const cx=130, cy=130, r=100; let start=0;
+    data.forEach(function(d,i){ const ang=360*d.v/100; svg.appendChild(svgEl('path',{d:arcPath(cx,cy,r,start,start+ang),fill:PAL[i%PAL.length],stroke:'#fff','stroke-width':1.5}));
+      const mid=(start+ang/2)*Math.PI/180; const lx=cx+(r*0.62)*Math.cos(mid), ly=cy+(r*0.62)*Math.sin(mid); txt(svg, lx, ly, d.v+'%', 12.5, C.primary, 700); start+=ang; });
+    data.forEach(function(d,i){ const le=el('div','',lg, '■ '+d.n+'：'+d.v+'%'); le.style.color=C.primary; });
+  })();
+
+  /* ④ 随堂挑战 */
+  (function(){
+    const p=panels.quiz;
+    const card=cardOf(p,'④','随堂挑战');
+    const Q=[
+      {q:'25% 对应的圆心角是几度？', a:90, hint:'360 × 25% = 90'},
+      {q:'半圆（50%）的圆心角是几度？', a:180, hint:'360 × 50% = 180'},
+      {q:'一块占 25%、一块占 25%、一块占 50%，最大那块圆心角几度？', a:180, hint:'50% → 360×50%=180'}
+    ];
+    let qi=0, wrong=0; const box=el('div','',card);
+    function show(){ box.innerHTML=''; const it=Q[qi];
+      el('div','font-size:15px;font-weight:600;color:'+C.primary+';margin-bottom:10px;',box,'第 '+(qi+1)+' 题 / 共 '+Q.length+' 题');
+      el('div','font-size:14.5px;line-height:1.8;margin-bottom:12px;',box, it.q);
+      const inp=el('input',null,box); inp.type='text'; inp.style.cssText='width:160px;height:46px;font-size:18px;padding:4px 10px;border:1px solid '+C.line+';border-radius:10px;';
+      const fb=el('div','font-size:13.5px;margin-top:10px;min-height:20px;',box,'');
+      const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
+      const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:'#fff';font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
+      const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:'#fff';color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
+      bOk.onclick=function(){ const v=inp.value.trim().replace('°','').replace('度',''); if(Math.abs(+v-it.a)<0.01){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
+    }
+    show();
+  })();
+
+  setTab('angle');
+}
+
 function getUnitDiagrams(unit, grade, sem){
   const name = unit.name || '';
   const type = unit.type || '';
@@ -2002,6 +2444,17 @@ function getUnitDiagrams(unit, grade, sem){
   if (name === '多边形的面积') { add(out, diagPolygonArea, '多边形的面积（剪拼推导·计算·挑战）', {}, '👆 点标签切换：平行四边形 / 三角·梯形 / 面积计算 / 随堂挑战'); return out; }
   // ===== 圆：专属四段交互动图（剪拼成长方形·计算·挑战）=====
   if (name === '圆') { add(out, diagCircleArea, '圆的面积（剪拼成长方形·计算·挑战）', {}, '👆 点标签切换：剪拼成长方形 / 周长与面积 / 圆环与半圆 / 随堂挑战'); return out; }
+
+  // ===== 分数除法：推导复现四段交互动图（等分除·倒数推导·计算·挑战）=====
+  if (name === '分数除法') { add(out, diagFractionDiv, '分数除法（等分除·倒数推导·计算·挑战）', {}, '👆 点标签切换：等分除演示 / 倒数推导 / 除法计算 / 随堂挑战'); return out; }
+  // ===== 比 / 比例：推导复现四段交互动图（比即分数·化简·比例·挑战）=====
+  if (name === '比') { add(out, diagRatioDerive, '比（比即分数·化简·比例·挑战）', {}, '👆 点标签切换：比即分数 / 化简比 / 比例 / 随堂挑战'); return out; }
+  if (name === '比例') { add(out, diagRatioDerive, '比例（比值相等·化简·挑战）', {}, '👆 点标签切换：比即分数 / 化简比 / 比例 / 随堂挑战'); return out; }
+  // ===== 百分数：推导复现四段交互动图（百分格·分数·小数·挑战）=====
+  if (name === '百分数（一）') { add(out, diagPercentDerive, '百分数（百分格·分数·小数·挑战）', {}, '👆 点标签切换：百分格模型 / 百分数↔分数 / 百分数↔小数 / 随堂挑战'); return out; }
+  if (name === '百分数（二）') { add(out, diagPercentDerive, '百分数（百分格·分数·小数·挑战）', {}, '👆 点标签切换：百分格模型 / 百分数↔分数 / 百分数↔小数 / 随堂挑战'); return out; }
+  // ===== 扇形统计图：推导复现四段交互动图（圆心角·画扇形·读图·挑战）=====
+  if (name === '扇形统计图') { add(out, diagPieChartDerive, '扇形统计图（圆心角·画扇形·读图·挑战）', {}, '👆 点标签切换：圆心角推导 / 画扇形 / 读图 / 随堂挑战'); return out; }
 
   // ===== 专属交互动图（补齐此前只走兜底的单元）=====
   if (/生活应用题/.test(name)) { add(out, diagWordProblem, '看图列式（部分—整体）', {}, '👆 拖动滑块改变“已知”数量，看算式'); dedicated = true; }

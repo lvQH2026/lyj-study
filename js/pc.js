@@ -740,7 +740,7 @@
     if (item.passage) h += '<div class="pc-passage">' + item.passage + '</div>';
     if (item.paperSection) h += '<div class="pc-section-banner">' + esc(item.paperSection) + '</div>';
     h += '<div class="pc-q-text">' + esc(item.question) + '</div>';
-    if (item.svg) h += '<div class="pc-q-svg">' + item.svg + '</div>';
+    if (item.svg) h += '<div class="pc-q-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + item.svg + '</svg></div>';
     if (item.type === 'choice' || item.type === 'judge') {
       h += '<div class="pc-options" id="pcOpts">';
       (item.options || []).forEach(function (opt, oi) {
@@ -950,7 +950,7 @@
       h += '<div class="pc-wrong-item"><div class="pc-wrong-meta">' + esc(it.unitName || '') + (it.grade ? ' · ' + it.grade + '年级' : '') + (it.module ? ' · ' + it.module : '') + '</div>';
       if (q.passage) h += '<div class="pc-passage">' + q.passage + '</div>';
       h += '<div class="pc-wrong-stem">' + esc(q.question) + '</div>';
-      if (q.svg) h += '<div class="pc-wrong-svg">' + q.svg + '</div>';
+      if (q.svg) h += '<div class="pc-wrong-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + q.svg + '</svg></div>';
       h += '<div class="pc-wrong-ans">你的答案：<span class="me">' + esc(ua) + '</span>　正确答案：<span class="ok">' + esc(q.answer) + '</span></div>';
       if (q.explain) h += '<div class="pc-wrong-explain">解析：' + esc(q.explain) + '</div>';
       h += '</div>';

@@ -1,6 +1,6 @@
 // 吕泳冀学习站 Service Worker
-// v64：圆柱与圆锥单元新增「侧面展开·表面积」tab（沿高剪开→侧面展开成长方形→S侧=2πrh→加两底面得 S表=2πrh+2πr²），与已上线体积推导成组。diagram.js 在 SHELL 内，升版本强制重装
-const CACHE = 'lyj-shell-v64';
+// v66：全量配图体检并修复 195 个越界 SVG：钟表/行程/长方形/量角器/圆/方位/正方形数等居中/缩放；PC 端 pc.js 给 svg 补 <svg viewBox> 与 pc.css 尺寸，解决 PC 带图题空白。
+const CACHE = 'lyj-shell-v66';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

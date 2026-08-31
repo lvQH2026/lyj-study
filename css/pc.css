@@ -360,6 +360,8 @@ a { color: inherit; }
 .pc-section-banner::before { content: ""; width: 4px; height: 18px; background: var(--gold); border-radius: 2px; }
 .pc-q-text { font-size: 18px; font-weight: 600; line-height: 1.75; margin-bottom: 20px; color: var(--ink); }
 .pc-q-svg { margin: 10px 0 20px; }
+.pc-q-svg svg { width: 220px; height: 184px; display: block; }
+.pc-wrong-svg svg { width: 180px; height: 150px; display: block; }
 
 .pc-options { display: flex; flex-direction: column; gap: 12px; }
 .pc-opt {
