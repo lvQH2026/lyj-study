@@ -5982,11 +5982,17 @@ function figRotate(){
 }
 // 分数条：d 等份长条中前 n 份涂阴影
 function figFracBar(n,d){
-  const x0=20,y0=38,w=80,h=24,cw=w/d;
-  let s=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="1.8"/>`;
+  // v83s: 防御性自适应 —— 当 d 较大时按比例放大画布宽度（上限 100），
+  // 并降低描边宽度，保证每份至少 3px 可分辨填充。
+  // 原版在 d=24 时 cw=3.3px 描边已啃掉 70% 填充；d≥40 视觉崩溃成密集竖线。
+  const MIN_CW=3, W_MAX=100, W_MIN=80;
+  const w=Math.min(W_MAX, Math.max(W_MIN, d*MIN_CW));
+  const x0=20, y0=38, h=24, cw=w/d;
+  const strokeW=cw>=6?1:0.6, outlineW=1.2;
+  let s=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="${FIG_FILL2}" stroke="${FIG_STROKE}" stroke-width="${outlineW}"/>`;
   for(let i=0;i<d;i++){
-    if(i<n) s+=`<rect x="${(x0+i*cw).toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${h}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
-    else if(i>0) s+=`<line x1="${(x0+i*cw).toFixed(1)}" y1="${y0}" x2="${(x0+i*cw).toFixed(1)}" y2="${y0+h}" stroke="${FIG_STROKE}" stroke-width="1"/>`;
+    if(i<n) s+=`<rect x="${(x0+i*cw).toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${h}" fill="${FIG_FILL}" stroke="${FIG_STROKE}" stroke-width="${strokeW}"/>`;
+    else if(i>0) s+=`<line x1="${(x0+i*cw).toFixed(1)}" y1="${y0}" x2="${(x0+i*cw).toFixed(1)}" y2="${y0+h}" stroke="${FIG_STROKE}" stroke-width="${strokeW}"/>`;
   }
   return s;
 }
@@ -8764,7 +8770,7 @@ function g5_fraction(){
   const f1=ri(1,bd-1); let f2=ri(1,bd-1); while(f2===f1) f2=ri(1,bd-1);
   const big=Math.max(f1,f2), small=Math.min(f1,f2);
   let items=[
-    {s:figFracBar(na*k,nb*k),q:`图中阴影部分占几分之几？（约成最简分数）`,a:`${na}/${nb}`,d:[q1,`${na*k+1}/${nb*k}`,`${nb-na}/${nb}`]},
+    {s:figFracBar(na,nb),q:'图中阴影部分占几分之几？',a:`${na}/${nb}`,d:[q1,`${na*k+1}/${nb*k}`,`${nb-na}/${nb}`]},
     {s:figFracPie(na,nb),q:'图中阴影部分占几分之几？',a:`${na}/${nb}`,d:[`${nb-na}/${nb}`,`${na}/${nb-na}`,`${na+1}/${nb}`]},
     {q:`约分：${q1} = ？`,a:`${na}/${nb}`,d:[`${na*k}/${nb*k+1}`,`${na*k+1}/${nb*k}`,`${nb}/${na}`]},
     {q:`与${na}/${nb}相等的分数是？`,a:q1,d:[`${na+1}/${nb+1}`,`${na*k}/${nb*k+1}`,`${na*k+1}/${nb*k}`]},

@@ -98,7 +98,20 @@
 //     ③ getQuestionTypeTag 在 forceFill=false 时按真实类型显示，
 //        标签「选择题」或「图形题」与 4 个选项按钮对齐，孩子看到不再困惑
 //   验收：_smoke_v83r.js 10/10 PASS；5 卷抽样填空区选择题 forceFill=0；真机截图确认选项完整渲染
-const CACHE = 'lyj-shell-v83r';
+// v83s：修复 5下「图中阴影部分占几分之几」图形不清晰（密集竖线条）
+//   根因：math.js figFracBar(n, d) 在 d≥24 时每份宽度 cw=w/d 仅 1.1~3.3px，被 1px 描边完全吞没；
+//         d=72 时图形退化为 66 条密集竖线条，看不出阴影与未阴影对比。
+//         同时 g5_fraction() 第 8767 行 s:figFracBar(na*k, nb*k) 在 k∈[2..6] 时
+//         最坏情况 nb*k=12×6=72 份，必然触发该崩溃。
+//   修复：
+//     ① g5_fraction() 第 8767 行调用从 (na*k, nb*k) 改回 (na, nb) — 用最简分数画图，
+//        题面去掉「（约成最简分数）」括号提示，约分考点交由第 8774 行「3/9约分等于？」独立覆盖；
+//     ② figFracBar 函数做防御性自适应：cw<3 时按比例放大 w 到上限 100（viewBox 120 物理约束），
+//        描边宽度从 1.0 降至 0.6（cw≥6 时仍 1.0 保持原观感）；
+//        兜底未来其他调用点意外传大 d 时不至于崩成密集竖线。
+//   验收：_smoke_v83s.js 9/9 PASS（含极端 d=72 描边占比从 90%+ 降至 43%）；
+//         真机截图 _v83s_quiz_repaired.png 显示清晰的 1/3 三段图。
+const CACHE = 'lyj-shell-v83s';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
