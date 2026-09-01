@@ -111,7 +111,20 @@
 //        兜底未来其他调用点意外传大 d 时不至于崩成密集竖线。
 //   验收：_smoke_v83s.js 9/9 PASS（含极端 d=72 描边占比从 90%+ 降至 43%）；
 //         真机截图 _v83s_quiz_repaired.png 显示清晰的 1/3 三段图。
-const CACHE = 'lyj-shell-v83s';
+
+// ============================================================
+// v83t · 修复判断题派生丢图
+//   用户实考截图：5下期中考试第 13 题「图中阴影部分占几分之几？7/12」+ 选项 A正确/B错误
+//               —— 派生自「图中阴影部分占几分之几？」原题，但派生时丢了 svg 配图。
+//   根因：deriveJudgeQuestions() push 的判断题对象只拷了 _unitType/_unitName/_core，**没拷 svg**；
+//        且 judgeStatement() 也不拒绝「图中阴影|看图|上图|下图|左图|右图」等强图依赖题面
+//        —— 派生后题面文字里仍写「图中」「上图」，但孩子看不到图。
+//   修复（math.js）：
+//     ① deriveJudgeQuestions() 派生时透传 q.svg，并加 _origQ 字段便于回溯源题；
+//     ② judgeStatement() 拒绝「图中阴影|看图|上图|下图|左图|右图」题面，强图依赖题不再派生。
+//   验收：_smoke_v83t.js 14/14 PASS；真机 5 下期中考试判断题区（30 题）扫描
+//         「图中…题面 + 缺图」组合剩余 = 0，全部变成「X 是 Y」纯文本陈述句。
+const CACHE = 'lyj-shell-v83t';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

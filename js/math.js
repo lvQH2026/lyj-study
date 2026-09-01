@@ -12172,6 +12172,12 @@ function judgeStatement(question, value) {
   // 「括号里填几？」「在（　）里填上合适的数」这类元描述句式，
   // 改造成陈述句后语义是断裂的（"2+3=4，括号里填几"），一律不派生。
   if (/括号|填几|填上|里填|填一填|填[“"]/.test(t)) return '';
+  // v83t：强图依赖题面（"图中阴影部分占几分之几""看图回答""上图是..."）也拒绝派生。
+  // 派生后会变成「图中阴影部分占几分之几？A/B（）」，题面文本里仍有「图中」三个字，
+  // 孩子必须看到原图才能判断对错；如果派生时不带图，体验就是「题干说看图却看不到图」。
+  // （虽然 v83t 已让 deriveJudgeQuestions 透传 svg 兜底，但叙述型陈述「3/9 约分后等于 1/3」
+  //  比「图中阴影部分占几分之几 1/4（）」更标准、命题质量也更高，故一并拒绝。）
+  if (/图中阴影|图中阴影部分|看图|上图|下图|左图|右图/.test(t)) return '';
   // 只在题干末尾留一个判断空位，供孩子打 √ / ×
   const BLANK = '（　　）';
   let s = '';
@@ -12245,6 +12251,9 @@ function deriveJudgeQuestions(pool, n, usedText) {
     if (localText.has(stmt)) continue;
     localText.add(stmt);
     if (usedText) usedText.add(stmt);
+    // v83t：派生判断题时拷 svg —— 否则原题「图中阴影部分占几分之几？」这种带图题
+    // 派生后变成「图中阴影部分占几分之几？A/B （）」，孩子没有图根本判断不了对错，
+    // 且题目下方还显「图中」三个字却看不到配图，体验完全崩塌。
     out.push({
       type: 'choice',
       judge: true,
@@ -12252,10 +12261,12 @@ function deriveJudgeQuestions(pool, n, usedText) {
       options: ['正确', '错误'],
       answer: (shown === ans) ? '正确' : '错误',
       answerIdx: (shown === ans) ? 0 : 1,
+      svg: q.svg,                                    // v83t：把原题的 svg 透传
       _unitType: q._unitType,
       _unitName: q._unitName,
       _core: q._core,
       _derived: true,
+      _origQ: q.question,                            // v83t：便于回溯源题
     });
   }
   // 错题配额没用完（可派生的题太少）：把已有的判断题随机翻一半为「错误」
