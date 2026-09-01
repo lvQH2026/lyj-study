@@ -124,10 +124,17 @@ function engGoBack() {
     setView(v.title, v.render, viewStack.length > 0);
   }
 }
+// v79：底部导航统一为全局一套（#globalNav），英语模块不再自带 .eng-bottom-nav。
+// 映射：自然拼读→首页、国际音标→练习、错题本→错题；原第 4 个「进度」入口移入拼读首页。
+const ENG_NAV_MAP = { phonics: 'home', ipa: 'exam', wrong: 'wrong', progress: 'home' };
 function switchMain(tab) {
   viewStack.length = 0;
   mainTab = tab;
-  document.querySelectorAll('#englishRoot .nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  if (window.App && typeof App.setNavActive === 'function') {
+    App.setNavActive(ENG_NAV_MAP[tab] || 'home');
+  } else {
+    document.querySelectorAll('#englishRoot .nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  }
   if (tab === 'phonics') renderPhonicsHome();
   else if (tab === 'ipa') renderIpaHome();
   else if (tab === 'progress') renderProgress();
@@ -142,7 +149,11 @@ function renderPhonicsHome() {
     let lessonCount = 0; d.levels.forEach(l => lessonCount += l.lessons.length);
     let html = '<div class="card">'
       + '<div style="font-weight:700;font-size:18px;color:var(--primary)">自然拼读 Phonics</div>'
-      + '<div class="unit-meta" style="margin-top:4px">四级体系 · 共 ' + d.levels.length + ' 级 ' + lessonCount + ' 课 · 每课 5 步闭环，20 个单词</div></div>';
+      + '<div class="unit-meta" style="margin-top:4px">四级体系 · 共 ' + d.levels.length + ' 级 ' + lessonCount + ' 课 · 每课 5 步闭环，20 个单词</div>'
+      // v79：底部导航第 4 个「进度」入口已随导航统一移除，这里补一个入口
+      + '<div class="btn-row" style="margin-top:10px">'
+      + '<button class="btn-ghost" style="flex:1" onclick="switchMain(\'progress\')">📈 学习进度</button>'
+      + '</div></div>';
     d.levels.forEach((lv, li) => {
       html += '<div class="section-title">' + lv.no + ' · ' + lv.name + '</div><div class="unit-list">';
       lv.lessons.forEach((ls) => {

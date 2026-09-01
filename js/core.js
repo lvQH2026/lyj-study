@@ -6,39 +6,105 @@
 window.App = (function () {
   let current = 'math';
 
-  function switchModule(mod) {
-    current = mod;
-    const mathRoot = document.getElementById('mathRoot');
-    const cnRoot = document.getElementById('chineseRoot');
-    const engRoot = document.getElementById('englishRoot');
-    const btns = document.querySelectorAll('.module-switch .mod-btn');
+  // v79：年级持久化。此前 state.currentGrade（数学）与 cnState.grade（语文）
+  // 都是纯内存变量，孩子明明只读六年级，每次重开却要重新点一遍年级。
+  const GRADE_KEY = 'lyj_grade_v1';
+  const DEFAULT_GRADE = 6;
 
-    // 隐藏所有根容器
-    mathRoot.style.display = 'none';
-    engRoot.style.display = 'none';
-    if (cnRoot) cnRoot.style.display = 'none';
+  function readGradeMap() {
+    try {
+      const m = JSON.parse(localStorage.getItem(GRADE_KEY) || '{}');
+      return (m && typeof m === 'object') ? m : {};
+    } catch (e) { return {}; }
+  }
 
-    // 移除所有按钮 active
-    btns.forEach(b => b.classList.remove('active'));
+  function getGrade(mod) {
+    const g = parseInt(readGradeMap()[mod], 10);
+    return (g >= 1 && g <= 6) ? g : DEFAULT_GRADE;
+  }
 
-    if (mod === 'english') {
-      engRoot.style.display = 'block';
-      const btn = document.querySelector('.module-switch .mod-btn[data-mod="english"]');
-      if (btn) btn.classList.add('active');
-      if (typeof switchMain === 'function') switchMain('phonics');
-    } else if (mod === 'chinese') {
-      if (cnRoot) cnRoot.style.display = 'block';
-      const btn = document.querySelector('.module-switch .mod-btn[data-mod="chinese"]');
-      if (btn) btn.classList.add('active');
-      if (window.CN && typeof CN.init === 'function') CN.init();
-    } else {
-      mathRoot.style.display = 'block';
-      const btn = document.querySelector('.module-switch .mod-btn[data-mod="math"]');
-      if (btn) btn.classList.add('active');
+  function setGrade(mod, g) {
+    g = parseInt(g, 10);
+    if (!(g >= 1 && g <= 6)) return;
+    const m = readGradeMap();
+    m[mod] = g;
+    try { localStorage.setItem(GRADE_KEY, JSON.stringify(m)); } catch (e) {}
+  }
+
+  // ---- v79：Root / 全局页调度 ----
+  // 底部导航已统一为一套（#globalNav），统计与家长后台提升为「全局页」（#globalPages），
+  // 三个模块 Root 之外。切到全局页时三个 Root 全部隐藏；切回模块页时全局页隐藏。
+  function rootEls() {
+    return {
+      math: document.getElementById('mathRoot'),
+      chinese: document.getElementById('chineseRoot'),
+      english: document.getElementById('englishRoot'),
+      global: document.getElementById('globalPages')
+    };
+  }
+
+  function hideAllRoots() {
+    const r = rootEls();
+    ['math', 'chinese', 'english', 'global'].forEach(function (k) {
+      if (r[k]) r[k].style.display = 'none';
+    });
+  }
+
+  function showGlobal(pageId) {
+    hideAllRoots();
+    const r = rootEls();
+    if (r.global) r.global.style.display = 'block';
+    activatePage(pageId);
+  }
+
+  function showRoot(mod) {
+    hideAllRoots();
+    const r = rootEls();
+    if (r[mod]) r[mod].style.display = 'block';
+  }
+
+  function activatePage(pageId) {
+    const ps = document.querySelectorAll('.page');
+    for (let i = 0; i < ps.length; i++) ps[i].classList.remove('active');
+    const p = document.getElementById(pageId);
+    if (p) p.classList.add('active');
+  }
+
+  function setNavActive(tab) {
+    const tabs = document.querySelectorAll('#globalNav .nav-tab');
+    for (let i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('active', tabs[i].getAttribute('data-page') === tab);
     }
   }
 
-  return { get module() { return current; }, switchModule };
+  function switchModule(mod) {
+    current = mod;
+    showRoot(mod);
+
+    const btns = document.querySelectorAll('.module-switch .mod-btn');
+    btns.forEach(b => b.classList.toggle('active', b.getAttribute('data-mod') === mod));
+    setNavActive('home');
+
+    if (mod === 'english') {
+      if (typeof switchMain === 'function') switchMain('phonics');
+    } else if (mod === 'chinese') {
+      if (window.CN && typeof CN.goHome === 'function') CN.goHome();
+    } else {
+      if (typeof showPage === 'function') showPage('home');
+      const bb = document.getElementById('backBtn');
+      if (bb) bb.style.display = 'none';
+      // v79：回首页时重渲染，刷新「当前年级」回显与最近练习
+      if (typeof renderHome === 'function') renderHome();
+    }
+  }
+
+  return {
+    get module() { return current; },
+    switchModule,
+    // v79 新增
+    showGlobal, showRoot, hideAllRoots, activatePage, setNavActive,
+    getGrade, setGrade, DEFAULT_GRADE
+  };
 })();
 
 // ============================================================

@@ -2262,3 +2262,34 @@ body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',
 }
 .m-ai-steps span{ display:block; margin-top:3px; }
 
+
+/* ============================================================
+   v79 · 全局底部导航统一 + 年级持久化
+   底部导航从「数学模块内」提升为全局唯一一套（#globalNav），
+   语文 / 英语各自的 .cn-bottom-nav / .eng-bottom-nav 已删除。
+   统计 / 家长后台提升为全局页（#globalPages），三科共用。
+   ============================================================ */
+
+/* 当前年级回显条（仅数学首页） */
+.grade-current-hint{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:var(--card-bg); border:1px solid var(--border);
+  border-left:4px solid var(--gold);
+  border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:12px;
+  font-size:13px; color:var(--text-light);
+}
+.grade-current-hint strong{ color:var(--text); font-size:15px; }
+
+/* 已持久化的年级卡片高亮 */
+.grade-card.active{
+  border:2px solid var(--primary);
+  box-shadow:0 6px 18px rgba(62,74,99,.16);
+}
+.grade-card.active .grade-badge{ background:var(--primary); }
+.grade-card.active::after{
+  content:'当前'; display:block; margin-top:6px;
+  font-size:11px; font-weight:700; color:var(--primary); letter-spacing:.5px;
+}
+
+/* 小号按钮（首页「继续学习」等） */
+.btn-sm{ padding:6px 14px; font-size:13px; border-radius:8px; }

@@ -387,8 +387,8 @@ ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabas
 const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
-ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 缓存递进至 v78',
-  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v78') &&
+ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 缓存递进至 v79',
+  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v79') &&
   /window\.AI_GRADE/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
   /AI 批改给分数，模拟真实老师手写批注/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) &&
   /drawScoreStamp/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
@@ -415,6 +415,49 @@ ok('v78：PC 页脚版本号改为动态（pc.html 占位 + pc.js 调用）',
 ok('v78：core.js 新增 readShellVersion 且正则行首锚定（只匹配真实声明行）',
   /function readShellVersion/.test(core78) &&
   /\/\^\\s\*const\\s\+CACHE/.test(core78) && /m\)/.test(core78));
+
+// ---- v79：S1 三科导航统一 + 年级持久化 ----
+const idx79 = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const core79 = fs.readFileSync(path.join(ROOT, 'js/core.js'), 'utf8');
+const math79 = fs.readFileSync(path.join(ROOT, 'js/math.js'), 'utf8');
+const cn79 = fs.readFileSync(path.join(ROOT, 'js/chinese.js'), 'utf8');
+const eng79 = fs.readFileSync(path.join(ROOT, 'js/english.js'), 'utf8');
+
+ok('v79：底部导航收敛为全局唯一一套 #globalNav（五 tab 首页/练习/错题/统计/家长）',
+  /id="globalNav"/.test(idx79) &&
+  (idx79.match(/class="nav-tab/g) || []).length === 5 &&
+  /data-page="home"/.test(idx79) && /data-page="exam"/.test(idx79) &&
+  /data-page="wrong"/.test(idx79) && /data-page="stats"/.test(idx79) && /data-page="parent"/.test(idx79));
+ok('v79：语文 / 英语各自的底部导航已删除',
+  !/cn-bottom-nav/.test(idx79) && !/eng-bottom-nav/.test(idx79));
+ok('v79：统计与家长页提升为全局页 #globalPages（移出 #mathRoot）',
+  /id="globalPages"/.test(idx79) &&
+  !/<div id="mathRoot">[\s\S]*id="page-stats"[\s\S]*<\/div><!-- \/mathRoot -->/.test(idx79) &&
+  !/<div id="mathRoot">[\s\S]*id="page-parent"[\s\S]*<\/div><!-- \/mathRoot -->/.test(idx79));
+ok('v79：core.js 新增 root/全局页调度（showGlobal / showRoot / setNavActive）',
+  /function showGlobal/.test(core79) && /function showRoot/.test(core79) &&
+  /function setNavActive/.test(core79) && /function hideAllRoots/.test(core79));
+ok('v79：core.js 新增年级持久化（localStorage lyj_grade_v1，默认六年级）',
+  /lyj_grade_v1/.test(core79) && /function getGrade/.test(core79) &&
+  /function setGrade/.test(core79) && /DEFAULT_GRADE\s*=\s*6/.test(core79));
+ok('v79：switchTab 改为全局调度（统计/家长走全局页，其余按模块分发）',
+  /app\.showGlobal\('page-' \+ tab\)/.test(math79) &&
+  /mod === 'chinese'/.test(math79) && /mod === 'english'/.test(math79));
+ok('v79：数学年级恢复自持久化值（不再从 null 起）',
+  /App\.getGrade\('math'\)/.test(math79) && /App\.setGrade\('math', grade\)/.test(math79));
+ok('v79：语文年级恢复自持久化值（不再从 4 起）',
+  /App\.getGrade\('chinese'\)/.test(cn79) && /App\.setGrade\('chinese', g\)/.test(cn79));
+ok('v79：语文新增独立考试中心页 #cnPageExam（CN.showExam）',
+  /id="cnPageExam"/.test(idx79) && /function cnShowExam/.test(cn79) &&
+  /function cnRenderExam/.test(cn79) && /showExam: cnShowExam/.test(cn79));
+ok('v79：cnShowPage 纳入考试页', /'cnPageLearn', 'cnPageExam'/.test(cn79));
+ok('v79：英语接入全局导航（拼读=首页 / 音标=练习 / 错题本=错题）',
+  /ENG_NAV_MAP/.test(eng79) && /phonics: 'home', ipa: 'exam', wrong: 'wrong'/.test(eng79) &&
+  /App\.setNavActive/.test(eng79));
+ok('v79：英语原「进度」入口移入拼读首页（不丢功能）',
+  /switchMain\(\\'progress\\'\)/.test(eng79) && /学习进度/.test(eng79));
+ok('v79：SW 缓存递进至 lyj-shell-v79',
+  /const CACHE = 'lyj-shell-v79'/.test(fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8')));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));

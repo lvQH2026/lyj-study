@@ -9550,7 +9550,8 @@ function quickMixedGen() {
 // 应用状态管理
 // ============================================================
 let state = {
-  currentGrade: null,
+  // v79：年级持久化——重开页面保持上次选的年级（默认六年级，孩子当前就读年级）
+  currentGrade: (window.App && typeof App.getGrade === 'function') ? App.getGrade('math') : 6,
   currentSemester: 1,
   currentUnit: null,
   quizQuestions: [],
@@ -9771,31 +9772,51 @@ function showPage(pageId) {
   window.scrollTo(0, 0);
 }
 
+// v79：底部导航已统一为全局一套（#globalNav）。
+// 「统计 / 家长」是全局页（三科共用），其余按当前模块分发到数学 / 语文 / 英语。
 function switchTab(tab) {
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.nav-tab[data-page="${tab}"]`).classList.add('active');
+  const app = window.App;
+  const mod = (app && app.module) || 'math';
 
-  if (tab === 'home') {
-    showPage('home');
-    document.getElementById('backBtn').style.display = 'none';
-    renderHome();
-  } else if (tab === 'wrong') {
-    showPage('wrong');
-    document.getElementById('backBtn').style.display = 'none';
-    renderWrongBank();
-  } else if (tab === 'stats') {
-    showPage('stats');
-    document.getElementById('backBtn').style.display = 'none';
-    renderStats();
-  } else if (tab === 'exam') {
-    showPage('exam');
-    document.getElementById('backBtn').style.display = 'none';
-    renderExamCenter();
-  } else if (tab === 'parent') {
-    showPage('parent');
-    document.getElementById('backBtn').style.display = 'none';
-    renderParent();
+  if (app && typeof app.setNavActive === 'function') app.setNavActive(tab);
+  else {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    const t = document.querySelector(`.nav-tab[data-page="${tab}"]`);
+    if (t) t.classList.add('active');
   }
+
+  // 全局页：隐藏三个模块 Root，显示 #globalPages
+  if (tab === 'stats' || tab === 'parent') {
+    app.showGlobal('page-' + tab);
+    // 两个渲染函数分别在 math.js / parent.js，缺任一都不该让整页导航崩掉
+    if (tab === 'stats') { if (typeof renderStats === 'function') renderStats(); }
+    else if (typeof renderParent === 'function') renderParent();
+    return;
+  }
+
+  app.showRoot(mod);
+
+  if (mod === 'chinese') {
+    if (tab === 'home') { if (window.CN && CN.goHome) CN.goHome(); }
+    else if (tab === 'wrong') { if (window.CN && CN.switchTab) CN.switchTab('wrong'); }
+    else if (tab === 'exam') { if (window.CN && CN.showExam) CN.showExam(); }
+    return;
+  }
+
+  if (mod === 'english') {
+    if (typeof switchMain === 'function') {
+      switchMain(tab === 'home' ? 'phonics' : (tab === 'exam' ? 'ipa' : 'wrong'));
+    }
+    return;
+  }
+
+  // 数学
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) backBtn.style.display = 'none';
+
+  if (tab === 'home') { showPage('home'); renderHome(); }
+  else if (tab === 'wrong') { showPage('wrong'); renderWrongBank(); }
+  else if (tab === 'exam') { showPage('exam'); renderExamCenter(); }
 }
 
 function goBack() {
@@ -9857,10 +9878,19 @@ function renderHome() {
     4: '四年级', 5: '五年级', 6: '六年级'
   };
 
+  // v79：年级已持久化，这里回显「当前年级」并高亮对应卡片，
+  // 省得孩子每次重开都要重新点一遍六年级。
+  let hintEl = document.getElementById('gradeCurrentHint');
+  if (hintEl) {
+    let cg = state.currentGrade || 6;
+    hintEl.innerHTML = '<div class="grade-current-hint">当前年级 <strong>' + gradeNames[cg] +
+      '</strong><button class="btn btn-primary btn-sm" onclick="selectGrade(' + cg + ')">继续学习 ›</button></div>';
+  }
+
   grid.innerHTML = '';
   for (let g = 1; g <= 6; g++) {
     let card = document.createElement('div');
-    card.className = 'grade-card';
+    card.className = 'grade-card' + (g === state.currentGrade ? ' active' : '');
     card.dataset.grade = g;
     card.innerHTML = `
       <div class="grade-badge">${g}</div>
@@ -9932,6 +9962,8 @@ function startSpecialQuiz(grade, sem, idx) {
 
 function selectGrade(grade) {
   state.currentGrade = grade;
+  // v79：记住这次选择，下次打开直接落在该年级
+  if (window.App && typeof App.setGrade === 'function') App.setGrade('math', grade);
   state.currentSemester = 1;
   showPage('units');
   document.getElementById('backBtn').style.display = 'block';

@@ -1664,7 +1664,8 @@
   // ============================================================
   const PRAC_N = 30; // 每次练习题数
   let cnState = {
-    grade: 4,
+    // v79：年级持久化——与数学共用 App.getGrade/setGrade，重开保持六年级
+    grade: (window.App && typeof App.getGrade === 'function') ? App.getGrade('chinese') : 6,
     unitIdx: 0,
     quiz: null,      // { questions, idx, score, userAnswers, results, paper }
     tab: 'home',
@@ -1674,7 +1675,7 @@
   function el(id) { return document.getElementById(id); }
 
   function cnShowPage(pageId) {
-    ['cnPageHome', 'cnPageQuiz', 'cnPageResult', 'cnPageWrong', 'cnPageLearn'].forEach(function (pid) {
+    ['cnPageHome', 'cnPageQuiz', 'cnPageResult', 'cnPageWrong', 'cnPageLearn', 'cnPageExam'].forEach(function (pid) {
       const p = el(pid);
       if (p) p.classList.remove('active');
     });
@@ -3109,6 +3110,8 @@ function cn5x8_pool() {
 
   function cnSelectGrade(g) {
     cnState.grade = g;
+    // v79：记住年级选择，下次打开直接落在同一年级
+    if (window.App && typeof App.setGrade === 'function') App.setGrade('chinese', g);
     cnRenderHome();
   }
 
@@ -3927,20 +3930,86 @@ function cn5x8_pool() {
     cnSaveData(data);
   }
 
+  // ============================================================
+  // v79：语文考试中心（供全局底部导航「练习」tab 进入）
+  // 此前语文只有首页里内联的几个考试按钮，底部导航只有「首页 / 错题库」两个入口，
+  // 孩子找不到考试；现在与数学一样有独立考试页。
+  // ============================================================
+  function cnShowExam() {
+    if (window.App && typeof App.showRoot === 'function') App.showRoot('chinese');
+    cnShowPage('cnPageExam');
+    if (el('cnBackBtn')) el('cnBackBtn').style.display = 'none';
+    cnRenderExam();
+  }
+
+  function cnRenderExam() {
+    const box = el('cnExamContent');
+    if (!box) return;
+    const units = CN_DATA[cnState.grade] || [];
+    const CN_NUM = ['\u96F6', '\u4E00', '\u4E8C', '\u4E09', '\u56DB', '\u4E94', '\u516D', '\u4E03', '\u516B', '\u4E5D'];
+
+    let html = '<div class="welcome-banner"><h2>语文考试中心</h2><p>' +
+      CN_NUM[cnState.grade] + '\u5E74\u7EA7 \u00B7 \u5355\u5143 / \u671F\u4E2D / \u671F\u672B \u00B7 24\u9898\u6EE1\u5206100\u5206</p></div>';
+
+    // 年级切换
+    html += '<div class="section-title">当前年级</div><div class="grade-grid">';
+    [4, 5, 6].forEach(function (g) {
+      html += '<button class="grade-btn' + (g === cnState.grade ? ' active' : '') +
+        '" onclick="CN.selectGrade(' + g + ');CN.showExam()">' + g + '\u5E74\u7EA7</button>';
+    });
+    html += '</div>';
+
+    // 单元考试
+    html += '<div class="card" style="padding:12px;margin-bottom:12px">';
+    html += '<div style="font-size:14px;font-weight:600;margin-bottom:10px">\u5355\u5143\u6D4B\u8BD5\u5377</div>';
+    if (units.length) {
+      html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      units.forEach(function (u, i) {
+        html += '<button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="CN.beginExam(\'unit\',' + i + ')">' + u.name + '</button>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="font-size:12px;color:var(--text-lighter)">\u8BE5\u5E74\u7EA7\u6682\u65E0\u5355\u5143</div>';
+    }
+    html += '</div>';
+
+    // 期中 / 期末
+    html += '<div class="card" style="padding:12px;margin-bottom:12px">';
+    html += '<div style="font-size:14px;font-weight:600;margin-bottom:10px">\u671F\u4E2D / \u671F\u672B\u6D4B\u8BD5\u5377</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'mid\',\'上\')">上册期中</button>';
+    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'final\',\'上\')">上册期末</button>';
+    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'mid\',\'下\')">下册期中</button>';
+    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'final\',\'下\')">下册期末</button>';
+    html += '</div></div>';
+
+    html += '<div class="card" style="background:#F6FFED;border:1px solid #B7EB8F">';
+    html += '<div style="font-size:13px;color:var(--text-light);line-height:1.8">' +
+      '<strong>\u8BD5\u5377\u8BF4\u660E\uff1A</strong><br>' +
+      '\u2022 \u5355\u5143\u6D4B\u8BD5\u5377\uff1A\u53EA\u8003\u4E00\u4E2A\u5355\u5143\uff0c24\u9898\u6EE1\u5206100\u5206<br>' +
+      '\u2022 \u671F\u4E2D\uff1A\u534A\u518C\u7EFC\u5408\uff1b\u671F\u672B\uff1A\u5168\u518C\u7EFC\u5408<br>' +
+      '\u2022 \u7ED3\u6784\uFF1A\u57FA\u7840\u77E5\u8BC6 10 \u9898\u00B7\u9605\u8BFB\u7406\u89E3 8 \u9898\u00B7\u79EF\u7D2F\u4E0E\u8FD0\u7528 6 \u9898' +
+      '</div></div>';
+
+    box.innerHTML = html;
+  }
+
   // ---- Tab 切换 ----
+  // v79：底部导航已统一为全局一套（#globalNav），语文模块不再自带 .cn-bottom-nav。
+  // 这里只负责页面切换，active 态由 App.setNavActive 统一维护。
   function cnSwitchTab(tab) {
     cnState.tab = tab;
-    // 更新底部导航
-    var tabs = document.querySelectorAll('#chineseRoot .cn-bottom-nav .nav-tab');
-    tabs.forEach(function (t) { t.classList.remove('active'); });
-    var activeTab = document.querySelector('#chineseRoot .cn-bottom-nav .nav-tab[data-tab="' + tab + '"]');
-    if (activeTab) activeTab.classList.add('active');
+    if (window.App && typeof App.setNavActive === 'function') {
+      App.setNavActive(tab === 'wrong' ? 'wrong' : 'home');
+    }
 
     if (tab === 'home') {
       cnGoHome();
+    } else if (tab === 'exam') {
+      cnShowExam();
     } else if (tab === 'wrong') {
       cnShowPage('cnPageWrong');
-      el('cnBackBtn').style.display = 'none';
+      if (el('cnBackBtn')) el('cnBackBtn').style.display = 'none';
       cnRenderWrong();
     }
   }
@@ -3974,6 +4043,8 @@ function cn5x8_pool() {
     replay: cnReplayFlow,          // v75：答案解析页「重新考试 / 再练一次」
     goHome: cnGoHome,
     switchTab: cnSwitchTab,
+    showExam: cnShowExam,      // v79：全局导航「练习」tab → 语文考试中心
+    renderExam: cnRenderExam,
     startWrongReview: cnStartWrongReview,
     removeWrong: cnRemoveWrong,
     clearWrong: cnClearWrong,

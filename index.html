@@ -36,6 +36,7 @@
   </div>
 
   <div class="section-title">选择年级</div>
+  <div id="gradeCurrentHint"></div>
   <div class="grade-grid" id="gradeGrid"></div>
 
   <div class="section-title">快速练习</div>
@@ -162,29 +163,6 @@
   <div id="wrongListContainer"></div>
 </div>
 
-<!-- ===== 统计页 ===== -->
-<div class="page" id="page-stats">
-  <div class="section-title">学习统计</div>
-  <div class="stats-overview" id="statsOverview"></div>
-  <div class="section-title">📋 各年级详情</div>
-  <div class="card">
-    <table class="grade-stats-table" id="gradeStatsTable"></table>
-  </div>
-  <div class="section-title">近期成绩</div>
-  <div id="recentScores"></div>
-
-  <div class="section-title">💾 数据备份与同步</div>
-  <div class="card">
-    <div style="font-size:13px;color:var(--text-light);line-height:1.7;margin-bottom:12px">
-      学习记录保存在本机浏览器里。换手机或想在电脑上继续练，先在这里<strong>导出</strong>，再到另一台设备<strong>导入</strong>即可。
-    </div>
-    <button class="btn btn-primary" style="margin-bottom:10px" onclick="exportUserData()">⬇️ 导出学习数据（JSON）</button>
-    <button class="btn btn-outline" style="margin-bottom:10px" onclick="document.getElementById(&#39;importFile&#39;).click()">⬆️ 导入学习数据</button>
-    <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importUserData(event)">
-    <button class="btn btn-outline" onclick="exportWrongBookText()">📄 导出错题本（文本）</button>
-  </div>
-</div>
-
 <!-- ===== 拍图上传页（AI 批改） ===== -->
 <div class="page" id="page-upload">
   <div class="section-title">拍图上传试题</div>
@@ -278,50 +256,6 @@
   </div>
 </div>
 
-<!-- 底部导航 -->
-<div class="bottom-nav">
-  <button class="nav-tab active" data-page="home" onclick="switchTab('home')">
-    <span class="tab-icon">🏠</span>
-    <span class="tab-label">首页</span>
-  </button>
-  <button class="nav-tab" data-page="exam" onclick="switchTab('exam')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></span>
-    <span class="tab-label">考试</span>
-  </button>
-  <button class="nav-tab" data-page="wrong" onclick="switchTab('wrong')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
-    <span class="tab-label">错题库</span>
-  </button>
-  <button class="nav-tab" data-page="stats" onclick="switchTab('stats')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></span>
-    <span class="tab-label">统计</span>
-  </button>
-  <button class="nav-tab" data-page="parent" onclick="switchTab('parent')">
-    <span class="tab-icon">👨‍👩‍👦</span>
-    <span class="tab-label">家长</span>
-  </button>
-  
-</div>
-
-<div class="page" id="page-parent">
-  <div class="navbar"><h1>家长后台</h1></div>
-  <div style="padding:12px">
-    <div id="deviceCred" style="background:#e6f0ff;border:1px solid #b3d4ff;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#1d4ed8">
-      <div style="font-weight:700;margin-bottom:6px">📱 吕泳冀 · 学习凭证</div>
-      <div id="deviceCredBody">…</div>
-      <div style="font-size:12px;color:#475569;margin-top:6px">所有设备自动共享此身份。家长远程查看：打开本应用 → 点「家长」→ 用学习ID和口令登录。</div>
-    </div>
-    <div id="parentLogin" style="display:none;background:#fff;border-radius:10px;padding:12px;margin-bottom:12px">
-      <div style="font-size:14px;font-weight:700;margin-bottom:8px">查看孩子的学习情况</div>
-      <input id="parentId" placeholder="学习ID（如 LYJ3X9ZQ）" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-      <input id="parentPw" type="password" placeholder="口令" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-      <button class="btn btn-primary" style="width:100%" onclick="parentLogin()">查看</button>
-    </div>
-    <div id="parentResult"></div>
-  </div>
-</div>
-
-<!-- Toast -->
 </div><!-- /mathRoot -->
 <div id="englishRoot" style="display:none">
   <div class="navbar eng-navbar">
@@ -329,12 +263,6 @@
     <h1 id="engNavTitle">英语 · 学习中心</h1>
   </div>
   <div id="engBody" style="padding:14px"></div>
-  <div class="bottom-nav eng-bottom-nav">
-    <button class="nav-tab active" data-tab="phonics" onclick="switchMain('phonics')"><span class="tab-icon">拼</span><span class="tab-label">自然拼读</span></button>
-    <button class="nav-tab" data-tab="ipa" onclick="switchMain('ipa')"><span class="tab-icon">音</span><span class="tab-label">国际音标</span></button>
-    <button class="nav-tab" data-tab="wrong" onclick="switchMain('wrong')"><span class="tab-icon">错</span><span class="tab-label">错题本</span></button>
-    <button class="nav-tab" data-tab="progress" onclick="switchMain('progress')"><span class="tab-label">进度</span></button>
-  </div>
 </div><!-- /englishRoot -->
 <div id="chineseRoot" style="display:none">
   <div class="navbar">
@@ -416,18 +344,90 @@
     <div id="cnWrongList"></div>
   </div>
 
-  <!-- 底部导航 -->
-  <div class="bottom-nav cn-bottom-nav">
-    <button class="nav-tab active" data-tab="home" onclick="CN.switchTab('home')">
-      <span class="tab-icon">🏠</span>
-      <span class="tab-label">首页</span>
-    </button>
-    <button class="nav-tab" data-tab="wrong" onclick="CN.switchTab('wrong')">
-      <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
-      <span class="tab-label">错题库</span>
-    </button>
+  <!-- 考试中心页（v79：语文接入全局「练习」tab） -->
+  <div class="page" id="cnPageExam">
+    <div id="cnExamContent" style="padding:14px"></div>
   </div>
 </div><!-- /chineseRoot -->
+
+<!-- ============================================================
+     全局页（v79）：三科共用 —— 统计 / 家长后台
+     挂在各模块 Root 之外，切到这里时三个 Root 一并隐藏。
+     ============================================================ -->
+<div id="globalPages" style="display:none">
+
+  <!-- 统计页 -->
+  <div class="page" id="page-stats">
+    <div class="navbar"><h1>📊 学习统计</h1></div>
+    <div class="section-title">学习统计</div>
+    <div class="stats-overview" id="statsOverview"></div>
+    <div class="section-title">📋 各年级详情</div>
+    <div class="card">
+      <table class="grade-stats-table" id="gradeStatsTable"></table>
+    </div>
+    <div class="section-title">近期成绩</div>
+    <div id="recentScores"></div>
+
+    <div class="section-title">💾 数据备份与同步</div>
+    <div class="card">
+      <div style="font-size:13px;color:var(--text-light);line-height:1.7;margin-bottom:12px">
+        学习记录保存在本机浏览器里。换手机或想在电脑上继续练，先在这里<strong>导出</strong>，再到另一台设备<strong>导入</strong>即可。
+      </div>
+      <button class="btn btn-primary" style="margin-bottom:10px" onclick="exportUserData()">⬇️ 导出学习数据（JSON）</button>
+      <button class="btn btn-outline" style="margin-bottom:10px" onclick="document.getElementById(&#39;importFile&#39;).click()">⬆️ 导入学习数据</button>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importUserData(event)">
+      <button class="btn btn-outline" onclick="exportWrongBookText()">📄 导出错题本（文本）</button>
+    </div>
+  </div>
+
+  <!-- 家长后台页 -->
+  <div class="page" id="page-parent">
+    <div class="navbar"><h1>家长后台</h1></div>
+    <div style="padding:12px">
+      <div id="deviceCred" style="background:#e6f0ff;border:1px solid #b3d4ff;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#1d4ed8">
+        <div style="font-weight:700;margin-bottom:6px">📱 吕泳冀 · 学习凭证</div>
+        <div id="deviceCredBody">…</div>
+        <div style="font-size:12px;color:#475569;margin-top:6px">所有设备自动共享此身份。家长远程查看：打开本应用 → 点「家长」→ 用学习ID和口令登录。</div>
+      </div>
+      <div id="parentLogin" style="display:none;background:#fff;border-radius:10px;padding:12px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px">查看孩子的学习情况</div>
+        <input id="parentId" placeholder="学习ID（如 LYJ3X9ZQ）" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="parentPw" type="password" placeholder="口令" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <button class="btn btn-primary" style="width:100%" onclick="parentLogin()">查看</button>
+      </div>
+      <div id="parentResult"></div>
+    </div>
+  </div>
+</div><!-- /globalPages -->
+
+<!-- ============================================================
+     全局底部导航（v79）：三科唯一一套
+     首页 / 练习 / 错题 / 统计 / 家长
+     模块页 → 分发到当前模块；统计与家长 → 全局页。
+     ============================================================ -->
+<div class="bottom-nav" id="globalNav">
+  <button class="nav-tab active" data-page="home" onclick="switchTab('home')">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label">首页</span>
+  </button>
+  <button class="nav-tab" data-page="exam" onclick="switchTab('exam')">
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></span>
+    <span class="tab-label">练习</span>
+  </button>
+  <button class="nav-tab" data-page="wrong" onclick="switchTab('wrong')">
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+    <span class="tab-label">错题</span>
+  </button>
+  <button class="nav-tab" data-page="stats" onclick="switchTab('stats')">
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></span>
+    <span class="tab-label">统计</span>
+  </button>
+  <button class="nav-tab" data-page="parent" onclick="switchTab('parent')">
+    <span class="tab-icon">👨‍👩‍👦</span>
+    <span class="tab-label">家长</span>
+  </button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="js/core.js"></script>

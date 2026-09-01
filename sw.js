@@ -40,7 +40,18 @@
 //      避免 iOS 聚焦小字号输入框时强制放大页面。② 首页 banner 文案改为「人教版 · 六年级 · 小升初冲刺」。
 //      ③ PC 页脚版本号不再手写（此前长期停留在 v60，滞后 17 版），改为 readShellVersion()
 //      从 sw.js 解析 const CACHE 实际版本动态写入。
-const CACHE = 'lyj-shell-v78';
+// v79：S1 三科导航统一 + 年级持久化。
+//      ① 底部导航从「数学模块内一套 / 语文 2 个入口 / 英语 4 个入口」收敛为全局唯一一套
+//         #globalNav（首页 / 练习 / 错题 / 统计 / 家长），删除 .cn-bottom-nav 与 .eng-bottom-nav。
+//      ② 统计页与家长后台提升为「全局页」#globalPages（移出 #mathRoot，三科共用），
+//         语文 / 英语现在也能看统计、进家长看板。
+//      ③ switchTab 改为全局调度：统计/家长 → 全局页；其余按当前模块分发到数学 / 语文 / 英语。
+//         语文新增独立考试中心页 #cnPageExam（CN.showExam），此前只有首页内联的几个考试按钮。
+//         英语按 拼读=首页 / 音标=练习 / 错题本=错题 接入，原「进度」入口移入拼读首页。
+//      ④ 年级持久化：core.js 新增 App.getGrade/setGrade（localStorage 键 lyj_grade_v1，
+//         按模块分别记忆），数学 state.currentGrade 与语文 cnState.grade 默认六年级，
+//         重开页面不再回到「未选年级」/ 四年级；首页回显「当前年级」并高亮对应卡片。
+const CACHE = 'lyj-shell-v79';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
