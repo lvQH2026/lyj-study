@@ -11152,7 +11152,7 @@ function getSectionScorer(key) {
     let hasOpts = q.options && q.options.length >= 2;
     if (isPureExpression(q)) return 2.5;                        // 竖式计算留给计算题区
     if (isApplicationLike(q) && wordy) return 1.2;              // 情境题留给应用题区
-    if (hasOpts && !isNumericAnswer(q.answer)) return 1.2;      // 概念辨析留给选择题区
+    if (hasOpts) return 0.6;                                    // v83r: 带≥2选项的选择题（含合数题这种答案可书写的）不进填空区，让选择题区收
     if (q.type === 'fill' && !wordy) return 12;
     if (q.type === 'fill') return 7;
     if (!wordy && isNumericAnswer(q.answer)) return 8;
@@ -12403,7 +12403,13 @@ function generateExamPaper() {
       item.forceFill = false;
       if (sec.key === 'fill' || sec.key === 'calc') {
         // 填空/计算：一律书面作答
-        if (isTypableAnswer(item.answer) && canForceFill(item)) item.forceFill = true;
+        // v83r：原生选择题（type 为 choice/shape_choice 且 options≥2）即使答案可书写，
+        // 也保留为选择题作答 —— 强行 forceFill 会让"下面哪个数是合数？"这类带 4 个数字
+        // 选项的题只剩题干和输入框，4 个选项整体消失，渲染后"题干不完整"。
+        // 真要补的只有：① 选项缺失（mc() 兜底就补齐了）② 单空答案无法多空作答。
+        const nativeChoice = (item.type === 'choice' || item.type === 'shape_choice') &&
+                             Array.isArray(item.options) && item.options.length >= 2;
+        if (!nativeChoice && isTypableAnswer(item.answer) && canForceFill(item)) item.forceFill = true;
       } else if (sec.key === 'app') {
         // 应用题：能算出数值的写答案，否则保留选项
         if (isNumericAnswer(item.answer) || !item.options || item.options.length < 2) {
@@ -12698,10 +12704,18 @@ function readFillAnswer() {
 function getQuestionTypeTag(q) {
   // v73：卷面上题型的判定以「真题分区」为准——填空题区里即使保留了选项，
   // 它在卷面上仍然是填空题；判断题是真题必有的独立题型，优先识别。
+  // v83r：但若实际并未 forceFill、且题是 type=choice/shape_choice，说明这题是选择题误进填空区，
+  // 此时标签按真实类型显示（孩子看到 4 个选项 + 「选择题」标签才能对齐）。
   if (q.judge) return '判断题';
   if (q._section === 'calc') return '计算题';
   if (q._section === 'app') return '解决问题';
-  if (q._section === 'fill') return '填空题';
+  if (q._section === 'fill' && q.forceFill) return '填空题';
+  if (q._section === 'fill') {
+    // 未 forceFill 的填空区选择题：按真实类型显示
+    if (q.type === 'shape_choice') return '图形题';
+    if (q.type === 'choice') return '选择题';
+    return '填空题';
+  }
   if (q._section === 'choice') return '选择题';
   if (q._section === 'judge') return '判断题';
   if (q.type === 'fill') return '填空题';

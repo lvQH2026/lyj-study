@@ -86,7 +86,19 @@
 //      ④ PC 端解除「英语暂只支持单元练习」限制：考试中心可按 PEP 单元 / 阶段 / 期中 /
 //         期末出卷（30 题，可选难度），单元练习页新增「人教 PEP 教材同步」区块。
 //      ⑤ 移动端英语首页新增「教材同步」入口，册 → 单元 → 单词表 / 核心句型 / 语法要点 → 练习。
-const CACHE = 'lyj-shell-v83';
+// v83r：修复 5 年级下册期末考试「下面哪个数是合数」被强行降级填空。
+//   用户反馈：第 6 题题干不完整，题型标签显示「填空题」+ 输入框 + 选项消失。
+//   根因：math.js 12405 行 fill/calc 分区 forceFill 入口没加选择题护城河，
+//         原生选择题被分到填空区时按"答案可写"判定成 forceFill=1；
+//         加之填空区 scorer 给带选项 + 数字答案的选择题打分 8（高于真正填空题），
+//         导致选择题高概率被抽进填空区再被强制降级。
+//   修复：
+//     ① fill/calc forceFill 加 nativeChoice 护城河（带≥2选项的选择题不再降级填空）
+//     ② 填空区 scorer 把带选项的选择题打分从 ≥1.2 压到 0.6，让选择题区优先收
+//     ③ getQuestionTypeTag 在 forceFill=false 时按真实类型显示，
+//        标签「选择题」或「图形题」与 4 个选项按钮对齐，孩子看到不再困惑
+//   验收：_smoke_v83r.js 10/10 PASS；5 卷抽样填空区选择题 forceFill=0；真机截图确认选项完整渲染
+const CACHE = 'lyj-shell-v83r';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
