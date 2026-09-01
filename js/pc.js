@@ -645,7 +645,26 @@
       h += '<div class="pc-list">';
       bank.slice(0, 30).forEach(function (w) {
         const q = w.question || w;
-        h += '<div class="pc-list-row"><div class="lr-left"><span class="lr-name">' + esc(q.question || '') + '</span></div><div style="text-align:right"><div class="lr-meta">答错 ' + (w.count || 1) + ' 次</div></div></div>';
+        // v81：解析讲解回填。PC 端原来只列出题干和错次，看不到答案也没有讲解。
+        const hit = (typeof findUnitByName === 'function' && w.grade && w.unitName)
+          ? findUnitByName(w.grade, w.unitName) : null;
+        let steps = q.steps;
+        if (!steps || !steps.length || (steps.length === 1 && /^答案：/.test(String(steps[0])))) {
+          steps = (typeof generateSteps === 'function') ? generateSteps(q, hit && hit.unit) : [];
+        }
+        const ua = w.userAnswer === undefined || w.userAnswer === '' ? '未作答' : w.userAnswer;
+        h += '<div class="pc-wrong-item">';
+        h += '<div class="pc-wrong-head"><span class="lr-name">' + esc(q.question || '') + '</span>'
+          + '<span class="lr-meta">' + esc(w.unitName || '') + ' · 答错 ' + (w.count || 1) + ' 次</span></div>';
+        h += '<div class="pc-wrong-ans">你的答案：<b class="bad">' + esc(String(ua)) + '</b>'
+          + '　正确答案：<b class="ok">' + esc(String(q.answer === undefined ? '' : q.answer)) + '</b></div>';
+        if (q.explain) h += '<div class="pc-wrong-explain">解析：' + esc(q.explain) + '</div>';
+        if (steps && steps.length) {
+          h += '<details class="pc-wrong-steps" open><summary>分步讲解（' + steps.length + ' 步）</summary><ol>';
+          steps.forEach(function (s) { h += '<li>' + esc(String(s)) + '</li>'; });
+          h += '</ol></details>';
+        }
+        h += '</div>';
       });
       h += '</div>';
     }

@@ -61,7 +61,20 @@
 //      ④ 本周概览：近 7 天练习次数 / 题量 / 正确率。
 //      ⑤ 埋点 lyj_task_click：按天聚合记录驾驶舱任务点击数（留 30 天），用于连续观察是否真的带动练习。
 //      ⑥ 卫生修复：startSpecialQuiz 此前只改内存年级未持久化，已补 App.setGrade。
-const CACHE = 'lyj-shell-v80';
+// v81：S3 解析讲解回填。
+//      ① 新增通用分步讲解引擎 buildSmartSteps(q, unit)（js/math.js）。题库里没有一道题自带
+//         explain/steps（实测 630 道去重题 0%），全靠 generateSteps 现场生成，而旧兜底只吐一行
+//         「答案：x」，实测 89.2% 的题拿不到任何讲解。新引擎三层：L1 句式语义规则（比例尺/折扣/
+//         成数/比/解比例/倒数/圆/圆柱圆锥/统计/鸽巢/方向/植树/角度/数与形/公因数公倍数/竖式乘法…）
+//         → L2 分数关系与关键词驱动列式（结果须与答案精确一致才输出，绝不瞎凑算式）
+//         → L3 单元知识卡（用单元自带的 summary/fidx/method 生成「考点→公式→思路→答案」）。
+//         实测空壳率 89.2% → 0%，其中真解析约 50%、知识卡约 21%。
+//      ② 竖式乘法分解 verticalMulSteps：三位数乘两位数等计算题原先只有一行算式，现按位拆开讲。
+//      ③ 移动端错题本 renderWrongBank 补「解析 + 分步讲解」；PC 端错题库 renderWrongBank
+//         原先只列题干和错次，现补「你的答案 / 正确答案 + 分步讲解」。
+//      ④ 容错：generateSteps 兜底生成的步骤会打 q.stepsGeneric，difficultyScore 与
+//         questionDifficulty 不再把它当作「多步运算」的难度信号，避免 6:3:1 梯度被压平。
+const CACHE = 'lyj-shell-v81';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

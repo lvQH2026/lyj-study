@@ -2386,3 +2386,22 @@ body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',
 }
 .dash-week-val{ font-size:20px; font-weight:800; color:var(--primary); }
 .dash-week-lbl{ font-size:11px; color:var(--text-lighter); margin-top:2px; }
+
+/* ===== v81：错题本分步讲解回填 ===== */
+.wrong-explain{
+  margin-top:8px; padding:8px 10px; border-radius:8px;
+  background:var(--bg); font-size:13px; color:var(--text-light); line-height:1.7;
+}
+.wrong-explain b{ color:var(--primary); }
+details.wrong-steps{
+  margin:8px 0 2px; padding:8px 10px; border-radius:8px;
+  background:#FCF9F2; border:1px solid #EFE6D2;
+}
+details.wrong-steps summary{
+  font-size:12.5px; color:#A67C33; font-weight:700; cursor:pointer; user-select:none;
+}
+.wrong-steps-ol{
+  margin:6px 0 0; padding-left:18px; font-size:13px; color:var(--text); line-height:1.75;
+}
+.wrong-steps-ol li{ margin-top:3px; }
+.wrong-steps-ol li::marker{ color:var(--gold); font-weight:700; }

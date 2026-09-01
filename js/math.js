@@ -11162,7 +11162,7 @@ function getSectionScorer(key) {
 
 // 生成整份试卷
 // 自动生成解题步骤（计算题/应用题）
-function generateSteps(q) {
+function generateSteps(q, unit) {
   let t = (q.question || '').replace(/\s/g,'');
   let ans = q.answer !== undefined ? String(q.answer) : '';
   let m;
@@ -11303,12 +11303,23 @@ function generateSteps(q) {
   if (m) {
     let a=+m[1], op=m[2], b=+m[3];
     let r = op==='+' ? a+b : op==='-' ? a-b : op==='×' ? a*b : +(a/b).toFixed(2);
+    // v81：整数乘法补竖式分解。4 年级「三位数乘两位数」专项 90 道题、3 年级两个乘法单元
+    // 原先只有一行「235 × 27 = 6345」，孩子看不到怎么算出来的，这里逐位拆开。
+    if (op === '×' && Number.isInteger(a) && Number.isInteger(b)) {
+      let vs = verticalMulSteps(a, b);
+      if (vs) return vs;
+    }
     let steps=[`${a} ${op} ${b} = ${fmt(r)}`];
     if (op==='×' && (String(a).includes('.') || String(b).includes('.'))) {
       const da=(String(a).split('.')[1]||'').length, db=(String(b).split('.')[1]||'').length;
       steps.unshift(`小数乘法：先按整数乘法计算，再看两个因数共有 ${da+db} 位小数，从积的右边起数出 ${da+db} 位点上小数点`);
     }
-    if (op==='+' || op==='-') steps.unshift(`小数点对齐（相同数位对齐），从低位算起`);
+    if (op==='+' || op==='-') {
+      // v81：整数加减法不该说「小数点对齐」
+      const dec = String(a).includes('.') || String(b).includes('.');
+      steps.unshift(dec ? `小数点对齐（也就是相同数位对齐），从低位算起`
+                        : `相同数位对齐，从个位算起`);
+    }
     if (op==='÷') steps.unshift(`除数是整数：按整数除法计算，商的小数点与被除数对齐`);
     return steps;
   }
@@ -11389,19 +11400,642 @@ function generateSteps(q) {
     let an = parseFloat(ans);
     if (nums.length >= 2) {
       let [a,b] = nums.slice(0,2);
-      if (a*b === an) steps.push(`根据题意列式：${a} × ${b} = ${a*b}`);
-      else if (b && +(a/b).toFixed(2) === an) steps.push(`根据题意列式：${a} ÷ ${b} = ${fmt(+(a/b).toFixed(2))}`);
-      else steps.push(`根据题意分析数量关系，列式计算`);
+      if (a*b === an) { steps.push(`根据题意列式：${a} × ${b} = ${a*b}`); steps.push(`答：${ans}`); return steps; }
+      if (b && +(a/b).toFixed(2) === an) { steps.push(`根据题意列式：${a} ÷ ${b} = ${fmt(+(a/b).toFixed(2))}`); steps.push(`答：${ans}`); return steps; }
+      // v81：原逻辑到这里只会说「根据题意分析数量关系」这种空话，改由通用讲解引擎接手
+      let smart2 = buildSmartSteps(q, unit);
+      if (smart2 && smart2.length) { q.stepsGeneric = true; return smart2; }
+      steps.push(`根据题意分析数量关系，列式计算`);
       steps.push(`答：${ans}`);
       return steps;
     }
+    // v81：不再只说套话，先让通用讲解引擎试一次
+    let smartApp = buildSmartSteps(q, unit);
+    if (smartApp && smartApp.length) { q.stepsGeneric = true; return smartApp; }
     steps.push(`根据题意分析数量关系，得出结果`);
     steps.push(`答：${ans}`);
     return steps;
   }
 
   // ── 填空 / 选择 / 兜底 ──
+  // v81：旧兜底只吐一行「答案：x」，实测 89% 的题因此拿不到任何讲解，改走通用讲解引擎
+  let smart = buildSmartSteps(q, unit);
+  if (smart && smart.length) { q.stepsGeneric = true; return smart; }
   return [`答案：${ans}`];
+}
+
+// ============================================================
+// v81：通用分步讲解引擎（S3 · 解析讲解回填）
+// ============================================================
+// 背景（实测 630 道去重题）：题库里没有一道题自带 explain 或 steps，
+// 所有解析都由 generateSteps 现场生成；而旧兜底只吐一行「答案：x」，
+// 导致 89% 的题在错题本和答案解析页里看不到任何讲解。
+// 这里补三层，任何一层命中都保证返回 ≥2 步：
+//   L1 句式语义规则 —— 六年级高频句式（比例尺/折扣/成数/比/倒数/圆/圆柱圆锥/
+//       统计/鸽巢/方向/数与形/公因数公倍数/互化…）
+//   L2 分数关系 + 关键词驱动列式 —— 只在「结果与答案精确一致」或「题干有明确
+//       运算信号」时才列式，绝不瞎凑算式
+//   L3 单元知识卡 —— 用单元自带的 summary / fidx / method 生成
+//       「考点 → 公式 → 思路 → 答案」，保证任何题都有学科内容
+// 三层全落空时也有「读题 → 方法 → 答案」三段，并附选项对照。
+
+// 整数乘法竖式分解：把位数少的因数拆位，逐位去乘再相加。
+// 一位数乘多位数时改拆另一个因数的数位（更符合口算习惯）。
+function verticalMulSteps(a, b) {
+  if (!Number.isInteger(a) || !Number.isInteger(b) || a <= 0 || b <= 0) return null;
+  const top = Math.max(a, b), bot = Math.min(a, b);
+  const topStr = String(top), botStr = String(bot);
+  // 表内乘法：直接出口诀
+  if (topStr.length === 1 && botStr.length === 1) {
+    return ['用乘法口诀计算', `${a} × ${b} = ${a * b}`];
+  }
+  const steps = [];
+  if (botStr.length === 1) {
+    // 多位数 × 一位数：按数位拆开分别相乘（242 = 200 + 40 + 2，注意是「数字×位值」）
+    const ds = topStr.split('').map(Number);
+    const place = ds.map((d, i) => Math.pow(10, ds.length - 1 - i));
+    const seg = ds.map((d, i) => d * place[i]);
+    steps.push(`用 ${bot} 去乘 ${top} 的每一位：${top} = ${seg.join(' + ')}`);
+    const parts = [];
+    ds.forEach((d, i) => {
+      const v = seg[i] * bot;
+      parts.push(v);
+      steps.push(`${seg[i]} × ${bot} = ${v}`);
+    });
+    steps.push(`再把各部分相加：${parts.join(' + ')} = ${a * b}`);
+    return steps;
+  }
+  // 多位数 × 多位数：标准竖式，用下面因数的每一位从个位起依次去乘
+  const unitName = ['个', '十', '百', '千', '万'];
+  steps.push(`用竖式计算 ${a} × ${b}：把 ${top} 写在上面，用 ${bot} 的每一位从个位起依次去乘`);
+  const partials = [];
+  botStr.split('').reverse().forEach((ch, i) => {
+    const d = Number(ch);
+    if (d === 0) return;
+    const base = top * d, val = base * Math.pow(10, i);
+    partials.push(val);
+    if (i === 0) steps.push(`先用个位上的 ${d} 去乘：${top} × ${d} = ${base}`);
+    else steps.push(`再用${unitName[i] || i}位上的 ${d} 去乘：${top} × ${d} = ${base}，表示 ${base} 个${unitName[i] || ''}，也就是 ${val}`);
+  });
+  if (!partials.length) return null;
+  if (partials.length === 1) steps.push(`所以 ${a} × ${b} = ${partials[0]}`);
+  else steps.push(`把两次乘得的数相加：${partials.join(' + ')} = ${a * b}`);
+  return steps;
+}
+
+// 按题目上的 _unitName 反查单元对象，给 L3 提供 summary / fidx / method。
+// 组卷时题目来自多个单元，只能逐题反查；广西真题没有单元归属，返回 null。
+function unitMetaFor(q) {
+  if (!q || !q._unitName || q._unitName === '广西真题') return null;
+  try {
+    const hit = findUnitByName(state.currentGrade, q._unitName);
+    return hit ? hit.unit : null;
+  } catch (e) { return null; }
+}
+
+// 提取题干中的数字（先剥掉 1:600,000 这类千分位逗号，避免被当成两个数）
+function stepNums(t) {
+  return (String(t).replace(/(\d),(\d{3})/g, '$1$2').match(/\d+(?:\.\d+)?/g) || []).map(Number);
+}
+
+// 从一组素材里挑与本题最相关的一条：按题干汉字命中数打分，命中答案额外加权。
+// 固定取第一条会出现「题问乘真分数积怎么变，却讲分数乘整数法则」这种跑题的讲解。
+function pickRelevant(list, t, ans) {
+  if (!list || !list.length) return null;
+  const sAns = String(ans === undefined ? '' : ans);
+  let best = list[0], bestScore = -1;
+  list.forEach(function (s) {
+    const str = String(s);
+    let sc = 0;
+    for (let i = 0; i < t.length; i++) {
+      const ch = t.charAt(i);
+      if (ch >= '\u4e00' && ch <= '\u9fa5' && str.indexOf(ch) >= 0) sc++;
+    }
+    if (sAns && sAns.length <= 6 && str.indexOf(sAns) >= 0) sc += 5;
+    if (sc > bestScore) { bestScore = sc; best = s; }
+  });
+  return best;
+}
+
+// L3：单元知识卡（每个单元都有 summary / fidx / method 三套教学素材）
+function stepsFromUnitCard(unit, ans, t) {
+  if (!unit) return null;
+  const steps = [];
+  const tip = pickRelevant(unit.summary, t || '', ans);
+  if (tip) steps.push('考点：' + tip);
+  if (unit.fidx && unit.fidx.length) {
+    const f = unit.fidx[0];
+    steps.push('公式：' + f.t + ' —— ' + f.f);
+  }
+  const way = pickRelevant((unit.method || []).map(function (m) { return m && m.s; }), t || '', ans);
+  if (way) steps.push('思路：' + way);
+  steps.push('正确答案：' + ans);
+  return steps.length >= 2 ? steps : null;
+}
+
+// 选择题专属最后一步：把四个选项摊开对照
+function stepOptionsLine(q) {
+  if (!q.options || !q.options.length) return null;
+  const txt = q.options.map(function (o, i) {
+    return String.fromCharCode(65 + i) + '. ' + (typeof o === 'object' ? o.value : o);
+  }).join('；');
+  return '选项对照：' + txt;
+}
+
+function buildSmartSteps(q, unit) {
+  const t = String(q.question || '').replace(/\s/g, '');
+  const ans = q.answer !== undefined ? String(q.answer) : '';
+  // 答案数值：支持 '3:4' 之外的纯数与 '5/6' 这类分数答案
+  let an = NaN;
+  const fm = ans.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+  if (fm) an = parseFloat(fm[1]) / parseFloat(fm[2]);
+  else if (/^-?\d+(?:\.\d+)?$/.test(ans)) an = parseFloat(ans);
+  const ansIsPlainNum = /^-?\d+(?:\.\d+)?$/.test(ans);
+  const near = function (x) { return !isNaN(an) && isFinite(x) && Math.abs(x - an) < 1e-6; };
+  let m;
+
+  /* ---------- L1 · 句式语义规则 ---------- */
+
+  // 倒数：a/b → b/a
+  m = t.match(/^(\d+)\/(\d+)的倒数是？$/);
+  if (m) return ['求一个分数的倒数，就是把分子和分母调换位置',
+    `${m[1]}/${m[2]} 的倒数是 ${m[2]}/${m[1]}`];
+  m = t.match(/^(\d+)的倒数是？$/);
+  if (m) {
+    const n = +m[1];
+    if (n === 1) return ['1 的倒数是它本身', '1 的倒数是 1'];
+    return ['整数 n（n≠0）的倒数是 1/n', `${n} 的倒数是 1/${n}`];
+  }
+
+  // 比例尺：图上距离 → 实际距离（厘米化千米）
+  m = t.match(/比例尺1:([\d,]+)/);
+  if (m && /(实际距离|两地实际)/.test(t)) {
+    const sc = +String(m[1]).replace(/,/g, '');
+    const cm = (t.match(/距离是?(\d+(?:\.\d+)?)厘米/) || t.match(/(\d+(?:\.\d+)?)厘米/) || [])[1];
+    if (cm) {
+      const c = +cm, total = c * sc, km = total / 100000;
+      return ['比例尺 = 图上距离 : 实际距离，所以实际距离 = 图上距离 × 比例尺的后项',
+        `实际距离 = ${c} × ${sc} = ${total}（厘米）`,
+        `${total} 厘米 = ${total / 100} 米 = ${fmt(+km.toFixed(4))} 千米`];
+    }
+  }
+
+  // 折扣：已知原价求现价
+  m = t.match(/原价(\d+(?:\.\d+)?)元，打(\d+(?:\.\d+)?)折/);
+  if (m) {
+    const p = +m[1], d = +m[2], rate = d / 10;
+    return [`打 ${d} 折就是按原价的十分之几出售：${d} 折 = ${d}/10 = ${fmt(+rate.toFixed(4))}`,
+      `现价 = 原价 × 折扣 = ${p} × ${fmt(+rate.toFixed(4))} = ${fmt(+(p * rate).toFixed(4))}（元）`];
+  }
+  // 折扣：已知现价求原价
+  m = t.match(/打(\d+(?:\.\d+)?)折后现价是(\d+(?:\.\d+)?)元，原价/);
+  if (m) {
+    const d = +m[1], now = +m[2], rate = d / 10;
+    return [`打 ${d} 折 = 原价的 ${fmt(+rate.toFixed(4))}，即「原价 × ${fmt(+rate.toFixed(4))} = 现价」`,
+      `原价 = 现价 ÷ 折扣 = ${now} ÷ ${fmt(+rate.toFixed(4))} = ${fmt(+(now / rate).toFixed(4))}（元）`];
+  }
+  // 折扣的含义
+  m = t.match(/打(\d+(?:\.\d+)?)折出售，现价是原价的百分之几/);
+  if (m) {
+    const d = +m[1];
+    return [`几折就表示十分之几，也就是百分之几十`,
+      `${d} 折 = ${d}/10 = ${Math.round(d * 10)}%`];
+  }
+  // 成数：增产 n 成
+  m = t.match(/增产(\d+(?:\.\d+)?)成/);
+  if (m) {
+    const c = +m[1], p = c * 10;
+    return [`一成就是十分之一，也就是 10%`,
+      `增产 ${c} 成 = 增产 ${p}%，今年产量 = 1 + ${p}% = ${100 + p}%`];
+  }
+
+  // 百分数 → 分数
+  m = t.match(/^(\d+(?:\.\d+)?)%等于几分之几/);
+  if (m) {
+    const p = +m[1];
+    const steps = [`百分数化分数：先把百分数写成分母是 100 的分数，再约成最简分数`, `${p}% = ${p}/100`];
+    const g = gcd(p * 100, 100) / 100;
+    if (p % 1 === 0 && gcd(p, 100) > 1) steps.push(`约分：${p}/100 = ${fracStr(p, 100)}`);
+    return steps;
+  }
+  // 分数 → 小数
+  m = t.match(/^把(\d+)\/(\d+)化成小数是？$/);
+  if (m) return ['分数化小数：用分子除以分母', `${m[1]} ÷ ${m[2]} = ${fmt(+(+m[1] / +m[2]).toFixed(4))}`];
+  // 小数 → 百分数
+  m = t.match(/^把(\d*\.\d+)化成百分数是？$/);
+  if (m) {
+    const v = +m[1];
+    return ['小数化百分数：小数点向右移动两位，再添上百分号',
+      `${v} = ${fmt(+(v * 100).toFixed(4))}%`];
+  }
+
+  // 比：比值
+  m = t.match(/^(\d+):(\d+)的比值是？$/);
+  if (m) {
+    const a = +m[1], b = +m[2];
+    return ['比值 = 前项 ÷ 后项，结果可以是整数或分数',
+      `${a} : ${b} = ${a} ÷ ${b} = ${a}/${b}`,
+      `约成最简：${fracStr(a, b)}`];
+  }
+  // 比：化简（6:8化简后 / 把10:15化简后 / 化简比 12:18 = ？）
+  m = t.match(/(\d+):(\d+)化简后|化简比(\d+):(\d+)/);
+  if (m) {
+    const a = +(m[1] || m[3]), b = +(m[2] || m[4]), g = gcd(a, b);
+    return ['化简比：前项和后项同时除以它们的最大公因数',
+      `${a} 和 ${b} 的最大公因数是 ${g}`,
+      `${a}:${b} = ${a / g}:${b / g}`];
+  }
+  // 比：小数比化最简整数比
+  m = t.match(/^(\d*\.\d+):(\d*\.\d+)化成最简整数比是？$/);
+  if (m) {
+    const a = +m[1], b = +m[2];
+    const k = Math.pow(10, Math.max((String(a).split('.')[1] || '').length, (String(b).split('.')[1] || '').length));
+    const ia = Math.round(a * k), ib = Math.round(b * k), g = gcd(ia, ib);
+    return ['先把小数比化成整数比：前项后项同时扩大相同的倍数',
+      `${a}:${b} = ${ia}:${ib}`,
+      `再同时除以最大公因数 ${g}：${ia / g}:${ib / g}`];
+  }
+  // 比：按比分配（已知和）
+  m = t.match(/之和是(\d+(?:\.\d+)?)，甲:乙=(\d+):(\d+)，甲是/);
+  if (m) {
+    const s = +m[1], a = +m[2], b = +m[3], tot = a + b;
+    return ['按比分配：先求总份数，再求每一份是多少',
+      `总份数 = ${a} + ${b} = ${tot}，每份 = ${s} ÷ ${tot} = ${fmt(+(s / tot).toFixed(4))}`,
+      `甲占 ${a} 份：${fmt(+(s / tot).toFixed(4))} × ${a} = ${fmt(+(s * a / tot).toFixed(4))}`];
+  }
+  // 比：已知一项求另一项
+  m = t.match(/甲:乙=(\d+):(\d+)，乙是(\d+(?:\.\d+)?)，甲是/);
+  if (m) {
+    const a = +m[1], b = +m[2], y = +m[3];
+    return ['先求出一份是多少，再算甲占几份',
+      `每份 = ${y} ÷ ${b} = ${fmt(+(y / b).toFixed(4))}`,
+      `甲 = ${fmt(+(y / b).toFixed(4))} × ${a} = ${fmt(+(y * a / b).toFixed(4))}`];
+  }
+  // 比：前项加某数、比值不变
+  m = t.match(/^(\d+):(\d+)的前项加上(\d+)，要使比值不变，后项应加上/);
+  if (m) {
+    const a = +m[1], b = +m[2], add = +m[3], na = a + add, k = na / a;
+    return ['比的前项和后项同时乘或除以相同的数（0 除外），比值不变',
+      `前项变成 ${a} + ${add} = ${na}，相当于扩大到原来的 ${fmt(+k.toFixed(4))} 倍`,
+      `后项也要扩大同样的倍数：${b} × ${fmt(+k.toFixed(4))} = ${fmt(+(b * k).toFixed(4))}`,
+      `所以后项应加上 ${fmt(+(b * k).toFixed(4))} - ${b} = ${fmt(+(b * k - b).toFixed(4))}`];
+  }
+
+  // 解比例：x 可能在四个位置中的任意一个（9:x=3:4 / 2:3=4:x …）
+  m = t.match(/^(\d+(?:\.\d+)?):(x|\d+(?:\.\d+)?)=(\d+(?:\.\d+)?):(x|\d+(?:\.\d+)?)，?则?x=[?？]$/);
+  if (m) {
+    const p = [m[1], m[2], m[3], m[4]];
+    const xi = p.indexOf('x');
+    const vals = p.map(function (v) { return v === 'x' ? null : parseFloat(v); });
+    if (xi >= 0) {
+      if (xi === 0 || xi === 3) {
+        const other = vals[xi === 0 ? 3 : 0], prod = vals[1] * vals[2];
+        return ['比例的基本性质：两个外项的积 = 两个内项的积',
+          `${xi === 0 ? 'x' : other} 和 ${xi === 0 ? other : 'x'} 是外项，${vals[1]} 和 ${vals[2]} 是内项`,
+          `${xi === 0 ? `x × ${other}` : `${other} × x`} = ${vals[1]} × ${vals[2]} = ${prod}`,
+          `x = ${prod} ÷ ${other} = ${fmt(+(prod / other).toFixed(4))}`];
+      }
+      const other = vals[xi === 1 ? 2 : 1], prod = vals[0] * vals[3];
+      return ['比例的基本性质：两个外项的积 = 两个内项的积',
+        `${vals[0]} 和 ${vals[3]} 是外项，${xi === 1 ? 'x' : other} 和 ${xi === 1 ? other : 'x'} 是内项`,
+        `${vals[0]} × ${vals[3]} = ${xi === 1 ? `x × ${other}` : `${other} × x`} = ${prod}`,
+        `x = ${prod} ÷ ${other} = ${fmt(+(prod / other).toFixed(4))}`];
+    }
+  }
+  // 图形按 n:1 放大
+  m = t.match(/按(\d+(?:\.\d+)?):1放大后，\S{0,8}长是多少/);
+  if (m) {
+    const k = +m[1], len = (t.match(/长(\d+(?:\.\d+)?)厘米/) || [])[1];
+    if (len) return [`图形按 ${k}:1 放大，每条边都扩大到原来的 ${k} 倍`,
+      `长 = ${len} × ${k} = ${fmt(+(len * k).toFixed(4))}（厘米）`];
+  }
+  m = t.match(/按(\d+(?:\.\d+)?):1放大后，\S{0,12}面积是原图形的几倍/);
+  if (m) {
+    const k = +m[1];
+    return [`图形按 ${k}:1 放大，每条边都扩大到原来的 ${k} 倍`,
+      `面积扩大的倍数 = 边长扩大倍数的平方：${k}² = ${fmt(+(k * k).toFixed(4))}`,
+      `所以面积是原来的 ${fmt(+(k * k).toFixed(4))} 倍`];
+  }
+  // 温度升降（跨零点的减法）
+  m = t.match(/从(-?\d+)℃下降到(-?\d+)℃/);
+  if (m) {
+    const c1 = +m[1], c2 = +m[2];
+    return ['下降的温度 = 原来的温度 − 下降后的温度',
+      `${c1} − (${c2}) = ${c1} + ${-c2} = ${fmt(+(c1 - c2).toFixed(4))}（℃）`];
+  }
+  m = t.match(/从(-?\d+)℃上升到(-?\d+)℃/);
+  if (m) {
+    const c1 = +m[1], c2 = +m[2];
+    return ['上升的温度 = 上升后的温度 − 原来的温度',
+      `${c2} − (${c1}) = ${c2} + ${-c1} = ${fmt(+(c2 - c1).toFixed(4))}（℃）`];
+  }
+
+  // 圆：直径 / 半径扩倍
+  m = t.match(/半径是(\d+(?:\.\d+)?)\S{0,3}，?它的直径/);
+  if (m) {
+    const r = +m[1];
+    return ['同一个圆里，直径是半径的 2 倍：d = 2r',
+      `d = 2 × ${r} = ${fmt(+(2 * r).toFixed(4))}（${(t.match(/半径是\d+(?:\.\d+)?(\S{0,3})/) || [])[1] || ''}）`];
+  }
+  m = t.match(/半径扩大(\d+(?:\.\d+)?)倍，面积扩大/);
+  if (m) {
+    const k = +m[1];
+    return ['圆的面积 S = πr²，面积与半径的平方成正比',
+      `半径扩大 ${k} 倍，面积就扩大 ${k}² = ${fmt(+(k * k).toFixed(4))} 倍`];
+  }
+  m = t.match(/半径扩大(\d+(?:\.\d+)?)倍，周长扩大/);
+  if (m) {
+    const k = +m[1];
+    return ['圆的周长 C = 2πr，周长与半径成正比',
+      `半径扩大 ${k} 倍，周长也扩大 ${k} 倍`];
+  }
+  // 已知直径求半径 / 半径扩倍时直径同步扩倍
+  m = t.match(/直径是(\d+(?:\.\d+)?)\S{0,3}，?它的半径/);
+  if (m) {
+    const d = +m[1];
+    return ['同一个圆里，半径是直径的一半：r = d ÷ 2',
+      `r = ${d} ÷ 2 = ${fmt(+(d / 2).toFixed(4))}`];
+  }
+  m = t.match(/半径扩大(\d+(?:\.\d+)?)倍，直径扩大/);
+  if (m) {
+    const k = +m[1];
+    return ['直径 d = 2r，直径和半径成正比',
+      `半径扩大 ${k} 倍，直径也扩大 ${k} 倍`];
+  }
+  // 已知半径求周长
+  m = t.match(/半径是(\d+(?:\.\d+)?)\S{0,3}，?它的周长/);
+  if (m) {
+    const r = +m[1];
+    return ['圆的周长公式：C = 2πr',
+      `C = 2 × 3.14 × ${r} = ${fmt(+(2 * 3.14 * r).toFixed(4))}`];
+  }
+
+  // 圆柱 / 圆锥（π 取 3.14）
+  m = t.match(/一个(圆柱|圆锥).{0,12}底面半径(\d+(?:\.\d+)?)厘米、高(\d+(?:\.\d+)?)厘米，它的(侧面积|表面积|体积)/);
+  if (m) {
+    const shape = m[1], r = +m[2], h = +m[3], kind = m[4];
+    if (shape === '圆锥') {
+      if (kind === '体积') return ['圆锥的体积等于与它等底等高的圆柱体积的三分之一：V = 1/3 πr²h',
+        `V = 1/3 × 3.14 × ${r}² × ${h} = 1/3 × 3.14 × ${fmt(+(r * r).toFixed(4))} × ${h}`,
+        `V = ${fmt(+(3.14 * r * r * h / 3).toFixed(4))}（立方厘米）`];
+    } else {
+      if (kind === '侧面积') return ['圆柱的侧面积 = 底面周长 × 高：S侧 = 2πrh',
+        `S侧 = 2 × 3.14 × ${r} × ${h} = ${fmt(+(2 * 3.14 * r * h).toFixed(4))}（平方厘米）`];
+      if (kind === '表面积') return ['圆柱的表面积 = 侧面积 + 两个底面积：S = 2πrh + 2πr²',
+        `侧面积 = 2 × 3.14 × ${r} × ${h} = ${fmt(+(2 * 3.14 * r * h).toFixed(4))}`,
+        `两个底面积 = 2 × 3.14 × ${r}² = ${fmt(+(2 * 3.14 * r * r).toFixed(4))}`,
+        `表面积 = ${fmt(+(2 * 3.14 * r * h + 2 * 3.14 * r * r).toFixed(4))}（平方厘米）`];
+      if (kind === '体积') return ['圆柱的体积 = 底面积 × 高：V = πr²h',
+        `V = 3.14 × ${r}² × ${h} = 3.14 × ${fmt(+(r * r).toFixed(4))} × ${h}`,
+        `V = ${fmt(+(3.14 * r * r * h).toFixed(4))}（立方厘米）`];
+    }
+  }
+
+  // 统计：众数 / 中位数 / 平均数
+  m = t.match(/^数据([\d、.]+)的众数是？$/);
+  if (m) {
+    const ds = m[1].split('、').map(Number);
+    const cnt = {};
+    ds.forEach(function (d) { cnt[d] = (cnt[d] || 0) + 1; });
+    let best = ds[0], bc = 0;
+    ds.forEach(function (d) { if (cnt[d] > bc) { bc = cnt[d]; best = d; } });
+    return ['众数是一组数据中出现次数最多的那个数',
+      `逐个统计：${ds.map(function (d) { return d + ' 出现 ' + cnt[d] + ' 次'; }).join('，')}`,
+      `出现次数最多的是 ${best}（${bc} 次），所以众数是 ${best}`];
+  }
+  m = t.match(/^数据([\d、.]+)的中位数是？$/);
+  if (m) {
+    const ds = m[1].split('、').map(Number).sort(function (a, b) { return a - b; });
+    const n = ds.length, mid = n % 2 ? ds[(n - 1) / 2] : (ds[n / 2 - 1] + ds[n / 2]) / 2;
+    return ['求中位数要先按从小到大的顺序排列',
+      `排序后：${ds.join('、')}，一共有 ${n} 个数`,
+      n % 2 ? `奇数个数，取正中间的第 ${(n + 1) / 2} 个：${mid}` : `偶数个数，取中间两个数的平均数：(${ds[n / 2 - 1]} + ${ds[n / 2]}) ÷ 2 = ${fmt(+mid.toFixed(4))}`];
+  }
+
+  // 鸽巢问题（鸽子版）
+  m = t.match(/把(\d+)只鸽子飞进(\d+)个鸽巢/);
+  if (m) {
+    const n = +m[1], d = +m[2], q2 = Math.floor(n / d);
+    return ['把鸽子看作物体、鸽巢看作抽屉，用「至少数 = 商 + 1」',
+      `${n} ÷ ${d} = ${q2}……${n - q2 * d}`,
+      `至少数 = ${q2} + 1 = ${q2 + 1}（只）`];
+  }
+
+  // 植树问题（四类：两端都种 +1 / 只种一端 不变 / 两端都不种 −1 / 封闭图形 不变）
+  m = t.match(/(\d+(?:\.\d+)?)米.{0,20}?每隔(\d+(?:\.\d+)?)米/);
+  if (m && /种|放|栽|摆|插|安/.test(t)) {
+    const L = +m[1], g = +m[2], n = L / g;
+    let delta, why;
+    if (/两端都不种|两端都不栽|两端都不放|两端都不摆/.test(t)) { delta = -1; why = '两端都不种：棵数 = 间隔数 − 1'; }
+    else if (/只在一端|只种一端|另一端不放|只有一端|一端放/.test(t)) { delta = 0; why = '只种一端（另一端不放）：棵数 = 间隔数'; }
+    else if (/圆|周长|封闭|一圈|池塘/.test(t)) { delta = 0; why = '封闭图形（围成一圈）：棵数 = 间隔数'; }
+    else { delta = 1; why = '两端都种：棵数 = 间隔数 + 1'; }
+    return ['先求间隔数：间隔数 = 总长 ÷ 间距',
+      `${L} ÷ ${g} = ${fmt(+n.toFixed(4))}（个间隔）`,
+      why,
+      delta === 0 ? `棵数 = 间隔数 = ${fmt(+n.toFixed(4))}`
+        : `棵数 = ${fmt(+n.toFixed(4))} ${delta > 0 ? '+' : '−'} 1 = ${fmt(+(n + delta).toFixed(4))}`];
+  }
+  // 敲钟间隔 / 爬楼层数（间隔数 = 个数 − 1）
+  m = t.match(/敲(\d+)下/);
+  if (m && /间隔/.test(t)) {
+    const n = +m[1];
+    return [`敲 ${n} 下，第 1 下就是起点，中间只有 ${n} − 1 个间隔`, `${n} − 1 = ${n - 1}（个间隔）`];
+  }
+  m = t.match(/从(\d+)楼走到(\d+)楼/);
+  if (m) {
+    const a2 = +m[1], b2 = +m[2];
+    return ['从第 a 层走到第 b 层，实际走的层数 = b − a（起点那层不用走）', `${b2} − ${a2} = ${b2 - a2}（层）`];
+  }
+
+  // 角度：已知一个角求另一个角（直角 90° / 平角 180° / 对顶角 / 邻补角）
+  m = t.match(/已知∠?(\d+)=(\d+(?:\.\d+)?)°，?∠?(\d+)=/);
+  if (m) {
+    const known = +m[2];
+    if (/组成一个直角|成直角|直角分成|将直角分成|分成∠1和∠2/.test(t) && near(90 - known))
+      return ['直角是 90°，两个角合起来正好是一个直角',
+        `∠${m[3]} = 90° − ${known}° = ${fmt(+(90 - known).toFixed(4))}°`];
+    if (/对顶角/.test(t) && near(known))
+      return ['两条直线相交，相对的两个角（对顶角）大小相等',
+        `∠${m[3]} = ∠${m[1]} = ${known}°`];
+    if (/邻补角/.test(t) && near(180 - known))
+      return ['相邻的两个角合起来是一个平角（180°），这样的两个角互为邻补角',
+        `∠${m[3]} = 180° − ${known}° = ${fmt(+(180 - known).toFixed(4))}°`];
+    if (/平角/.test(t) && near(180 - known))
+      return ['平角是 180°，两个角合起来正好是一个平角',
+        `∠${m[3]} = 180° − ${known}° = ${fmt(+(180 - known).toFixed(4))}°`];
+    if (near(180 - known))
+      return ['直线上相邻的几个角合起来是一个平角（180°）',
+        `∠${m[3]} = 180° − ${known}° = ${fmt(+(180 - known).toFixed(4))}°`];
+  }
+  // 角度：一条直线上三个角，已知两个求第三个
+  m = t.match(/已知∠(\d+)=(\d+(?:\.\d+)?)°，?∠(\d+)=(\d+(?:\.\d+)?)°，?∠(\d+)=/);
+  if (m) {
+    const x = +m[2], y = +m[4], z = 180 - x - y;
+    if (near(z)) return ['一条直线上的三个角合起来正好是一个平角（180°）',
+      `∠${m[5]} = 180° − ${x}° − ${y}° = ${fmt(+z.toFixed(4))}°`];
+  }
+  // 折纸折角：折过去的部分与原来重合，露出的角是折起角的 2 倍。
+  // 只在答案吻合时才输出——不同配图的几何关系可能不同，宁可不讲也不能讲错。
+  m = t.match(/折痕折起.{0,8}，?已知∠(\d+)=(\d+(?:\.\d+)?)°，?∠(\d+)=/);
+  if (m) {
+    const known = +m[2];
+    if (near(known / 2)) return ['折过去的部分和原来的部分完全重合，所以露出的大角是折起小角的 2 倍',
+      `∠${m[3]} = ${known}° ÷ 2 = ${fmt(+(known / 2).toFixed(4))}°`];
+    if (near(known)) return ['折叠只是改变位置，角的大小不变',
+      `∠${m[3]} = ∠${m[1]} = ${known}°`];
+  }
+  // 三角板拼角：一副三角板能拼出的角一定是 15° 的整数倍
+  m = t.match(/三角板.{0,24}能拼出(\d+)°的角吗/);
+  if (m) {
+    const d = +m[1], ok = d % 15 === 0;
+    return ['一副三角板上只有 30°、60°、90° 和 45°、45°、90°，拼出来的角一定是 15° 的整数倍',
+      `${d}° ${ok ? '是' : '不是'} 15° 的整数倍（${d} ÷ 15 = ${fmt(+(d / 15).toFixed(4))}）`,
+      ok ? `所以能拼出 ${d}° 的角` : `所以不能拼出 ${d}° 的角`];
+  }
+
+  // 工程问题：合做效率
+  m = t.match(/单独做(\d+)天完成，\S{0,8}单独做(\d+)天完成，\S{0,8}合做每天完成/);
+  if (m) {
+    const a = +m[1], b = +m[2];
+    return ['把整项工程看作单位「1」，工作效率 = 1 ÷ 工作时间',
+      `两人每天分别完成 1/${a} 和 1/${b}`,
+      `通分相加：1/${a} + 1/${b} = ${b}/${a * b} + ${a}/${a * b} = ${a + b}/${a * b}`];
+  }
+  // 工程问题：n 天完成工程的几分之几
+  m = t.match(/独做(\d+)天完成，\S{0,8}(\d+)天完成工程的几分之几/);
+  if (m) {
+    const d = +m[1], n = +m[2];
+    return ['把整项工程看作单位「1」，每天完成 1 ÷ 总天数',
+      `每天完成 1/${d}，${n} 天就完成 ${n} 个 1/${d}`,
+      `${n} × 1/${d} = ${n}/${d}`];
+  }
+
+  // 位置与方向：两个观测点方向相对
+  m = t.match(/^(.+)在(.+)的(南|北)偏(东|西)(\d+)°方向上，那么/);
+  if (m) {
+    // 捕获组：m[3]=南/北，m[4]=东/西，m[5]=角度（勿偏移，早期版本曾误用 m[4]/m[5]/m[6]）
+    const flip = { 南: '北', 北: '南', 东: '西', 西: '东' };
+    const d = flip[m[3]], e = flip[m[4]];
+    return ['两人的位置互换后，要以另一个人为观测点重新看方向',
+      '方向要改成相反方向：南↔北，东↔西，偏转的角度不变',
+      `${m[3]}偏${m[4]}${m[5]}° 的相反方向是 ${d}偏${e}${m[5]}°`];
+  }
+  // 位置与方向：同一种方向的两种说法（互余）
+  m = t.match(/^「(南|北)偏(东|西)(\d+)°」方向的另一种说法是/);
+  if (m) {
+    const x = +m[3], y = 90 - x;
+    return ['同一个方向可以用两组基准来描述，两组角度相加是 90°',
+      `${m[1]}偏${m[2]}${x}° = ${m[2]}偏${m[1]}${y}°（因为 ${x}° + ${y}° = 90°）`];
+  }
+
+  // 数与形：正方形数
+  m = t.match(/拼到第(\d+)层时用了(\d+)个小正方形，再拼上第(\d+)层后一共/);
+  if (m) {
+    const n = +m[3];
+    return ['从 1 开始拼，每层都是一个大正方形，第 n 层一共 n² 个小正方形',
+      `拼到第 ${n} 层时，一共是 ${n}² = ${n * n}（个）`];
+  }
+
+  // 最大公因数 / 最小公倍数
+  m = t.match(/^(\d+)和(\d+)的最大公因数是？$/);
+  if (m) {
+    const a = +m[1], b = +m[2], g = gcd(a, b);
+    return ['最大公因数是两个数公有因数中最大的那个',
+      `${a} 的因数与 ${b} 的因数中，公有的最大的是 ${g}`,
+      `所以最大公因数是 ${g}`];
+  }
+  m = t.match(/^(\d+)和(\d+)的最小公倍数是？$/);
+  if (m) {
+    const a = +m[1], b = +m[2], g = gcd(a, b), l = a * b / g;
+    return ['最小公倍数 = 两数的乘积 ÷ 最大公因数',
+      `${a} 和 ${b} 的最大公因数是 ${g}`,
+      `最小公倍数 = ${a} × ${b} ÷ ${g} = ${l}`];
+  }
+
+  // 长方形周长 / 面积（低年级高频）
+  m = t.match(/长(\d+(?:\.\d+)?)[\u4e00-\u9fa5]{0,2}、?宽(\d+(?:\.\d+)?)/);
+  if (m && /周长/.test(t)) {
+    const a = +m[1], b = +m[2];
+    return ['长方形周长 = （长 + 宽）× 2', `(${a} + ${b}) × 2 = ${fmt(+((a + b) * 2).toFixed(4))}`];
+  }
+  if (m && /面积/.test(t)) {
+    const a = +m[1], b = +m[2];
+    return ['长方形面积 = 长 × 宽', `${a} × ${b} = ${fmt(+(a * b).toFixed(4))}`];
+  }
+  // 单价 × 数量
+  m = t.match(/每个(\d+(?:\.\d+)?)元，买(\d+(?:\.\d+)?)个/);
+  if (m) {
+    const p = +m[1], n = +m[2];
+    return ['总价 = 单价 × 数量', `${p} × ${n} = ${fmt(+(p * n).toFixed(4))}（元）`];
+  }
+  // 比一个数大/小几
+  m = t.match(/比(\d+(?:\.\d+)?)大(\d+(?:\.\d+)?)的数是/);
+  if (m) return ['求比一个数大几的数，用加法', `${m[1]} + ${m[2]} = ${fmt(+(+m[1] + +m[2]).toFixed(4))}`];
+  m = t.match(/比(\d+(?:\.\d+)?)小(\d+(?:\.\d+)?)的数是/);
+  if (m) return ['求比一个数小几的数，用减法', `${m[1]} - ${m[2]} = ${fmt(+(+m[1] - +m[2]).toFixed(4))}`];
+
+  /* ---------- L2 · 分数关系反推（结果必须与答案精确一致才输出） ---------- */
+  m = t.match(/(\d+)\/(\d+)/);
+  if (m && +m[2] !== 0) {
+    const a = +m[1], b = +m[2];
+    // 取分数之外的数字作为参与运算的量
+    const rest = t.slice(0, m.index) + ' ' + t.slice(m.index + m[0].length);
+    const nums = stepNums(rest);
+    for (let i = nums.length - 1; i >= 0; i--) {
+      const n = nums[i];
+      if (near(n * a / b)) return ['求一个数的几分之几是多少，用乘法计算',
+        `${n} × ${a}/${b} = ${n} × ${a} ÷ ${b} = ${fmt(+(n * a / b).toFixed(4))}`];
+      if (near(n / (a / b))) return ['已知一个数的几分之几是多少，求这个数，用除法计算',
+        `${n} ÷ ${a}/${b} = ${n} × ${b}/${a} = ${fmt(+(n * b / a).toFixed(4))}`];
+    }
+  }
+
+  /* ---------- L2b · 关键词驱动列式（无运算信号就绝不猜） ---------- */
+  if (ansIsPlainNum && !isNaN(an)) {
+    const nums = stepNums(t.replace(/(\d+)\/(\d+)/g, ''));   // 排除分数内部数字
+    if (nums.length >= 2 && nums.length <= 5) {
+      let ops = [];
+      if (/一共|总共|共有|合计|和是|相加|之和|共多少|一共有/.test(t)) ops.push('+');
+      if (/还剩|剩下|还差|相差|多多少|少多少|比\S{1,8}多|比\S{1,8}少/.test(t)) ops.push('-');
+      if (/每个|每组|每行|每份|倍|面积|体积|总价|周长/.test(t)) ops.push('×');
+      if (/平均|可以分成|分成|速度|每小时|每天|单价/.test(t)) ops.push('÷');
+      // 题干里没有任何运算信号就绝不猜：宁可交给单元知识卡，也不能编一条错的算式
+      if (!ops.length) return null;
+      for (let oi = 0; oi < ops.length; oi++) {
+        const op = ops[oi];
+        for (let i = 0; i < nums.length; i++) {
+          for (let j = 0; j < nums.length; j++) {
+            if (i === j) continue;
+            const a = nums[i], b = nums[j];
+            const r = op === '+' ? a + b : op === '-' ? a - b : op === '×' ? a * b : (b ? a / b : NaN);
+            if (!near(r)) continue;
+            const why = op === '+' ? '求一共是多少，用加法'
+              : op === '-' ? '求相差多少，用减法'
+              : op === '×' ? '求几个几是多少，用乘法'
+              : '求每份是多少，用除法';
+            return [why, `${a} ${op} ${b} = ${fmt(+r.toFixed(4))}`, `所以答案是 ${ans}`];
+          }
+        }
+      }
+    }
+  }
+
+  /* ---------- L3 · 单元知识卡兜底 ---------- */
+  const card = stepsFromUnitCard(unit, ans, t);
+  if (card) {
+    const opt = stepOptionsLine(q);
+    if (opt) card.push(opt);
+    return card;
+  }
+
+  /* ---------- 终极兜底：读题 → 方法 → 答案 ---------- */
+  const last = ['先读题，找出题目给出的已知条件和要求的问题',
+    '再选择本单元学过的方法列式或判断',
+    '正确答案：' + ans];
+  const opt2 = stepOptionsLine(q);
+  if (opt2) last.push(opt2);
+  return last;
 }
 
 // ============================================================
@@ -11416,7 +12050,9 @@ function difficultyScore(q) {
   if (/至少|最少|保证|怎样|为什么|规律|第\s*\d+\s*个/.test(t)) s += 2;   // 策略/探究词
   if (/\d+\s*[+−-]\s*\d+\s*[+−-]\s*\d+/.test(t)) s += 1;                // 两步以上加减
   if (/[×÷]/.test(t) && t.split(/[×÷]/).length >= 3) s += 1;           // 两步以上乘除
-  if (q && q.steps && q.steps.length >= 3) s += 1;
+  // v81：stepsGeneric 表示这组步骤是通用引擎兜底生成的，不能当作「多步运算」的难度信号，
+  // 否则几乎所有题都会 +1 分，把 6:3:1 的梯度压平。
+  if (q && q.steps && q.steps.length >= 3 && !q.stepsGeneric) s += 1;
   if (q && q.type === 'fill') s += 0.5;
   return s;
 }
@@ -11450,7 +12086,7 @@ function questionDifficulty(q) {
   if (appWord && t.length >= 18) return 2;
   if (/\d+\s*[+−-]\s*\d+\s*[+−-]\s*\d+/.test(t)) return 2;
   if (/[×÷]/.test(t) && t.split(/[×÷]/).length >= 3) return 2;
-  if (q && q.steps && q.steps.length >= 3) return 2;
+  if (q && q.steps && q.steps.length >= 3 && !q.stepsGeneric) return 2;  // v81：同 difficultyScore，排除兜底步骤
   return 1;
 }
 
@@ -11666,7 +12302,7 @@ function injectRealIntoPaper(questions, STRUCT, grade, sem, type) {
       } else if (sec.key === 'choice' && (!item.options || item.options.length < 2) && canForceFill(item)) {
         item.forceFill = true;
       }
-      if (!item.steps) item.steps = generateSteps(item);
+      if (!item.steps) item.steps = generateSteps(item, unitMetaFor(item));
       questions[idxs[k]] = item;
       realCount++;
     }
@@ -11784,7 +12420,7 @@ function generateExamPaper() {
   // 为每道题生成解题步骤
   questions.forEach((q, i) => {
     q.num = i + 1;
-    if (!q.steps) q.steps = generateSteps(q);
+    if (!q.steps) q.steps = generateSteps(q, unitMetaFor(q));
   });
 
   // 配图保底：每套卷至少含 MIN_IMG 张配图题（真实试卷均有图形/图表题）。
@@ -11823,7 +12459,7 @@ function generateExamPaper() {
       item._section = slot.q._section;         // v73：保持原分区（题型标签不能串区）
       item.forceFill = false;
       if (slot.q._section === 'choice' && (!item.options || item.options.length < 2) && canForceFill(item)) item.forceFill = true;
-      if (!item.steps) item.steps = generateSteps(item);
+      if (!item.steps) item.steps = generateSteps(item, unitMetaFor(item));
       item.num = slot.q.num;
       questions[slot.i] = item;
       imgNow++;
@@ -12447,6 +13083,20 @@ function renderWrongBank() {
       ? `<button class="btn-similar" onclick="practiceSimilarWrong('${w.id}')">练同类题</button>`
       : '';
 
+    // v81：解析讲解回填。老错题入库时可能只存了「答案：x」这种空壳步骤，
+    // 这里统一判定「有效步骤」——少于 2 步或整段就是「答案：…」的，重新生成一次。
+    let steps = q.steps;
+    if (!steps || !steps.length || (steps.length === 1 && /^答案：/.test(steps[0]))) {
+      steps = generateSteps(q, hit && hit.unit);
+    }
+    let explainBlock = q.explain
+      ? `<div class="wrong-explain"><b>解析：</b>${q.explain}</div>`
+      : '';
+    let stepsBlock = (steps && steps.length)
+      ? `<details class="wrong-steps" open><summary>分步讲解（${steps.length} 步）</summary>`
+        + `<ol class="wrong-steps-ol">${steps.map(s => `<li>${s}</li>`).join('')}</ol></details>`
+      : '';
+
     html += `<div class="wrong-item">
       <div class="wrong-item-header">
         <span class="wrong-item-tag">${gradeNames[w.grade] || ''} · ${w.unitName || ''}</span>
@@ -12456,6 +13106,8 @@ function renderWrongBank() {
       <div class="wrong-item-answer">
         你的答案：<span class="user-ans">${userAns}</span> ｜ 正确答案：<span class="correct-ans">${correctAns}</span>
       </div>
+      ${explainBlock}
+      ${stepsBlock}
       ${fidxBlock}
       <div class="wrong-item-actions">
         <button class="btn-retry" onclick="retryOneWrong('${w.id}')">重做</button>

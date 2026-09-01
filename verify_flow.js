@@ -510,8 +510,59 @@ ok('v80：驾驶舱样式齐备（倒计时/任务/薄弱/本周 四块）',
   /\.dash-weak-item\{/.test(css80) && /\.dash-week\{/.test(css80));
 ok('v80：卫生修复 startSpecialQuiz 补年级持久化',
   /App\.setGrade\('math', grade\)/.test(math80));
-ok('v80：SW 缓存递进至 lyj-shell-v80',
-  /const CACHE = 'lyj-shell-v80'/.test(sw80));
+ok('v80：SW 缓存至少 v80（同 v77/v79，用下限校验，避免每次发版误报）',
+  swVer() >= 80);
+
+// ============================================================
+// v81：S3 解析讲解回填
+// ============================================================
+const math81 = fs.readFileSync(path.join(ROOT, 'js/math.js'), 'utf8');
+const pc81 = fs.readFileSync(path.join(ROOT, 'js/pc.js'), 'utf8');
+const css81 = fs.readFileSync(path.join(ROOT, 'css/style.css'), 'utf8');
+const pcss81 = fs.readFileSync(path.join(ROOT, 'css/pc.css'), 'utf8');
+
+ok('v81：通用讲解引擎 buildSmartSteps(q, unit) 就位',
+  /function buildSmartSteps\(q, unit\)/.test(math81));
+ok('v81：引擎三层齐备（L1 规则 / L2 关键词列式 / L3 单元知识卡）',
+  /L1 · 句式语义规则/.test(math81) && /L2b · 关键词驱动列式/.test(math81) &&
+  /function stepsFromUnitCard\(unit, ans\)/.test(math81));
+ok('v81：L3 取用单元自带的 summary / fidx / method',
+  /unit\.summary/.test(math81) && /unit\.fidx/.test(math81) && /unit\.method/.test(math81));
+ok('v81：L2 要求结果与答案精确一致才列式（near 判定，不瞎凑算式）',
+  /const near = function \(x\)/.test(math81) && /if \(!near\(r\)\) continue;/.test(math81));
+ok('v81：L2 无运算信号时不猜（ops 为空直接返回 null）',
+  /if \(!ops\.length\) return null;/.test(math81));
+ok('v81：generateSteps 支持传入单元上下文',
+  /function generateSteps\(q, unit\)/.test(math81));
+ok('v81：组卷三处调用点均传入 unitMetaFor(q)',
+  (math81.match(/generateSteps\([a-z]+, unitMetaFor\([a-z]+\)\)/g) || []).length >= 3);
+ok('v81：unitMetaFor 按 _unitName 反查单元，广西真题返回 null',
+  /function unitMetaFor\(q\)/.test(math81) && /广西真题/.test(math81));
+ok('v81：旧「答案：x」单行兜底已被通用引擎取代',
+  /let smart = buildSmartSteps\(q, unit\);/.test(math81));
+ok('v81：应用题分支不再输出「根据题意分析数量关系」套话（先交给引擎）',
+  /let smart2 = buildSmartSteps\(q, unit\);/.test(math81));
+ok('v81：兜底步骤打 stepsGeneric 标记',
+  /q\.stepsGeneric = true/.test(math81));
+ok('v81：难度分级不受兜底步骤干扰（两处均排除 stepsGeneric）',
+  (math81.match(/q\.steps\.length >= 3 && !q\.stepsGeneric/g) || []).length === 2);
+ok('v81：竖式乘法分解 verticalMulSteps 就位并接入纯算式分支',
+  /function verticalMulSteps\(a, b\)/.test(math81) && /verticalMulSteps\(a, b\);/.test(math81));
+ok('v81：整数加减法不再误说「小数点对齐」',
+  /dec \? `小数点对齐/.test(math81) && /: `相同数位对齐，从个位算起`/.test(math81));
+ok('v81：移动端错题本渲染分步讲解',
+  /details class="wrong-steps"/.test(math81) && /wrong-steps-ol/.test(math81));
+ok('v81：老错题的「答案：x」空壳步骤会被重新生成',
+  /steps\.length === 1 && \/\^答案：\/\.test\(steps\[0\]\)/.test(math81));
+ok('v81：PC 错题库补答案与分步讲解（原先只有题干）',
+  /pc-wrong-ans/.test(pc81) && /pc-wrong-steps/.test(pc81));
+ok('v81：PC 端错题讲解复用 generateSteps 与 findUnitByName',
+  /typeof generateSteps === 'function'/.test(pc81) && /typeof findUnitByName === 'function'/.test(pc81));
+ok('v81：移动端讲解样式齐备（解析块 + 分步 details）',
+  /\.wrong-explain\{/.test(css81) && /details\.wrong-steps\{/.test(css81) && /\.wrong-steps-ol\{/.test(css81));
+ok('v81：PC 端讲解样式齐备',
+  /\.pc-wrong-item\{/.test(pcss81) && /details\.pc-wrong-steps\{/.test(pcss81));
+ok('v81：SW 缓存递进至 v81', swVer() >= 81);
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));

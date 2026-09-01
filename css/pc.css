@@ -838,3 +838,29 @@ a { color: inherit; }
   background:#F7F6F2; font-size:13px; color:var(--ink-2); line-height:1.7;
 }
 .pc-ai-steps span{ display:block; margin-top:4px; }
+
+/* ===== v81：PC 错题库 —— 答案 + 分步讲解 ===== */
+.pc-wrong-item{
+  padding:12px 14px; border-bottom:1px solid var(--line);
+  display:flex; flex-direction:column; gap:6px;
+}
+.pc-wrong-item:last-child{ border-bottom:none; }
+.pc-wrong-head{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
+.pc-wrong-head .lr-name{ font-size:14px; font-weight:600; color:var(--ink); }
+.pc-wrong-head .lr-meta{ font-size:12px; color:var(--ink-3); white-space:nowrap; }
+.pc-wrong-ans{ font-size:13px; color:var(--ink-2); }
+.pc-wrong-ans b.bad{ color:#C23A2B; }
+.pc-wrong-ans b.ok{ color:#2E7D52; }
+.pc-wrong-explain{
+  font-size:13px; color:var(--ink-2); background:#F7F6F2;
+  padding:8px 12px; border-radius:8px; line-height:1.7;
+}
+details.pc-wrong-steps{
+  padding:8px 12px; border-radius:8px; background:#F7F6F2;
+}
+details.pc-wrong-steps summary{
+  font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; user-select:none;
+}
+details.pc-wrong-steps ol{
+  margin:6px 0 0; padding-left:20px; font-size:13px; color:var(--ink-2); line-height:1.8;
+}
