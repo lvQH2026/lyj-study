@@ -35,7 +35,12 @@
 //      使语文错题批语可按知识点生成。
 // v77：移除「选择题型」筛选器（UI/交互/数据结构/筛选逻辑全部删除，无残留引用）；难度档由「混合+三档」收敛为
 //      基础(1)/提高(2)/拓展(3) 三档，弹层默认选中基础题；PC 端「暂无此类题型」toast 统一为「该单元暂无题目」。
-const CACHE = 'lyj-shell-v77';
+// v78：S0 基础修正。① 解除移动端禁止缩放（index.html 去掉 maximum-scale=1.0/user-scalable=no，
+//      改为 viewport-fit=cover），并给 input/textarea/select 兜底 font-size:16px，
+//      避免 iOS 聚焦小字号输入框时强制放大页面。② 首页 banner 文案改为「人教版 · 六年级 · 小升初冲刺」。
+//      ③ PC 页脚版本号不再手写（此前长期停留在 v60，滞后 17 版），改为 readShellVersion()
+//      从 sw.js 解析 const CACHE 实际版本动态写入。
+const CACHE = 'lyj-shell-v78';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

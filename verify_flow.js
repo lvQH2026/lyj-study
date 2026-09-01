@@ -387,8 +387,8 @@ ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabas
 const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
-ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 缓存升级为 lyj-shell-v77',
-  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v77') &&
+ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 缓存递进至 v78',
+  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v78') &&
   /window\.AI_GRADE/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
   /AI 批改给分数，模拟真实老师手写批注/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) &&
   /drawScoreStamp/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
@@ -396,6 +396,25 @@ ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 
   fs.readFileSync(path.join(ROOT, 'supabase/functions/ai-grade/index.ts'), 'utf8').includes('glm-4v-flash') &&
   !/color:'#fff'/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')) &&
   !/background:'#fff'/.test(fs.readFileSync(path.join(ROOT, 'js/diagram.js'), 'utf8')));
+
+// ---- v78：S0 基础修正（缩放 / banner / 版本号动态化）----
+const idx78 = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const pc78 = fs.readFileSync(path.join(ROOT, 'pc.html'), 'utf8');
+const core78 = fs.readFileSync(path.join(ROOT, 'js/core.js'), 'utf8');
+const pcs78 = fs.readFileSync(path.join(ROOT, 'js/pc.js'), 'utf8');
+ok('v78：移动端解除禁止缩放（去掉 user-scalable=no 与 maximum-scale=1.0）',
+  !/user-scalable\s*=\s*no/.test(idx78) && !/maximum-scale\s*=\s*1/.test(idx78) &&
+  /viewport-fit\s*=\s*cover/.test(idx78));
+ok('v78：首页 banner 改为「人教版 · 六年级 · 小升初冲刺」',
+  /人教版 · 六年级 · 小升初冲刺/.test(idx78) && !/1-6年级 · 让学习变得有趣/.test(idx78));
+ok('v78：input/textarea/select 兜底 font-size:16px（防 iOS 聚焦放大）',
+  /input,\s*textarea,\s*select\{[^}]*font-size:\s*16px/.test(mainCss));
+ok('v78：PC 页脚版本号改为动态（pc.html 占位 + pc.js 调用）',
+  /id="pcFootVer"/.test(pc78) && !/>v60 ·/.test(pc78) &&
+  /updateFootVer\(\)/.test(pcs78) && /readShellVersion/.test(pcs78));
+ok('v78：core.js 新增 readShellVersion 且正则行首锚定（只匹配真实声明行）',
+  /function readShellVersion/.test(core78) &&
+  /\/\^\\s\*const\\s\+CACHE/.test(core78) && /m\)/.test(core78));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));

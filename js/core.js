@@ -42,6 +42,28 @@ window.App = (function () {
 })();
 
 // ============================================================
+// v78：读取 Service Worker 壳版本号，供页面页脚显示。
+// 直接从 sw.js 文本解析 const CACHE = 'lyj-shell-vNN'，
+// 取代手写版本号（此前 pc.html 长期停留在 v60，滞后 17 版）。
+// ============================================================
+function readShellVersion(cb) {
+  if (typeof cb !== 'function') return;
+  var fallback = 'v77';
+  var done = function (v) { try { cb(v || fallback); } catch (e) {} };
+  try {
+    if (typeof fetch !== 'function') { done(fallback); return; }
+    fetch('sw.js', { cache: 'no-store' }).then(function (r) {
+      return r && r.ok ? r.text() : '';
+    }).then(function (t) {
+      // 行首锚定 + m 标志：只匹配真正的声明行，跳过注释里出现的同名文字
+      var m = t && t.match(/^\s*const\s+CACHE\s*=\s*['"]([^'"]+)['"]/m);
+      var v = m ? String(m[1]).replace(/^.*?(v\d+).*$/, '$1') : '';
+      done(v);
+    }).catch(function () { done(fallback); });
+  } catch (e) { done(fallback); }
+}
+
+// ============================================================
 // v73：练习设置弹层（进入单元练习前的难度选择）
 // 数学与语文共用、PC 与移动端共用同一套 DOM（样式由 style.css / pc.css 各自控制），
 // 动态创建，不必改动 index.html 与 pc.html。

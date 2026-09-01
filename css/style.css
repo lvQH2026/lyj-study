@@ -1353,6 +1353,9 @@ body{background:var(--bg);color:var(--text);}
 input,textarea,select{
   border:1.5px solid var(--border);border-radius:var(--radius-sm);
   transition:border-color .2s, box-shadow .2s;
+  /* 放宽缩放后：iOS 聚焦 <16px 输入框会强制放大页面，统一兜底 16px */
+  font-size:16px;
+  font-family:inherit;
 }
 input:focus,textarea:focus,select:focus{
   border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,111,224,.12);outline:none;

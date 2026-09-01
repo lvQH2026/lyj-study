@@ -9849,6 +9849,9 @@ function goHome() {
 // ============================================================
 function renderHome() {
   let grid = document.getElementById('gradeGrid');
+  // v78：pc.html 没有 #gradeGrid（年级网格属移动端首页），此处直接返回，
+  // 避免 PC 端加载时抛出「Cannot set properties of null (setting 'innerHTML')」。
+  if (!grid) return;
   let gradeNames = {
     1: '一年级', 2: '二年级', 3: '三年级',
     4: '四年级', 5: '五年级', 6: '六年级'

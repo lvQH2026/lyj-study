@@ -351,6 +351,11 @@
     el.textContent = text;
   }
   function updateFootId() { const el = $('pcFootId'); if (el) el.textContent = useCloud ? ('ID: ' + C.LEARNING_ID) : '未启用云端'; }
+  // v78：页脚版本号改为读取 sw.js 实际 CACHE，杜绝手写版本号滞后
+  function updateFootVer() {
+    if (typeof readShellVersion !== 'function') return;
+    readShellVersion(function (v) { const el = $('pcFootVer'); if (el) el.textContent = v; });
+  }
 
   function renderContent() {
     renderCrumb();
@@ -1229,6 +1234,7 @@
     $('pcRefreshBtn').onclick = PC.refresh;
     $('pcMergeBtn').onclick = PC.merge;
     updateFootId();
+    updateFootVer();
     setSyncChip('ok', '本地');
     renderNav(); renderContent();
   }
