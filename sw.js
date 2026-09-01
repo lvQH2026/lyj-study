@@ -51,7 +51,17 @@
 //      ④ 年级持久化：core.js 新增 App.getGrade/setGrade（localStorage 键 lyj_grade_v1，
 //         按模块分别记忆），数学 state.currentGrade 与语文 cnState.grade 默认六年级，
 //         重开页面不再回到「未选年级」/ 四年级；首页回显「当前年级」并高亮对应卡片。
-const CACHE = 'lyj-shell-v79';
+// v80：S2 今日任务驾驶舱（#todayPanel，移动端首页首屏）。
+//      ① 小升初倒计时卡：默认目标日 2027-06-15（存 localStorage 键 lyj_exam_date，可点日期改），
+//         配六年级冲刺进度条（起点 2026-09-01）。
+//      ② 今日任务：数学/语文按当日练习记录判定完成，英语按当日点击标记（lyj_task_done），
+//         每科一条并给「去做」直达按钮（数学进单元列表、语文进模块或错题库、英语进拼读）。
+//      ③ 薄弱提醒：按错题所属单元聚合取 Top3，点击「专项练」按单元名反查 KNOWLEDGE_BASE 坐标；
+//         查不到坐标时降级打开错题库。
+//      ④ 本周概览：近 7 天练习次数 / 题量 / 正确率。
+//      ⑤ 埋点 lyj_task_click：按天聚合记录驾驶舱任务点击数（留 30 天），用于连续观察是否真的带动练习。
+//      ⑥ 卫生修复：startSpecialQuiz 此前只改内存年级未持久化，已补 App.setGrade。
+const CACHE = 'lyj-shell-v80';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

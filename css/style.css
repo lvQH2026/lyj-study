@@ -2293,3 +2293,96 @@ body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',
 
 /* 小号按钮（首页「继续学习」等） */
 .btn-sm{ padding:6px 14px; font-size:13px; border-radius:8px; }
+
+/* ============================================================
+   v80 · 今日任务驾驶舱（#todayPanel）
+   首屏直接回答「今天练什么」：小升初倒计时 + 三科今日任务 +
+   薄弱单元提醒 + 本周概览。数据全部来自 localStorage，离线可用。
+   仅移动端首页（#page-home）渲染，PC 端 pc.html 无此节点。
+   ============================================================ */
+#todayPanel{ margin-bottom:4px; }
+
+.dash-card{
+  background:var(--card-bg); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:12px;
+  box-shadow:var(--shadow-sm);
+}
+
+/* ---- 倒计时卡 ---- */
+.dash-count{
+  background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border:none; color:#fff; position:relative; overflow:hidden;
+}
+.dash-count::after{
+  content:''; position:absolute; right:-28px; top:-28px;
+  width:110px; height:110px; border-radius:50%;
+  background:rgba(255,255,255,.07);
+}
+.dash-count-head{ display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
+.dash-count-label{ font-size:13px; font-weight:700; letter-spacing:1px; color:rgba(255,255,255,.85); }
+.dash-date-btn{
+  background:rgba(255,255,255,.16); border:none; color:#fff;
+  font-size:12px; padding:3px 10px; border-radius:99px; cursor:pointer;
+  font-family:inherit;
+}
+.dash-count-num{
+  position:relative; z-index:1; margin:6px 0 2px;
+  font-size:42px; font-weight:800; line-height:1; letter-spacing:-1px;
+}
+.dash-count-num span{ font-size:16px; font-weight:600; margin-left:4px; letter-spacing:0; }
+.dash-count-sub{ position:relative; z-index:1; font-size:12px; color:rgba(255,255,255,.75); }
+.dash-bar{
+  position:relative; z-index:1; height:6px; border-radius:99px;
+  background:rgba(255,255,255,.22); margin-top:12px; overflow:hidden;
+}
+.dash-bar-fill{ height:100%; border-radius:99px; background:var(--gold); transition:width .4s; min-width:3%; }
+.dash-count-foot{ position:relative; z-index:1; margin-top:6px; font-size:11px; color:rgba(255,255,255,.7); }
+
+/* ---- 区块头 ---- */
+.dash-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.dash-title{ font-size:15px; font-weight:700; color:var(--text); }
+.dash-sub{ font-size:11px; color:var(--text-lighter); }
+.dash-badge{
+  font-size:12px; font-weight:700; color:var(--gold);
+  background:rgba(180,148,90,.12); padding:2px 9px; border-radius:99px;
+}
+.dash-badge.done{ color:var(--success); background:rgba(47,179,126,.12); }
+
+/* ---- 今日任务 ---- */
+.dash-task{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--border); }
+.dash-task:first-of-type{ border-top:none; padding-top:2px; }
+.dash-check{
+  flex:0 0 20px; width:20px; height:20px; border-radius:50%;
+  border:1.5px solid var(--border); display:flex; align-items:center;
+  justify-content:center; font-size:12px; color:#fff; font-weight:700;
+}
+.dash-check.ok{ background:var(--success); border-color:var(--success); }
+.dash-task-main{ flex:1; min-width:0; }
+.dash-task-top{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.dash-subj{ font-size:11px; font-weight:700; padding:1px 7px; border-radius:4px; color:#fff; }
+.dash-subj.math{ background:var(--primary); }
+.dash-subj.chinese{ background:var(--accent); }
+.dash-subj.english{ background:var(--warning); }
+.dash-task-title{ font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1 1 auto; }
+.dash-task-hint{ font-size:11px; color:var(--text-lighter); margin-top:2px; }
+.dash-task-done{ font-size:11px; color:var(--success); font-weight:700; flex:0 0 auto; }
+.dash-go{ flex:0 0 auto; padding:5px 12px; font-size:12px; width:auto; }
+.dash-task.is-done .dash-task-title{ color:var(--text-lighter); text-decoration:line-through; }
+
+/* ---- 薄弱提醒 ---- */
+.dash-weak-item{ display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--border); }
+.dash-weak-item:first-of-type{ border-top:none; padding-top:2px; }
+.dash-weak-name{
+  flex:1; min-width:0; font-size:13px; font-weight:600; color:var(--text);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.dash-weak-count{ font-size:12px; font-weight:700; color:var(--accent); flex:0 0 auto; }
+
+/* ---- 本周概览 ---- */
+.dash-week{ display:flex; }
+.dash-week-item{ flex:1; text-align:center; position:relative; }
+.dash-week-item + .dash-week-item::before{
+  content:''; position:absolute; left:0; top:4px; bottom:4px; width:1px; background:var(--border);
+}
+.dash-week-val{ font-size:20px; font-weight:800; color:var(--primary); }
+.dash-week-lbl{ font-size:11px; color:var(--text-lighter); margin-top:2px; }

@@ -9866,6 +9866,277 @@ function goHome() {
 }
 
 // ============================================================
+// v80：今日任务驾驶舱
+// 解决「打开 App 后要自己想今天练什么」——首屏直接给倒计时、三科任务、薄弱提醒。
+// 数据全部来自本地 localStorage（三科共用 math_practice_data），离线可用。
+// ============================================================
+const EXAM_DATE_KEY = 'lyj_exam_date';
+const EXAM_DATE_DEFAULT = '2027-06-15';  // 小升初（家长确认：2027 年 6 月左右）
+const SPRINT_START = '2026-09-01';       // 六年级开学，冲刺进度条起点
+const TASK_DONE_KEY = 'lyj_task_done';   // 英语等无判分科目的「今日已完成」标记
+const TASK_CLICK_KEY = 'lyj_task_click'; // 埋点：驾驶舱任务点击数（按天聚合，留 30 天）
+
+const DAY_MS = 86400000;
+
+function todayStart() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+function _dateToTs(s) {
+  const d = new Date(s + 'T00:00:00');
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
+
+function getExamDate() {
+  try {
+    const v = localStorage.getItem(EXAM_DATE_KEY);
+    if (v && /^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  } catch (e) { /* 隐私模式下 localStorage 不可用，走默认值 */ }
+  return EXAM_DATE_DEFAULT;
+}
+
+function setExamDate() {
+  const cur = getExamDate();
+  const v = prompt('设置小升初考试日期（格式如 2027-06-15）', cur);
+  if (v === null) return;
+  const s = String(v).trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) { showToast('日期格式不对，示例：2027-06-15'); return; }
+  if (_dateToTs(s) === null) { showToast('这个日期不存在，请重新输入'); return; }
+  try { localStorage.setItem(EXAM_DATE_KEY, s); } catch (e) {}
+  renderTodayPanel();
+}
+
+// 倒计时 + 六年级冲刺进度
+function getCountdown() {
+  const examTs = _dateToTs(getExamDate());
+  const startTs = _dateToTs(SPRINT_START);
+  const now = todayStart();
+  const days = Math.round((examTs - now) / DAY_MS);
+  const span = Math.max(1, Math.round((examTs - startTs) / DAY_MS));
+  const passed = Math.min(span, Math.max(0, Math.round((now - startTs) / DAY_MS)));
+  return { days: days, pct: Math.round(passed / span * 100), examDate: getExamDate() };
+}
+
+// 英语等科目没有判分记录，用「当日点击标记」判定完成
+function _taskDoneObj() {
+  try { return JSON.parse(localStorage.getItem(TASK_DONE_KEY)) || {}; } catch (e) { return {}; }
+}
+function _todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function markTaskDone(k) {
+  try {
+    const o = _taskDoneObj();
+    o[k] = _todayKey();
+    localStorage.setItem(TASK_DONE_KEY, JSON.stringify(o));
+  } catch (e) {}
+}
+function isTaskMarked(k) {
+  return _taskDoneObj()[k] === _todayKey();
+}
+
+// 埋点：记录「打开首页 → 点任务开始练」的次数，用于连续观察驾驶舱是否真的带动练习
+function recordTaskClick(k) {
+  try {
+    const o = JSON.parse(localStorage.getItem(TASK_CLICK_KEY)) || {};
+    const d = _todayKey();
+    if (!o[d]) o[d] = {};
+    o[d][k] = (o[d][k] || 0) + 1;
+    const keys = Object.keys(o).sort();
+    while (keys.length > 30) { delete o[keys.shift()]; }
+    localStorage.setItem(TASK_CLICK_KEY, JSON.stringify(o));
+  } catch (e) {}
+}
+
+// 今日三科任务：数学/语文看当日练习记录，英语看当日标记
+function getTodayTasks() {
+  const data = loadData();
+  const hist = data.history || [];
+  const wrong = data.wrong || [];
+  const s = todayStart();
+  const e = s + DAY_MS;
+  const practicedToday = function (mod) {
+    return hist.some(function (h) { return (h.module || '数学') === mod && h.time >= s && h.time < e; });
+  };
+  const countWrong = function (mod) {
+    return wrong.filter(function (w) { return (w.module || '数学') === mod; }).length;
+  };
+
+  const mathWrong = countWrong('数学');
+  const cnWrong = countWrong('语文');
+  const grade = state.currentGrade || 6;
+
+  return [
+    {
+      key: 'math', subject: '数学',
+      title: mathWrong > 0 ? '重做 ' + mathWrong + ' 道错题 + 1 组练习' : '完成 1 组' + (grade === 6 ? '六年级' : grade + '年级') + '练习（30 题）',
+      hint: mathWrong > 0 ? '先清错题再练新题' : '保持手感',
+      done: practicedToday('数学'),
+      action: 'doMathTask()'
+    },
+    {
+      key: 'chinese', subject: '语文',
+      title: cnWrong > 0 ? '重做 ' + cnWrong + ' 道语文错题' : '完成 1 组语文练习（24 题）',
+      hint: cnWrong > 0 ? '错题为王' : '课本同步 + 阅读',
+      done: practicedToday('语文'),
+      action: cnWrong > 0 ? 'doChineseWrongTask()' : 'doChineseTask()'
+    },
+    {
+      key: 'english', subject: '英语',
+      title: '拼读 1 课 + 复习本课单词',
+      hint: '每日 15 分钟',
+      done: isTaskMarked('english'),
+      action: 'doEnglishTask()'
+    }
+  ];
+}
+
+function doMathTask() {
+  recordTaskClick('math');
+  selectGrade(state.currentGrade || 6);
+}
+function doChineseTask() {
+  recordTaskClick('chinese');
+  if (window.App) App.switchModule('chinese');
+}
+function doChineseWrongTask() {
+  recordTaskClick('chinese');
+  if (window.App) App.switchModule('chinese');
+  if (window.CN && typeof CN.switchTab === 'function') CN.switchTab('wrong');
+}
+function doEnglishTask() {
+  recordTaskClick('english');
+  markTaskDone('english');
+  if (window.App) App.switchModule('english');
+}
+
+// 薄弱单元：按错题所属单元聚合，取错题最多的前 n 个
+function getWeakUnits(n) {
+  const wrong = (loadData().wrong || []).filter(function (w) { return !w.module || w.module === '数学'; });
+  const map = {};
+  wrong.forEach(function (w) {
+    const k = w.unitName || '未分类';
+    if (!map[k]) map[k] = { name: k, count: 0, grade: w.grade || 0 };
+    map[k].count += (w.count || 1);
+    // 六年级错题优先，复习更贴近小升初
+    if (w.grade === 6) map[k].grade = 6;
+  });
+  return Object.keys(map).map(function (k) { return map[k]; })
+    .sort(function (a, b) { return b.count - a.count; })
+    .slice(0, n || 3);
+}
+
+// 只按单元名反查 KNOWLEDGE_BASE 坐标，六年级优先（错题可能来自任何年级）。
+// 注意：math.js 里已有一个 findUnitByName(grade, name)（供公式卡按「年级+单元名」查），
+// 这里必须换名，否则函数声明提升会互相覆盖。
+function findUnitCoordByName(name) {
+  for (let g = 6; g >= 1; g--) {
+    if (!KNOWLEDGE_BASE[g]) continue;
+    for (let s = 1; s <= 2; s++) {
+      const arr = KNOWLEDGE_BASE[g][s] || [];
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] && arr[i].name === name) return { grade: g, sem: s, idx: i };
+      }
+    }
+  }
+  return null;
+}
+
+function practiceWeakUnit(name) {
+  recordTaskClick('weak');
+  const u = findUnitCoordByName(name);
+  if (u) {
+    startSpecialQuiz(u.grade, u.sem, u.idx);
+  } else {
+    showToast('该单元暂无专项练习，已打开错题库');
+    switchTab('wrong');
+  }
+}
+
+// 最近 7 天概览
+function getWeekSummary() {
+  const hist = (loadData().history || []);
+  const end = todayStart() + DAY_MS;
+  const start = end - 7 * DAY_MS;
+  const w = hist.filter(function (h) { return h.time >= start && h.time < end; });
+  const questions = w.reduce(function (s, h) { return s + (h.total || 0); }, 0);
+  const correct = w.reduce(function (s, h) { return s + (h.score || 0); }, 0);
+  return {
+    times: w.length,
+    questions: questions,
+    accuracy: questions > 0 ? Math.round(correct / questions * 100) : 0
+  };
+}
+
+function renderTodayPanel() {
+  const box = document.getElementById('todayPanel');
+  if (!box) return;  // PC 端（pc.html）无此节点，直接跳过
+
+  const cd = getCountdown();
+  const tasks = getTodayTasks();
+  const doneN = tasks.filter(function (t) { return t.done; }).length;
+  const weak = getWeakUnits(3);
+  const week = getWeekSummary();
+
+  // ---- 倒计时卡 ----
+  let html = '<div class="dash-card dash-count">'
+    + '<div class="dash-count-head">'
+    + '<span class="dash-count-label">小升初冲刺</span>'
+    + '<button class="dash-date-btn" onclick="setExamDate()">' + cd.examDate + ' ›</button>'
+    + '</div>'
+    + '<div class="dash-count-num">' + (cd.days >= 0 ? cd.days : 0) + '<span>天</span></div>'
+    + '<div class="dash-count-sub">' + (cd.days >= 0 ? '距离小升初考试' : '考试日期已过，点右上角更新目标') + '</div>'
+    + '<div class="dash-bar"><div class="dash-bar-fill" style="width:' + cd.pct + '%"></div></div>'
+    + '<div class="dash-count-foot">六年级冲刺进度 ' + cd.pct + '%</div>'
+    + '</div>';
+
+  // ---- 今日任务 ----
+  html += '<div class="dash-card dash-tasks">'
+    + '<div class="dash-head"><span class="dash-title">今日任务</span>'
+    + '<span class="dash-badge' + (doneN === tasks.length ? ' done' : '') + '">' + doneN + '/' + tasks.length + '</span></div>';
+  tasks.forEach(function (t) {
+    html += '<div class="dash-task' + (t.done ? ' is-done' : '') + '">'
+      + '<span class="dash-check' + (t.done ? ' ok' : '') + '">' + (t.done ? '✓' : '') + '</span>'
+      + '<div class="dash-task-main">'
+      + '<div class="dash-task-top"><span class="dash-subj ' + t.key + '">' + t.subject + '</span>'
+      + '<span class="dash-task-title">' + t.title + '</span></div>'
+      + '<div class="dash-task-hint">' + t.hint + '</div>'
+      + '</div>'
+      + (t.done ? '<span class="dash-task-done">已完成</span>'
+        : '<button class="btn btn-primary btn-sm dash-go" onclick="' + t.action + '">去做</button>')
+      + '</div>';
+  });
+  html += '</div>';
+
+  // ---- 薄弱提醒 ----
+  if (weak.length > 0) {
+    html += '<div class="dash-card dash-weak">'
+      + '<div class="dash-head"><span class="dash-title">薄弱提醒</span>'
+      + '<span class="dash-sub">错题最多的单元</span></div>';
+    weak.forEach(function (w) {
+      html += '<div class="dash-weak-item">'
+        + '<span class="dash-weak-name">' + w.name + '</span>'
+        + '<span class="dash-weak-count">错 ' + w.count + ' 题</span>'
+        + '<button class="btn btn-outline btn-sm dash-go" onclick="practiceWeakUnit(\'' + w.name.replace(/'/g, "\\'") + '\')">专项练</button>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+
+  // ---- 本周概览 ----
+  html += '<div class="dash-card dash-week">'
+    + '<div class="dash-week-item"><div class="dash-week-val">' + week.times + '</div><div class="dash-week-lbl">本周练习</div></div>'
+    + '<div class="dash-week-item"><div class="dash-week-val">' + week.questions + '</div><div class="dash-week-lbl">本周题量</div></div>'
+    + '<div class="dash-week-item"><div class="dash-week-val">' + week.accuracy + '%</div><div class="dash-week-lbl">本周正确率</div></div>'
+    + '</div>';
+
+  box.innerHTML = html;
+}
+
+// ============================================================
 // 首页渲染
 // ============================================================
 function renderHome() {
@@ -9924,6 +10195,9 @@ function renderHome() {
 
   // 专项练习板块：汇总所有年级中的“专项”单元
   renderSpecialSection();
+
+  // v80：今日任务驾驶舱（倒计时 / 三科任务 / 薄弱提醒 / 本周概览）
+  renderTodayPanel();
 }
 
 function renderSpecialSection() {
@@ -9955,6 +10229,8 @@ function renderSpecialSection() {
 
 function startSpecialQuiz(grade, sem, idx) {
   state.currentGrade = grade;
+  // v80：专项练习也会切年级，此前漏了持久化，下次打开又回到原年级
+  if (window.App && typeof App.setGrade === 'function') App.setGrade('math', grade);
   state.currentSemester = sem;
   let unit = KNOWLEDGE_BASE[grade][sem][idx];
   showUnitDiagrams(unit, grade, sem, idx);

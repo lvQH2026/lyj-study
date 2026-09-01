@@ -387,8 +387,15 @@ ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabas
 const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
-ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 缓存递进至 v79',
-  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v79') &&
+// SW 版本号取下限校验：写死版本会随每次发布误报，这里只断言「至少到某个版本」。
+// 解析同样要行首锚定，否则会命中 sw.js 注释里出现的同名文字。
+function swVer() {
+  const m = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8')
+    .match(/^\s*const\s+CACHE\s*=\s*'lyj-shell-v(\d+)'/m);
+  return m ? Number(m[1]) : 0;
+}
+ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 缓存至少 v79',
+  swVer() >= 79 &&
   /window\.AI_GRADE/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
   /AI 批改给分数，模拟真实老师手写批注/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) &&
   /drawScoreStamp/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
@@ -456,8 +463,55 @@ ok('v79：英语接入全局导航（拼读=首页 / 音标=练习 / 错题本=�
   /App\.setNavActive/.test(eng79));
 ok('v79：英语原「进度」入口移入拼读首页（不丢功能）',
   /switchMain\(\\'progress\\'\)/.test(eng79) && /学习进度/.test(eng79));
-ok('v79：SW 缓存递进至 lyj-shell-v79',
-  /const CACHE = 'lyj-shell-v79'/.test(fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8')));
+ok('v79：SW 缓存至少 v79（行首锚定解析，不被注释里的同名文字干扰）',
+  swVer() >= 79 &&
+  !/^\s*const CACHE = 'lyj-shell-v79'/m.test(fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8')));
+
+// ---- v80：S2 今日任务驾驶舱 ----
+const idx80 = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const math80 = fs.readFileSync(path.join(ROOT, 'js/math.js'), 'utf8');
+const css80 = fs.readFileSync(path.join(ROOT, 'css/style.css'), 'utf8');
+const sw80 = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+
+ok('v80：首页插入驾驶舱容器 #todayPanel（welcome-banner 之后）',
+  /id="todayPanel"/.test(idx80) &&
+  idx80.indexOf('id="todayPanel"') > idx80.indexOf('welcome-banner'));
+// 注意：setExamDate 里也有一次 renderTodayPanel()，且定义在 renderHome 之前，
+// 故不能用「首次出现位置」判断，必须锚定 renderSpecialSection() 之后的那个调用。
+ok('v80：renderHome 末尾调用 renderTodayPanel',
+  /renderSpecialSection\(\);[\s\S]{0,220}renderTodayPanel\(\);/.test(math80));
+ok('v80：小升初倒计时（默认 2027-06-15 + 冲刺起点 2026-09-01）',
+  /EXAM_DATE_DEFAULT = '2027-06-15'/.test(math80) && /SPRINT_START = '2026-09-01'/.test(math80) &&
+  /function getCountdown/.test(math80));
+ok('v80：今日三科任务（数学/语文看当日记录，英语看当日标记）',
+  /function getTodayTasks/.test(math80) && /practicedToday\('数学'\)/.test(math80) &&
+  /practicedToday\('语文'\)/.test(math80) && /isTaskMarked\('english'\)/.test(math80));
+ok('v80：任务完成标记与点击埋点分离存储（lyj_task_done / lyj_task_click）',
+  /TASK_DONE_KEY = 'lyj_task_done'/.test(math80) && /TASK_CLICK_KEY = 'lyj_task_click'/.test(math80) &&
+  /function recordTaskClick/.test(math80));
+ok('v80：薄弱单元 Top3 按错题所属单元聚合（仅数学）',
+  /function getWeakUnits/.test(math80) && /slice\(0, n \|\| 3\)/.test(math80) &&
+  /w\.module === '数学'/.test(math80));
+ok('v80：单元坐标反查用 findUnitCoordByName，未覆盖既有 findUnitByName(grade,name)',
+  /function findUnitCoordByName/.test(math80) &&
+  (math80.match(/function findUnitByName\s*\(/g) || []).length === 1 &&
+  /findUnitByName\(grade, name\)/.test(math80));
+ok('v80：薄弱单元查不到坐标时降级打开错题库',
+  /暂无专项练习，已打开错题库/.test(math80) && /switchTab\('wrong'\)/.test(math80));
+ok('v80：本周概览（近 7 天次数/题量/正确率）',
+  /function getWeekSummary/.test(math80) && /end - 7 \* DAY_MS/.test(math80));
+ok('v80：考试日期可改且做格式校验（非法不改值）',
+  /function setExamDate/.test(math80) && /日期格式不对/.test(math80) && /这个日期不存在/.test(math80));
+ok('v80：renderTodayPanel 对 PC 端缺节点做空守卫',
+  /if \(!box\) return;/.test(math80));
+// .dash-tasks 只是容器标记类、无对应 CSS 规则，这里断言真正有样式的一条任务规则
+ok('v80：驾驶舱样式齐备（倒计时/任务/薄弱/本周 四块）',
+  /\.dash-count\{/.test(css80) && /\.dash-task\{/.test(css80) &&
+  /\.dash-weak-item\{/.test(css80) && /\.dash-week\{/.test(css80));
+ok('v80：卫生修复 startSpecialQuiz 补年级持久化',
+  /App\.setGrade\('math', grade\)/.test(math80));
+ok('v80：SW 缓存递进至 lyj-shell-v80',
+  /const CACHE = 'lyj-shell-v80'/.test(sw80));
 
 console.log('\n===== 通过 (' + pass.length + ') =====');
 pass.forEach(p => console.log('  ✓ ' + p));
