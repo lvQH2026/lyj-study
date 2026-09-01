@@ -187,7 +187,7 @@ a { color: inherit; }
 
 .pc-btn {
   border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); font-size: 13px; font-weight: 500;
-  padding: 9px 18px; border-radius: var(--radius-sm); transition: all .15s; white-space: nowrap;
+  padding: 9px 18px; min-height: 48px; border-radius: var(--radius-sm); transition: all .15s; white-space: nowrap;
 }
 .pc-btn:hover { border-color: var(--primary-100); color: var(--primary); box-shadow: var(--shadow-1); transform: translateY(-1px); }
 .pc-btn:active { transform: translateY(0); }
@@ -298,6 +298,8 @@ a { color: inherit; }
 .pc-bar-row .bl { width: 110px; color: var(--ink-2); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .pc-bar-track { flex: 1; height: 10px; background: var(--bg-2); border-radius: 6px; overflow: hidden; }
 .pc-bar-fill { height: 100%; border-radius: 6px; transition: width .5s ease; }
+/* v82：正确率三档填充色（原为 js/pc.js 模板串里的三元表达式拼进 style） */
+.bar-hi { background: #4E8C6E; } .bar-mid { background: #B4945A; } .bar-lo { background: #C2554F; }
 .pc-bar-val { width: 48px; text-align: right; color: var(--ink); flex-shrink: 0; font-weight: 700; }
 
 .pc-chip {
@@ -864,3 +866,6 @@ details.pc-wrong-steps summary{
 details.pc-wrong-steps ol{
   margin:6px 0 0; padding-left:20px; font-size:13px; color:var(--ink-2); line-height:1.8;
 }
+
+/* v82 · B2：百分比宽度档位类（5%% 一档，配合 js/core.js wpCls()，误差 ≤2.5%%）*/
+.u-wp0{width:0%;} .u-wp5{width:5%;} .u-wp10{width:10%;} .u-wp15{width:15%;} .u-wp20{width:20%;} .u-wp25{width:25%;} .u-wp30{width:30%;} .u-wp35{width:35%;} .u-wp40{width:40%;} .u-wp45{width:45%;} .u-wp50{width:50%;} .u-wp55{width:55%;} .u-wp60{width:60%;} .u-wp65{width:65%;} .u-wp70{width:70%;} .u-wp75{width:75%;} .u-wp80{width:80%;} .u-wp85{width:85%;} .u-wp90{width:90%;} .u-wp95{width:95%;} .u-wp100{width:100%;}

@@ -1,5 +1,12 @@
 // ===== 家长后台 =====
 
+// v82（B1 图标统一）：内联 SVG 图标，统一 viewBox/描边规范，颜色继承 currentColor
+// 说明：家长端是独立页面，不加载 js/core.js 的 UI_ICON，这里就地定义用到的图标
+const SVG_INBOX = '<svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+  + '<path d="M22 12h-6l-2 3h-4l-2-3H2"/>'
+  + '<path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>'
+  + '</svg>';
+
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
@@ -17,20 +24,19 @@ const SYNC_STATUS = {
 let _lastRemoteId = '', _lastRemotePw = '';   // 供「刷新」按钮复用上次凭证
 
 function syncInfoBox(title, detail, kind) {
-  const bg = kind === 'err' ? '#fff1f0' : '#eef7f0';
-  const bd = kind === 'err' ? '#cf1322' : '#4E8C6E';
-  const fg = kind === 'err' ? '#cf1322' : '#2c6b4f';
-  return '<div style="margin:10px 0;padding:12px;border:1px solid ' + bd + ';border-radius:10px;background:' + bg + ';color:' + fg + ';font-size:13px;line-height:1.6">'
-    + '<div style="font-weight:700">' + esc(title) + '</div>'
-    + (detail ? '<div style="color:#8c8c8c;margin-top:4px">' + esc(detail) + '</div>' : '')
-    + '<button class="btn" style="margin-top:8px" onclick="renderRemote(_lastRemoteId,_lastRemotePw)">刷新重试</button>'
+  // v82：配色原本是三个三元表达式拼进 style，只有 err / ok 两种取值，
+  // 收敛成 .sync-box + .sync-box-err 语义类（css/style.css）
+  return '<div class="sync-box' + (kind === 'err' ? ' sync-box-err' : '') + '">'
+    + '<div class="u-fw700">' + esc(title) + '</div>'
+    + (detail ? '<div class="u-c-gray2 u-mt4">' + esc(detail) + '</div>' : '')
+    + '<button class="btn u-mt8" onclick="renderRemote(_lastRemoteId,_lastRemotePw)">刷新重试</button>'
     + '</div>';
 }
 
 function syncRefreshBar() {
-  return '<div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#9AA3BD">'
+  return '<div class="u-mt10 u-flex u-between u-ac u-fs12 u-c-mute">'
     + '<span>数据来自云端（最新同步）</span>'
-    + '<button class="btn" style="padding:4px 12px;font-size:12px" onclick="renderRemote(_lastRemoteId,_lastRemotePw)">↻ 刷新</button>'
+    + '<button class="btn u-p4-12 u-fs12" onclick="renderRemote(_lastRemoteId,_lastRemotePw)">↻ 刷新</button>'
     + '</div>';
 }
 
@@ -173,25 +179,25 @@ function renderParent() {
     const d2 = loadData();
     let syncBox;
     if (typeof window.supabase === 'undefined') {
-      syncBox = '<div style="margin:10px 0;padding:10px 12px;border:1px solid #cf1322;border-radius:10px;background:#fff1f0;color:#cf1322;font-size:12px;line-height:1.6"><b>云端同步不可用</b><br>Supabase SDK 未加载（网络受限时常见）。答题记录只存在本机。</div>';
+      syncBox = '<div class="u-m10-0 u-p10-12 u-bd-bad u-r10 u-bg-warn-pale u-c-red2 u-fs12 u-lh16"><b>云端同步不可用</b><br>Supabase SDK 未加载（网络受限时常见）。答题记录只存在本机。</div>';
     } else if (d2 && d2.syncError) {
-      syncBox = '<div style="margin:10px 0;padding:10px 12px;border:1px solid #cf1322;border-radius:10px;background:#fff1f0;color:#cf1322;font-size:12px;line-height:1.6"><b>云端同步异常</b>（' + new Date(d2.syncError.time).toLocaleString('zh-CN') + '）<br>' + esc(d2.syncError.msg) + '<br><span style="color:#8c8c8c">答题记录只存在本机。请检查 Supabase 的 study_records 表 RLS 策略是否允许插入。</span></div>';
+      syncBox = '<div class="u-m10-0 u-p10-12 u-bd-bad u-r10 u-bg-warn-pale u-c-red2 u-fs12 u-lh16"><b>云端同步异常</b>（' + new Date(d2.syncError.time).toLocaleString('zh-CN') + '）<br>' + esc(d2.syncError.msg) + '<br><span class="u-c-gray2">答题记录只存在本机。请检查 Supabase 的 study_records 表 RLS 策略是否允许插入。</span></div>';
     } else {
-      syncBox = '<div style="margin:10px 0;font-size:12px;color:var(--success)">✓ 云端同步正常</div>';
+      syncBox = '<div class="u-m10-0 u-fs12 u-c-ok">✓ 云端同步正常</div>';
     }
     // 已配置固定学习ID/口令（如吕泳冀专属 LYJ-YONGJI）→ 打开即自动拉取家庭云端内容，家长无需手动登录即可看到
     if (cfg.LEARNING_ID && cfg.LEARNING_PW) {
       result.innerHTML = syncBox
-        + '<div style="margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-        + '<button id="repairCloudBtn" class="btn" style="padding:6px 12px;font-size:12px" onclick="repairCloudFromLocal()">↥ 把本机记录合并同步到云端</button>'
-        + '<span style="font-size:12px;color:#9AA3BD">若某次练习在家长端丢失，用「做过那次练习的手机」点此即可补回</span>'
+        + '<div class="u-m8-0 u-flex u-g8 u-ac u-wrap">'
+        + '<button id="repairCloudBtn" class="btn u-p6-12 u-fs12" onclick="repairCloudFromLocal()">↥ 把本机记录合并同步到云端</button>'
+        + '<span class="u-fs12 u-c-mute">若某次练习在家长端丢失，用「做过那次练习的手机」点此即可补回</span>'
         + '</div>'
-        + '<div id="syncStatusBar" style="font-size:13px;color:#9AA3BD;padding:8px 0">正在同步家庭学习数据…</div>';
+        + '<div class="u-fs13 u-c-mute u-p8-0" id="syncStatusBar">正在同步家庭学习数据…</div>';
       renderRemote(cfg.LEARNING_ID, cfg.LEARNING_PW);
     } else {
       // 未配置固定凭证 → 本机预览 + 手动登录框
       const s = getLocalStats();
-      result.innerHTML = syncBox + renderDashboard(s) + renderRecentPractice() + '<div id="aiMount"></div><div style="margin-top:14px;font-size:12px;color:#9AA3BD;text-align:center">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
+      result.innerHTML = syncBox + renderDashboard(s) + renderRecentPractice() + '<div id="aiMount"></div><div class="u-mt14 u-fs12 u-c-mute u-tc">▲ 本机数据 · 下方可输入其他学习凭证远程查看</div>';
       mountAiAnalysis('aiMount', 'local', null);
     }
   } else {
@@ -253,22 +259,23 @@ async function parentLogin() {
   const pw = document.getElementById('parentPw').value.trim();
   if (!id || !pw) { alert('请填写学习ID和口令'); return; }
   const result = document.getElementById('parentResult');
-  result.innerHTML = '<div id="syncStatusBar" style="font-size:13px;color:#9AA3BD;padding:8px 0">正在同步 ' + esc(id) + ' …</div>';
+  result.innerHTML = '<div class="u-fs13 u-c-mute u-p8-0" id="syncStatusBar">正在同步 ' + esc(id) + ' …</div>';
   renderRemote(id, pw);
 }
 
 function renderDashboard(s) {
   const unitBars = (s.units || []).slice(0, 12).map(u => {
     const w = Math.max(0, Math.min(100, u.accuracy));
-    const color = u.accuracy >= 80 ? 'var(--success)' : u.accuracy >= 60 ? 'var(--warning)' : 'var(--accent)';
+    // v82：配色按正确率三档取值，收敛成 .bar-hi/.bar-mid/.bar-lo 语义类（css/style.css）
+    const barCls = u.accuracy >= 80 ? 'bar-hi' : u.accuracy >= 60 ? 'bar-mid' : 'bar-lo';
     return `<div class="pp-bar">
       <div class="pp-bar-top"><span>${u.unit}</span><span>${u.accuracy}% · ${u.count}次</span></div>
-      <div class="pp-bar-track"><div class="pp-bar-fill" style="width:${w}%;background:${color}"></div></div>
+      <div class="pp-bar-track"><div class="pp-bar-fill ${barCls} ${wpCls(w)}"></div></div>
     </div>`;
   }).join('');
   const weakHtml = (s.weak && s.weak.length)
     ? s.weak.map(u => `<span class="pp-weak">${u.unit}（${u.accuracy}%）</span>`).join('')
-    : '<span class="pp-good">暂无明显薄弱点 🎉</span>';
+    : '<span class="pp-good">暂无明显薄弱点</span>';
   const trendHtml = (s.trend && s.trend.length)
     ? s.trend.map(t => `<div class="pp-dim">${t.date}：练习 ${t.count} 题</div>`).join('')
     : '<div class="pp-dim">暂无每日数据</div>';
@@ -279,22 +286,22 @@ function renderDashboard(s) {
           <div class="pp-dim">${esc(w.unitName)}${w.grade ? ' · ' + esc(String(w.grade)) + '年级' : ''}</div>
           ${q.passage ? `<div class="pp-passage">${esc(q.passage)}</div>` : ''}
           <div class="pp-wrong-q">${esc(q.question)}</div>
-          ${q.svg ? `<div style="margin:4px 0">${q.svg}</div>` : ''}
-          <div class="pp-dim" style="margin-top:2px">你的答案：<b class="pp-bad">${esc(w.userAnswer)}</b>　正确答案：<b class="pp-good">${esc(q.answer)}</b></div>
-          ${q.explain ? `<div class="pp-dim" style="margin-top:2px">解析：${esc(q.explain)}</div>` : ''}
+          ${q.svg ? `<div class="u-m4-0">${q.svg}</div>` : ''}
+          <div class="pp-dim u-mt2">你的答案：<b class="pp-bad">${esc(w.userAnswer)}</b>　正确答案：<b class="pp-good">${esc(q.answer)}</b></div>
+          ${q.explain ? `<div class="pp-dim u-mt2">解析：${esc(q.explain)}</div>` : ''}
         </div>`;
       }).join('')
     : '<div class="pp-dim">暂无错题记录</div>';
   return `
     <div class="pp-stat-row">
-      <div class="pp-stat"><div class="v" style="color:var(--primary)">${s.total || 0}</div><div class="l">练习次数</div></div>
-      <div class="pp-stat"><div class="v" style="color:var(--success)">${s.avg || 0}%</div><div class="l">平均正确率</div></div>
-      <div class="pp-stat"><div class="v" style="color:var(--accent)">${s.weak ? s.weak.length : 0}</div><div class="l">薄弱单元</div></div>
+      <div class="pp-stat"><div class="v u-c-primary">${s.total || 0}</div><div class="l">练习次数</div></div>
+      <div class="pp-stat"><div class="v u-c-ok">${s.avg || 0}%</div><div class="l">平均正确率</div></div>
+      <div class="pp-stat"><div class="v u-c-accent">${s.weak ? s.weak.length : 0}</div><div class="l">薄弱单元</div></div>
     </div>
-    <div class="card" style="margin-bottom:12px"><div class="section-title">📅 每日练习量</div>${trendHtml}</div>
-    <div class="card" style="margin-bottom:12px"><div class="section-title">📊 各单元正确率</div>${unitBars || '<div class="pp-dim">暂无数据</div>'}</div>
-    <div class="card" style="margin-bottom:12px"><div class="section-title">🎯 薄弱点</div><div>${weakHtml}</div></div>
-    <div class="card"><div class="section-title">❌ 最近错题</div>${wrongHtml}</div>
+    <div class="card u-mb12"><div class="section-title">每日练习量</div>${trendHtml}</div>
+    <div class="card u-mb12"><div class="section-title">各单元正确率</div>${unitBars || '<div class="pp-dim">暂无数据</div>'}</div>
+    <div class="card u-mb12"><div class="section-title">薄弱点</div><div>${weakHtml}</div></div>
+    <div class="card"><div class="section-title">最近错题</div>${wrongHtml}</div>
   `;
 }
 
@@ -345,13 +352,13 @@ function renderRecentPractice(source) {
   }
   const list = _rpRecords.slice(0, 8);
 
-  const head = '<div class="card rp-card" style="margin-bottom:12px"><div class="section-title">📝 最近练习</div>';
+  const head = '<div class="card rp-card u-mb12"><div class="section-title">最近练习</div>';
 
   if (!_rpRecords.length) {
     // 真正没有任何练习记录时才显示空状态（不再以「近 7 天」为门槛，避免历史内容被隐藏）
     return head +
       '<div class="rp-empty">' +
-        '<div class="rp-empty-icon">📭</div>' +
+        '<div class="rp-empty-icon">' + SVG_INBOX + '</div>' +
         '<div class="rp-empty-title">还没有练习记录</div>' +
         '<div class="rp-empty-sub">鼓励孩子每天坚持练习，进步看得见～</div>' +
       '</div></div>';
@@ -365,7 +372,7 @@ function renderRecentPractice(source) {
     // 期中/期末/月考为考试条目，加考试徽标
     const isExam = /期中|期末|月考/.test(h.unitName || '');
     return '<div class="rp-item" onclick="showPracticeDetail(' + i + ')">' +
-      '<div class="rp-subject ' + modCls + '">' + mod + (isExam ? ' 📄' : '') + '</div>' +
+      '<div class="rp-subject ' + modCls + '">' + mod + (isExam ? '（考试）' : '') + '</div>' +
       '<div class="rp-main">' +
         '<div class="rp-title">' + (h.grade ? esc(String(h.grade)) + '年级 · ' : '') + esc(h.unitName) + '</div>' +
         '<div class="rp-meta">' +
@@ -380,7 +387,7 @@ function renderRecentPractice(source) {
 
   return head +
     '<div id="rpList">' + items + '</div>' +
-    '<div id="rpDetail" style="display:none"></div>' +
+    '<div class="u-hide" id="rpDetail"></div>' +
     '</div>';
 }
 
@@ -414,7 +421,7 @@ function showPracticeDetail(i) {
           explain +
         '</div>';
       }).join('')
-    : '<div class="rp-dim">本次练习全部答对，没有错题 🎉</div>';
+    : '<div class="rp-dim">本次练习全部答对，没有错题</div>';
 
   detEl.innerHTML =
     '<div class="rp-detail-head">' +

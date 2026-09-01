@@ -1358,7 +1358,7 @@ function diagCylinderCone(container, opts){
     const btnMorph=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;background:'+C.primary+';color:#fff;',btnRow,'开始切拼');
     const btnReset=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:1px solid '+C.line+';font-size:15px;font-weight:600;cursor:pointer;background:#fff;color:'+C.primary+';',btnRow,'还原成圆');
     const cutFormula=el('div','display:none;margin-top:12px;border-radius:12px;padding:12px 16px;text-align:center;font-size:16px;font-weight:700;color:'+C.primary+';background:'+C.goldSoft+';border:1px solid #E8D9B8;',card,
-       '长方体体积 = 底面积 × 高 → V<sub>柱</sub> = πr²h <br><span style="font-size:12px;font-weight:400;color:'+C.ink2+';">拼成的长方形：长 ≈ πr（半个圆周），宽 ≈ r，所以底面积 S = πr × r = πr²</span>');
+       '长方体体积 = 底面积 × 高 → V<sub>柱</sub> = πr²h <br><span class="u-fs12 u-fw400 u-c-steel2">拼成的长方形：长 ≈ πr（半个圆周），宽 ≈ r，所以底面积 S = πr × r = πr²</span>');
     el('div','font-size:12.5px;color:'+C.ink2+';line-height:1.7;margin-top:10px;padding-left:10px;border-left:3px solid #E8D9B8;',card,
        '发现了吗？圆柱切拼后得到一个近似的长方体——它的高就是圆柱的高 h，底面积就是圆的面积 πr²，所以圆柱的体积 = 底面积 × 高。');
 
@@ -1396,12 +1396,12 @@ function diagCylinderCone(container, opts){
        '准备一个圆锥形容器和与它<b>等底等高</b>的圆柱形容器。把圆锥装满水，倒进圆柱里……倒几次能正好装满？先猜一猜，再动手试。');
     const stage=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:8px;',card);
     const svg=svgEl('svg',{viewBox:'0 0 560 320',style:'width:100%;height:auto;display:block;'}); stage.appendChild(svg);
-    const pourCount=el('div','text-align:center;font-size:14px;font-weight:600;color:'+C.ink2+';margin-top:10px;',card,'已倒入 <b style="color:'+C.goldDeep+';font-size:17px">0</b> 次，圆柱里的水占了 <b style="color:'+C.goldDeep+';font-size:17px">0 / 3</b> 份');
+    const pourCount=el('div','text-align:center;font-size:14px;font-weight:600;color:'+C.ink2+';margin-top:10px;',card,'已倒入 <b class="u-c-golddeep u-fs17">0</b> 次，圆柱里的水占了 <b class="u-c-golddeep u-fs17">0 / 3</b> 份');
     const btnRow=el('div','display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;',card);
     const btnPour=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#C4A266,#B4945A);color:#fff;',btnRow,'倒一次');
     const btnReset=el('button','min-height:48px;padding:0 22px;border-radius:12px;border:1px solid '+C.line+';font-size:15px;font-weight:600;cursor:pointer;background:#fff;color:'+C.primary+';',btnRow,'重新开始');
     const conclusion=el('div','display:none;margin-top:12px;border-radius:12px;padding:14px 16px;text-align:center;background:linear-gradient(135deg,'+C.goldSoft+',#F5EDDD);border:1.5px solid '+C.gold+';',card,
-       '<div style="font-size:17px;font-weight:700;color:'+C.primary+';">倒了整整 3 次，正好装满！</div><div style="font-size:13px;color:'+C.ink2+';margin-top:6px;line-height:1.7;">等底等高时：圆锥体积 = 圆柱体积 × ⅓<br>即 V<sub>锥</sub> = ⅓ · πr²h = ⅓ · S · h</div>');
+       '<div class="u-fs17 u-fw700 u-c-ink">倒了整整 3 次，正好装满！</div><div class="u-fs13 u-c-steel2 u-mt6 u-lh17">等底等高时：圆锥体积 = 圆柱体积 × ⅓<br>即 V<sub>锥</sub> = ⅓ · πr²h = ⅓ · S · h</div>');
     el('div','font-size:12.5px;color:'+C.ink2+';line-height:1.7;margin-top:10px;padding-left:10px;border-left:3px solid #E8D9B8;',card,
        '实验结论：圆锥的体积是与它等底等高圆柱体积的三分之一。记住「等底等高」这个前提——如果底或高不同，就不是简单的 3 倍关系了。');
 
@@ -1429,7 +1429,7 @@ function diagCylinderCone(container, opts){
       appendText(svg,(g.coneX+g.cylX)/2+10,g.baseY-60,'装满圆锥 → 倒入圆柱',12.5,C.ink2,400);
     }
     function setPourLevels(coneLv,cylLv){ const g=PG,coneH=g.tipY-g.baseY; const cr=svg.querySelector('#coneClipRectCC'); const lv=Math.max(0,Math.min(1,coneLv)); cr.setAttribute('y',g.tipY-coneH*lv); cr.setAttribute('height',coneH*lv+g.rh+8); const cc=svg.querySelector('#cylClipRectCC'); const lv2=Math.max(0,Math.min(1,cylLv)); cc.setAttribute('y',g.tipY-(g.tipY-g.baseY)*lv2+1); cc.setAttribute('height',(g.tipY-g.baseY)*lv2+g.rh+8); }
-    function updatePourCount(){ pourCount.innerHTML='已倒入 <b style="color:'+C.goldDeep+';font-size:17px">'+POUR.pours+'</b> 次，圆柱里的水占了 <b style="color:'+C.goldDeep+';font-size:17px">'+POUR.pours+' / 3</b> 份'; }
+    function updatePourCount(){ pourCount.innerHTML='已倒入 <b class="u-c-golddeep u-fs17">'+POUR.pours+'</b> 次，圆柱里的水占了 <b class="u-c-golddeep u-fs17">'+POUR.pours+' / 3</b> 份'; }
     btnPour.onclick=function(){ if(POUR.anim||POUR.pours>=3) return; POUR.anim=true; const b=this; b.disabled=true; const stream=svg.querySelector('#streamCC'); stream.setAttribute('opacity',1); tween(1,0,750,function(v){setPourLevels(v,POUR.pours/3);},function(){ tween(POUR.pours/3,(POUR.pours+1)/3,750,function(v){setPourLevels(0,v);},function(){ stream.setAttribute('opacity',0); POUR.pours++; POUR.anim=false; updatePourCount(); if(POUR.pours>=3){ conclusion.style.display='block'; b.textContent='实验完成'; setPourLevels(1,1); } else { setPourLevels(1,POUR.pours/3); b.disabled=false; b.textContent='倒一次（第 '+(POUR.pours+1)+' 次）'; } }); }); };
     btnReset.onclick=function(){ if(POUR.anim) return; POUR.pours=0; setPourLevels(1,0); updatePourCount(); conclusion.style.display='none'; btnPour.disabled=false; btnPour.textContent='倒一次'; };
     buildPour(); setPourLevels(1,0);
@@ -1552,11 +1552,11 @@ function diagCylinderCone(container, opts){
     const qs={idx:0,score:0,tries:0};
     function renderQuiz(){ quizScore.style.display='none';
       if(qs.idx>=QUIZ.length){ quizScore.style.display='block';
-        quizScore.innerHTML='<div style="font-size:30px;font-weight:700;color:'+C.primary+';">'+qs.score+'<small style="font-size:14px;color:'+C.ink2+';font-weight:400;"> / 3 题</small></div><div style="font-size:13.5px;color:'+C.ink2+';margin-top:6px;">'+(qs.score===3?'全对！圆柱和圆锥的体积你已经完全掌握了。':qs.score===2?'很不错！再回顾一下错的那道题。':'没关系，回到「倒水实验」再看一遍，你会发现规律其实很简单。')+'</div><div style="margin-top:10px;"><button id="restartBtnCC" style="min-height:48px;padding:0 22px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;">再来一轮</button></div>';
+        quizScore.innerHTML='<div class="u-fs30 u-fw700 u-c-ink">'+qs.score+'<small class="u-fs14 u-c-steel2 u-fw400"> / 3 题</small></div><div class="u-fs135 u-c-steel2 u-mt6">'+(qs.score===3?'全对！圆柱和圆锥的体积你已经完全掌握了。':qs.score===2?'很不错！再回顾一下错的那道题。':'没关系，回到「倒水实验」再看一遍，你会发现规律其实很简单。')+'</div><div class="u-mt10"><button class="u-mh48 u-p0-22 u-r12 u-bd0 u-bg-ink u-c-white u-fs15 u-fw600 u-cp" id="restartBtnCC">再来一轮</button></div>';
         const rb=quizScore.querySelector('#restartBtnCC'); rb.onclick=function(){ qs.idx=0; qs.score=0; qs.tries=0; renderQuiz(); }; return; }
-      const q=QUIZ[qs.idx]; let h='<div style="margin-bottom:16px;"><div style="font-size:14.5px;font-weight:600;line-height:1.7;margin-bottom:10px;"><span style="color:'+C.goldDeep+';margin-right:4px;">第 '+(qs.idx+1)+' 题</span>'+q.q+'</div><div style="display:grid;gap:8px;">';
-      q.opts.forEach(function(o,i){ h+='<button data-oi="'+i+'" style="min-height:48px;border:1.5px solid '+C.line+';border-radius:12px;background:#fff;font-size:14.5px;color:'+C.primary+';text-align:left;padding:0 14px;cursor:pointer;display:flex;align-items:center;gap:10px;"><span style="width:24px;height:24px;border-radius:8px;background:'+C.goldSoft+';border:1px solid '+C.line+';font-size:12.5px;font-weight:700;color:'+C.ink2+';display:inline-flex;align-items:center;justify-content:center;flex:none;">'+'ABCD'[i]+'</span><span>'+o+'</span></button>'; });
-      h+='</div><div data-fb style="display:none;margin-top:10px;border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.8;"></div></div>';
+      const q=QUIZ[qs.idx]; let h='<div class="u-mb16"><div class="u-fs145 u-fw600 u-lh17 u-mb10"><span class="u-c-golddeep u-mr4">第 '+(qs.idx+1)+' 题</span>'+q.q+'</div><div class="u-grid u-g8">';
+      q.opts.forEach(function(o,i){ h+='<button class="u-mh48 u-bd-sand15 u-r12 u-bg-w u-fs145 u-c-ink u-tl u-p0-14 u-cp u-flex u-ac u-g10" data-oi="'+i+'"><span class="u-w24 u-h24 u-r8 u-bg-cream u-bd-sand2 u-fs125 u-fw700 u-c-steel2 u-iflex u-ac u-jc u-fnone">'+'ABCD'[i]+'</span><span>'+o+'</span></button>'; });
+      h+='</div><div class="u-hide u-mt10 u-r12 u-p12-14b u-fs135 u-lh18" data-fb></div></div>';
       quizBox.innerHTML=h; const fb=quizBox.querySelector('[data-fb]');
       quizBox.querySelectorAll('button[data-oi]').forEach(function(b){ b.onclick=function(){ quizPick(+b.dataset.oi, b, fb, quizBox); }; });
     }
@@ -1687,7 +1687,7 @@ function diagCuboid(container, opts){
     function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='100px'; return s; }
     const aS=slider('长 a (cm)',1,10,5), bS=slider('宽 b (cm)',1,10,4), hS=slider('高 h (cm)',1,10,3);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
-    function refresh(){ const a=+aS.value,b=+bS.value,h=+hS.value; out.innerHTML='V<sub>长方体</sub> = a·b·h = '+a+'×'+b+'×'+h+' = <b style="color:'+C.goldDeep+';font-size:20px">'+ (a*b*h) +'</b> cm³<br>也 = 底面积×高 = '+(a*b)+'×'+h+' = '+(a*b*h)+' cm³'; }
+    function refresh(){ const a=+aS.value,b=+bS.value,h=+hS.value; out.innerHTML='V<sub>长方体</sub> = a·b·h = '+a+'×'+b+'×'+h+' = <b class="u-c-golddeep u-fs20">'+ (a*b*h) +'</b> cm³<br>也 = 底面积×高 = '+(a*b)+'×'+h+' = '+(a*b*h)+' cm³'; }
     [aS,bS,hS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
     const note=el('div','font-size:13px;color:'+C.ink2+';margin-top:10px;line-height:1.7;padding-left:10px;border-left:3px solid #E8D9B8;',card,
        '正方体是特殊的长方体（a=b=h），所以 V<sub>正</sub> = a³。例：棱长 3cm → 3×3×3 = 27 cm³。');
@@ -1711,7 +1711,7 @@ function diagCuboid(container, opts){
       const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
       const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
       const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
-      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！体积 = '+it.a; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！体积 = '+it.a; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='✓ 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
     }
     show();
@@ -1829,7 +1829,7 @@ function diagPolygonArea(container, opts){
     function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='90px'; return s; }
     const aS=slider('底 a',2,9,6), bS=slider('下底 b',2,9,4), hS=slider('高 h',2,8,4);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:15.5px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
-    function refresh(){ const a=+aS.value,b=+bS.value,h=+hS.value; out.innerHTML='平行四边形 S = a·h = '+a+'×'+h+' = <b style="color:'+C.goldDeep+'">'+ (a*h) +'</b><br>三角形 S = a·h÷2 = '+ (a*h/2) +'<br>梯形 S = (a+b)·h÷2 = ('+a+'+'+b+')×'+h+'÷2 = <b style="color:'+C.goldDeep+'">'+ ((a+b)*h/2) +'</b>'; }
+    function refresh(){ const a=+aS.value,b=+bS.value,h=+hS.value; out.innerHTML='平行四边形 S = a·h = '+a+'×'+h+' = <b class="u-c-golddeep">'+ (a*h) +'</b><br>三角形 S = a·h÷2 = '+ (a*h/2) +'<br>梯形 S = (a+b)·h÷2 = ('+a+'+'+b+')×'+h+'÷2 = <b class="u-c-golddeep">'+ ((a+b)*h/2) +'</b>'; }
     [aS,bS,hS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
 
@@ -1851,7 +1851,7 @@ function diagPolygonArea(container, opts){
       const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
       const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
       const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
-      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='✓ 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
     }
     show();
@@ -1954,7 +1954,7 @@ function diagCircleArea(container, opts){
     function slider(label,min,max,val){ const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,label); const s=el('input',null,w); s.type='range'; s.min=min; s.max=max; s.value=val; s.style.width='90px'; return s; }
     const RS=slider('外半径 R',3,9,6), rs=slider('内半径 r',1,8,3);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:15.5px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
-    function refresh(){ const R=+RS.value, r=Math.min(+rs.value,R-1); const PI=3.14; out.innerHTML='圆环 S = π(R²−r²) = 3.14×('+R+'²−'+r+'²) = <b style="color:'+C.goldDeep+'">'+ (PI*(R*R-r*r)).toFixed(2) +'</b><br>半圆 S = πr²÷2 = '+(PI*r*r/2).toFixed(2); }
+    function refresh(){ const R=+RS.value, r=Math.min(+rs.value,R-1); const PI=3.14; out.innerHTML='圆环 S = π(R²−r²) = 3.14×('+R+'²−'+r+'²) = <b class="u-c-golddeep">'+ (PI*(R*R-r*r)).toFixed(2) +'</b><br>半圆 S = πr²÷2 = '+(PI*r*r/2).toFixed(2); }
     [RS,rs].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
 
@@ -1976,7 +1976,7 @@ function diagCircleArea(container, opts){
       const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
       const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
       const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
-      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bOk.onclick=function(){ const v=inp.value.trim(); if(it.ok(v)){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='✓ 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
     }
     show();
@@ -2030,7 +2030,7 @@ function diagFractionDiv(container, opts){
       const oneW=Math.min(totalW, (a/c)*cellW);
       svg.appendChild(svgEl('rect',{x:x0+1,y:y-3,width:Math.max(2,oneW),height:h+6,fill:'none',stroke:C.primary,'stroke-width':2.5,'stroke-dasharray':'4 3'}));
       txt(svg, x0+oneW/2, y+h+24, '一份 = '+frac(a,b*c), 13, C.primary, 700);
-      out.innerHTML='<b>'+a+'/'+b+' ÷ '+c+'</b> = '+frac(a,b)+' × 1/'+c+' = <b style="color:'+C.goldDeep+'">'+frac(a,b*c)+'</b>';
+      out.innerHTML='<b>'+a+'/'+b+' ÷ '+c+'</b> = '+frac(a,b)+' × 1/'+c+' = <b class="u-c-golddeep">'+frac(a,b*c)+'</b>';
     }
     [aS,bS,cS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
@@ -2046,7 +2046,7 @@ function diagFractionDiv(container, opts){
     const aS=slider('a',1,8,2), bS=slider('b',2,9,3), cS=slider('c',1,8,1), dS=slider('d',2,9,2);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
     function refresh(){ const a=+aS.value,b=+bS.value,c=+cS.value,d=+dS.value;
-      out.innerHTML='<b>'+a+'/'+b+' ÷ '+c+'/'+d+'</b><br>= '+a+'/'+b+' × '+d+'/'+c+'　（乘倒数）<br>= '+(a*d)+'/'+(b*c)+' = <b style="color:'+C.goldDeep+'">'+frac(a*d,b*c)+'</b>';
+      out.innerHTML='<b>'+a+'/'+b+' ÷ '+c+'/'+d+'</b><br>= '+a+'/'+b+' × '+d+'/'+c+'　（乘倒数）<br>= '+(a*d)+'/'+(b*c)+' = <b class="u-c-golddeep">'+frac(a*d,b*c)+'</b>';
     }
     [aS,bS,cS,dS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
@@ -2062,8 +2062,8 @@ function diagFractionDiv(container, opts){
     const aS=slider('a',1,9,3), bS=slider('b',2,9,4), nS=slider('整数除数 n',1,6,2), cS=slider('分数除数 c',1,6,1), dS=slider('d',2,7,2);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:15.5px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
     function refresh(){ const a=+aS.value,b=+bS.value,n=+nS.value,c=+cS.value,d=+dS.value;
-      out.innerHTML='整数除：<b>'+a+'/'+b+' ÷ '+n+'</b> = '+a+'/'+b+' × 1/'+n+' = <b style="color:'+C.goldDeep+'">'+frac(a,b*n)+'</b><br>'+
-                    '分数除：<b>'+a+'/'+b+' ÷ '+c+'/'+d+'</b> = '+a+'/'+b+' × '+d+'/'+c+' = <b style="color:'+C.goldDeep+'">'+frac(a*d,b*c)+'</b>';
+      out.innerHTML='整数除：<b>'+a+'/'+b+' ÷ '+n+'</b> = '+a+'/'+b+' × 1/'+n+' = <b class="u-c-golddeep">'+frac(a,b*n)+'</b><br>'+
+                    '分数除：<b>'+a+'/'+b+' ÷ '+c+'/'+d+'</b> = '+a+'/'+b+' × '+d+'/'+c+' = <b class="u-c-golddeep">'+frac(a*d,b*c)+'</b>';
     }
     [aS,bS,nS,cS,dS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
@@ -2086,7 +2086,7 @@ function diagFractionDiv(container, opts){
       const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
       const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
       const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
-      bOk.onclick=function(){ const v=inp.value.trim(); if(Math.abs(toVal(v)-it.a)<0.01){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bOk.onclick=function(){ const v=inp.value.trim(); if(Math.abs(toVal(v)-it.a)<0.01){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='✓ 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
     }
     show();
@@ -2137,7 +2137,7 @@ function diagRatioDerive(container, opts){
       const hB=70, yB=130; svg.appendChild(svgEl('rect',{x:x0,y:yB,width:b*uw,height:hB,fill:'#CDD6E6',stroke:C.primary,'stroke-width':1.5,rx:6}));
       txt(svg, x0-12, yA+hA/2, 'a', 13, C.primary, 700, 'end'); txt(svg, x0+a*uw+8, yA+hA/2, ''+a, 13, C.goldDeep, 700, 'start');
       txt(svg, x0-12, yB+hB/2, 'b', 13, C.primary, 700, 'end'); txt(svg, x0+b*uw+8, yB+hB/2, ''+b, 13, C.primary, 700, 'start');
-      out.innerHTML='<b>a : b = '+a+' : '+b+'</b> = '+a+' ÷ '+b+' = <b style="color:'+C.goldDeep+'">'+(a/b).toFixed(3).replace(/\.?0+$/,'')+'</b>　（即 '+frac(a,b)+'）';
+      out.innerHTML='<b>a : b = '+a+' : '+b+'</b> = '+a+' ÷ '+b+' = <b class="u-c-golddeep">'+(a/b).toFixed(3).replace(/\.?0+$/,'')+'</b>　（即 '+frac(a,b)+'）';
     }
     [aS,bS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
@@ -2153,7 +2153,7 @@ function diagRatioDerive(container, opts){
     const aS=slider('前项 a',2,18,12), bS=slider('后项 b',2,18,8);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
     function refresh(){ const a=+aS.value, b=+bS.value, g=gcd(a,b);
-      out.innerHTML='<b>'+a+' : '+b+'</b> = ('+a+'÷'+g+') : ('+b+'÷'+g+') = <b style="color:'+C.goldDeep+'">'+(a/g)+' : '+(b/g)+'</b>';
+      out.innerHTML='<b>'+a+' : '+b+'</b> = ('+a+'÷'+g+') : ('+b+'÷'+g+') = <b class="u-c-golddeep">'+(a/g)+' : '+(b/g)+'</b>';
     }
     [aS,bS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
@@ -2180,7 +2180,7 @@ function diagRatioDerive(container, opts){
       txt(svg, x0+a*uw+6, yA+23, ''+b, 12, C.primary, 700, 'start');
       txt(svg, x0-10, yB+23, 'c', 13, C.primary, 700, 'end'); txt(svg, x0+c*uw-6, yB+23, ''+c, 12, C.goldDeep, 700, 'end');
       txt(svg, x0+c*uw+6, yB+23, ''+d, 12, C.primary, 700, 'start');
-      out.innerHTML='<b>'+a+' : '+b+' = '+c+' : '+d+'</b>　比值都是 <b style="color:'+C.goldDeep+'">'+(a/b).toFixed(3).replace(/\.?0+$/,'')+'</b>';
+      out.innerHTML='<b>'+a+' : '+b+' = '+c+' : '+d+'</b>　比值都是 <b class="u-c-golddeep">'+(a/b).toFixed(3).replace(/\.?0+$/,'')+'</b>';
     }
     [aS,bS,kS].forEach(function(s){ s.addEventListener('input',refresh); }); refresh();
   })();
@@ -2206,7 +2206,7 @@ function diagRatioDerive(container, opts){
       bOk.onclick=function(){ const v=inp.value.trim(); let ok=false;
         if(typeof it.a==='string'){ const nv=normRatio(v), na=normRatio(it.a); ok = nv&&na&&nv===na; }
         else { ok = Math.abs(+v-it.a)<0.01; }
-        if(ok){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } }
+        if(ok){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='✓ 全部完成！'; } }
         else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); }
       };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
@@ -2254,7 +2254,7 @@ function diagPercentDerive(container, opts){
     const out=el('div','text-align:center;font-size:15.5px;font-weight:700;color:'+C.primary+';margin-top:10px;',card,'');
     function refresh(){ const p=+pS.value; const cell=24, gx=0, gy=0; svg.innerHTML='';
       for(let r=0;r<10;r++) for(let c=0;c<10;c++){ const idx=r*10+c+1; const fill=(idx<=p)?'#E7D6AE':'#fff'; svg.appendChild(svgEl('rect',{x:gx+c*cell,y:gy+r*cell,width:cell-1,height:cell-1,fill:fill,stroke:'#E8D9B8','stroke-width':1})); }
-      out.innerHTML='涂了 <b>'+p+'</b> 格 → <b style="color:'+C.goldDeep+'">'+p+'%</b> = '+p+'/100';
+      out.innerHTML='涂了 <b>'+p+'</b> 格 → <b class="u-c-golddeep">'+p+'%</b> = '+p+'/100';
     }
     pS.addEventListener('input',refresh); refresh();
   })();
@@ -2269,7 +2269,7 @@ function diagPercentDerive(container, opts){
     const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,'百分数 p'); const pS=el('input',null,w); pS.type='range'; pS.min=1; pS.max=100; pS.value=25; pS.style.width='160px'; w.appendChild(pS);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
     function refresh(){ const p=+pS.value;
-      out.innerHTML='<b>'+p+'%</b> = '+p+'/100 = <b style="color:'+C.goldDeep+'">'+frac(p,100)+'</b>';
+      out.innerHTML='<b>'+p+'%</b> = '+p+'/100 = <b class="u-c-golddeep">'+frac(p,100)+'</b>';
     }
     pS.addEventListener('input',refresh); refresh();
   })();
@@ -2284,7 +2284,7 @@ function diagPercentDerive(container, opts){
     const w=el('div','display:flex;flex-direction:column;gap:4px;',ctrl); el('div','font-size:12.5px;color:'+C.ink2+';font-weight:600;',w,'百分数 p'); const pS=el('input',null,w); pS.type='range'; pS.min=1; pS.max=100; pS.value=75; pS.style.width='160px'; w.appendChild(pS);
     const out=el('div','background:'+C.goldSoft+';border:1px solid #E8D9B8;border-radius:12px;padding:14px;margin-top:10px;font-size:16px;line-height:2;color:'+C.primary+';text-align:center;font-weight:600;',card,'');
     function refresh(){ const p=+pS.value;
-      out.innerHTML='<b>'+p+'%</b> = '+p+'/100 = <b style="color:'+C.goldDeep+'">'+(p/100).toFixed(2).replace(/\.?0+$/,'')+'</b><br>（反过来：'+(p/100).toFixed(2).replace(/\.?0+$/,'')+' = '+p+'%）';
+      out.innerHTML='<b>'+p+'%</b> = '+p+'/100 = <b class="u-c-golddeep">'+(p/100).toFixed(2).replace(/\.?0+$/,'')+'</b><br>（反过来：'+(p/100).toFixed(2).replace(/\.?0+$/,'')+' = '+p+'%）';
     }
     pS.addEventListener('input',refresh); refresh();
   })();
@@ -2310,7 +2310,7 @@ function diagPercentDerive(container, opts){
       bOk.onclick=function(){ const v=inp.value.trim().replace('%','').replace('％',''); let ok=false;
         if(typeof it.a==='string'){ const f1=fracStr(v), f2=fracStr(it.a); ok = f1&&f2&&f1===f2; }
         else { ok = Math.abs(+v-it.a)<0.01; }
-        if(ok){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } }
+        if(ok){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='✓ 全部完成！'; } }
         else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); }
       };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
@@ -2363,7 +2363,7 @@ function diagPieChartDerive(container, opts){
       txt(svg, cx, cy+8, ''+p+'%', 16, C.goldDeep, 700);
       const mid=ang/2*Math.PI/180; const lx=cx+(r+30)*Math.cos(mid), ly=cy+(r+30)*Math.sin(mid);
       txt(svg, lx, ly, ang.toFixed(0)+'°', 15, C.accent, 700);
-      out.innerHTML='圆心角 = 360° × '+p+'% = <b style="color:'+C.goldDeep+'">'+ang.toFixed(0)+'°</b>';
+      out.innerHTML='圆心角 = 360° × '+p+'% = <b class="u-c-golddeep">'+ang.toFixed(0)+'°</b>';
     }
     pS.addEventListener('input',refresh); refresh();
   })();
@@ -2418,7 +2418,7 @@ function diagPieChartDerive(container, opts){
       const row=el('div','display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;',box);
       const bOk=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:none;background:'+C.primary+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;',row,'提交');
       const bHint=el('button','min-height:46px;padding:0 20px;border-radius:12px;border:1px solid '+C.line+';background:#fff;color:'+C.primary+';font-size:15px;font-weight:600;cursor:pointer;',row,'看提示');
-      bOk.onclick=function(){ const v=inp.value.trim().replace('°','').replace('度',''); if(Math.abs(+v-it.a)<0.01){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='🎉 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
+      bOk.onclick=function(){ const v=inp.value.trim().replace('°','').replace('度',''); if(Math.abs(+v-it.a)<0.01){ fb.style.color=C.success; fb.textContent='✓ 答对了！'; qi++; if(qi<Q.length){ setTimeout(show,700); } else { fb.style.color=C.success; fb.textContent='✓ 全部完成！'; } } else { wrong++; fb.style.color=C.accent; fb.textContent='再想想～ '+(wrong>=1?('提示：'+it.hint):''); } };
       bHint.onclick=function(){ fb.style.color=C.goldDeep; fb.textContent='提示：'+it.hint; };
     }
     show();
@@ -2436,66 +2436,66 @@ function getUnitDiagrams(unit, grade, sem){
   let dedicated = false;
 
   // ===== 圆柱与圆锥：专属四段交互动图（切拼·倒水·计算·挑战）=====
-  if (/圆柱与圆锥|圆柱圆锥/.test(name)) { add(out, diagCylinderCone, '圆柱与圆锥的体积和表面积（切拼·倒水·展开·计算·挑战）', {}, '👆 点标签切换：切拼探究 / 倒水实验 / 体积计算 / 侧面展开·表面积 / 随堂挑战'); return out; }
+  if (/圆柱与圆锥|圆柱圆锥/.test(name)) { add(out, diagCylinderCone, '圆柱与圆锥的体积和表面积（切拼·倒水·展开·计算·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：切拼探究 / 倒水实验 / 体积计算 / 侧面展开·表面积 / 随堂挑战'); return out; }
 
   // ===== 长方体和正方体：专属四段交互动图（摆一摆·表面积·计算·挑战）=====
-  if (name === '长方体和正方体') { add(out, diagCuboid, '长方体和正方体的体积（摆一摆·表面积·计算·挑战）', {}, '👆 点标签切换：摆一摆 / 表面积 / 体积计算 / 随堂挑战'); return out; }
+  if (name === '长方体和正方体') { add(out, diagCuboid, '长方体和正方体的体积（摆一摆·表面积·计算·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：摆一摆 / 表面积 / 体积计算 / 随堂挑战'); return out; }
   // ===== 多边形的面积：专属四段交互动图（剪拼推导·计算·挑战）=====
-  if (name === '多边形的面积') { add(out, diagPolygonArea, '多边形的面积（剪拼推导·计算·挑战）', {}, '👆 点标签切换：平行四边形 / 三角·梯形 / 面积计算 / 随堂挑战'); return out; }
+  if (name === '多边形的面积') { add(out, diagPolygonArea, '多边形的面积（剪拼推导·计算·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：平行四边形 / 三角·梯形 / 面积计算 / 随堂挑战'); return out; }
   // ===== 圆：专属四段交互动图（剪拼成长方形·计算·挑战）=====
-  if (name === '圆') { add(out, diagCircleArea, '圆的面积（剪拼成长方形·计算·挑战）', {}, '👆 点标签切换：剪拼成长方形 / 周长与面积 / 圆环与半圆 / 随堂挑战'); return out; }
+  if (name === '圆') { add(out, diagCircleArea, '圆的面积（剪拼成长方形·计算·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：剪拼成长方形 / 周长与面积 / 圆环与半圆 / 随堂挑战'); return out; }
 
   // ===== 分数除法：推导复现四段交互动图（等分除·倒数推导·计算·挑战）=====
-  if (name === '分数除法') { add(out, diagFractionDiv, '分数除法（等分除·倒数推导·计算·挑战）', {}, '👆 点标签切换：等分除演示 / 倒数推导 / 除法计算 / 随堂挑战'); return out; }
+  if (name === '分数除法') { add(out, diagFractionDiv, '分数除法（等分除·倒数推导·计算·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：等分除演示 / 倒数推导 / 除法计算 / 随堂挑战'); return out; }
   // ===== 比 / 比例：推导复现四段交互动图（比即分数·化简·比例·挑战）=====
-  if (name === '比') { add(out, diagRatioDerive, '比（比即分数·化简·比例·挑战）', {}, '👆 点标签切换：比即分数 / 化简比 / 比例 / 随堂挑战'); return out; }
-  if (name === '比例') { add(out, diagRatioDerive, '比例（比值相等·化简·挑战）', {}, '👆 点标签切换：比即分数 / 化简比 / 比例 / 随堂挑战'); return out; }
+  if (name === '比') { add(out, diagRatioDerive, '比（比即分数·化简·比例·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：比即分数 / 化简比 / 比例 / 随堂挑战'); return out; }
+  if (name === '比例') { add(out, diagRatioDerive, '比例（比值相等·化简·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：比即分数 / 化简比 / 比例 / 随堂挑战'); return out; }
   // ===== 百分数：推导复现四段交互动图（百分格·分数·小数·挑战）=====
-  if (name === '百分数（一）') { add(out, diagPercentDerive, '百分数（百分格·分数·小数·挑战）', {}, '👆 点标签切换：百分格模型 / 百分数↔分数 / 百分数↔小数 / 随堂挑战'); return out; }
-  if (name === '百分数（二）') { add(out, diagPercentDerive, '百分数（百分格·分数·小数·挑战）', {}, '👆 点标签切换：百分格模型 / 百分数↔分数 / 百分数↔小数 / 随堂挑战'); return out; }
+  if (name === '百分数（一）') { add(out, diagPercentDerive, '百分数（百分格·分数·小数·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：百分格模型 / 百分数↔分数 / 百分数↔小数 / 随堂挑战'); return out; }
+  if (name === '百分数（二）') { add(out, diagPercentDerive, '百分数（百分格·分数·小数·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：百分格模型 / 百分数↔分数 / 百分数↔小数 / 随堂挑战'); return out; }
   // ===== 扇形统计图：推导复现四段交互动图（圆心角·画扇形·读图·挑战）=====
-  if (name === '扇形统计图') { add(out, diagPieChartDerive, '扇形统计图（圆心角·画扇形·读图·挑战）', {}, '👆 点标签切换：圆心角推导 / 画扇形 / 读图 / 随堂挑战'); return out; }
+  if (name === '扇形统计图') { add(out, diagPieChartDerive, '扇形统计图（圆心角·画扇形·读图·挑战）', {}, UI_ICON.svg('pointer',14)+' 点标签切换：圆心角推导 / 画扇形 / 读图 / 随堂挑战'); return out; }
 
   // ===== 专属交互动图（补齐此前只走兜底的单元）=====
-  if (/生活应用题/.test(name)) { add(out, diagWordProblem, '看图列式（部分—整体）', {}, '👆 拖动滑块改变“已知”数量，看算式'); dedicated = true; }
-  if (/混合运算/.test(name) && grade !== 4) { add(out, diagMixOps, '混合运算顺序', {}, '👆 点按钮，按先乘除后加减的顺序计算'); dedicated = true; }
-  if (/图形计数/.test(name)) { add(out, diagCountShapes, '巧数图形（数三角形）', {}, '👆 拖动滑块猜数量，点验证'); dedicated = true; }
-  if (/测量/.test(name)) { add(out, diagMeasure, '用尺子量长度', {}, '👆 拖动红色手柄测量长度'); dedicated = true; }
-  if (/倍的认识/.test(name)) { add(out, diagMultiples, '倍的认识（几个几）', {}, '👆 拖滑块改变每行/行数，看总数'); dedicated = true; }
-  if (/巧数图形/.test(name)) { add(out, diagCountShapes, '巧数图形（数三角形）', {}, '👆 拖动滑块猜数量，点验证'); dedicated = true; }
+  if (/生活应用题/.test(name)) { add(out, diagWordProblem, '看图列式（部分—整体）', {}, UI_ICON.svg('pointer',14)+' 拖动滑块改变“已知”数量，看算式'); dedicated = true; }
+  if (/混合运算/.test(name) && grade !== 4) { add(out, diagMixOps, '混合运算顺序', {}, UI_ICON.svg('pointer',14)+' 点按钮，按先乘除后加减的顺序计算'); dedicated = true; }
+  if (/图形计数/.test(name)) { add(out, diagCountShapes, '巧数图形（数三角形）', {}, UI_ICON.svg('pointer',14)+' 拖动滑块猜数量，点验证'); dedicated = true; }
+  if (/测量/.test(name)) { add(out, diagMeasure, '用尺子量长度', {}, UI_ICON.svg('pointer',14)+' 拖动红色手柄测量长度'); dedicated = true; }
+  if (/倍的认识/.test(name)) { add(out, diagMultiples, '倍的认识（几个几）', {}, UI_ICON.svg('pointer',14)+' 拖滑块改变每行/行数，看总数'); dedicated = true; }
+  if (/巧数图形/.test(name)) { add(out, diagCountShapes, '巧数图形（数三角形）', {}, UI_ICON.svg('pointer',14)+' 拖动滑块猜数量，点验证'); dedicated = true; }
   if (/位置与方向/.test(name) || /位置（数对）/.test(name)) {
     const isPair = /数对/.test(name), isTwo = /（二）/.test(name);
-    add(out, isPair ? diagCoordPlane : (isTwo ? diagBearing : diagPosition), isPair ? '用数对确定位置' : (isTwo ? '方向与位置（辨认方向）' : '位置与方向（上下左右）'), {}, '👆 看位置怎样描述');
+    add(out, isPair ? diagCoordPlane : (isTwo ? diagBearing : diagPosition), isPair ? '用数对确定位置' : (isTwo ? '方向与位置（辨认方向）' : '位置与方向（上下左右）'), {}, UI_ICON.svg('pointer',14)+' 看位置怎样描述');
     dedicated = true;
   }
-  if (/搭配问题/.test(name)) { add(out, diagTree, '搭配问题（树状图）', {}, '👆 点上方上衣，高亮它的 3 种搭配'); dedicated = true; }
-  if (/公顷和平方千米|公顷与平方千米/.test(name)) { add(out, diagAreaUnits, '面积单位换算', {}, '👆 拖滑块看平方米与公顷的关系'); dedicated = true; }
-  if (/图形认知/.test(name)) { add(out, diagShapeProps, '图形认知', {}, '👆 点按钮认识图形特征'); dedicated = true; }
-  if (/因数与倍数/.test(name)) { add(out, diagFactors, '因数与倍数', {}, '👆 拖滑块选数，看它的因数对'); dedicated = true; }
-  if (/按比分配/.test(name)) { add(out, diagRatioSplit, '按比分配', {}, '👆 拖滑块改总数与比例'); dedicated = true; }
-  if (/总复习/.test(name)) { add(out, diagReviewMap, '六下总复习', {}, '👆 点卡片回顾核心知识'); dedicated = true; }
+  if (/搭配问题/.test(name)) { add(out, diagTree, '搭配问题（树状图）', {}, UI_ICON.svg('pointer',14)+' 点上方上衣，高亮它的 3 种搭配'); dedicated = true; }
+  if (/公顷和平方千米|公顷与平方千米/.test(name)) { add(out, diagAreaUnits, '面积单位换算', {}, UI_ICON.svg('pointer',14)+' 拖滑块看平方米与公顷的关系'); dedicated = true; }
+  if (/图形认知/.test(name)) { add(out, diagShapeProps, '图形认知', {}, UI_ICON.svg('pointer',14)+' 点按钮认识图形特征'); dedicated = true; }
+  if (/因数与倍数/.test(name)) { add(out, diagFactors, '因数与倍数', {}, UI_ICON.svg('pointer',14)+' 拖滑块选数，看它的因数对'); dedicated = true; }
+  if (/按比分配/.test(name)) { add(out, diagRatioSplit, '按比分配', {}, UI_ICON.svg('pointer',14)+' 拖滑块改总数与比例'); dedicated = true; }
+  if (/总复习/.test(name)) { add(out, diagReviewMap, '六下总复习', {}, UI_ICON.svg('pointer',14)+' 点卡片回顾核心知识'); dedicated = true; }
 
   // ===== 四年级优先：按参考页「四年级下册数学乐园」升级为精美交互动画 =====
   if (grade === 4) {
     if (/巧数|数三角/.test(name)) {
-      add(out, refCountTriangles, '巧数三角形（专项）', {}, '👆 数一数图中有几个三角形，点验证看对错');
+      add(out, refCountTriangles, '巧数三角形（专项）', {}, UI_ICON.svg('pointer',14)+' 数一数图中有几个三角形，点验证看对错');
     } else if (/四则运算|运算顺序|混合运算/.test(name)) {
-      add(out, refOrderOfOps, '四则运算顺序', {}, '👆 点"先算这一步"，看先乘除后加减');
+      add(out, refOrderOfOps, '四则运算顺序', {}, UI_ICON.svg('pointer',14)+' 点"先算这一步"，看先乘除后加减');
     } else if (/三角形/.test(name)) {
-      add(out, refTriSum, '三角形内角和 = 180°', {}, '👆 点"把三个角拼在一起"，看内角和');
+      add(out, refTriSum, '三角形内角和 = 180°', {}, UI_ICON.svg('pointer',14)+' 点"把三个角拼在一起"，看内角和');
     } else if (/运算定律|分配律/.test(name)) {
-      add(out, refDistributive, '乘法分配律', {}, '👆 拖滑块改长宽，点"分开算"对比');
+      add(out, refDistributive, '乘法分配律', {}, UI_ICON.svg('pointer',14)+' 拖滑块改长宽，点"分开算"对比');
     } else if (/小数/.test(name) && /意义|性质/.test(name)) {
-      add(out, refDecimal, '小数的意义（100 格方格）', {}, '👆 拖滑块或点格子，看 0.1 和 0.01');
+      add(out, refDecimal, '小数的意义（100 格方格）', {}, UI_ICON.svg('pointer',14)+' 拖滑块或点格子，看 0.1 和 0.01');
     } else if (/对称|平移|图形的运动/.test(name)) {
-      add(out, refMotion, '轴对称 · 平移 · 旋转', {}, '👆 点按钮、拖手柄，看图形变换');
+      add(out, refMotion, '轴对称 · 平移 · 旋转', {}, UI_ICON.svg('pointer',14)+' 点按钮、拖手柄，看图形变换');
     }
     if (out.length) return out.slice(0, 3);
   }
   // 鸡兔同笼（任意年级，参考页同款假设法动画）
-  if (/鸡兔/.test(name)) add(out, refChickenRabbit, '鸡兔同笼（假设法）', {}, '👆 点步骤按钮，看假设法怎么算');
+  if (/鸡兔/.test(name)) add(out, refChickenRabbit, '鸡兔同笼（假设法）', {}, UI_ICON.svg('pointer',14)+' 点步骤按钮，看假设法怎么算');
   // 平均数（任意年级）
-  if (/平均数/.test(name)) add(out, refAverage, '平均数（移多补少）', {}, '👆 点"移多补少"，看平均数怎么来');
+  if (/平均数/.test(name)) add(out, refAverage, '平均数（移多补少）', {}, UI_ICON.svg('pointer',14)+' 点"移多补少"，看平均数怎么来');
 
   // 计数 / 数认识 → 数轴 + 位值
   if (/数数|数的认识|数的意义|1-5|6-10|11-20|100以内|万以内|大数|负数/.test(name)) {
@@ -2589,7 +2589,7 @@ function getUnitDiagrams(unit, grade, sem){
   if (/克和千克|重量|容量/.test(name)) add(out, diagBarChart, '用柱状图比轻重');
   // 应用题类
   if (/行程|速度/.test(name)) add(out, diagSpeed, '路程=速度×时间');
-  if (/植树/.test(name)) add(out, diagPlant, '植树问题：间隔与棵数', {}, '👆 拖动金色手柄，或拉滑块，看间隔与棵数怎样变');
+  if (/植树/.test(name)) add(out, diagPlant, '植树问题：间隔与棵数', {}, UI_ICON.svg('pointer',14)+' 拖动金色手柄，或拉滑块，看间隔与棵数怎样变');
   if (/鸡兔/.test(name)) add(out, diagChickenRabbit, '鸡兔同笼：数头数脚');
   if (/面积应用|周长应用/.test(name)) add(out, diagAreaRect, '画图算面积/周长');
   if (/工程问题|价格应用|分数应用/.test(name)) add(out, diagBarChart, '用图表示数量关系');
@@ -2657,9 +2657,9 @@ function refTriSum(box) {
     '<div class="anim-msg" id="ts-msg"></div>' +
     '<div class="anim-ctrl">' +
     '  <button class="btn btn-primary" id="ts-fold">▶ 把三个角拼在一起</button>' +
-    '  <button class="btn" id="ts-new">🎲 换一个三角形</button>' +
+    '  <button class="btn" id="ts-new">'+UI_ICON.svg('dice',16)+'换一个三角形</button>' +
     '</div>' +
-    '<div class="anim-tip">💡 拖动上方<b>顶点</b>改变三角形形状，三个内角会实时变化，但它们的和永远 = <b>180°</b>。点"把三个角拼在一起"看拼成平角。</div>';
+    '<div class="anim-tip">'+UI_ICON.svg('info',15)+'拖动上方<b>顶点</b>改变三角形形状，三个内角会实时变化，但它们的和永远 = <b>180°</b>。点"把三个角拼在一起"看拼成平角。</div>';
 
   // 顶点位置为真相来源；角度由位置反算，保证拖拽时度数真实可信
   let P = [{ x: 70, y: 205 }, { x: 350, y: 205 }, { x: 210, y: 60 }];
@@ -2788,8 +2788,8 @@ function refDistributive(box) {
     '  <label>宽 b：<input type="range" id="dl-b" min="1" max="9" value="6"><span id="dl-bv">6</span></label>' +
     '  <label>宽 c：<input type="range" id="dl-c" min="1" max="9" value="3"><span id="dl-cv">3</span></label>' +
     '</div>' +
-    '<div class="anim-ctrl"><button class="btn btn-primary" id="dl-split">✂ 分开算 / 合起来算</button></div>' +
-    '<div class="anim-tip">💡 大长方形的面积 = a×(b+c)；分成两块后 = a×b + a×c。面积没变，所以 <b>a×(b+c) = a×b + a×c</b>，这就是乘法分配律。</div>';
+    '<div class="anim-ctrl"><button class="btn btn-primary" id="dl-split">'+UI_ICON.svg('scissors',16)+'分开算 / 合起来算</button></div>' +
+    '<div class="anim-tip">'+UI_ICON.svg('info',15)+'大长方形的面积 = a×(b+c)；分成两块后 = a×b + a×c。面积没变，所以 <b>a×(b+c) = a×b + a×c</b>，这就是乘法分配律。</div>';
 
   let split = false;
   const $ = function (id) { return box.querySelector(id); };
@@ -2832,14 +2832,14 @@ function refDistributive(box) {
  * ============================================================ */
 function refDecimal(box) {
   box.innerHTML =
-    '<div class="anim-stage"><svg id="dc-svg" viewBox="0 0 300 300" class="anim-svg" style="max-width:320px;touch-action:none"></svg></div>' +
+    '<div class="anim-stage"><svg id="dc-svg" viewBox="0 0 300 300" class="anim-svg u-xw320 u-touch0"></svg></div>' +
     '<div class="anim-msg" id="dc-msg"></div>' +
-    '<div class="anim-sliders"><label style="flex:1 1 100%">涂色格数：<input type="range" id="dc-n" min="0" max="100" value="37"><span id="dc-nv">37</span></label></div>' +
+    '<div class="anim-sliders"><label class="u-f-full">涂色格数：<input type="range" id="dc-n" min="0" max="100" value="37"><span id="dc-nv">37</span></label></div>' +
     '<div class="anim-ctrl">' +
     '  <button class="btn" id="dc-m1">− 1 格</button><button class="btn" id="dc-p1">+ 1 格</button>' +
     '  <button class="btn btn-primary" id="dc-p10">+ 1 整行（0.1）</button>' +
     '</div>' +
-    '<div class="anim-tip">💡 把"1"平均分成 100 份，每份是 <b>0.01</b>（百分之一）；每一整行 10 格就是 <b>0.1</b>（十分之一）。点方格或拖滑块试试看。</div>';
+    '<div class="anim-tip">'+UI_ICON.svg('info',15)+'把"1"平均分成 100 份，每份是 <b>0.01</b>（百分之一）；每一整行 10 格就是 <b>0.1</b>（十分之一）。点方格或拖滑块试试看。</div>';
 
   const $ = function (id) { return box.querySelector(id); };
 
@@ -2900,11 +2900,11 @@ function refOrderOfOps(box) {
     '<div class="anim-stage"><svg id="oo-svg" viewBox="0 0 470 150" class="anim-svg"></svg></div>' +
     '<div class="anim-msg" id="oo-msg"></div>' +
     '<div class="anim-ctrl">' +
-    '  <button class="btn btn-primary" id="oo-next">👉 先算这一步</button>' +
-    '  <button class="btn" id="oo-ans">💡 显示全部步骤</button>' +
-    '  <button class="btn" id="oo-new">🎲 换一道</button>' +
+    '  <button class="btn btn-primary" id="oo-next">'+UI_ICON.svg('pointer',16)+'先算这一步</button>' +
+    '  <button class="btn" id="oo-ans">'+UI_ICON.svg('bulb',16)+'显示全部步骤</button>' +
+    '  <button class="btn" id="oo-new">'+UI_ICON.svg('dice',16)+'换一道</button>' +
     '</div>' +
-    '<div class="anim-tip">💡 <b>先乘除，后加减</b>：同一级运算从左往右算。先找有没有 × 或 ÷，有就先算它；都算完，再算 + 和 −。点"先算这一步"，看每一步先算谁。</div>';
+    '<div class="anim-tip">'+UI_ICON.svg('info',15)+'<b>先乘除，后加减</b>：同一级运算从左往右算。先找有没有 × 或 ÷，有就先算它；都算完，再算 + 和 −。点"先算这一步"，看每一步先算谁。</div>';
 
   const $ = function (id) { return box.querySelector(id); };
   let toks, hi;
@@ -2978,15 +2978,15 @@ function refCountTriangles(box) {
   box.innerHTML =
     '<div class="anim-stage"><svg id="ct-svg" viewBox="0 0 420 260" class="anim-svg"></svg></div>' +
     '<div class="anim-msg" id="ct-msg"></div>' +
-    '<div class="anim-sliders"><label style="flex:1 1 100%">我数到：<input type="number" id="ct-ans" min="0" max="99" value="0" style="width:66px"> 个</label></div>' +
+    '<div class="anim-sliders"><label class="u-f-full">我数到：<input class="u-w66" type="number" id="ct-ans" min="0" max="99" value="0"> 个</label></div>' +
     '<div class="anim-ctrl">' +
-    '  <button class="btn btn-primary" id="ct-check">✔ 验证</button>' +
-    '  <button class="btn" id="ct-show">👀 显示所有三角形</button>' +
+    '  <button class="btn btn-primary" id="ct-check">✓ 验证</button>' +
+    '  <button class="btn" id="ct-show">'+UI_ICON.svg('eye',16)+'显示所有三角形</button>' +
     '  <button class="btn" id="ct-easy">简单</button>' +
     '  <button class="btn" id="ct-mid">中等</button>' +
     '  <button class="btn" id="ct-hard">难</button>' +
     '</div>' +
-    '<div class="anim-tip">💡 别只数小三角形！由 2 段、3 段拼起来的<b>大三角形</b>也要算。<br>规律：底边被分成 n 段时，三角形总数 = 1+2+…+n = n(n+1)/2。</div>';
+    '<div class="anim-tip">'+UI_ICON.svg('info',15)+'别只数小三角形！由 2 段、3 段拼起来的<b>大三角形</b>也要算。<br>规律：底边被分成 n 段时，三角形总数 = 1+2+…+n = n(n+1)/2。</div>';
 
   const $ = function (id) { return box.querySelector(id); };
   let N = 4, timer = null;
@@ -3042,7 +3042,7 @@ function refCountTriangles(box) {
   $('#ct-check').onclick = function () {
     const v = +$('#ct-ans').value, t = trueCount();
     $('#ct-msg').innerHTML = v === t
-      ? '🎉 正确！图中共有 <b class="hl">' + t + '</b> 个三角形。'
+      ? UI_ICON.svg('dice',16)+' 正确！图中共有 <b class="hl">' + t + '</b> 个三角形。'
       : '再想想～图中其实有 <b class="hl">' + t + '</b> 个三角形（不是 ' + v + ' 个）。点"显示所有三角形"看看漏了哪些。';
   };
   $('#ct-show').onclick = showAll;
@@ -3059,7 +3059,7 @@ function refCountTriangles(box) {
 function refMotion(box) {
   box.innerHTML =
     '<div class="anim-tabs"><button class="tab tab-on" data-m="sym">轴对称</button><button class="tab" data-m="tra">平移</button><button class="tab" data-m="rot">旋转</button></div>' +
-    '<div class="anim-stage"><svg id="mo-svg" viewBox="0 0 420 300" class="anim-svg" style="touch-action:none"></svg></div>' +
+    '<div class="anim-stage"><svg id="mo-svg" viewBox="0 0 420 300" class="anim-svg u-touch0"></svg></div>' +
     '<div class="anim-msg" id="mo-msg"></div>' +
     '<div class="anim-sliders" id="mo-sliders"></div>' +
     '<div class="anim-ctrl" id="mo-ctrl"></div>' +
@@ -3142,10 +3142,10 @@ function refMotion(box) {
         : '点"画出对称图形"，看看沿' + (axis === 'v' ? '竖' : '横') + '着的对称轴翻过去是什么样。';
       $('#mo-sliders').innerHTML = '';
       $('#mo-ctrl').innerHTML =
-        '<button class="btn btn-primary" id="mo-go">🦋 画出对称图形</button>' +
+        '<button class="btn btn-primary" id="mo-go">画出对称图形</button>' +
         '<button class="btn" id="mo-axis">↔ 换对称轴方向</button>' +
         '<button class="btn" id="mo-rst">↺ 重来</button>';
-      $('#mo-tip').innerHTML = '💡 <b>轴对称</b>：沿一条直线对折，两边能完全重合。对应点到对称轴的距离相等，连线与对称轴垂直。';
+      $('#mo-tip').innerHTML = UI_ICON.svg('info',15)+' <b>轴对称</b>：沿一条直线对折，两边能完全重合。对应点到对称轴的距离相等，连线与对称轴垂直。';
       $('#mo-go').onclick = function () { shown = true; draw(); };
       $('#mo-axis').onclick = function () { axis = axis === 'v' ? 'h' : 'v'; shown = false; draw(); };
       $('#mo-rst').onclick = function () { shown = false; draw(); };
@@ -3165,7 +3165,7 @@ function refMotion(box) {
         '<label>左右：<input type="range" id="mo-dx" min="-2" max="7" value="' + dx + '"><span>' + dx + '</span></label>' +
         '<label>上下：<input type="range" id="mo-dy" min="-2" max="3" value="' + dy + '"><span>' + dy + '</span></label>';
       $('#mo-ctrl').innerHTML = '<button class="btn btn-primary" id="mo-play">▶ 自动平移演示</button><button class="btn" id="mo-rst2">↺ 回到原位</button>';
-      $('#mo-tip').innerHTML = '💡 <b>平移</b>：图形沿直线方向整体移动。平移只改变<b>位置</b>，不改变<b>形状、大小和方向</b>。';
+      $('#mo-tip').innerHTML = UI_ICON.svg('info',15)+' <b>平移</b>：图形沿直线方向整体移动。平移只改变<b>位置</b>，不改变<b>形状、大小和方向</b>。';
       $('#mo-dx').oninput = function () { dx = +this.value; draw(); };
       $('#mo-dy').oninput = function () { dy = +this.value; draw(); };
       $('#mo-play').onclick = function () {
@@ -3190,7 +3190,7 @@ function refMotion(box) {
       $('#mo-msg').innerHTML = '绕红点（旋转中心）把图形转了 <b class="hl">' + ang + '°</b>。<br><span class="sub">旋转只改变<b>方向</b>，不改变<b>形状和大小</b>。（拖动橙色手柄转一转）</span>';
       $('#mo-sliders').innerHTML = '<label>旋转：<input type="range" id="mo-ang" min="-180" max="180" value="' + ang + '"><span>' + ang + '°</span></label>';
       $('#mo-ctrl').innerHTML = '<button class="btn btn-primary" id="mo-spin">⟳ 自动旋转演示</button><button class="btn" id="mo-rst3">↺ 回到 0°</button>';
-      $('#mo-tip').innerHTML = '💡 <b>旋转</b>：图形绕一个定点（旋转中心）转动一定角度。旋转只改变<b>方向</b>，不改变<b>形状和大小</b>。';
+      $('#mo-tip').innerHTML = UI_ICON.svg('info',15)+' <b>旋转</b>：图形绕一个定点（旋转中心）转动一定角度。旋转只改变<b>方向</b>，不改变<b>形状和大小</b>。';
       $('#mo-ang').oninput = function () { ang = +this.value; draw(); };
       $('#mo-spin').onclick = function () {
         clearInterval(timer); ang = 0; draw();
@@ -3236,11 +3236,11 @@ function refAverage(box) {
     '<div class="anim-stage"><svg id="av-svg" viewBox="0 0 440 280" class="anim-svg"></svg></div>' +
     '<div class="anim-msg" id="av-msg"></div>' +
     '<div class="anim-ctrl">' +
-    '  <button class="btn btn-primary" id="av-go">⚖ 移多补少，变一样高</button>' +
-    '  <button class="btn" id="av-new">🎲 换一组数据</button>' +
+    '  <button class="btn btn-primary" id="av-go">'+UI_ICON.svg('scale',16)+'移多补少，变一样高</button>' +
+    '  <button class="btn" id="av-new">'+UI_ICON.svg('dice',16)+'换一组数据</button>' +
     '  <button class="btn" id="av-rst">↺ 看原始数据</button>' +
     '</div>' +
-    '<div class="anim-tip">💡 把多的移给少的，最后每根一样高，这个高度就是<b>平均数</b>。计算方法：<b>平均数 = 总数量 ÷ 总份数</b>。点柱子上的 +/− 也能改数据。</div>';
+    '<div class="anim-tip">'+UI_ICON.svg('info',15)+'把多的移给少的，最后每根一样高，这个高度就是<b>平均数</b>。计算方法：<b>平均数 = 总数量 ÷ 总份数</b>。点柱子上的 +/− 也能改数据。</div>';
 
   const $ = function (id) { return box.querySelector(id); };
   let data = [], leveled = false, timer = null;
@@ -3359,7 +3359,7 @@ function refChickenRabbit(box) {
     if (stage >= 1) s += '<div class="step">② 比实际少了：' + L + ' − ' + 2 * H + ' = <b>' + (L - 2 * H) + '</b>（只脚）</div>';
     if (stage >= 2) s += '<div class="step">③ 每只兔比鸡多 2 只脚，兔有：' + (L - 2 * H) + ' ÷ 2 = <b class="hl">' + RB + '</b>（只）</div>';
     if (stage >= 2) s += '<div class="step">④ 鸡有：' + H + ' − ' + RB + ' = <b class="hl">' + CK + '</b>（只）</div>';
-    if (stage >= 2) s += '<div class="step ok">✔ 检验：' + CK + '×2 + ' + RB + '×4 = ' + L + '（只脚）正确！</div>';
+    if (stage >= 2) s += '<div class="step ok">✓ 检验：' + CK + '×2 + ' + RB + '×4 = ' + L + '（只脚）正确！</div>';
     $('#cr-steps').innerHTML = s;
   }
 

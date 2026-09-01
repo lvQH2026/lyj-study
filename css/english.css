@@ -70,7 +70,7 @@
 /* 次级按钮：对齐数学 .btn-outline 观感 */
 #englishRoot .btn-ghost {
   background:#fff; border:2px solid var(--border); color: var(--text-light); border-radius:12px;
-  padding: 11px 14px; font-weight:600; font-size:14px; cursor:pointer; transition: background .15s;
+  padding: 11px 14px; min-height:48px; font-weight:600; font-size:14px; cursor:pointer; transition: background .15s;
 }
 #englishRoot .btn-ghost:active { background: rgba(59,111,224,.06); }
 #englishRoot .btn-row { display:flex; gap:10px; }

@@ -508,7 +508,7 @@
     if (subj === 'math' && u.fidx && u.fidx.length) {
       h += '<div class="pc-section-title">万能公式</div><div class="pc-kp-formulas">';
       u.fidx.forEach(function (f) {
-        h += '<div class="pc-formula-card"><div class="pf-t">' + esc(f.t) + '</div><div class="pf-f">' + esc(f.f) + '</div>' + (f.warn ? '<div class="pf-warn">⚠ ' + esc(f.warn) + '</div>' : '') + '</div>';
+        h += '<div class="pc-formula-card"><div class="pf-t">' + esc(f.t) + '</div><div class="pf-f">' + esc(f.f) + '</div>' + (f.warn ? '<div class="pf-warn">'+UI_ICON.svg('warn',13)+' ' + esc(f.warn) + '</div>' : '') + '</div>';
       });
       h += '</div>';
     }
@@ -585,7 +585,7 @@
 
   /* ---------------- 学生 · 考试中心 ---------------- */
   function renderExam(c) {
-    let h = '<div class="pc-card"><div class="pc-section-title" style="margin-top:0">考试设置（' + esc(subjName(S.subject)) + '）</div>';
+    let h = '<div class="pc-card"><div class="pc-section-title u-mt0">考试设置（' + esc(subjName(S.subject)) + '）</div>';
     h += '<div class="pc-row"><span class="lab">类型</span><div class="pc-seg" id="examType">';
     [['unit', '单元考'], ['month', '月考'], ['mid', '期中'], ['final', '期末']].forEach(function (p, i) {
       h += '<button data-t="' + p[0] + '" class="' + (i === 0 ? 'active' : '') + '">' + p[1] + '</button>';
@@ -638,7 +638,7 @@
   function renderWrongBank(c) {
     const mod = modOf(S.subject);
     const bank = (typeof getAllWrongBank === 'function' ? getAllWrongBank() : pcLoad().wrong).filter(function (w) { return !w.module || w.module === mod; });
-    let h = '<div class="pc-card"><div class="pc-section-title" style="margin-top:0">' + esc(subjName(S.subject)) + '错题库（' + bank.length + '）</div>';
+    let h = '<div class="pc-card"><div class="pc-section-title u-mt0">' + esc(subjName(S.subject)) + '错题库（' + bank.length + '）</div>';
     h += '<div class="pc-row"><button class="pc-btn primary" onclick="PC.startWrongReview()">开始错题重练</button><button class="pc-btn ghost" onclick="PC.clearWrong()">清空错题库</button></div>';
     if (!bank.length) h += '<div class="pc-empty">暂无错题</div>';
     else {
@@ -689,7 +689,7 @@
     const st = computeStats(hist);
     let h = '<div class="pc-grid pc-metrics">';
     h += metric('练习次数', st.count, 'c-blue') + metric('平均正确率', st.avg + '%', 'c-green') + metric('薄弱单元', st.weak.length, 'c-red') + metric('连续学习', st.cont + '天', 'c-gold');
-    h += '</div><div class="pc-grid pc-two" style="margin-top:16px"><div class="pc-card"><h3>各单元正确率</h3>' + unitBars(st.units) + '</div><div class="pc-card"><h3>最近练习</h3>' + recentListHtml(hist.slice(0, 8)) + '</div></div>';
+    h += '</div><div class="pc-grid pc-two u-mt16"><div class="pc-card"><h3>各单元正确率</h3>' + unitBars(st.units) + '</div><div class="pc-card"><h3>最近练习</h3>' + recentListHtml(hist.slice(0, 8)) + '</div></div>';
     c.innerHTML = h;
   }
 
@@ -813,7 +813,7 @@
     let h = '<div class="pc-quiz-wrap">';
     h += '<div class="pc-quiz-head"><div class="pc-quiz-title"><button class="pc-quiz-back" onclick="PC.back()" title="返回上一页">←</button>' + esc(q.title) + '</div><div class="pc-quiz-progress">第 ' + (i + 1) + ' / ' + total + ' 题</div></div>';
     if (q.badge) h += '<div class="pc-quiz-badge">' + esc(q.badge) + '</div>';
-    h += '<div class="pc-progress-track"><div class="pc-progress-fill" style="width:' + (total ? i / total * 100 : 0) + '%"></div></div>';
+    h += '<div class="pc-progress-track"><div class="pc-progress-fill ' + wpCls(total ? i / total * 100 : 0) + '"></div></div>';
     // v73.2：题号导航（全部题号可点击跳转，不强制顺序）
     h += '<div class="pc-quiz-nav" id="pcQuizNav">';
     for (let ni = 0; ni < total; ni++) {
@@ -1130,7 +1130,7 @@
         h += '</div>';
       });
     });
-    h += '<div class="pc-row" style="justify-content:center;gap:12px;margin-top:18px">';
+    h += '<div class="pc-row u-jc u-g12 u-mt18">';
     h += '<button class="pc-btn primary" onclick="PC.retry()">重新考试</button>';
     h += '<button class="pc-btn ghost" onclick="PC.back()">返回单元学习</button>';
     if (q.isExam) h += '<button class="pc-btn ghost" onclick="PC.printPaper()">打印试卷</button>';
@@ -1153,11 +1153,11 @@
     let h = '<div class="pc-grid pc-metrics">';
     h += metric('练习次数', st.count, 'c-blue') + metric('平均正确率', st.avg + '%', 'c-green') + metric('薄弱单元', st.weak.length, 'c-red') + metric('连续学习', st.cont + '天', 'c-gold');
     h += '</div>';
-    h += '<div class="pc-grid pc-two" style="margin-top:16px">';
+    h += '<div class="pc-grid pc-two u-mt16">';
     h += '<div class="pc-card"><h3>每日练习量（近14天）</h3>' + svgTrend(st.trend) + '</div>';
     h += '<div class="pc-card"><h3>各单元正确率</h3>' + unitBars(st.units) + '</div>';
     h += '</div>';
-    h += '<div class="pc-grid pc-two" style="margin-top:16px">';
+    h += '<div class="pc-grid pc-two u-mt16">';
     h += '<div class="pc-card"><h3>薄弱点</h3>' + (st.weak.length ? st.weak.map(function (u) { return '<span class="pc-chip">' + esc(u.name) + '（' + u.acc + '%）</span>'; }).join('') : '<div class="pc-empty">暂无明显薄弱点</div>') + '</div>';
     h += '<div class="pc-card"><h3>最近练习</h3>' + recentListHtml(records.slice(0, 8)) + '</div>';
     h += '</div>';
@@ -1223,8 +1223,9 @@
   function unitBars(units) {
     if (!units.length) return '<div class="pc-empty">暂无单元数据</div>';
     return units.map(function (u) {
-      const col = u.acc >= 80 ? '#4E8C6E' : u.acc >= 60 ? '#B4945A' : '#C2554F';
-      return '<div class="pc-bar-row"><span class="bl">' + esc(u.name) + '</span><div class="pc-bar-track"><div class="pc-bar-fill" style="width:' + u.acc + '%;background:' + col + '"></div></div><span class="pc-bar-val">' + u.acc + '%</span></div>';
+      // v82：配色按正确率三档取值，收敛成 .bar-hi/.bar-mid/.bar-lo 语义类（css/pc.css）
+      const barCls = u.acc >= 80 ? 'bar-hi' : u.acc >= 60 ? 'bar-mid' : 'bar-lo';
+      return '<div class="pc-bar-row"><span class="bl">' + esc(u.name) + '</span><div class="pc-bar-track"><div class="pc-bar-fill ' + barCls + ' ' + wpCls(u.acc) + '"></div></div><span class="pc-bar-val">' + u.acc + '%</span></div>';
     }).join('');
   }
   function recentListHtml(records) {
@@ -1233,7 +1234,7 @@
       const acc = r.accuracy != null ? r.accuracy : Math.round(r.score / r.total * 100);
       const cl = acc >= 80 ? 'good' : acc >= 60 ? 'mid' : 'bad';
       const mod = r.module === '数学' ? '数学' : r.module === '语文' ? '语文' : r.module === '英语' ? '英语' : '';
-      return '<div class="pc-list-row"><div class="lr-left"><span class="lr-name">' + esc(r.unitName || '练习') + '</span>' + (mod ? '<span class="pc-mod-tag">' + mod + '</span>' : '') + '</div><div style="text-align:right"><div class="lr-meta">' + fmtDate(r.time) + '</div><div class="pc-score-pill ' + cl + '">' + acc + '分</div></div></div>';
+      return '<div class="pc-list-row"><div class="lr-left"><span class="lr-name">' + esc(r.unitName || '练习') + '</span>' + (mod ? '<span class="pc-mod-tag">' + mod + '</span>' : '') + '</div><div class="u-tr"><div class="lr-meta">' + fmtDate(r.time) + '</div><div class="pc-score-pill ' + cl + '">' + acc + '分</div></div></div>';
     }).join('') + '</div>';
   }
   function metric(label, num, cls) { return '<div class="pc-card pc-metric ' + cls + '"><div class="m-label">' + label + '</div><div class="m-num">' + num + '</div></div>'; }

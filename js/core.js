@@ -108,6 +108,80 @@ window.App = (function () {
 })();
 
 // ============================================================
+// v82：全站统一线性图标集（B1 视觉风格治理）
+// ------------------------------------------------------------
+// 背景：此前图标是「三套体系混排」——底部导航「首页」用彩色 emoji（房子）、
+// 「练习/统计」用线性 SVG、「家长」又用彩色 emoji（家庭人物），各页面按钮上还散落着
+// 庆祝、灯泡、场记板、骰子等一堆彩色 emoji。彩色 emoji 由系统字体渲染，
+// 安卓 / iOS / Windows 长得都不一样，且与「轻奢极简（黛蓝/香槟金/米白）」的定位冲突。
+//
+// 【本注释刻意不写出 emoji 字符本身】——否则以后跑「全站 emoji 清零」审计时，
+// 注释里的字符也会被扫出来造成误报。描述一律用名称。
+//
+// 规范（与既有 SVG 保持一致，勿改）：
+//   viewBox="0 0 24 24" · fill="none" · stroke="currentColor" · stroke-width="1.8"
+//   · stroke-linecap="round" · stroke-linejoin="round"
+// 全部走 currentColor，因此图标颜色自动跟随所处文字色（导航未选中/选中态自动生效）。
+//
+// 用法：UI_ICON.svg('home') 返回 SVG 字符串；UI_ICON.html('home', 22) 返回带尺寸的。
+// 需要额外尺寸/类名时传第二个参数（像素）。
+//
+// 保留不替换的符号（单色文字符号，非彩色 emoji，渲染稳定且语义明确）：
+//   ★ ☆   星级评分（功能性符号）
+//   ✅    结果页「确认成绩」按钮（语义按钮）
+//   ✓ ✗  对错判定（Dingbats 单色文本字形，各平台长得一致，不会像 emoji 因系统而异）
+// ============================================================
+const UI_ICON = (function () {
+  // 每个图标只写 path/几何内容，外壳统一在此拼接，避免漏写属性导致风格漂移
+  const P = {
+    home:     '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/>',
+    book:     '<path d="M5 4h9a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 20a3 3 0 01-3-3"/>',
+    // 错题库：书签夹在书里。原先这里用的是一个叉号，语义是「关闭/删除」，
+    // 放在「错题」tab 上会让人以为点了会删东西，v82 换成书签。
+    bookmark: '<path d="M7 3h10a1 1 0 011 1v17l-6-4-6 4V4a1 1 0 011-1z"/>',
+    chart:    '<path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/>',
+    users:    '<path d="M16 20v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M17 4.5a3.5 3.5 0 010 6.9"/><path d="M19 20v-1a4 4 0 00-2.4-3.7"/>',
+    compass:  '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.1 5-5 2.1 2.1-5z"/>',
+    globe:    '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 3.9 5.6 3.9 9S14.6 18.4 12 21c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/>',
+    print:    '<path d="M7 8V3h10v5"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M7 14h10v7H7z"/>',
+    download: '<path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/>',
+    upload:   '<path d="M12 17V5"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/>',
+    save:     '<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3"/><path d="M8 14h8v7H8z"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/>',
+    target:   '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/>',
+    list:     '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+    // 警示：取代原来的警告三角（U+26A0 在 Windows/iOS 上会被渲染成橙色彩色三角，
+    //       与黛蓝/香槟金配色冲突）
+    warn:     '<path d="M12 3.6L2.6 20h18.8z"/><path d="M12 10v4.5"/><path d="M12 17.4h.01"/>',
+    // 提示/思路：取代原来的灯泡符号（彩色 emoji，且在小字号下糊成一团）
+    info:     '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.8h.01"/>',
+    bulb:     '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.6 10.8c.6.5.9 1.1 1 1.7h5.2c.1-.6.4-1.2 1-1.7A6 6 0 0012 3z"/>',
+    film:     '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16"/><path d="M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+    dice:     '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9.5h.01M15 9.5h.01M9 15h.01M15 15h.01M12 12h.01"/>',
+    pointer:  '<path d="M9 4.5a1.6 1.6 0 013 0v6.2l1.3-1.4a1.6 1.6 0 012.4 2.1l-4 4.3a1.6 1.6 0 01-2.3.05L6 12.4a1.6 1.6 0 012.3-2.2l.7.7z"/><path d="M4 15v3.5A2.5 2.5 0 006.5 21h9"/>',
+    refresh:  '<path d="M20 11a8 8 0 10-1.6 5.6"/><path d="M20 5v6h-6"/>',
+    clipboard:'<rect x="6" y="4" width="12" height="3" rx="1"/><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><path d="M9 12h6M9 16h4"/>',
+    eye:      '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+    scissors: '<circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.2 7.8L20 18M8.2 16.2L20 6"/>',
+    scale:    '<path d="M12 4v16"/><path d="M7 20h10"/><path d="M5 8h14"/><path d="M5 8l-2.5 6h5z"/><path d="M19 8l-2.5 6h5z"/>',
+    trend:    '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+    file:     '<path d="M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V9z"/><path d="M13 3v6h6"/>',
+    arrowUp:  '<path d="M12 20V5"/><path d="M6 11l6-6 6 6"/>',
+    arrowDown:'<path d="M12 4v15"/><path d="M6 13l6 6 6-6"/>',
+    parent:   '<path d="M12 21s-7-4.4-7-9.3A3.7 3.7 0 0112 9a3.7 3.7 0 015-1.3"/><path d="M12 21c0-3 1.5-5.5 4-7"/>'
+  };
+  function svg(name, size) {
+    const g = P[name];
+    if (!g) return '';
+    const s = size || 22;
+    return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true">' + g + '</svg>';
+  }
+  return { svg: svg, html: svg, has: function (n) { return !!P[n]; }, names: Object.keys(P) };
+})();
+
+// ============================================================
 // v78：读取 Service Worker 壳版本号，供页面页脚显示。
 // 直接从 sw.js 文本解析 const CACHE = 'lyj-shell-vNN'，
 // 取代手写版本号（此前 pc.html 长期停留在 v60，滞后 17 版）。
@@ -189,6 +263,24 @@ function openPracticeSettings(opts) {
     if (typeof opts.onStart === 'function') opts.onStart(_practiceDiffSel);
   });
   mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
+}
+
+// ============================================================
+// v82 · B2：百分比宽度 -> .u-wp* 语义类
+// ------------------------------------------------------------
+// 进度条这类「宽度 = 某个百分比」的样式，值只能运行期确定，过去一律拼成
+// 行内 style 属性，导致 B2 收不干净。这里按 5% 一档离散化，误差 ≤2.5%，
+// 进度条上肉眼无差别，换来的是宽度也归 CSS 管、主题可统一治理。
+//
+// 档位类 .u-wp0/.u-wp5/.../.u-wp100（共 21 条）定义在：
+//   - css/style.css（移动端 index.html 与 pc.html 都引）
+//   - css/pc.css（pc.html 只引 pc.css，色值与 style.css 不同，需各自定义）
+//   - parent-pc.html 的内嵌 <style>（该页完全独立，不引任何外部 CSS）
+// 改档位粒度只需改本函数 + 上述三处生成规则。
+// ============================================================
+function wpCls(p) {
+  var v = Math.round((Number(p) || 0) / 5) * 5;
+  return 'u-wp' + Math.max(0, Math.min(100, v));
 }
 
 // ============================================================

@@ -536,7 +536,7 @@ window.AI_GRADE = (function () {
           S.remoteURL = remote;
         } catch (e) {
           console.warn('[aiGrade] 上传失败:', e);
-          setStatus('<div class="gz-warn">图片上传失败，转为「半自动批改」<br><span style="font-size:12px">' +
+          setStatus('<div class="gz-warn">图片上传失败，转为「半自动批改」<br><span class="u-fs12">' +
             esc(e.message) + '</span></div>');
           return enterManual('图片上传失败');
         }
@@ -546,13 +546,13 @@ window.AI_GRADE = (function () {
       }
 
       // 调 AI 批改
-      setStatus('<div class="gz-loading">AI 老师正在批改…<br><span style="font-size:12px;opacity:.75">大约需要 10~30 秒</span></div>');
+      setStatus('<div class="gz-loading">AI 老师正在批改…<br><span class="u-fs12 u-op75">大约需要 10~30 秒</span></div>');
       let res;
       try {
         res = await callGradeAPI(remote, S.subject, S.grade);
       } catch (e) {
         console.warn('[aiGrade] 批改服务异常:', e);
-        setStatus('<div class="gz-warn">批改服务不可用，转为「半自动批改」<br><span style="font-size:12px">' +
+        setStatus('<div class="gz-warn">批改服务不可用，转为「半自动批改」<br><span class="u-fs12">' +
           esc(e.message) + '</span></div>');
         return enterManual('服务不可用');
       }
@@ -566,7 +566,7 @@ window.AI_GRADE = (function () {
       } else {
         const why = (res && res.error) ? res.error : '模型未返回结果';
         console.warn('[aiGrade] 降级:', why);
-        setStatus('<div class="gz-warn">AI 批改未成功，转为「半自动批改」<br><span style="font-size:12px">' +
+        setStatus('<div class="gz-warn">AI 批改未成功，转为「半自动批改」<br><span class="u-fs12">' +
           esc(why) + '</span></div>');
         enterManual(why);
       }
@@ -849,7 +849,7 @@ window.AI_GRADE = (function () {
       return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
     };
     const shown = list.slice(0, 12);
-    let h = `<div class="section-title" style="margin-top:4px">批改记录</div><div class="card">`;
+    let h = `<div class="section-title u-mt4">批改记录</div><div class="card">`;
     shown.forEach((p) => {
       const rate = p.totalScore ? Math.round(p.earnedScore / p.totalScore * 100) : 0;
       const wrongN = (p.questions || []).filter((q) => q.status === 'wrong' || q.status === 'partial').length;

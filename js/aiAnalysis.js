@@ -35,6 +35,13 @@
   const SUBJ_COLOR = { '\u6570\u5B66': '#3E4A63', '\u8BED\u6587': '#B4945A', '\u82F1\u8BED': '#5E8B7E' };
   const SUBJ_ORDER = ['\u6570\u5B66', '\u8BED\u6587', '\u82F1\u8BED'];
 
+  // ---- v82：取值有限的运行期分支 → 语义类后缀（配色定义在 css/style.css）----
+  // 以前这些颜色是直接拼进 style 属性的（'' + c + ''、'' + c + '33' 这种 8 位
+  // 十六进制拼接），既读不出含义，改配色还得翻 JS。现在 JS 只负责判档位。
+  const SUBJ_CLS = { '\u6570\u5B66': 's-math', '\u8BED\u6587': 's-cn', '\u82F1\u8BED': 's-en' };
+  const subjCls = s => SUBJ_CLS[s] || 's-ink';
+  const riskLvl = lv => (lv === 'high' || lv === 'mid' || lv === 'good' ? lv : 'tip');
+
   // ============ 数据标准化 ============
   // 输入：本机 history 数组；输出：记录数组 [{ts, date, subject, unit, accuracy, total, wrong[]}]
   function normalize(history) {
@@ -252,7 +259,7 @@
     const W = width || 640, H = 200, PL = 34, PR = 12, PT = 18, PB = 34;
     const iw = W - PL - PR, ih = H - PT - PB;
     const has = points.filter(function (p) { return p.accuracy != null; });
-    if (!has.length) return '<div style="padding:24px;text-align:center;color:#9AA3BD;font-size:13px">\u8BE5\u65F6\u95F4\u8303\u56F4\u5185\u8FD8\u6CA1\u6709\u7EC3\u4E60\u8BB0\u5F55</div>';
+    if (!has.length) return '<div class="u-p24 u-tc u-c-mute u-fs13">\u8BE5\u65F6\u95F4\u8303\u56F4\u5185\u8FD8\u6CA1\u6709\u7EC3\u4E60\u8BB0\u5F55</div>';
     const maxY = 100, minY = Math.max(0, Math.min.apply(null, has.map(function (p) { return p.accuracy; })) - 10);
     const y = function (v) { return PT + ih - (v - minY) / (maxY - minY) * ih; };
     const x = function (i) { return PL + (points.length <= 1 ? iw / 2 : i / (points.length - 1) * iw); };
@@ -282,7 +289,7 @@
     points.forEach(function (p, i) {
       labels += '<text x="' + x(i) + '" y="' + (H - 11) + '" font-size="15" fill="#5A6478" text-anchor="middle">' + p.label + '</text>';
     });
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="\u6210\u7EE9\u8D70\u52BF\u56FE">'
+    return '<svg class="u-w100 u-hauto u-block" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="\u6210\u7EE9\u8D70\u52BF\u56FE">'
       + '<defs><linearGradient id="aiArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B4945A" stop-opacity=".28"/><stop offset="100%" stop-color="#B4945A" stop-opacity=".02"/></linearGradient></defs>'
       + g
       + (area ? '<path d="' + area + '" fill="url(#aiArea)"/>' : '')
@@ -293,7 +300,7 @@
   // 柱状图（各单元正确率）
   function renderBarSvg(units, width) {
     const list = (units || []).slice(0, 8);
-    if (!list.length) return '<div style="padding:24px;text-align:center;color:#9AA3BD;font-size:13px">\u8FD8\u6CA1\u6709\u5355\u5143\u7EC3\u4E60\u8BB0\u5F55</div>';
+    if (!list.length) return '<div class="u-p24 u-tc u-c-mute u-fs13">\u8FD8\u6CA1\u6709\u5355\u5143\u7EC3\u4E60\u8BB0\u5F55</div>';
     const W = width || 640, H = 220, PL = 8, PR = 8, PT = 22, PB = 58;
     const iw = W - PL - PR, ih = H - PT - PB;
     const bw = Math.min(46, iw / list.length * 0.62);
@@ -313,7 +320,7 @@
       const name = String(u.unit || '').length > 7 ? String(u.unit).slice(0, 7) + '\u2026' : (u.unit || '');
       labels += '<text transform="rotate(-30 ' + (cx + bw / 2) + ' ' + (H - 18) + ')" x="' + (cx + bw / 2) + '" y="' + (H - 18) + '" font-size="15" fill="#5A6478" text-anchor="middle">' + esc(name) + '</text>';
     });
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="\u5355\u5143\u6B63\u786E\u7387\u56FE">'
+    return '<svg class="u-w100 u-hauto u-block" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="\u5355\u5143\u6B63\u786E\u7387\u56FE">'
       + '<line x1="' + PL + '" y1="' + (PT + ih) + '" x2="' + (W - PR) + '" y2="' + (PT + ih) + '" stroke="#ECEAE4" stroke-width="1"/>'
       + rects + labels + '</svg>';
   }
@@ -374,34 +381,34 @@
     }
     const slText = isCloud ? '' : '\uFF0C\u8D8B\u52BF\uFF1A<b>' + esc(sl.slopeText) + '</b>';
 
-    let h = '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>\u5B66\u4E60\u5206\u6790\u62A5\u544A</title></head><body style="font-family:-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif;color:#3E4A63;max-width:720px;margin:0 auto;padding:24px;background:#F7F6F2;line-height:1.7">';
-    h += '<div style="text-align:center;padding:28px 0 10px;border-bottom:3px double #B4945A"><div style="font-size:22px;font-weight:800;letter-spacing:4px">\u5B66\u4E60\u5206\u6790\u62A5\u544A</div><div style="font-size:12px;color:#9AA3BD;margin-top:6px">\u751F\u6210\u65F6\u95F4\uFF1A' + new Date().toLocaleString('zh-CN') + ' \u00B7 \u7EDF\u8BA1\u8303\u56F4\uFF1A' + period + ' \u00B7 \u5171 ' + total + ' \u6B21\u7EC3\u4E60</div></div>';
+    let h = '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>\u5B66\u4E60\u5206\u6790\u62A5\u544A</title></head><body class="u-ff u-c-ink u-xw720 u-m0a u-p24 u-bg-paper u-lh17">';
+    h += '<div class="u-tc u-p28-0-10 u-bb-double"><div class="u-fs22 u-fw800 u-ls4">\u5B66\u4E60\u5206\u6790\u62A5\u544A</div><div class="u-fs12 u-c-mute u-mt6">\u751F\u6210\u65F6\u95F4\uFF1A' + new Date().toLocaleString('zh-CN') + ' \u00B7 \u7EDF\u8BA1\u8303\u56F4\uFF1A' + period + ' \u00B7 \u5171 ' + total + ' \u6B21\u7EC3\u4E60</div></div>';
 
-    h += '<h3 style="border-left:4px solid #B4945A;padding-left:10px;margin:22px 0 10px">\u4E00\u3001\u5B66\u79D1\u6210\u7EE9\u6982\u89C8</h3>';
-    h += '<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="background:#3E4A63;color:#fff"><th style="padding:8px">\u5B66\u79D1</th><th>\u7EC3\u4E60\u9898\u91CF</th><th>\u5E73\u5747\u6B63\u786E\u7387</th></tr>';
+    h += '<h3 class="u-bl-gold4 u-pl10 u-m22-0-10">\u4E00\u3001\u5B66\u79D1\u6210\u7EE9\u6982\u89C8</h3>';
+    h += '<table class="u-w100 u-collapse u-fs13"><tr class="u-bg-ink u-c-white"><th class="u-p8">\u5B66\u79D1</th><th>\u7EC3\u4E60\u9898\u91CF</th><th>\u5E73\u5747\u6B63\u786E\u7387</th></tr>';
     SUBJ_ORDER.forEach(function (s) {
       if (!bySubj[s].t) return;
-      h += '<tr style="border-bottom:1px solid #ECEAE4"><td style="padding:8px;text-align:center">' + s + '</td><td style="text-align:center">\u7EA6 ' + bySubj[s].t + ' \u9898</td><td style="text-align:center;font-weight:700">' + Math.round(bySubj[s].c / bySubj[s].t * 100) + '%</td></tr>';
+      h += '<tr class="u-bdb-mist"><td class="u-p8 u-tc">' + s + '</td><td class="u-tc">\u7EA6 ' + bySubj[s].t + ' \u9898</td><td class="u-tc u-fw700">' + Math.round(bySubj[s].c / bySubj[s].t * 100) + '%</td></tr>';
     });
-    h += '</table><p style="font-size:13px;color:#5A6478">\u603B\u4F53\u5E73\u5747\u6B63\u786E\u7387\uFF1A<b>' + avg + '%</b>' + slText + '\u3002</p>';
+    h += '</table><p class="u-fs13 u-c-slate">\u603B\u4F53\u5E73\u5747\u6B63\u786E\u7387\uFF1A<b>' + avg + '%</b>' + slText + '\u3002</p>';
 
-    h += '<h3 style="border-left:4px solid #B4945A;padding-left:10px;margin:22px 0 10px">\u4E8C\u3001\u8584\u5F31\u77E5\u8BC6\u70B9\u5F52\u56E0</h3>';
-    if (!attr.length) h += '<p style="font-size:13px;color:#9AA3BD">\u6682\u65E0\u9519\u9898\u8BB0\u5F55\uFF0C\u7EE7\u7EED\u4FDD\u6301\u3002</p>';
+    h += '<h3 class="u-bl-gold4 u-pl10 u-m22-0-10">\u4E8C\u3001\u8584\u5F31\u77E5\u8BC6\u70B9\u5F52\u56E0</h3>';
+    if (!attr.length) h += '<p class="u-fs13 u-c-mute">\u6682\u65E0\u9519\u9898\u8BB0\u5F55\uFF0C\u7EE7\u7EED\u4FDD\u6301\u3002</p>';
     attr.forEach(function (a, i) {
-      h += '<p style="font-size:13px;margin:6px 0"><b>' + (i + 1) + '. ' + esc(a.unit) + '</b>\uFF08' + esc(a.subject) + '\uFF0C\u9519\u9898 ' + a.count + ' \u9898' + (a.acc != null ? '\uFF0C\u5355\u5143\u6B63\u786E\u7387 ' + a.acc + '%' : '') + '\uFF09<br><span style="color:#5A6478">\u5EFA\u8BAE\uFF1A' + esc(a.suggestion) + '</span></p>';
+      h += '<p class="u-fs13 u-m6-0"><b>' + (i + 1) + '. ' + esc(a.unit) + '</b>\uFF08' + esc(a.subject) + '\uFF0C\u9519\u9898 ' + a.count + ' \u9898' + (a.acc != null ? '\uFF0C\u5355\u5143\u6B63\u786E\u7387 ' + a.acc + '%' : '') + '\uFF09<br><span class="u-c-slate">\u5EFA\u8BAE\uFF1A' + esc(a.suggestion) + '</span></p>';
     });
 
-    h += '<h3 style="border-left:4px solid #B4945A;padding-left:10px;margin:22px 0 10px">\u4E09\u3001\u98CE\u9669\u63D0\u793A</h3>';
+    h += '<h3 class="u-bl-gold4 u-pl10 u-m22-0-10">\u4E09\u3001\u98CE\u9669\u63D0\u793A</h3>';
     riskList.forEach(function (r) {
-      const c = r.level === 'high' ? '#cf1322' : r.level === 'mid' ? '#d46b08' : r.level === 'good' ? '#389e0d' : '#3E4A63';
-      h += '<p style="font-size:13px;margin:6px 0"><b style="color:' + c + '">\u25CF ' + esc(r.title) + '</b>\uFF1A' + esc(r.desc) + '</p>';
+      const lvl = riskLvl(r.level);
+      h += '<p class="u-fs13 u-m6-0"><b class="rk-t-' + lvl + '">\u25CF ' + esc(r.title) + '</b>\uFF1A' + esc(r.desc) + '</p>';
     });
 
-    h += '<h3 style="border-left:4px solid #B4945A;padding-left:10px;margin:22px 0 10px">\u56DB\u3001\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</h3>';
-    h += '<p style="font-size:13px"><b>\u672C\u5468\u76EE\u6807\uFF1A</b></p><ul style="font-size:13px">' + plan.weekly.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
-    h += '<p style="font-size:13px"><b>\u6BCF\u65E5\u5B89\u6392\uFF1A</b></p><ul style="font-size:13px">' + plan.daily.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    h += '<h3 class="u-bl-gold4 u-pl10 u-m22-0-10">\u56DB\u3001\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</h3>';
+    h += '<p class="u-fs13"><b>\u672C\u5468\u76EE\u6807\uFF1A</b></p><ul class="u-fs13">' + plan.weekly.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    h += '<p class="u-fs13"><b>\u6BCF\u65E5\u5B89\u6392\uFF1A</b></p><ul class="u-fs13">' + plan.daily.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
 
-    h += '<div style="margin-top:26px;padding-top:12px;border-top:1px solid #ECEAE4;font-size:11px;color:#9AA3BD;text-align:center">\u672C\u62A5\u544A\u7531\u5B66\u4E60\u7AD9\u81EA\u52A8\u751F\u6210\uFF0C\u4EC5\u4F9B\u5BB6\u957F\u4E0E\u8001\u5E08\u53C2\u8003\u3002</div>';
+    h += '<div class="u-mt26 u-pt12 u-bdt-mist u-fs11 u-c-mute u-tc">\u672C\u62A5\u544A\u7531\u5B66\u4E60\u7AD9\u81EA\u52A8\u751F\u6210\uFF0C\u4EC5\u4F9B\u5BB6\u957F\u4E0E\u8001\u5E08\u53C2\u8003\u3002</div>';
     h += '</body></html>';
     return h;
   }
@@ -445,83 +452,83 @@
 
       let h = '';
       // 标题 + 时间筛选 + 导出/分享
-      h += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:14px 0 10px">';
-      h += '<div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:4px;height:18px;background:var(--gold,#B4945A);border-radius:2px"></span><span style="font-size:16px;font-weight:800;letter-spacing:1px">AI \u5B66\u4E60\u5206\u6790</span></div>';
-      h += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+      h += '<div class="u-flex u-ac u-between u-wrap u-g8 u-m14-0-10">';
+      h += '<div class="u-flex u-ac u-g6"><span class="u-inlblk u-w4 u-h18 u-bg-gold u-r2"></span><span class="u-fs16 u-fw800 u-ls1">AI \u5B66\u4E60\u5206\u6790</span></div>';
+      h += '<div class="u-flex u-g6 u-wrap">';
       if (mode === 'local' && dataset.length) {
         [['week', '\u8FD1\u5468'], ['month', '\u8FD1\u6708'], ['term', '\u8FD1\u5B66\u671F']].forEach(function (x) {
-          h += '<button onclick="AI_ANALYSIS.setPeriod(\'' + containerId + '\',\'' + x[0] + '\')" data-p="' + x[0] + '" style="padding:6px 12px;border-radius:16px;border:1.5px solid ' + (p === x[0] ? 'var(--gold,#B4945A)' : 'var(--border,#E5E7EB)') + ';background:' + (p === x[0] ? 'rgba(180,148,90,.1)' : '#fff') + ';color:' + (p === x[0] ? 'var(--gold,#B4945A)' : '#5A6478') + ';font-size:12px;font-weight:600;cursor:pointer">' + x[1] + '</button>';
+          h += '<button class="sl-opt' + (p === x[0] ? ' on' : '') + '" onclick="AI_ANALYSIS.setPeriod(\'' + containerId + '\',\'' + x[0] + '\')" data-p="' + x[0] + '">' + x[1] + '</button>';
         });
       }
-      h += '<button onclick="AI_ANALYSIS.exportReport(\'' + containerId + '\')" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--border,#E5E7EB);background:#fff;color:#5A6478;font-size:12px;font-weight:600;cursor:pointer">\u5BFC\u51FA\u62A5\u544A</button>';
-      h += '<button onclick="AI_ANALYSIS.shareReport(\'' + containerId + '\')" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--border,#E5E7EB);background:#fff;color:#5A6478;font-size:12px;font-weight:600;cursor:pointer">\u5206\u4EAB\u7ED9\u8001\u5E08</button>';
+      h += '<button class="u-p6-12 u-r16 u-bd-soft u-bg-w u-c-slate u-fs12 u-fw600 u-cp" onclick="AI_ANALYSIS.exportReport(\'' + containerId + '\')">\u5BFC\u51FA\u62A5\u544A</button>';
+      h += '<button class="u-p6-12 u-r16 u-bd-soft u-bg-w u-c-slate u-fs12 u-fw600 u-cp" onclick="AI_ANALYSIS.shareReport(\'' + containerId + '\')">\u5206\u4EAB\u7ED9\u8001\u5E08</button>';
       h += '</div></div>';
 
       // 空态
       if (!dataset.length && !cloudUnits) {
-        return h + '<div style="padding:28px 16px;text-align:center;color:#9AA3BD;font-size:13px;line-height:1.8">\u5C1A\u65E0\u8DB3\u591F\u7684\u5B66\u4E60\u6570\u636E\u3002<br>\u5B69\u5B50\u5B8C\u6210\u51E0\u6B21\u7EC3\u4E60\u540E\uFF0C\u8FD9\u91CC\u4F1A\u81EA\u52A8\u751F\u6210\u8D8B\u52BF\u3001\u5F52\u56E0\u4E0E\u98CE\u9669\u5206\u6790\u3002</div>';
+        return h + '<div class="u-p28-16 u-tc u-c-mute u-fs13 u-lh18">\u5C1A\u65E0\u8DB3\u591F\u7684\u5B66\u4E60\u6570\u636E\u3002<br>\u5B69\u5B50\u5B8C\u6210\u51E0\u6B21\u7EC3\u4E60\u540E\uFF0C\u8FD9\u91CC\u4F1A\u81EA\u52A8\u751F\u6210\u8D8B\u52BF\u3001\u5F52\u56E0\u4E0E\u98CE\u9669\u5206\u6790\u3002</div>';
       }
 
       // 1. 成绩走势卡片
-      h += '<div class="card" style="margin-bottom:12px"><div class="section-title">\u6210\u7EE9\u8D70\u52BF</div>';
+      h += '<div class="card u-mb12"><div class="section-title">\u6210\u7EE9\u8D70\u52BF</div>';
       if (mode === 'local') {
         h += renderLineSvg(series, 640);
         const subjChips = hasSubj.map(function (s) {
-          return '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#5A6478"><span style="width:8px;height:8px;border-radius:50%;background:' + SUBJ_COLOR[s] + ';display:inline-block"></span>' + s + ' ' + Math.round(subjSummary[s].c / subjSummary[s].t * 100) + '%</span>';
+          return '<span class="u-iflex u-ac u-g5 u-fs11 u-c-slate"><span class="sdot sdot8 ' + subjCls(s) + '"></span>' + s + ' ' + Math.round(subjSummary[s].c / subjSummary[s].t * 100) + '%</span>';
         }).join('&nbsp;&nbsp;');
-        h += '<div style="margin-top:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:12px">';
-        h += '<span style="color:#5A6478">' + subjChips + '</span>';
-        h += '<span style="color:' + (sl.dir === 'down' ? '#cf1322' : sl.dir === 'up' ? '#389e0d' : '#5A6478') + ';font-weight:700">' + sl.slopeText + '</span></div>';
+        h += '<div class="u-mt8 u-flex u-between u-wrap u-g6 u-fs12">';
+        h += '<span class="u-c-slate">' + subjChips + '</span>';
+        h += '<span class="u-fw700 trend-' + sl.dir + '">' + sl.slopeText + '</span></div>';
       } else if (cloudUnits) {
         // 远程模式：单元正确率柱状图 + 题量趋势说明
         h += renderBarSvg(cloudUnits, 640);
         if (opts.cloudStats && Array.isArray(opts.cloudStats.trend) && opts.cloudStats.trend.length) {
           const t = opts.cloudStats.trend;
           const last = t[t.length - 1];
-          h += '<div style="margin-top:8px;font-size:12px;color:#5A6478">\u5171\u8BB0\u5F55 ' + opts.cloudStats.trend.length + ' \u4E2A\u7EC3\u4E60\u65E5\uFF0C\u6700\u8FD1\u7EC3\u4E60\u65E5 ' + esc(last.date) + '\uFF08' + last.count + ' \u9898\uFF09\u3002\u67F1\u5B50\u4E3A\u5404\u5355\u5143\u5E73\u5747\u6B63\u786E\u7387\uFF0C\u7EA2\u8272\u4E3A\u9700\u91CD\u70B9\u5173\u6CE8\u5355\u5143\u3002</div>';
+          h += '<div class="u-mt8 u-fs12 u-c-slate">\u5171\u8BB0\u5F55 ' + opts.cloudStats.trend.length + ' \u4E2A\u7EC3\u4E60\u65E5\uFF0C\u6700\u8FD1\u7EC3\u4E60\u65E5 ' + esc(last.date) + '\uFF08' + last.count + ' \u9898\uFF09\u3002\u67F1\u5B50\u4E3A\u5404\u5355\u5143\u5E73\u5747\u6B63\u786E\u7387\uFF0C\u7EA2\u8272\u4E3A\u9700\u91CD\u70B9\u5173\u6CE8\u5355\u5143\u3002</div>';
         }
       }
       h += '</div>';
 
       // 2. 错题归因卡片
-      h += '<div class="card" style="margin-bottom:12px"><div class="section-title">\u9519\u9898\u5F52\u56E0\u4E0E\u5EFA\u8BAE</div>';
+      h += '<div class="card u-mb12"><div class="section-title">\u9519\u9898\u5F52\u56E0\u4E0E\u5EFA\u8BAE</div>';
       if (!attr.length) {
         h += '<div class="pp-dim">\u6682\u65E0\u9519\u9898\u8BB0\u5F55\uFF0C\u8868\u73B0\u4E0D\u9519\u3002</div>';
       } else {
         attr.forEach(function (a, i) {
           const barW = Math.min(100, Math.round(a.count / attr[0].count * 100));
-          h += '<div style="margin-bottom:12px">';
-          h += '<div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#3E4A63">';
-          h += '<span style="width:6px;height:6px;border-radius:50%;background:' + (SUBJ_COLOR[a.subject] || '#3E4A63') + ';display:inline-block"></span>';
-          h += esc(a.unit) + ' <span style="font-weight:400;color:#9AA3BD;font-size:11px">' + esc(a.subject) + ' \u00B7 \u9519\u9898 ' + a.count + ' \u9898' + (a.acc != null ? ' \u00B7 \u6B63\u786E\u7387 ' + a.acc + '%' : '') + '</span></div>';
-          h += '<div style="height:6px;background:var(--border,#ECEAE4);border-radius:3px;margin:5px 0;overflow:hidden"><div style="height:100%;width:' + barW + '%;background:' + (SUBJ_COLOR[a.subject] || '#3E4A63') + ';border-radius:3px"></div></div>';
-          h += '<div style="font-size:12px;color:#5A6478;line-height:1.6">\u4E3B\u8981\u5931\u5206\u9898\u578B\uFF1A' + esc(a.topType) + '\u3002\u5EFA\u8BAE\uFF1A' + esc(a.suggestion) + '</div>';
+          h += '<div class="u-mb12">';
+          h += '<div class="u-flex u-ac u-g6 u-fs13 u-fw700 u-c-ink">';
+          h += '<span class="sdot sdot6 ' + subjCls(a.subject) + '"></span>';
+          h += esc(a.unit) + ' <span class="u-fw400 u-c-mute u-fs11">' + esc(a.subject) + ' \u00B7 \u9519\u9898 ' + a.count + ' \u9898' + (a.acc != null ? ' \u00B7 \u6B63\u786E\u7387 ' + a.acc + '%' : '') + '</span></div>';
+          h += '<div class="u-h6 u-bg-border u-r3 u-m5-0 u-ovh"><div class="u-h100 u-r3 ' + subjCls(a.subject) + ' ' + wpCls(barW) + '"></div></div>';
+          h += '<div class="u-fs12 u-c-slate u-lh16">\u4E3B\u8981\u5931\u5206\u9898\u578B\uFF1A' + esc(a.topType) + '\u3002\u5EFA\u8BAE\uFF1A' + esc(a.suggestion) + '</div>';
           h += '</div>';
         });
       }
       h += '</div>';
 
       // 3. 风险预测卡片
-      h += '<div class="card" style="margin-bottom:12px"><div class="section-title">\u98CE\u9669\u9884\u6D4B</div>';
+      h += '<div class="card u-mb12"><div class="section-title">\u98CE\u9669\u9884\u6D4B</div>';
       riskList.forEach(function (r) {
-        const c = r.level === 'high' ? '#cf1322' : r.level === 'mid' ? '#d46b08' : r.level === 'good' ? '#389e0d' : '#3E4A63';
+        const lvl = riskLvl(r.level);
         const tag = r.level === 'high' ? '\u9AD8\u98CE\u9669' : r.level === 'mid' ? '\u4E2D\u98CE\u9669' : r.level === 'good' ? '\u72B6\u6001\u826F\u597D' : '\u63D0\u793A';
-        h += '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid ' + c + '33;border-radius:10px;background:' + c + '0d;margin-bottom:8px">';
-        h += '<span style="flex-shrink:0;font-size:11px;font-weight:700;color:#fff;background:' + c + ';padding:3px 8px;border-radius:10px">' + tag + '</span>';
-        h += '<div style="font-size:12.5px;color:#3E4A63;line-height:1.65"><b>' + esc(r.title) + '</b><br><span style="color:#5A6478">' + esc(r.desc) + '</span></div></div>';
+        h += '<div class="rk-card rk-card-' + lvl + ' u-mb8">';
+        h += '<span class="rk-tag rk-tag-' + lvl + '">' + tag + '</span>';
+        h += '<div class="u-fs125 u-c-ink u-lh165"><b>' + esc(r.title) + '</b><br><span class="u-c-slate">' + esc(r.desc) + '</span></div></div>';
       });
       h += '</div>';
 
       // 4. 提升方案卡片
-      h += '<div class="card" style="margin-bottom:12px;background:#FCF9F2;border:1px solid #E8D9B8"><div class="section-title" style="color:#B4945A">\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</div>';
-      h += '<div style="font-size:12.5px;color:#3E4A63;line-height:1.8">';
-      h += '<div style="margin-bottom:8px;font-weight:700;color:#B4945A">\u672C\u5468\u76EE\u6807</div>';
+      h += '<div class="card u-mb12 u-bg-cream u-bd-sand"><div class="section-title u-c-gold2">\u4E2A\u6027\u5316\u63D0\u5347\u65B9\u6848</div>';
+      h += '<div class="u-fs125 u-c-ink u-lh18">';
+      h += '<div class="u-mb8 u-fw700 u-c-gold2">\u672C\u5468\u76EE\u6807</div>';
       plan.weekly.forEach(function (x) { h += '<div>\u00B7 ' + esc(x) + '</div>'; });
-      h += '<div style="margin:10px 0 8px;font-weight:700;color:#B4945A">\u6BCF\u65E5\u5B89\u6392</div>';
+      h += '<div class="u-m10-0-8 u-fw700 u-c-gold2">\u6BCF\u65E5\u5B89\u6392</div>';
       plan.daily.forEach(function (x) { h += '<div>\u00B7 ' + esc(x) + '</div>'; });
       h += '</div></div>';
 
-      h += '<div style="font-size:11px;color:#7A8398;text-align:center;margin:10px 0 4px">\u5206\u6790\u57FA\u4E8E\u5B69\u5B50\u5B9E\u9645\u7EC3\u4E60\u6570\u636E\u81EA\u52A8\u751F\u6210\uFF0C\u4EC5\u4F9B\u53C2\u8003</div>';
+      h += '<div class="u-fs11 u-c-slate3 u-tc u-m10-0-4">\u5206\u6790\u57FA\u4E8E\u5B69\u5B50\u5B9E\u9645\u7EC3\u4E60\u6570\u636E\u81EA\u52A8\u751F\u6210\uFF0C\u4EC5\u4F9B\u53C2\u8003</div>';
       return h;
     }
 

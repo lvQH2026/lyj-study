@@ -10089,7 +10089,7 @@ function renderTodayPanel() {
     + '</div>'
     + '<div class="dash-count-num">' + (cd.days >= 0 ? cd.days : 0) + '<span>天</span></div>'
     + '<div class="dash-count-sub">' + (cd.days >= 0 ? '距离小升初考试' : '考试日期已过，点右上角更新目标') + '</div>'
-    + '<div class="dash-bar"><div class="dash-bar-fill" style="width:' + cd.pct + '%"></div></div>'
+    + '<div class="dash-bar"><div class="dash-bar-fill ' + wpCls(cd.pct) + '"></div></div>'
     + '<div class="dash-count-foot">六年级冲刺进度 ' + cd.pct + '%</div>'
     + '</div>';
 
@@ -10177,18 +10177,18 @@ function renderHome() {
   let recent = (data.history || []).slice(0, 3);
   let recentEl = document.getElementById('recentList');
   if (recent.length === 0) {
-    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon" style="color:var(--text-lighter)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></div><div class="empty-text">还没有练习记录，快开始吧！</div></div>`;
+    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon u-c-lighter"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></div><div class="empty-text">还没有练习记录，快开始吧！</div></div>`;
   } else {
     recentEl.innerHTML = recent.map(r => {
       let gradeNames2 = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
       let rateLabel = r.accuracy >= 90 ? '优秀' : r.accuracy >= 60 ? '良好' : '加油';
-      return `<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 16px">
-        <div style="font-size:12px;font-weight:700;color:var(--success);background:rgba(78,140,110,.12);padding:3px 10px;border-radius:99px">${rateLabel}</div>
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:14px">${gradeNames2[r.grade]} · ${r.unitName}</div>
-          <div style="font-size:12px;color:var(--text-lighter)">${r.score}/${r.total} · 正确率${r.accuracy}%</div>
+      return `<div class="card u-flex u-ac u-g10 u-p12-16">
+        <div class="u-fs12 u-fw700 u-c-ok u-bg-ok-s2 u-p3-10 u-rpill">${rateLabel}</div>
+        <div class="u-f1">
+          <div class="u-fw600 u-fs14">${gradeNames2[r.grade]} · ${r.unitName}</div>
+          <div class="u-fs12 u-c-lighter">${r.score}/${r.total} · 正确率${r.accuracy}%</div>
         </div>
-        <div style="color:var(--primary);font-weight:700;font-size:18px">${r.accuracy}%</div>
+        <div class="u-c-primary u-fw700 u-fs18">${r.accuracy}%</div>
       </div>`;
     }).join('');
   }
@@ -10213,7 +10213,7 @@ function renderSpecialSection() {
     }
   }
   if (found.length === 0) {
-    el.innerHTML = '<div class="empty-text" style="text-align:center;padding:8px 0">暂无专项练习</div>';
+    el.innerHTML = '<div class="empty-text u-tc u-p8-0">暂无专项练习</div>';
     return;
   }
   el.innerHTML = found.map(item => `
@@ -10274,7 +10274,7 @@ function renderUnits() {
     let bestScore = records.length > 0 ? Math.max(...records.map(r => r.accuracy)) : 0;
     let metaText = records.length > 0
       ? `<span class="unit-progress">最高正确率 ${bestScore}%</span>`
-      : `<span style="font-size:12px;color:var(--text-lighter)">${getTypeName(unit.type)}${unit.summary ? ' · 含同步学习' : ''}</span>`;
+      : `<span class="u-fs12 u-c-lighter">${getTypeName(unit.type)}${unit.summary ? ' · 含同步学习' : ''}</span>`;
     let badge = isSpec ? '专' : (unit.unit ? unit.unit : idx + 1);
     return `<div class="${cls}" onclick="startUnitQuiz(${idx})">
       <div class="unit-number">${badge}</div>
@@ -10290,7 +10290,7 @@ function renderUnits() {
     let html = '';
     let tb = units.filter(u => u.group === '课本');
     let sp = units.filter(u => u.group !== '课本');
-    html += `<div class="section-title" style="margin-top:2px">课本同步（${semName}）</div>`;
+    html += `<div class="section-title u-mt2">课本同步（${semName}）</div>`;
     tb.forEach(u => { html += unitItemHTML(u, units.indexOf(u)); });
     if (sp.length) {
       html += `<div class="section-title">专项练习</div>`;
@@ -10311,7 +10311,7 @@ function renderUnits() {
 
     let metaText = records.length > 0
       ? `<span class="unit-progress">最高正确率 ${bestScore}%</span>`
-      : `<span style="font-size:12px;color:var(--text-lighter)">${getTypeName(unit.type)}</span>`;
+      : `<span class="u-fs12 u-c-lighter">${getTypeName(unit.type)}</span>`;
 
     item.innerHTML = `
       <div class="unit-number">${idx + 1}</div>
@@ -10360,33 +10360,35 @@ function showUnitDiagrams(unit, grade, sem, idx) {
     let h = '';
     // 1) 知识点总结卡（米白底）
     if (unit.summary && unit.summary.length) {
-      h += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin:4px 0 8px">知识点总结</div>';
-      h += '<div style="background:var(--bg,#F7F6F2);border:1px solid rgba(180,148,90,.25);border-radius:12px;padding:12px 14px;margin-bottom:14px">';
+      h += '<div class="u-fs12 u-fw700 u-c-gold u-m4-0-8">知识点总结</div>';
+      h += '<div class="sum-list u-bg-page-f u-bd-gold-s25 u-r12 u-p12-14b u-mb14">';
       unit.summary.forEach(function (s, i) {
-        h += '<div style="display:flex;gap:8px;margin-bottom:' + (i === unit.summary.length - 1 ? 0 : 9) + 'px;font-size:13.5px;line-height:1.75">';
-        h += '<span style="color:var(--gold);font-weight:700;flex-shrink:0">' + (i + 1) + '.</span><span>' + s + '</span></div>';
+        // v82：末项去间距交给 .sum-list > div:last-child，不再在 JS 里算索引
+        h += '<div>';
+        h += '<span class="u-c-gold u-fw700 u-noshrink">' + (i + 1) + '.</span><span>' + s + '</span></div>';
       });
       h += '</div>';
     }
     // 2) 万能公式卡（金色描边）
     if (unit.fidx && unit.fidx.length) {
-      h += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin:4px 0 8px">万能公式</div>';
+      h += '<div class="u-fs12 u-fw700 u-c-gold u-m4-0-8">万能公式</div>';
       unit.fidx.forEach(function (f) {
-        h += '<div style="background:#FCF9F2;border:1px solid #E8D9B8;border-left:3px solid var(--gold);border-radius:10px;padding:10px 12px;margin-bottom:9px">';
-        h += '<div style="font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:4px">' + f.t + '</div>';
-        h += '<div style="font-size:13.5px;line-height:1.7;color:var(--primary,#3E4A63)">' + f.f + '</div>';
-        if (f.warn) h += '<div style="font-size:11.5px;color:#C0504D;margin-top:4px">⚠ ' + f.warn + '</div>';
+        h += '<div class="fidx-card">';
+        h += '<div class="u-fs125 u-fw700 u-c-gold u-mb4">' + f.t + '</div>';
+        h += '<div class="u-fs135 u-lh17 u-c-primary-f">' + f.f + '</div>';
+        if (f.warn) h += '<div class="u-fs115 u-c-red u-mt4">'+UI_ICON.svg('warn',13)+' ' + f.warn + '</div>';
         h += '</div>';
       });
     }
     // 3) 万能答题方法卡（黛蓝底）
     if (unit.method && unit.method.length) {
-      h += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin:4px 0 8px">万能答题方法</div>';
-      h += '<div style="background:linear-gradient(135deg,#3E4A63,#2E3648);border-radius:12px;padding:12px 14px;margin-bottom:6px">';
-      unit.method.forEach(function (m, i) {
-        h += '<div style="margin-bottom:' + (i === unit.method.length - 1 ? 0 : 10) + 'px">';
-        h += '<div style="font-size:12px;font-weight:700;color:#D8C9A8;margin-bottom:3px">' + m.t + '</div>';
-        h += '<div style="font-size:13px;line-height:1.75;color:#F2F0EA">' + m.s + '</div>';
+      h += '<div class="u-fs12 u-fw700 u-c-gold u-m4-0-8">万能答题方法</div>';
+      h += '<div class="mtd-list u-bg-grad-dark u-r12 u-p12-14b u-mb6">';
+      unit.method.forEach(function (m) {
+        // v82：同上，末项去间距交给 .mtd-list > div:last-child（i 因此不再需要）
+        h += '<div>';
+        h += '<div class="u-fs12 u-fw700 u-c-palegold u-mb3">' + m.t + '</div>';
+        h += '<div class="u-fs13 u-lh175 u-c-paper">' + m.s + '</div>';
         h += '</div>';
       });
       h += '</div>';
@@ -10408,7 +10410,7 @@ function showUnitDiagrams(unit, grade, sem, idx) {
   if (unit.interactiveIntro) {
     const card = document.createElement('div');
     card.className = 'diag-card';
-    card.innerHTML = '<div class="diag-card-title">🎬 动手探索</div><div class="diag-card-body"></div><div class="diag-card-hint">👆 拖动滑块，看角的变化</div>';
+    card.innerHTML = '<div class="diag-card-title">'+UI_ICON.svg('film',16)+' 动手探索</div><div class="diag-card-body"></div><div class="diag-card-hint">'+UI_ICON.svg('pointer',14)+' 拖动滑块，看角的变化</div>';
     cardsEl.appendChild(card);
     renderShapeExplore(card.querySelector('.diag-card-body'));
   }
@@ -10417,7 +10419,7 @@ function showUnitDiagrams(unit, grade, sem, idx) {
   diags.forEach(d => {
     const card = document.createElement('div');
     card.className = 'diag-card';
-    card.innerHTML = '<div class="diag-card-title">🎬 ' + d.title + '</div><div class="diag-card-body"></div><div class="diag-card-hint">' + (d.hint || '👆 动手试一试，看图形怎么变') + '</div>';
+    card.innerHTML = '<div class="diag-card-title">'+UI_ICON.svg('film',16)+' ' + d.title + '</div><div class="diag-card-body"></div><div class="diag-card-hint">' + (d.hint || UI_ICON.svg('pointer',14)+' 动手试一试，看图形怎么变') + '</div>';
     cardsEl.appendChild(card);
     try { d.fn(card.querySelector('.diag-card-body'), d.opts || {}); }
     catch (e) { console.error('diagram render error', d.title, e); }
@@ -10446,7 +10448,7 @@ function renderShapeExplore(container){
     let ex=cx+r*Math.cos(a), ey=cy-r*Math.sin(a);
     let pts=[]; for(let k=0;k<=20;k++){let dd=d*k/20,aa=Math.PI*dd/180;pts.push(`${(cx+ar*Math.cos(aa)).toFixed(1)},${(cy-ar*Math.sin(aa)).toFixed(1)}`);}
     let t=angType(d);
-    return `<svg viewBox="0 0 360 300" style="width:100%;max-width:360px">
+    return `<svg class="u-w100 u-xw360" viewBox="0 0 360 300">
       <!-- 量角器背景 -->
       <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="rgba(180,148,90,0.05)" stroke="#B4945A" stroke-width="1"/>
       <line x1="${cx-r}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#B4945A" stroke-width="0.8"/>
@@ -10473,19 +10475,18 @@ function renderShapeExplore(container){
     </svg>`;
   }
   container.innerHTML = `
-    <div style="margin:12px 0">
-      <div style="font-size:13px;color:var(--text-light);margin-bottom:8px;text-align:center">
-        👆 拖动下面滑块，观察角从<strong style="color:#4E8C6E">锐角</strong>→<strong style="color:#E57373">直角</strong>→<strong style="color:#C08A3E">钝角</strong>→<strong style="color:#6B7894">平角</strong>→<strong style="color:#3E4A63">周角</strong>的全过程
+    <div class="u-m12-0">
+      <div class="u-fs13 u-c-light u-mb8 u-tc">
+        ${UI_ICON.svg('pointer',14)}拖动下面滑块，观察角从<strong class="u-c-green">锐角</strong>→<strong class="u-c-coral">直角</strong>→<strong class="u-c-amber">钝角</strong>→<strong class="u-c-steel">平角</strong>→<strong class="u-c-ink">周角</strong>的全过程
       </div>
       <div id="shapeExploreSvg">${draw(45)}</div>
-      <div style="padding:8px 0">
+      <div class="u-p8-0">
         <input type="range" id="shapeExploreSlider" min="0" max="360" value="45" step="1"
-          style="width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,#4E8C6E 0%,#4E8C6E 25%,#E57373 25%,#E57373 25%,#C08A3E 25%,#C08A3E 50%,#6B7894 50%,#6B7894 50%,#B4945A 50%,#B4945A 100%,#3E4A63 100%);border-radius:4px;outline:none;cursor:pointer">
-        <input type="range" id="shapeExploreSlider2" min="0" max="360" value="45" step="1"
-          style="width:100%;height:8px;margin-top:6px;-webkit-appearance:none;appearance:none;background:transparent;border-radius:4px;outline:none;cursor:pointer;border:1px solid var(--border)">
+          class="angle-scale-range">
+        <input class="u-w100 u-h8 u-mt6 u-appear0 u-bg-trans u-r4 u-outline0 u-cp u-bd-border" type="range" id="shapeExploreSlider2" min="0" max="360" value="45" step="1">
       </div>
-      <div style="text-align:center;font-size:13px;color:var(--text-lighter);margin-top:4px">
-        💡 上面是精细滑块(步长1°)，下面是快速滑块
+      <div class="u-tc u-fs13 u-c-lighter u-mt4">
+        ${UI_ICON.svg('info',15)}上面是精细滑块(步长1°)，下面是快速滑块
       </div>
     </div>`;
   let svgEl=document.getElementById('shapeExploreSvg');
@@ -10730,9 +10731,9 @@ function exportWrongBookText() {
 // 考试系统：单元考 / 月考 / 期中 / 期末
 // ============================================================
 const EXAM_TYPES = [
-  { key: 'unit',  icon: '📖', name: '单元考试', desc: '针对单个单元的达标检测 · 100分' },
-  { key: 'month', icon: '🗓️', name: '月　考',   desc: '阶段性综合测试（累计单元）· 100分' },
-  { key: 'mid',   icon: '📗', name: '期中考试', desc: '半册内容综合测试 · 100分' },
+  { key: 'unit',  icon: UI_ICON.svg('book',20), name: '单元考试', desc: '针对单个单元的达标检测 · 100分' },
+  { key: 'month', icon: UI_ICON.svg('calendar',20), name: '月　考',   desc: '阶段性综合测试（累计单元）· 100分' },
+  { key: 'mid',   icon: UI_ICON.svg('book',20), name: '期中考试', desc: '半册内容综合测试 · 100分' },
   { key: 'final', icon: '', name: '期末考试', desc: '整册内容综合测试 · 100分' },
 ];
 
@@ -10841,11 +10842,11 @@ function renderExamCenter() {
   EXAM_TYPES.forEach(t => {
     html += `<div class="exam-type-card ${examState.type === t.key ? 'selected' : ''}" onclick="selectExamType('${t.key}')">
       <div class="exam-type-icon">${t.icon}</div>
-      <div style="flex:1">
+      <div class="u-f1">
         <div class="exam-type-name">${t.name}</div>
         <div class="exam-type-desc">${t.desc}</div>
       </div>
-      <div style="color:var(--success);font-size:18px;font-weight:700">${examState.type === t.key ? '✓' : '›'}</div>
+      <div class="u-c-ok u-fs18 u-fw700">${examState.type === t.key ? '✓' : '›'}</div>
     </div>`;
   });
   document.getElementById('examTypeList').innerHTML = html;
@@ -10905,7 +10906,7 @@ function renderExamCenter() {
   // 开始按钮文案
   if (hasType) {
     let t = EXAM_TYPES.find(x => x.key === examState.type);
-    document.getElementById('startExamBtn').textContent = `🚀 开始${t.name.replace(/\s/g, '')}`;
+    document.getElementById('startExamBtn').textContent = `开始${t.name.replace(/\s/g, '')}`;
   }
 }
 
@@ -11065,7 +11066,7 @@ function pickFromPool(pool, used, n, scorer, usedText) {
   let tplCount = {};
   const tplOf = q => (q.question || '')
     .replace(/\d+(\.\d+)?/g, '#')
-    .replace(/(.)\1+/gu, '$1')   // 折叠重复符号，如 🔟•••• 与 🔟•• 视为同一题型
+    .replace(/(.)\1+/gu, '$1')   // 折叠重复符号，如「●●●●」与「●●」视为同一题型
     .slice(0, 20);
   const run = (allowRepeat) => {
     while (out.length < n) {
@@ -12533,7 +12534,7 @@ function startExam() {
       let remain = Math.max(0, Math.ceil((state.examEndTime - Date.now()) / 1000));
       let m = Math.floor(remain / 60), s = remain % 60;
       let timerEl = document.getElementById('examTimer');
-      if (timerEl) timerEl.textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+      if (timerEl) timerEl.textContent = `用时 ${m}:${s.toString().padStart(2,'0')}`;
       if (remain <= 0) { clearInterval(state.examTimer); state.examTimer = null; finishQuiz(); }
     }, 1000);
 
@@ -12698,13 +12699,13 @@ function getQuestionTypeTag(q) {
   // v73：卷面上题型的判定以「真题分区」为准——填空题区里即使保留了选项，
   // 它在卷面上仍然是填空题；判断题是真题必有的独立题型，优先识别。
   if (q.judge) return '判断题';
-  if (q._section === 'calc') return '🧮 计算题';
-  if (q._section === 'app') return '📋 解决问题';
-  if (q._section === 'fill') return '✏️ 填空题';
+  if (q._section === 'calc') return '计算题';
+  if (q._section === 'app') return '解决问题';
+  if (q._section === 'fill') return '填空题';
   if (q._section === 'choice') return '选择题';
   if (q._section === 'judge') return '判断题';
-  if (q.type === 'fill') return '✏️ 填空题';
-  if (q.type === 'shape_choice') return '📐 图形题';
+  if (q.type === 'fill') return '填空题';
+  if (q.type === 'shape_choice') return '图形题';
   if (q.type === 'choice') return '选择题';
   return '练习题';
 }
@@ -13059,12 +13060,12 @@ function renderWrongBank() {
   let container = document.getElementById('wrongListContainer');
 
   if (wrongBank.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">错题库是空的，继续保持！</div></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">${UI_ICON.svg('bookmark',30)}</div><div class="empty-text">错题库是空的，继续保持！</div></div>`;
     return;
   }
 
   let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
-  let html = `<div style="font-size:13px;color:var(--text-light);margin-bottom:10px">共 ${wrongBank.length} 道错题</div>`;
+  let html = `<div class="u-fs13 u-c-light u-mb10">共 ${wrongBank.length} 道错题</div>`;
   html += '<div class="wrong-list">';
 
   wrongBank.forEach(w => {
@@ -13100,7 +13101,7 @@ function renderWrongBank() {
     html += `<div class="wrong-item">
       <div class="wrong-item-header">
         <span class="wrong-item-tag">${gradeNames[w.grade] || ''} · ${w.unitName || ''}</span>
-        <span style="font-size:11px;color:var(--text-lighter)">错${w.count || 1}次</span>
+        <span class="u-fs11 u-c-lighter">错${w.count || 1}次</span>
       </div>
       <div class="wrong-item-question">${qText}</div>
       <div class="wrong-item-answer">
@@ -13190,7 +13191,7 @@ function unitFormulaHtml(unit) {
     h += '<div class="wrong-fidx-card">'
       + '<span class="wrong-fidx-t">' + f.t + '</span>'
       + '<span class="wrong-fidx-f">' + f.f + '</span>'
-      + (f.warn ? '<span class="wrong-fidx-warn">⚠ ' + f.warn + '</span>' : '')
+      + (f.warn ? '<span class="wrong-fidx-warn">'+UI_ICON.svg('warn',13)+' ' + f.warn + '</span>' : '')
       + '</div>';
   });
   return h;
@@ -13288,6 +13289,10 @@ function renderStats() {
   let wrongBank = (data.wrong || []).filter(w => !w.module || w.module === '数学');
   let stats = data.stats || {};
 
+  // v82：正确率配色原本是两处各写一遍的三元表达式（阈值还散落在模板串里），
+  // 收敛成一个档位函数，配色交给 .acc-* 语义类（css/style.css）。
+  const accTier = a => (a >= 80 ? 'acc-hi' : a >= 60 ? 'acc-mid' : 'acc-lo');
+
   // 总览
   let totalDone = history.reduce((s, h) => s + h.total, 0);
   let totalCorrect = history.reduce((s, h) => s + h.score, 0);
@@ -13324,12 +13329,11 @@ function renderStats() {
   for (let g = 1; g <= 6; g++) {
     let s = stats[g] || { totalDone: 0, totalCorrect: 0 };
     let acc = s.totalDone > 0 ? Math.round(s.totalCorrect / s.totalDone * 100) : 0;
-    let accColor = acc >= 80 ? 'var(--success)' : acc >= 60 ? 'var(--warning)' : 'var(--accent)';
     tableHtml += `<tr>
       <td>${gradeNames[g]}</td>
       <td>${s.totalDone}</td>
       <td>${s.totalCorrect}</td>
-      <td style="color:${acc ? accColor : 'var(--text-lighter)'};font-weight:700">${s.totalDone > 0 ? acc + '%' : '—'}</td>
+      <td class="u-fw700 ${s.totalDone > 0 ? accTier(acc) : 'acc-none'}">${s.totalDone > 0 ? acc + '%' : '—'}</td>
     </tr>`;
   }
   tableHtml += '</tbody>';
@@ -13339,20 +13343,19 @@ function renderStats() {
   let recent = history.slice(0, 10);
   let recentEl = document.getElementById('recentScores');
   if (recent.length === 0) {
-    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon" style="color:var(--text-lighter)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></div><div class="empty-text">还没有练习记录</div></div>`;
+    recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon u-c-lighter"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></div><div class="empty-text">还没有练习记录</div></div>`;
   } else {
     recentEl.innerHTML = recent.map(r => {
       let rateLabel = r.accuracy >= 90 ? '优秀' : r.accuracy >= 60 ? '良好' : '加油';
-      let accColor = r.accuracy >= 80 ? 'var(--success)' : r.accuracy >= 60 ? 'var(--warning)' : 'var(--accent)';
       let date = new Date(r.time);
       let dateStr = `${date.getMonth()+1}/${date.getDate()}`;
-      return `<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px 16px">
-        <div style="font-size:12px;font-weight:700;color:var(--success);background:rgba(78,140,110,.12);padding:3px 10px;border-radius:99px">${rateLabel}</div>
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:14px">${gradeNames[r.grade]} · ${r.unitName}</div>
-          <div style="font-size:12px;color:var(--text-lighter)">${dateStr} · ${r.score}/${r.total}题</div>
+      return `<div class="card u-flex u-ac u-g10 u-p12-16">
+        <div class="u-fs12 u-fw700 u-c-ok u-bg-ok-s2 u-p3-10 u-rpill">${rateLabel}</div>
+        <div class="u-f1">
+          <div class="u-fw600 u-fs14">${gradeNames[r.grade]} · ${r.unitName}</div>
+          <div class="u-fs12 u-c-lighter">${dateStr} · ${r.score}/${r.total}题</div>
         </div>
-        <div style="color:${accColor};font-weight:700;font-size:18px">${r.accuracy}%</div>
+        <div class="u-fw700 u-fs18 ${accTier(r.accuracy)}">${r.accuracy}%</div>
       </div>`;
     }).join('');
   }

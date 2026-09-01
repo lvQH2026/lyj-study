@@ -74,7 +74,7 @@
 //         原先只列题干和错次，现补「你的答案 / 正确答案 + 分步讲解」。
 //      ④ 容错：generateSteps 兜底生成的步骤会打 q.stepsGeneric，difficultyScore 与
 //         questionDifficulty 不再把它当作「多步运算」的难度信号，避免 6:3:1 梯度被压平。
-const CACHE = 'lyj-shell-v81';
+const CACHE = 'lyj-shell-v82';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',

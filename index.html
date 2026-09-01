@@ -22,9 +22,9 @@
 
 <!-- 顶部导航栏 -->
 <div class="navbar">
-  <h1>📐 小学数学</h1>
+  <h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.1 5-5 2.1 2.1-5z"/></svg>小学数学 · 人教版</h1>
   <div class="nav-icons">
-    <button class="nav-icon-btn" onclick="goBack()" id="backBtn" style="display:none">←</button>
+    <button class="nav-icon-btn u-hide" onclick="goBack()" id="backBtn">←</button>
   </div>
 </div>
 
@@ -56,9 +56,9 @@
   </div>
 
   <div class="section-title">拍图上传试题</div>
-  <div class="card" style="text-align:center;padding:20px">
-    <p style="color:var(--text-light);font-size:13px;margin-bottom:12px">拍照或选择图片，AI 批改给分数，模拟真实老师手写批注。可下载批改后的试卷，错题自动加入错题库</p>
-    <button class="btn btn-primary" onclick="showPage('upload');document.getElementById('backBtn').style.display='block';document.getElementById('backBtn').onclick=()=>goHome();" style="max-width:200px;margin:0 auto">拍照 / 选择图片</button>
+  <div class="card u-tc u-p20">
+    <p class="u-c-light u-fs13 u-mb12">拍照或选择图片，AI 批改给分数，模拟真实老师手写批注。可下载批改后的试卷，错题自动加入错题库</p>
+    <button class="btn btn-primary u-xw200 u-m0a" onclick="showPage('upload');document.getElementById('backBtn').style.display='block';document.getElementById('backBtn').onclick=()=>goHome();">拍照 / 选择图片</button>
   </div>
 
   <div class="section-title">最近练习</div>
@@ -68,18 +68,18 @@
 
 <!-- ===== 同步学习 + 交互动画图解 ===== -->
 <div class="page" id="page-special-intro">
-  <div class="card" style="padding:18px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <span style="font-size:20px">📖</span>
-      <h2 id="specialIntroTitle" style="margin:0"></h2>
+  <div class="card u-p18">
+    <div class="u-flex u-ac u-g8 u-mb4">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h9a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 20a3 3 0 01-3-3"/></svg>
+      <h2 class="u-m0" id="specialIntroTitle"></h2>
     </div>
-    <p style="color:var(--text-light);font-size:13px;margin:0 0 14px" id="specialIntroDesc">先学知识点，再开始练习。</p>
+    <p class="u-c-light u-fs13 u-m0-0-14" id="specialIntroDesc">先学知识点，再开始练习。</p>
     <div id="studyCards"></div>
-    <div id="specialIntroImgWrap" style="display:none;text-align:center;margin-bottom:14px">
-      <img id="specialIntroImg" src="" alt="" style="max-width:100%;border-radius:10px;display:inline-block;border:1px solid var(--line);">
+    <div class="u-hide u-tc u-mb14" id="specialIntroImgWrap">
+      <img class="u-xw100 u-r10 u-inlblk u-bd-line" id="specialIntroImg" src="" alt="">
     </div>
     <div id="diagramCards"></div>
-    <button class="btn btn-primary" id="specialIntroBtn" style="margin-top:18px;max-width:240px">开始答题</button>
+    <button class="btn btn-primary u-mt18 u-xw240" id="specialIntroBtn">开始答题</button>
   </div>
 </div>
 <!-- ===== 单元列表页 ===== -->
@@ -94,18 +94,18 @@
 
 <!-- ===== 答题页 ===== -->
 <div class="page" id="page-quiz">
-  <div class="exam-paper-header" id="examPaperHeader" style="display:none">
+  <div class="exam-paper-header u-hide" id="examPaperHeader">
     <div class="exam-title" id="examPaperTitle"></div>
     <div class="exam-sub" id="examPaperSub"></div>
-    <div style="text-align:center;font-size:18px;font-weight:700;color:#cf1322;margin-top:4px" id="examTimer">⏱ 70:00</div>
-    <div style="text-align:center;margin-top:6px"><button class="prt-trigger-btn" onclick="printCurrentPaper()">🖨 打印本卷（A4）</button></div>
+    <div class="u-tc u-fs18 u-fw700 u-c-red2 u-mt4" id="examTimer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg> 70:00</div>
+    <div class="u-tc u-mt6"><button class="prt-trigger-btn" onclick="printCurrentPaper()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>打印本卷（A4）</button></div>
   </div>
   <div class="quiz-header">
     <div class="quiz-progress" id="quizProgress">第 1 / 10 题</div>
     <div class="quiz-score" id="quizScore">★ 0</div>
   </div>
   <div class="progress-bar">
-    <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
+    <div class="progress-bar-fill u-w10" id="progressFill"></div>
   </div>
   <div class="quiz-nav" id="quizNav"></div>
   <div class="question-card" id="questionCard">
@@ -113,7 +113,7 @@
   </div>
   <div class="quiz-bottom" id="quizBottom">
     <div class="feedback" id="feedback"></div>
-    <div style="margin-top:12px" id="quizActions">
+    <div class="u-mt12" id="quizActions">
       <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">提交答案</button>
     </div>
   </div>
@@ -131,7 +131,7 @@
     <div class="result-stats" id="resultStats">
       <div class="result-stat"><div class="num correct" id="resultCorrect">0</div><div class="label">答对</div></div>
       <div class="result-stat"><div class="num wrong" id="resultWrong">0</div><div class="label">答错</div></div>
-      <div class="result-stat"><div class="num" id="resultAccuracy" style="color:var(--primary)">0%</div><div class="label">正确率</div></div>
+      <div class="result-stat"><div class="num u-c-primary" id="resultAccuracy">0%</div><div class="label">正确率</div></div>
       <div class="result-stat"><div class="num" id="resultTime">0秒</div><div class="label">用时</div></div>
     </div>
     <div class="teacher-comment" id="teacherComment"></div>
@@ -145,13 +145,13 @@
   </div>
 
   <!-- 第二步：答案与解析页 -->
-  <div class="card result-card" id="examAnswerKey" style="display:none;text-align:left">
+  <div class="card result-card u-hide u-tl" id="examAnswerKey">
     <div class="section-title">答案与解析</div>
     <div id="examAnswerKeyBody"></div>
     <div class="btn-group">
       <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()">重新考试</button>
       <button class="btn btn-outline" onclick="backToStudy()">返回单元学习</button>
-      <button class="btn btn-outline" onclick="printCurrentPaper()">🖨 打印试卷</button>
+      <button class="btn btn-outline" onclick="printCurrentPaper()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>打印试卷</button>
     </div>
   </div>
 </div>
@@ -159,7 +159,7 @@
 <!-- ===== 错题库页 ===== -->
 <div class="page" id="page-wrong">
   <div class="section-title">错题库</div>
-  <div class="btn-group" style="margin-bottom:16px">
+  <div class="btn-group u-mb16">
     <button class="btn btn-primary" onclick="startWrongReview()">开始错题重练</button>
     <button class="btn btn-outline" onclick="clearAllWrong()">清空错题</button>
   </div>
@@ -171,7 +171,7 @@
   <div class="section-title">拍图上传试题</div>
 
   <div class="card">
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px">选择学科</div>
+    <div class="u-fs14 u-fw600 u-mb10">选择学科</div>
     <div class="gz-subs">
       <button class="gz-sub-btn active" data-sub="数学">数学</button>
       <button class="gz-sub-btn" data-sub="语文">语文</button>
@@ -179,34 +179,34 @@
     </div>
   </div>
 
-  <div class="card" style="text-align:center">
+  <div class="card u-tc">
     <div id="uploadArea" class="gz-drop" onclick="document.getElementById('fileInput').click()">
       <div class="gz-drop-icon">
         <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
       </div>
-      <div style="font-size:15px;font-weight:600;color:var(--text)">拍照或选择图片</div>
-      <div style="font-size:12px;color:var(--text-lighter);margin-top:4px">支持拍照、相册选择，拍已做完的卷子</div>
+      <div class="u-fs15 u-fw600 u-c-text">拍照或选择图片</div>
+      <div class="u-fs12 u-c-lighter u-mt4">支持拍照、相册选择，拍已做完的卷子</div>
     </div>
-    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
+    <input class="u-hide" type="file" id="fileInput" accept="image/*" capture="environment">
   </div>
 
   <div id="gradeStatus"></div>
 
-  <div class="card" id="gradeCanvasWrap" style="display:none;padding:12px">
-    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text-light)">批改后的试卷</div>
+  <div class="card u-hide u-p12" id="gradeCanvasWrap">
+    <div class="u-fs13 u-fw600 u-mb8 u-c-light">批改后的试卷</div>
     <div id="gradeCanvasHolder"></div>
   </div>
 
   <div id="gradeResult"></div>
 
-  <div class="card" style="background:#FFFBE6;border:1px solid #FFE58F">
-    <div style="font-size:13px;color:var(--text-light);line-height:1.8">
+  <div class="card u-bg-warnpale u-bd-warnpale">
+    <div class="u-fs13 u-c-light u-lh18">
       <strong>使用说明：</strong><br>
       1. 先选学科，再拍下<strong>已经做完</strong>的卷子或作业<br>
       2. AI 老师逐题批改、判分，并在图上画红勾 / 红叉 / 圈注 / 旁批<br>
       3. 右上角是分数印章，底部是老师总评语<br>
       4. 点「下载批改后的试卷」保存 PNG，点「加入错题库」把错题收进去<br>
-      <span style="color:var(--accent)">拍照小技巧：光线均匀、拍正、把整页拍全，批改更准</span>
+      <span class="u-c-accent">拍照小技巧：光线均匀、拍正、把整页拍全，批改更准</span>
     </div>
   </div>
 
@@ -218,12 +218,12 @@
   <div class="section-title">考试中心</div>
 
   <div class="card">
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px">选择考试类型</div>
+    <div class="u-fs14 u-fw600 u-mb10">选择考试类型</div>
     <div id="examTypeList"></div>
   </div>
 
-  <div class="card" id="examConfigCard" style="display:none">
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px">考试设置</div>
+  <div class="card u-hide" id="examConfigCard">
+    <div class="u-fs14 u-fw600 u-mb10">考试设置</div>
     <div class="field-row">
       <span class="field-label">年级</span>
       <div id="examGradeBtns" class="chip-group"></div>
@@ -235,52 +235,52 @@
         <button class="chip" data-sem="2" onclick="selectExamSemester(2)">下册</button>
       </div>
     </div>
-    <div class="field-row" id="examUnitRow" style="display:none">
+    <div class="field-row u-hide" id="examUnitRow">
       <span class="field-label">单元</span>
       <div id="examUnitBtns" class="chip-group"></div>
     </div>
-    <div class="field-row" id="examMonthRow" style="display:none">
+    <div class="field-row u-hide" id="examMonthRow">
       <span class="field-label">月考次数</span>
       <div id="examMonthBtns" class="chip-group"></div>
     </div>
   </div>
 
-  <button class="btn btn-primary" id="startExamBtn" style="display:none" onclick="startExam()">🚀 开始考试</button>
+  <button class="btn btn-primary u-hide" id="startExamBtn" onclick="startExam()">开始考试</button>
 
-  <div class="card" style="background:#F6FFED;border:1px solid #B7EB8F">
-    <div style="font-size:13px;color:var(--text-light);line-height:1.8">
+  <div class="card u-bg-ok u-bd-ok">
+    <div class="u-fs13 u-c-light u-lh18">
       <strong>试卷说明：</strong><br>
       • 单元考试：测一个单元，30题满分100分<br>
       • 月考试：阶段综合（前几单元），30题满分100分<br>
       • 期中考试：半册综合，30题满分100分<br>
       • 期末考试：全册综合，30题满分100分<br>
-      <span style="color:var(--success)">题型含填空、选择、计算、应用题，按真实试卷结构</span>
+      <span class="u-c-ok">题型含填空、选择、计算、应用题，按真实试卷结构</span>
     </div>
   </div>
 </div>
 
 </div><!-- /mathRoot -->
-<div id="englishRoot" style="display:none">
+<div class="u-hide" id="englishRoot">
   <div class="navbar eng-navbar">
-    <button class="nav-icon-btn" id="engBackBtn" onclick="engGoBack()" style="display:none">←</button>
+    <button class="nav-icon-btn u-hide" id="engBackBtn" onclick="engGoBack()">←</button>
     <h1 id="engNavTitle">英语 · 学习中心</h1>
   </div>
-  <div id="engBody" style="padding:14px"></div>
+  <div class="u-p14" id="engBody"></div>
 </div><!-- /englishRoot -->
-<div id="chineseRoot" style="display:none">
+<div class="u-hide" id="chineseRoot">
   <div class="navbar">
-    <button class="nav-icon-btn" id="cnBackBtn" onclick="CN.goHome()" style="display:none">&larr;</button>
-    <h1>📖 小学语文</h1>
+    <button class="nav-icon-btn u-hide" id="cnBackBtn" onclick="CN.goHome()">&larr;</button>
+    <h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h9a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 20a3 3 0 01-3-3"/></svg>小学语文 · 统编版</h1>
   </div>
 
   <!-- 首页 -->
   <div class="page active" id="cnPageHome">
-    <div id="cnHomeContent" style="padding:14px"></div>
+    <div class="u-p14" id="cnHomeContent"></div>
   </div>
 
   <!-- 同步学习页 -->
   <div class="page" id="cnPageLearn">
-    <div id="cnLearnContent" style="padding:14px"></div>
+    <div class="u-p14" id="cnLearnContent"></div>
   </div>
 
   <!-- 答题页 -->
@@ -290,7 +290,7 @@
       <div class="quiz-score" id="cnQuizScore">★ 0</div>
     </div>
     <div class="progress-bar">
-      <div class="progress-bar-fill" id="cnProgressFill" style="width:10%"></div>
+      <div class="progress-bar-fill u-w10" id="cnProgressFill"></div>
     </div>
     <div class="quiz-nav" id="cnQuizNav"></div>
     <div class="question-card" id="cnQuestionCard"></div>
@@ -311,7 +311,7 @@
       <div class="result-stats" id="cnResultStats">
         <div class="result-stat"><div class="num correct" id="cnResultCorrect">0</div><div class="label">答对</div></div>
         <div class="result-stat"><div class="num wrong" id="cnResultWrong">0</div><div class="label">答错</div></div>
-        <div class="result-stat"><div class="num" id="cnResultAccuracy" style="color:var(--primary)">0%</div><div class="label">正确率</div></div>
+        <div class="result-stat"><div class="num u-c-primary" id="cnResultAccuracy">0%</div><div class="label">正确率</div></div>
         <div class="result-stat"><div class="num" id="cnResultTime">0秒</div><div class="label">用时</div></div>
       </div>
       <div class="teacher-comment" id="cnTeacherComment"></div>
@@ -326,13 +326,13 @@
     </div>
 
     <!-- 第二步：答案与解析页 -->
-    <div class="card result-card" id="cnExamAnswerKey" style="display:none;text-align:left">
+    <div class="card result-card u-hide u-tl" id="cnExamAnswerKey">
       <div class="section-title">答案与解析</div>
       <div id="cnExamAnswerKeyBody"></div>
       <div class="btn-group">
         <button class="btn btn-primary" id="cnRetryBtn" onclick="CN.replay()">重新考试</button>
         <button class="btn btn-outline" onclick="CN.backToStudy()">返回单元学习</button>
-        <button class="btn btn-outline" onclick="CN.printPaper()">🖨 打印试卷</button>
+        <button class="btn btn-outline" onclick="CN.printPaper()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>打印试卷</button>
       </div>
     </div>
   </div>
@@ -340,7 +340,7 @@
   <!-- 错题库页 -->
   <div class="page" id="cnPageWrong">
     <div class="section-title">语文错题库</div>
-    <div class="btn-group" style="margin-bottom:16px">
+    <div class="btn-group u-mb16">
       <button class="btn btn-primary" onclick="CN.startWrongReview()">开始错题重练</button>
       <button class="btn btn-outline" onclick="CN.clearWrong()">清空语文错题</button>
     </div>
@@ -349,7 +349,7 @@
 
   <!-- 考试中心页（v79：语文接入全局「练习」tab） -->
   <div class="page" id="cnPageExam">
-    <div id="cnExamContent" style="padding:14px"></div>
+    <div class="u-p14" id="cnExamContent"></div>
   </div>
 </div><!-- /chineseRoot -->
 
@@ -357,46 +357,46 @@
      全局页（v79）：三科共用 —— 统计 / 家长后台
      挂在各模块 Root 之外，切到这里时三个 Root 一并隐藏。
      ============================================================ -->
-<div id="globalPages" style="display:none">
+<div class="u-hide" id="globalPages">
 
   <!-- 统计页 -->
   <div class="page" id="page-stats">
-    <div class="navbar"><h1>📊 学习统计</h1></div>
+    <div class="navbar"><h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg>学习统计</h1></div>
     <div class="section-title">学习统计</div>
     <div class="stats-overview" id="statsOverview"></div>
-    <div class="section-title">📋 各年级详情</div>
+    <div class="section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>各年级详情</div>
     <div class="card">
       <table class="grade-stats-table" id="gradeStatsTable"></table>
     </div>
     <div class="section-title">近期成绩</div>
     <div id="recentScores"></div>
 
-    <div class="section-title">💾 数据备份与同步</div>
+    <div class="section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3"/><path d="M8 14h8v7H8z"/></svg>数据备份与同步</div>
     <div class="card">
-      <div style="font-size:13px;color:var(--text-light);line-height:1.7;margin-bottom:12px">
+      <div class="u-fs13 u-c-light u-lh17 u-mb12">
         学习记录保存在本机浏览器里。换手机或想在电脑上继续练，先在这里<strong>导出</strong>，再到另一台设备<strong>导入</strong>即可。
       </div>
-      <button class="btn btn-primary" style="margin-bottom:10px" onclick="exportUserData()">⬇️ 导出学习数据（JSON）</button>
-      <button class="btn btn-outline" style="margin-bottom:10px" onclick="document.getElementById(&#39;importFile&#39;).click()">⬆️ 导入学习数据</button>
-      <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importUserData(event)">
-      <button class="btn btn-outline" onclick="exportWrongBookText()">📄 导出错题本（文本）</button>
+      <button class="btn btn-primary u-mb10" onclick="exportUserData()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>导出学习数据（备份文件）</button>
+      <button class="btn btn-outline u-mb10" onclick="document.getElementById(&#39;importFile&#39;).click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17V5"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></svg>导入学习数据</button>
+      <input class="u-hide" type="file" id="importFile" accept=".json,application/json" onchange="importUserData(event)">
+      <button class="btn btn-outline" onclick="exportWrongBookText()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V9z"/><path d="M13 3v6h6"/></svg>导出错题本（文本）</button>
     </div>
   </div>
 
   <!-- 家长后台页 -->
   <div class="page" id="page-parent">
     <div class="navbar"><h1>家长后台</h1></div>
-    <div style="padding:12px">
-      <div id="deviceCred" style="background:#e6f0ff;border:1px solid #b3d4ff;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#1d4ed8">
-        <div style="font-weight:700;margin-bottom:6px">📱 吕泳冀 · 学习凭证</div>
+    <div class="u-p12">
+      <div class="u-bg-blue u-bd-blue u-r10 u-p12 u-mb12 u-fs13 u-c-blue" id="deviceCred">
+        <div class="u-fw700 u-mb6">吕泳冀 · 学习凭证</div>
         <div id="deviceCredBody">…</div>
-        <div style="font-size:12px;color:#475569;margin-top:6px">所有设备自动共享此身份。家长远程查看：打开本应用 → 点「家长」→ 用学习ID和口令登录。</div>
+        <div class="u-fs12 u-c-slate2 u-mt6">所有设备自动共享此身份。家长远程查看：打开本应用 → 点「家长」→ 用学习ID和口令登录。</div>
       </div>
-      <div id="parentLogin" style="display:none;background:#fff;border-radius:10px;padding:12px;margin-bottom:12px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:8px">查看孩子的学习情况</div>
-        <input id="parentId" placeholder="学习ID（如 LYJ3X9ZQ）" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="parentPw" type="password" placeholder="口令" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <button class="btn btn-primary" style="width:100%" onclick="parentLogin()">查看</button>
+      <div class="u-hide u-bg-w u-r10 u-p12 u-mb12" id="parentLogin">
+        <div class="u-fs14 u-fw700 u-mb8">查看孩子的学习情况</div>
+        <input class="u-w100 u-p8 u-mb8 u-bd u-r8 u-bbox" id="parentId" placeholder="学习ID（如 LYJ3X9ZQ）">
+        <input class="u-w100 u-p8 u-mb8 u-bd u-r8 u-bbox" id="parentPw" type="password" placeholder="口令">
+        <button class="btn btn-primary u-w100" onclick="parentLogin()">查看</button>
       </div>
       <div id="parentResult"></div>
     </div>
@@ -410,7 +410,7 @@
      ============================================================ -->
 <div class="bottom-nav" id="globalNav">
   <button class="nav-tab active" data-page="home" onclick="switchTab('home')">
-    <span class="tab-icon">🏠</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg></span>
     <span class="tab-label">首页</span>
   </button>
   <button class="nav-tab" data-page="exam" onclick="switchTab('exam')">
@@ -418,7 +418,7 @@
     <span class="tab-label">练习</span>
   </button>
   <button class="nav-tab" data-page="wrong" onclick="switchTab('wrong')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a1 1 0 011 1v17l-6-4-6 4V4a1 1 0 011-1z"/></svg></span>
     <span class="tab-label">错题</span>
   </button>
   <button class="nav-tab" data-page="stats" onclick="switchTab('stats')">
@@ -426,7 +426,7 @@
     <span class="tab-label">统计</span>
   </button>
   <button class="nav-tab" data-page="parent" onclick="switchTab('parent')">
-    <span class="tab-icon">👨‍👩‍👦</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M17 4.5a3.5 3.5 0 010 6.9"/><path d="M19 20v-1a4 4 0 00-2.4-3.7"/></svg></span>
     <span class="tab-label">家长</span>
   </button>
 </div>

@@ -3025,8 +3025,8 @@ function cn5x8_pool() {
     html += '<div class="section-title">选择年级</div>';
     html += '<div class="grade-grid">';
     [4, 5, 6].forEach(function (g) {
-      const active = g === cnState.grade ? ' style="background:var(--primary);color:#fff;border-color:var(--primary)"' : '';
-      html += '<button class="grade-btn' + (g === cnState.grade ? ' active' : '') + '" onclick="CN.selectGrade(' + g + ')"' + active + '>' + g + '年级</button>';
+      // v82：选中态交给 .grade-btn.active（css/style.css 已正式定义），不再拼行内样式
+      html += '<button class="grade-btn' + (g === cnState.grade ? ' active' : '') + '" onclick="CN.selectGrade(' + g + ')">' + g + '年级</button>';
     });
     html += '</div>';
 
@@ -3034,14 +3034,14 @@ function cn5x8_pool() {
     const units = CN_DATA[cnState.grade] || [];
 
     function cnUnitCard(u, i) {
-      let c = '<div class="card" style="margin-bottom:10px;padding:12px">';
-      c += '<div style="font-size:15px;font-weight:600;margin-bottom:6px">' + u.name + '</div>';
+      let c = '<div class="card u-mb10 u-p12">';
+      c += '<div class="u-fs15 u-fw600 u-mb6">' + u.name + '</div>';
       if (u.lessons && u.lessons.length) {
-        c += '<div style="font-size:11px;color:var(--text-light);margin-bottom:8px;line-height:1.8">' + u.lessons.join('　') + '</div>';
+        c += '<div class="u-fs11 u-c-light u-mb8 u-lh18">' + u.lessons.join('　') + '</div>';
       }
-      c += '<div style="display:flex;gap:8px">';
-      c += '<button class="btn btn-primary" style="flex:1;padding:10px;font-size:13px" onclick="CN.showLearn(' + i + ')">同步学习</button>';
-      c += '<button class="btn btn-outline" style="flex:1;padding:10px;font-size:13px" onclick="CN.beginQuiz(' + i + ')">练习 ' + PRAC_N + ' 题</button>';
+      c += '<div class="u-flex u-g8">';
+      c += '<button class="btn btn-primary u-f1 u-p10 u-fs13" onclick="CN.showLearn(' + i + ')">同步学习</button>';
+      c += '<button class="btn btn-outline u-f1 u-p10 u-fs13" onclick="CN.beginQuiz(' + i + ')">练习 ' + PRAC_N + ' 题</button>';
       c += '</div></div>';
       return c;
     }
@@ -3065,20 +3065,20 @@ function cn5x8_pool() {
       html += '</div>';
       // 考试中心（六上/六下 期中期末 + 单元考试）
       html += '<div class="section-title">考试中心 · 真实试卷</div>';
-      html += '<div class="card" style="padding:12px;margin-bottom:10px">';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
-      html += '<button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px" onclick="CN.beginExam(\'mid\',\'上\')">' + cnState.grade + '上期中</button>';
-      html += '<button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px" onclick="CN.beginExam(\'final\',\'上\')">' + cnState.grade + '上期末</button>';
-      html += '<button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px" onclick="CN.beginExam(\'mid\',\'下\')">' + cnState.grade + '下期中</button>';
-      html += '<button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px" onclick="CN.beginExam(\'final\',\'下\')">' + cnState.grade + '下期末</button>';
+      html += '<div class="card u-p12 u-mb10">';
+      html += '<div class="u-flex u-wrap u-g8 u-mb10">';
+      html += '<button class="btn btn-primary u-f1 u-p12 u-fs14" onclick="CN.beginExam(\'mid\',\'上\')">' + cnState.grade + '上期中</button>';
+      html += '<button class="btn btn-primary u-f1 u-p12 u-fs14" onclick="CN.beginExam(\'final\',\'上\')">' + cnState.grade + '上期末</button>';
+      html += '<button class="btn btn-primary u-f1 u-p12 u-fs14" onclick="CN.beginExam(\'mid\',\'下\')">' + cnState.grade + '下期中</button>';
+      html += '<button class="btn btn-primary u-f1 u-p12 u-fs14" onclick="CN.beginExam(\'final\',\'下\')">' + cnState.grade + '下期末</button>';
       html += '</div>';
-      html += '<div style="font-size:12px;color:var(--text-lighter);margin-bottom:6px">单元考试（选一个单元）：</div>';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      html += '<div class="u-fs12 u-c-lighter u-mb6">单元考试（选一个单元）：</div>';
+      html += '<div class="u-flex u-wrap u-g6">';
       units.forEach(function (u, i) {
-        html += '<button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="CN.beginExam(\'unit\',' + i + ')">' + (u.group === '\u4E13\u9879' ? '' : (u.term === '\u4E0A' ? '\u4E0A' : '\u4E0B') + u.unit + '\u5143 ') + u.name.replace(/年级[上下]册·/, '').replace(/^专项·/, '') + '</button>';
+        html += '<button class="btn btn-outline u-p6-10 u-fs12" onclick="CN.beginExam(\'unit\',' + i + ')">' + (u.group === '\u4E13\u9879' ? '' : (u.term === '\u4E0A' ? '\u4E0A' : '\u4E0B') + u.unit + '\u5143 ') + u.name.replace(/年级[上下]册·/, '').replace(/^专项·/, '') + '</button>';
       });
       html += '</div>';
-      html += '<div style="font-size:11px;color:var(--text-lighter);margin-top:8px">试卷按真实结构出题：基础知识 · 阅读理解 · 积累与运用，满分100分，内容随机生成</div>';
+      html += '<div class="u-fs11 u-c-lighter u-mt8">试卷按真实结构出题：基础知识 · 阅读理解 · 积累与运用，满分100分，内容随机生成</div>';
       html += '</div>';
     } else {
       // 4/5年级 · 知识板块
@@ -3090,18 +3090,18 @@ function cn5x8_pool() {
       html += '</div>';
       // 考试中心
       html += '<div class="section-title">考试中心 · 真实试卷</div>';
-      html += '<div class="card" style="padding:12px;margin-bottom:10px">';
-      html += '<div style="display:flex;gap:8px;margin-bottom:10px">';
-      html += '<button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px" onclick="CN.beginExam(\'mid\')">期中考试</button>';
-      html += '<button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px" onclick="CN.beginExam(\'final\')">期末考试</button>';
+      html += '<div class="card u-p12 u-mb10">';
+      html += '<div class="u-flex u-g8 u-mb10">';
+      html += '<button class="btn btn-primary u-f1 u-p12 u-fs14" onclick="CN.beginExam(\'mid\')">期中考试</button>';
+      html += '<button class="btn btn-primary u-f1 u-p12 u-fs14" onclick="CN.beginExam(\'final\')">期末考试</button>';
       html += '</div>';
-      html += '<div style="font-size:12px;color:var(--text-lighter);margin-bottom:6px">单元考试（选一个板块）：</div>';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      html += '<div class="u-fs12 u-c-lighter u-mb6">单元考试（选一个板块）：</div>';
+      html += '<div class="u-flex u-wrap u-g6">';
       units.forEach(function (u, i) {
-        html += '<button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="CN.beginExam(\'unit\',' + i + ')">' + u.name + '</button>';
+        html += '<button class="btn btn-outline u-p6-10 u-fs12" onclick="CN.beginExam(\'unit\',' + i + ')">' + u.name + '</button>';
       });
       html += '</div>';
-      html += '<div style="font-size:11px;color:var(--text-lighter);margin-top:8px">试卷按真实结构出题：基础知识 · 阅读理解 · 积累与运用，满分100分，内容随机生成</div>';
+      html += '<div class="u-fs11 u-c-lighter u-mt8">试卷按真实结构出题：基础知识 · 阅读理解 · 积累与运用，满分100分，内容随机生成</div>';
       html += '</div>';
     }
 
@@ -3124,28 +3124,28 @@ function cn5x8_pool() {
     window.CN._lastUnitIdx = idx;
 
     let html = '';
-    html += '<div class="card" style="padding:14px;margin-bottom:12px;background:linear-gradient(135deg,#3E4A63,#2E3648);color:#fff">';
-    html += '<div style="font-size:12px;opacity:.8;margin-bottom:4px">' + cnState.grade + '年级 · 同步学习</div>';
-    html += '<div style="font-size:20px;font-weight:700">' + unit.name + '</div>';
+    html += '<div class="card u-p14 u-mb12 u-bg-grad-dark u-c-white">';
+    html += '<div class="u-fs12 u-op80 u-mb4">' + cnState.grade + '年级 · 同步学习</div>';
+    html += '<div class="u-fs20 u-fw700">' + unit.name + '</div>';
     html += '</div>';
 
     // 本单元课文列表（课本同步单元）
     if (unit.lessons && unit.lessons.length) {
-      html += '<div class="card" style="padding:12px;margin-bottom:12px">';
-      html += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">本单元课文</div>';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      html += '<div class="card u-p12 u-mb12">';
+      html += '<div class="u-fs12 u-fw700 u-c-gold u-mb8">本单元课文</div>';
+      html += '<div class="u-flex u-wrap u-g6">';
       unit.lessons.forEach(function (l) {
-        html += '<span style="display:inline-block;padding:5px 10px;font-size:12px;background:rgba(180,148,90,.08);border:1px solid rgba(180,148,90,.3);border-radius:20px;color:#6d5c35">' + l + '</span>';
+        html += '<span class="u-inlblk u-p5-10 u-fs12 u-bg-gold-s u-bd-gold-s u-r20 u-c-brown">' + l + '</span>';
       });
       html += '</div></div>';
     }
 
     // 知识点总结
     html += '<div class="section-title">知识点总结</div>';
-    html += '<div class="card" style="padding:14px;margin-bottom:12px">';
+    html += '<div class="card u-p14 u-mb12">';
     (unit.summary || []).forEach(function (s, i) {
-      html += '<div style="display:flex;gap:8px;margin-bottom:10px;font-size:14px;line-height:1.7">';
-      html += '<span style="color:var(--gold);font-weight:700;flex-shrink:0">' + (i + 1) + '.</span>';
+      html += '<div class="u-flex u-g8 u-mb10 u-fs14 u-lh17">';
+      html += '<span class="u-c-gold u-fw700 u-noshrink">' + (i + 1) + '.</span>';
       html += '<span>' + s + '</span></div>';
     });
     html += '</div>';
@@ -3156,28 +3156,28 @@ function cn5x8_pool() {
       unit.fidx.forEach(function (fi) {
         const fm = CN_FORMULAS[fi];
         if (!fm) return;
-        html += '<div class="card" style="padding:12px;margin-bottom:10px;border-left:3px solid var(--gold)">';
-        html += '<div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px">' + fm.t + '</div>';
-        html += '<div style="font-size:13px;line-height:1.8;background:rgba(180,148,90,.08);border-radius:8px;padding:8px 10px">' + fm.f + '</div>';
+        html += '<div class="card u-p12 u-mb10 u-bl-gold3">';
+        html += '<div class="u-fs13 u-fw700 u-c-gold u-mb6">' + fm.t + '</div>';
+        html += '<div class="u-fs13 u-lh18 u-bg-gold-s u-r8 u-p8-10">' + fm.f + '</div>';
         html += '</div>';
       });
     }
 
     // 全部公式速查
     html += '<div class="section-title">万能答题公式速查</div>';
-    html += '<details class="card" style="padding:12px;margin-bottom:12px">';
-    html += '<summary style="font-size:14px;font-weight:600;cursor:pointer;color:var(--primary)">展开全部 12 个万能答题公式</summary>';
-    html += '<div style="margin-top:10px">';
+    html += '<details class="card u-p12 u-mb12">';
+    html += '<summary class="u-fs14 u-fw600 u-cp u-c-primary">展开全部 12 个万能答题公式</summary>';
+    html += '<div class="u-mt10">';
     CN_FORMULAS.forEach(function (fm) {
-      html += '<div style="margin-bottom:10px;padding:10px;background:rgba(180,148,90,.06);border-radius:8px">';
-      html += '<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px">' + fm.t + '</div>';
-      html += '<div style="font-size:12px;line-height:1.7">' + fm.f + '</div>';
+      html += '<div class="u-mb10 u-p10 u-bg-gold-s06 u-r8">';
+      html += '<div class="u-fs12 u-fw700 u-c-gold u-mb4">' + fm.t + '</div>';
+      html += '<div class="u-fs12 u-lh17">' + fm.f + '</div>';
       html += '</div>';
     });
     html += '</div></details>';
 
     // 开始练习按钮
-    html += '<button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:4px" onclick="CN.beginQuiz(' + idx + ')">开始练习（' + PRAC_N + ' 题）</button>';
+    html += '<button class="btn btn-primary u-w100 u-p14 u-fs15 u-mt4" onclick="CN.beginQuiz(' + idx + ')">开始练习（' + PRAC_N + ' 题）</button>';
 
     el('cnBackBtn').style.display = 'block';
     el('cnBackBtn').onclick = cnGoHome;
@@ -3473,36 +3473,37 @@ function cn5x8_pool() {
     // 试卷结构横幅
     if (q.paper) {
       if (q.idx === 0) {
-        html += '<div style="text-align:center;margin-bottom:12px;padding:12px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(135deg,#3E4A63,#2E3648);color:#fff">';
-        html += '<div style="font-size:16px;font-weight:700;letter-spacing:2px">' + q.paper.title + '</div>';
-        html += '<div style="font-size:11px;opacity:.85;margin-top:4px">满分 100 分 · 内容随机生成 · 按真实试卷结构命题</div>';
+        html += '<div class="u-tc u-mb12 u-p12 u-bd-border u-r12 u-bg-grad-dark u-c-white">';
+        html += '<div class="u-fs16 u-fw700 u-ls2">' + q.paper.title + '</div>';
+        html += '<div class="u-fs11 u-op85 u-mt4">满分 100 分 · 内容随机生成 · 按真实试卷结构命题</div>';
         html += '</div>';
       }
       const prev = q.questions[q.idx - 1];
       if (q.idx === 0 || !prev || prev.paperSection !== item.paperSection) {
-        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
-        html += '<span style="display:inline-block;width:4px;height:18px;background:var(--gold);border-radius:2px"></span>';
-        html += '<span style="font-size:14px;font-weight:700;color:var(--gold)">' + (item.paperSection || '') + '</span></div>';
+        html += '<div class="u-flex u-ac u-g8 u-mb12">';
+        html += '<span class="u-inlblk u-w4 u-h18 u-bg-gold2 u-r2"></span>';
+        html += '<span class="u-fs14 u-fw700 u-c-gold">' + (item.paperSection || '') + '</span></div>';
       }
     }
     // 阅读理解段落
     if (item.passage) {
-      html += '<div style="background:#F3EEE3;border:1px solid #ECEAE4;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;line-height:1.8;max-height:160px;overflow-y:auto">' + item.passage + '</div>';
+      html += '<div class="u-bg-sand u-bd-mist u-r10 u-p12 u-mb12 u-fs13 u-lh18 u-xh160 u-ovy">' + item.passage + '</div>';
     }
-    html += '<div style="font-size:16px;font-weight:600;margin-bottom:14px;line-height:1.6">' + item.question + '</div>';
+    html += '<div class="u-fs16 u-fw600 u-mb14 u-lh16">' + item.question + '</div>';
 
     if (item.type === 'choice' || item.type === 'judge') {
       html += '<div class="option-group">';
       item.options.forEach(function (opt, i) {
         const sel = q.userAnswers[q.idx] === opt;
-        html += '<button class="option-btn' + (sel ? ' selected' : '') + '" onclick="CN.selectOption(' + i + ')" style="display:block;width:100%;text-align:left;margin-bottom:8px;padding:12px;border-radius:10px;font-size:15px;border:2px solid ' + (sel ? 'var(--primary)' : 'var(--border)') + ';background:' + (sel ? 'rgba(62,74,99,.06)' : '#fff') + '">';
+        // v82：外观收进 .cn-option-btn（css/style.css），选中态走已有的 .selected
+        html += '<button class="option-btn cn-option-btn' + (sel ? ' selected' : '') + '" onclick="CN.selectOption(' + i + ')">';
         html += String.fromCharCode(65 + i) + '. ' + opt;
         html += '</button>';
       });
       html += '</div>';
     } else if (item.type === 'fill') {
       const val = q.userAnswers[q.idx] || '';
-      html += '<input type="text" id="cnFillInput" value="' + (typeof val === 'string' ? val.replace(/"/g, '&quot;') : '') + '" placeholder="请输入答案" style="width:100%;padding:12px;font-size:16px;border:2px solid var(--border);border-radius:10px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'" onkeydown="if(event.key===\'Enter\')CN.submit()">';
+      html += '<input class="u-w100 u-p12 u-fs16 u-bd2 u-r10 u-outline0 u-bbox" type="text" id="cnFillInput" value="' + (typeof val === 'string' ? val.replace(/"/g, '&quot;') : '') + '" placeholder="请输入答案" onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'" onkeydown="if(event.key===\'Enter\')CN.submit()">';
     }
 
     el('cnQuestionCard').innerHTML = html;
@@ -3511,8 +3512,8 @@ function cn5x8_pool() {
     renderCnQuizNav();
 
     // 按钮区
-    let btnHtml = '<div id="cnFeedback" style="min-height:24px;margin-bottom:10px;font-size:14px"></div>';
-    btnHtml += '<button class="btn btn-primary" id="cnSubmitBtn" onclick="CN.submit()" style="width:100%">' + (q.paper ? '交本题' : '提交答案') + '</button>';
+    let btnHtml = '<div class="u-mh24 u-mb10 u-fs14" id="cnFeedback"></div>';
+    btnHtml += '<button class="btn btn-primary u-w100" id="cnSubmitBtn" onclick="CN.submit()">' + (q.paper ? '交本题' : '提交答案') + '</button>';
     el('cnQuizActions').innerHTML = btnHtml;
   }
 
@@ -3562,7 +3563,7 @@ function cn5x8_pool() {
 
     const ans = q.userAnswers[q.idx];
     if (!ans) {
-      el('cnFeedback').innerHTML = '<span style="color:var(--warning)">请先作答</span>';
+      el('cnFeedback').innerHTML = '<span class="u-c-warn">请先作答</span>';
       return;
     }
 
@@ -3586,14 +3587,14 @@ function cn5x8_pool() {
 
     if (correct) {
       q.score++;
-      el('cnFeedback').innerHTML = '<span style="color:var(--success);font-weight:600">\u2714 回答正确！</span>';
+      el('cnFeedback').innerHTML = '<span class="u-c-ok u-fw600">\u2714 回答正确！</span>';
       // v53：错题重练答对即视为「已掌握」，自动移出错题库
       if (q.sourceIds && q.sourceIds[q.idx]) {
         cnRemoveWrong(q.sourceIds[q.idx]);
-        el('cnFeedback').innerHTML += ' <span style="color:var(--success);background:rgba(78,140,110,.14);padding:2px 8px;border-radius:8px;font-size:12px;margin-left:6px">已掌握，自动移出错题本</span>';
+        el('cnFeedback').innerHTML += ' <span class="u-c-ok u-bg-ok-s3 u-p2-8 u-r8 u-fs12 u-ml6">已掌握，自动移出错题本</span>';
       }
     } else {
-      el('cnFeedback').innerHTML = '<span style="color:var(--danger);font-weight:600">\u2718 答错了。</span> <span style="color:var(--text-light)">正确答案：' + item.answer + '</span>';
+      el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>';
       // 加入错题库
       cnAddWrong(item, ans);
       // 收集本次测验错题明细（供历史记录/云端同步用）
@@ -3672,14 +3673,14 @@ function cn5x8_pool() {
           secs[s].t++;
           if (q.results[i]) secs[s].c++;
         });
-        let h = '<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)">';
-        h += '<div style="font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:8px">试卷分部分成绩</div>';
+        let h = '<div class="u-mt14 u-pt12 u-bdt-dash">';
+        h += '<div class="u-fs12 u-fw700 u-c-light u-mb8">试卷分部分成绩</div>';
         Object.keys(secs).forEach(function (s) {
           const pct = Math.round(secs[s].c / secs[s].t * 100);
-          h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">';
-          h += '<span style="flex:1">' + s + '</span>';
-          h += '<span style="color:var(--text-lighter)">' + secs[s].c + '/' + secs[s].t + '</span>';
-          h += '<div style="width:90px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:var(--gold);border-radius:3px"></div></div>';
+          h += '<div class="u-flex u-ac u-g8 u-mb6 u-fs12">';
+          h += '<span class="u-f1">' + s + '</span>';
+          h += '<span class="u-c-lighter">' + secs[s].c + '/' + secs[s].t + '</span>';
+          h += '<div class="u-w90 u-h6 u-bg-border2 u-r3 u-ovh"><div class="u-h100 u-r3 u-bg-gold ' + wpCls(pct) + '"></div></div>';
           h += '</div>';
         });
         h += '</div>';
@@ -3864,18 +3865,18 @@ function cn5x8_pool() {
     if (!container) return;
     const wrongs = cnGetWrong();
     if (!wrongs.length) {
-      container.innerHTML = '<div style="text-align:center;color:var(--text-lighter);padding:40px 0">\u8FD8\u6CA1\u6709\u8BED\u6587\u9519\u9898\uFF0C\u7EE7\u7EED\u52AA\u529B\uFF01</div>';
+      container.innerHTML = '<div class="u-tc u-c-lighter u-p40-0">\u8FD8\u6CA1\u6709\u8BED\u6587\u9519\u9898\uFF0C\u7EE7\u7EED\u52AA\u529B\uFF01</div>';
       return;
     }
     let html = '';
     wrongs.forEach(function (w) {
       const q = w.question;
-      html += '<div class="card" style="margin-bottom:10px;padding:12px">';
-      html += '<div style="font-size:14px;font-weight:600;margin-bottom:6px">' + (q.passage ? '<span style="color:var(--gold)">[阅读]</span> ' : '') + q.question + '</div>';
-      html += '<div style="font-size:13px;color:var(--danger)">你的答案：' + w.userAnswer + '</div>';
-      html += '<div style="font-size:13px;color:var(--success)">正确答案：' + q.answer + '</div>';
-      html += '<div style="font-size:11px;color:var(--text-lighter);margin-top:4px">' + (w.unitName || '') + ' · ' + (w.grade || '') + '\u5E74\u7EA7 · \u9519' + (w.count || 1) + '\u6B21</div>';
-      html += '<button class="btn btn-outline" style="margin-top:8px;font-size:12px;padding:4px 12px" onclick="CN.removeWrong(\'' + w.id + '\')">\u5220\u9664</button>';
+      html += '<div class="card u-mb10 u-p12">';
+      html += '<div class="u-fs14 u-fw600 u-mb6">' + (q.passage ? '<span class="u-c-gold">[阅读]</span> ' : '') + q.question + '</div>';
+      html += '<div class="u-fs13 u-c-bad">你的答案：' + w.userAnswer + '</div>';
+      html += '<div class="u-fs13 u-c-ok">正确答案：' + q.answer + '</div>';
+      html += '<div class="u-fs11 u-c-lighter u-mt4">' + (w.unitName || '') + ' · ' + (w.grade || '') + '\u5E74\u7EA7 · \u9519' + (w.count || 1) + '\u6B21</div>';
+      html += '<button class="btn btn-outline u-mt8 u-fs12 u-p4-12" onclick="CN.removeWrong(\'' + w.id + '\')">\u5220\u9664</button>';
       html += '</div>';
     });
     container.innerHTML = html;
@@ -3960,31 +3961,31 @@ function cn5x8_pool() {
     html += '</div>';
 
     // 单元考试
-    html += '<div class="card" style="padding:12px;margin-bottom:12px">';
-    html += '<div style="font-size:14px;font-weight:600;margin-bottom:10px">\u5355\u5143\u6D4B\u8BD5\u5377</div>';
+    html += '<div class="card u-p12 u-mb12">';
+    html += '<div class="u-fs14 u-fw600 u-mb10">\u5355\u5143\u6D4B\u8BD5\u5377</div>';
     if (units.length) {
-      html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      html += '<div class="u-flex u-wrap u-g8">';
       units.forEach(function (u, i) {
-        html += '<button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="CN.beginExam(\'unit\',' + i + ')">' + u.name + '</button>';
+        html += '<button class="btn btn-outline u-p6-10 u-fs12" onclick="CN.beginExam(\'unit\',' + i + ')">' + u.name + '</button>';
       });
       html += '</div>';
     } else {
-      html += '<div style="font-size:12px;color:var(--text-lighter)">\u8BE5\u5E74\u7EA7\u6682\u65E0\u5355\u5143</div>';
+      html += '<div class="u-fs12 u-c-lighter">\u8BE5\u5E74\u7EA7\u6682\u65E0\u5355\u5143</div>';
     }
     html += '</div>';
 
     // 期中 / 期末
-    html += '<div class="card" style="padding:12px;margin-bottom:12px">';
-    html += '<div style="font-size:14px;font-weight:600;margin-bottom:10px">\u671F\u4E2D / \u671F\u672B\u6D4B\u8BD5\u5377</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
-    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'mid\',\'上\')">上册期中</button>';
-    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'final\',\'上\')">上册期末</button>';
-    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'mid\',\'下\')">下册期中</button>';
-    html += '<button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px;font-size:13px" onclick="CN.beginExam(\'final\',\'下\')">下册期末</button>';
+    html += '<div class="card u-p12 u-mb12">';
+    html += '<div class="u-fs14 u-fw600 u-mb10">\u671F\u4E2D / \u671F\u672B\u6D4B\u8BD5\u5377</div>';
+    html += '<div class="u-flex u-wrap u-g8">';
+    html += '<button class="btn btn-primary u-f1 u-mw120 u-p10 u-fs13" onclick="CN.beginExam(\'mid\',\'上\')">上册期中</button>';
+    html += '<button class="btn btn-primary u-f1 u-mw120 u-p10 u-fs13" onclick="CN.beginExam(\'final\',\'上\')">上册期末</button>';
+    html += '<button class="btn btn-primary u-f1 u-mw120 u-p10 u-fs13" onclick="CN.beginExam(\'mid\',\'下\')">下册期中</button>';
+    html += '<button class="btn btn-primary u-f1 u-mw120 u-p10 u-fs13" onclick="CN.beginExam(\'final\',\'下\')">下册期末</button>';
     html += '</div></div>';
 
-    html += '<div class="card" style="background:#F6FFED;border:1px solid #B7EB8F">';
-    html += '<div style="font-size:13px;color:var(--text-light);line-height:1.8">' +
+    html += '<div class="card u-bg-ok u-bd-ok">';
+    html += '<div class="u-fs13 u-c-light u-lh18">' +
       '<strong>\u8BD5\u5377\u8BF4\u660E\uff1A</strong><br>' +
       '\u2022 \u5355\u5143\u6D4B\u8BD5\u5377\uff1A\u53EA\u8003\u4E00\u4E2A\u5355\u5143\uff0c24\u9898\u6EE1\u5206100\u5206<br>' +
       '\u2022 \u671F\u4E2D\uff1A\u534A\u518C\u7EFC\u5408\uff1b\u671F\u672B\uff1A\u5168\u518C\u7EFC\u5408<br>' +

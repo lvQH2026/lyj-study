@@ -209,6 +209,33 @@ body {
   margin-top: 2px;
 }
 
+/* 语文模块「年级切换」按钮（js/chinese.js 渲染的 .grade-btn）。
+   v82 之前这个类在 CSS 里【一条规则都没有】：选中态全靠行内样式
+   background/color/border-color 撑着，未选中的按钮则是浏览器默认按钮外观，
+   和全站设计语言不一致。这里补齐基础态 + 选中态，触控高度按 48px 规范。 */
+.grade-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-height: 48px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background .18s, border-color .18s, color .18s, transform .18s;
+}
+
+.grade-btn:active { transform: scale(.97); }
+
+.grade-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(62, 74, 99, .18);
+}
+
 /* 年级颜色：柔和哑光 pastel 渐变，匹配参考图低饱和卡片 */
 .grade-card[data-grade="1"] { background: linear-gradient(135deg, #FFAAA5, #FFD1DC); }
 .grade-card[data-grade="1"] .grade-name { color: #fff; }
@@ -1808,9 +1835,28 @@ details.wrong-fidx .wrong-fidx-body { margin-top: 6px; }
 
 /* 空状态 */
 .rp-empty { text-align: center; padding: 32px 12px; }
-.rp-empty-icon { font-size: 38px; margin-bottom: 8px; }
+/* v82：原为 font-size:38px 撑的 emoji，换成 inline SVG 后改由 color 控制描边色 */
+.rp-empty-icon { color: var(--text-lighter); line-height: 0; margin-bottom: 12px; }
 .rp-empty-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
 .rp-empty-sub { font-size: 12px; color: var(--text-lighter); line-height: 1.6; }
+
+/* v82：家长端同步状态提示框（parent.js syncInfoBox）。
+   原本 bg/bd/fg 三个色值是三元表达式拼进 style 的，只有「正常/异常」两种取值，
+   收敛成基类 + 修饰类，改配色只动这里一处。 */
+.sync-box {
+  margin: 10px 0; padding: 12px; border-radius: 10px;
+  font-size: 13px; line-height: 1.6;
+  border: 1px solid var(--success, #4E8C6E);
+  background: #eef7f0; color: #2c6b4f;
+}
+.sync-box-err { border-color: #cf1322; background: #fff1f0; color: #cf1322; }
+
+/* v82：正确率三档填充色（进度条 / 单元正确率条共用）。
+   原本在 parent.js 里是 var(--success)/var(--warning)/var(--accent) 的三元表达式，
+   收到这里后改配色只需动一处。注意：pc.html 用的是 pc.css 里的同名类、另一套色值。 */
+.bar-hi { background: var(--success); }
+.bar-mid { background: var(--warning); }
+.bar-lo { background: var(--accent); }
 
 /* 详情页 */
 .rp-detail-head {
@@ -2405,3 +2451,467 @@ details.wrong-steps summary{
 }
 .wrong-steps-ol li{ margin-top:3px; }
 .wrong-steps-ol li::marker{ color:var(--gold); font-weight:700; }
+
+/* ============================================================
+   v82 · B1 图标统一后的对齐规则
+   ------------------------------------------------------------
+   图标全部是 inline SVG（viewBox 0 0 24 24、currentColor 描边），
+   靠 currentColor 自动跟随文字色。这里只补「垂直对齐 + 右侧间距」，
+   用上下文选择器统一处理，避免为了对齐全站加行内样式。
+   ============================================================ */
+/* 按钮内图标：与文字基线对齐。.btn 本身已 flex 居中，这里只压掉 svg 的基线间隙 */
+.btn > svg,
+button > svg,
+.prt-trigger-btn > svg {
+  vertical-align: -0.15em;
+  margin-right: 6px;
+  flex: none;
+}
+/* 只有图标没有文字的按钮（如返回箭头区），不加右边距 */
+.btn > svg:only-child,
+button > svg:only-child { margin-right: 0; }
+
+/* 页面主标题 / 区块标题：图标略小于文字，视觉上不抢戏 */
+.navbar h1 > svg { flex: none; }
+.section-title > svg { flex: none; opacity: .85; }
+
+/* 底部导航图标容器：SVG 已自带 width/height，这里确保居中且不被压缩 */
+.nav-tab .tab-icon { line-height: 0; }
+.nav-tab .tab-icon > svg { display: block; margin: 0 auto; }
+
+/* 公式卡 / 提示里的警示图标 */
+.wrong-fidx-warn > svg,
+.pf-warn > svg { vertical-align: -0.12em; margin-right: 3px; }
+
+/* 图解卡片标题与提示 */
+.diag-card-title > svg { vertical-align: -0.15em; margin-right: 5px; }
+.diag-card-hint > svg,
+.anim-tip > svg { vertical-align: -0.12em; margin-right: 4px; flex: none; }
+
+/* 空状态图标：空心描边，保持轻奢极简，不做实心色块 */
+.empty-icon > svg { opacity: .45; }
+
+/* v82 · B2：百分比宽度档位类（5%% 一档，配合 js/core.js wpCls()，误差 ≤2.5%%）*/
+.u-wp0{width:0%;} .u-wp5{width:5%;} .u-wp10{width:10%;} .u-wp15{width:15%;} .u-wp20{width:20%;} .u-wp25{width:25%;} .u-wp30{width:30%;} .u-wp35{width:35%;} .u-wp40{width:40%;} .u-wp45{width:45%;} .u-wp50{width:50%;} .u-wp55{width:55%;} .u-wp60{width:60%;} .u-wp65{width:65%;} .u-wp70{width:70%;} .u-wp75{width:75%;} .u-wp80{width:80%;} .u-wp85{width:85%;} .u-wp90{width:90%;} .u-wp95{width:95%;} .u-wp100{width:100%;}
+
+/* ============================================================
+   v82 · B2 不适合拆成 utility 的组合样式 / 有限取值条件分支，给语义类名
+   ------------------------------------------------------------
+   这些值都是一次性组合、或取值有限的运行期分支，拆成原子 utility 后
+   可读性反而变差，因此直接按「它是什么」命名，而不是「它长什么样」。
+   ============================================================ */
+/* 万能公式卡：米白底 + 香槟金左边框 */
+.fidx-card {
+  background: #FCF9F2;
+  border: 1px solid #E8D9B8;
+  border-left: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 9px;
+}
+
+/* 角度探索滑块的「配色图例条」：
+   轨道本身按 锐角(绿) / 直角(红) / 钝角(金) / 平角(蓝灰) / 周角(墨) 分段着色，
+   孩子拖动时能从轨道颜色直接看出当前角属于哪一类。
+   注意：这是【静态图例】，不是随 value 变化的填充进度，别误当 BUG 修掉。 */
+.angle-scale-range {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg,
+    #4E8C6E 0%,  #4E8C6E 25%,
+    #E57373 25%, #E57373 25%,
+    #C08A3E 25%, #C08A3E 50%,
+    #6B7894 50%, #6B7894 50%,
+    #B4945A 50%, #B4945A 100%,
+    #3E4A63 100%);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* 语文答题页选项按钮（js/chinese.js renderQuiz）。
+   原本整块外观 + selected 分支都写在 style 里。它与 .option-btn 的通用规则
+   并【不】等价：这里是块级左对齐、15px、圆角 10；通用 .option-btn 是
+   flex 居中、18px、圆角 12。直接删行内样式会让语文选项视觉突变，所以整体
+   收成独立语义类（放在这里以压过 style.css:650 / :1951 的通用规则）。 */
+.cn-option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  border: 2px solid var(--border);
+  background: #fff;
+}
+
+.cn-option-btn.selected {
+  border-color: var(--primary);
+  background: rgba(62, 74, 99, .06);
+}
+
+/* 正确率档位配色（js/math.js renderStats 的 accTier）。
+   阈值 80 / 60 只留在 JS 一处，这里只管「档位长什么样」。 */
+.acc-hi { color: var(--success); }   /* >= 80 */
+.acc-mid { color: var(--warning); }  /* 60 ~ 79 */
+.acc-lo { color: var(--accent); }    /* < 60 */
+.acc-none { color: var(--text-lighter); }  /* 还没做过题 */
+
+/* 学科色点（js/aiAnalysis.js subjCls）。注意：SUBJ_COLOR 那份 JS 调色板仍用于
+   SVG 折线/柱图的绘制（那里必须走 JS 变量给 stroke/fill），两边的色值需保持一致。 */
+.sdot { display: inline-block; border-radius: 50%; }
+.sdot8 { width: 8px; height: 8px; }
+.sdot6 { width: 6px; height: 6px; }
+.s-math { background: #3E4A63; }
+.s-cn { background: #B4945A; }
+.s-en { background: #5E8B7E; }
+.s-ink { background: #3E4A63; }   /* 兜底：未知学科 */
+
+/* 成绩走势方向（slopeOf 返回的 dir 恰有 up / down / flat 三值） */
+.trend-up { color: #389e0d; }
+.trend-down { color: #cf1322; }
+.trend-flat { color: #5A6478; }
+
+/* 风险等级（js/aiAnalysis.js riskLvl：high / mid / good / 其它→tip）。
+   原写法是把色值拼成 8 位十六进制（如 ' + c + '33 表示 20% 透明度的描边），
+   改成语义类后，配色集中在这里，JS 只判档位。 */
+.rk-t-high { color: #cf1322; }
+.rk-t-mid { color: #d46b08; }
+.rk-t-good { color: #389e0d; }
+.rk-t-tip { color: #3E4A63; }
+
+.rk-card {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+.rk-card-high { border-color: #cf132233; background: #cf13220d; }
+.rk-card-mid { border-color: #d46b0833; background: #d46b080d; }
+.rk-card-good { border-color: #389e0d33; background: #389e0d0d; }
+.rk-card-tip { border-color: #3e4a6333; background: #3e4a630d; }
+
+.rk-tag {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+.rk-tag-high { background: #cf1322; }
+.rk-tag-mid { background: #d46b08; }
+.rk-tag-good { background: #389e0d; }
+.rk-tag-tip { background: #3E4A63; }
+
+/* 知识点总结 / 万能答题方法列表（js/math.js renderStudy）。
+   原先「最后一项去掉下间距」是在 JS 里用 index === length-1 算出来的，
+   挪到 :last-child 后，以后往列表里插删条目都不用再动 JS。 */
+.sum-list > div {
+  display: flex;
+  gap: 8px;
+  font-size: 13.5px;
+  line-height: 1.75;
+  margin-bottom: 9px;
+}
+.sum-list > div:last-child { margin-bottom: 0; }
+
+.mtd-list > div { margin-bottom: 10px; }
+.mtd-list > div:last-child { margin-bottom: 0; }
+
+/* v82 · B2：可点元素触控高度兜底。
+   真机量下来不少靠 padding 撑高度的按钮在 22~47px 之间，对孩子手指偏小，
+   验收线统一抬到 48px。这里只补「没设 min-height」的主要按钮类，不动已有
+   的精细高度（特异性 0,1,0 压不过 .btn.btn-sm / .pc-opt 等修饰类）。 */
+.btn, .grade-btn, .mod-btn, .dash-date-btn, .pc-btn, .sl-opt {
+  min-height: 48px;
+}
+
+/* 时间范围切换胶囊（本机 / 云端分析页的 近7天·近30天·全部） */
+.sl-opt {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border, #E5E7EB);
+  background: #fff;
+  color: #5A6478;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sl-opt.on {
+  border-color: var(--gold, #B4945A);
+  background: rgba(180, 148, 90, .1);
+  color: var(--gold, #B4945A);
+}
+
+
+
+
+/* ============================================================
+   v82 · B2 utility class 层（由 _u82.py 生成，勿手改，改了会被下次生成覆盖）
+   ------------------------------------------------------------
+   背景：全站散落 438 处 style="..." 行内样式，主题无法统一治理——
+   想改一个间距得改十几个文件。本层把【静态】行内样式回收成原子类。
+
+   【必须放在 style.css 最末尾】
+   这样 utility 才会覆盖组件样式，还原行内样式"永远最高优先级"的行为。
+   若挪到前面，组件规则会反过来盖掉 utility，出现视觉回归。
+
+   【动态样式不在此列】
+   进度条 width:${p}% 、SVG 变换、循环变量色这类运行期才确定的值必须留在
+   行内，本层不收录。
+
+   【重新生成】
+   python _u82.py css  ->  _u82_util.css，把本层整段替换掉即可。
+   gen_css 按"源码里出现过该类名"生成（而非本次扫描到的行内样式值），
+   所以分批回收时不会把上一批已转成 class 的条目整批丢掉。
+   ============================================================ */
+
+.u-ac{ align-items:center; }
+.u-appear0{ -webkit-appearance:none; appearance:none; }
+.u-bb-double{ border-bottom:3px double #b4945a; }
+.u-bbox{ box-sizing:border-box; }
+.u-bd{ border:1px solid #ddd; }
+.u-bd-bad{ border:1px solid #cf1322; }
+.u-bd-blue{ border:1px solid #b3d4ff; }
+.u-bd-border{ border:1px solid var(--border); }
+.u-bd-gold-s{ border:1px solid rgba(180,148,90,.3); }
+.u-bd-gold-s25{ border:1px solid rgba(180,148,90,.25); }
+.u-bd-line{ border:1px solid var(--line); }
+.u-bd-mist{ border:1px solid #eceae4; }
+.u-bd-ok{ border:1px solid #b7eb8f; }
+.u-bd-sand{ border:1px solid #e8d9b8; }
+.u-bd-sand15{ border:1.5px solid #e8e2d6; }
+.u-bd-sand2{ border:1px solid #e8e2d6; }
+.u-bd-soft{ border:1.5px solid var(--border,#e5e7eb); }
+.u-bd-warnpale{ border:1px solid #ffe58f; }
+.u-bd0{ border:none; }
+.u-bd2{ border:2px solid var(--border); }
+.u-bdb{ border-bottom:1px solid var(--line); }
+.u-bdb-mist{ border-bottom:1px solid #eceae4; }
+.u-bdt{ border-top:1px solid var(--line); }
+.u-bdt-dash{ border-top:1px dashed var(--border); }
+.u-bdt-mist{ border-top:1px solid #eceae4; }
+.u-between{ justify-content:space-between; }
+.u-bg-blue{ background:#e6f0ff; }
+.u-bg-border{ background:var(--border,#eceae4); }
+.u-bg-border2{ background:var(--border); }
+.u-bg-cream{ background:#fcf9f2; }
+.u-bg-gold{ background:var(--gold,#b4945a); }
+.u-bg-gold-s{ background:rgba(180,148,90,.08); }
+.u-bg-gold-s06{ background:rgba(180,148,90,.06); }
+.u-bg-gold2{ background:var(--gold); }
+.u-bg-grad{ background:linear-gradient(135deg,var(--primary),var(--primary-light)); }
+.u-bg-grad-dark{ background:linear-gradient(135deg,#3e4a63,#2e3648); }
+.u-bg-ink{ background:#3e4a63; }
+.u-bg-ok{ background:#f6ffed; }
+.u-bg-ok-s{ background:rgba(78,140,110,.1); }
+.u-bg-ok-s2{ background:rgba(78,140,110,.12); }
+.u-bg-ok-s3{ background:rgba(78,140,110,.14); }
+.u-bg-page{ background:var(--bg); }
+.u-bg-page-f{ background:var(--bg,#f7f6f2); }
+.u-bg-paper{ background:#f7f6f2; }
+.u-bg-sand{ background:#f3eee3; }
+.u-bg-trans{ background:transparent; }
+.u-bg-w{ background:#fff; }
+.u-bg-warn-pale{ background:#fff1f0; }
+.u-bg-warnpale{ background:#fffbe6; }
+.u-bl-gold3{ border-left:3px solid var(--gold); }
+.u-bl-gold4{ border-left:4px solid #b4945a; }
+.u-block{ display:block; }
+.u-c-accent{ color:var(--accent); }
+.u-c-amber{ color:#c08a3e; }
+.u-c-bad{ color:var(--danger); }
+.u-c-blue{ color:#1d4ed8; }
+.u-c-brown{ color:#6d5c35; }
+.u-c-coral{ color:#e57373; }
+.u-c-gold{ color:var(--gold); }
+.u-c-gold2{ color:#b4945a; }
+.u-c-golddeep{ color:#9a7b42; }
+.u-c-gray2{ color:#8c8c8c; }
+.u-c-green{ color:#4e8c6e; }
+.u-c-ink{ color:#3e4a63; }
+.u-c-light{ color:var(--text-light); }
+.u-c-lighter{ color:var(--text-lighter); }
+.u-c-mute{ color:#9aa3bd; }
+.u-c-ok{ color:var(--success); }
+.u-c-palegold{ color:#d8c9a8; }
+.u-c-paper{ color:#f2f0ea; }
+.u-c-primary{ color:var(--primary); }
+.u-c-primary-f{ color:var(--primary,#3e4a63); }
+.u-c-red{ color:#c0504d; }
+.u-c-red2{ color:#cf1322; }
+.u-c-slate{ color:#5a6478; }
+.u-c-slate2{ color:#475569; }
+.u-c-slate3{ color:#7a8398; }
+.u-c-steel{ color:#6b7894; }
+.u-c-steel2{ color:#6b7590; }
+.u-c-text{ color:var(--text); }
+.u-c-warn{ color:var(--warning); }
+.u-c-white{ color:#fff; }
+.u-col{ flex-direction:column; }
+.u-collapse{ border-collapse:collapse; }
+.u-cp{ cursor:pointer; }
+.u-f-full{ flex:1 1 100%; }
+.u-f1{ flex:1; }
+.u-ff{ font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif; font-family:-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif; }
+.u-flex{ display:flex; }
+.u-fnone{ flex:none; }
+.u-fs11{ font-size:11px; }
+.u-fs115{ font-size:11.5px; }
+.u-fs12{ font-size:12px; }
+.u-fs125{ font-size:12.5px; }
+.u-fs13{ font-size:13px; }
+.u-fs135{ font-size:13.5px; }
+.u-fs14{ font-size:14px; }
+.u-fs145{ font-size:14.5px; }
+.u-fs15{ font-size:15px; }
+.u-fs16{ font-size:16px; }
+.u-fs17{ font-size:17px; }
+.u-fs18{ font-size:18px; }
+.u-fs20{ font-size:20px; }
+.u-fs22{ font-size:22px; }
+.u-fs30{ font-size:30px; }
+.u-fw400{ font-weight:400; }
+.u-fw600{ font-weight:600; }
+.u-fw700{ font-weight:700; }
+.u-fw800{ font-weight:800; }
+.u-g10{ gap:10px; }
+.u-g12{ gap:12px; }
+.u-g5{ gap:5px; }
+.u-g6{ gap:6px; }
+.u-g8{ gap:8px; }
+.u-grid{ display:grid; }
+.u-h10{ height:10px; }
+.u-h100{ height:100%; }
+.u-h18{ height:18px; }
+.u-h2{ height:2px; }
+.u-h24{ height:24px; }
+.u-h6{ height:6px; }
+.u-h8{ height:8px; }
+.u-hauto{ height:auto; }
+.u-hide{ display:none; }
+.u-iflex{ display:inline-flex; }
+.u-inlblk{ display:inline-block; }
+.u-jc{ justify-content:center; }
+.u-lh1{ line-height:1; }
+.u-lh16{ line-height:1.6; }
+.u-lh165{ line-height:1.65; }
+.u-lh17{ line-height:1.7; }
+.u-lh175{ line-height:1.75; }
+.u-lh18{ line-height:1.8; }
+.u-ls1{ letter-spacing:1px; }
+.u-ls2{ letter-spacing:2px; }
+.u-ls4{ letter-spacing:4px; }
+.u-m0{ margin:0; }
+.u-m0-0-14{ margin:0 0 14px; }
+.u-m0a{ margin:0 auto; }
+.u-m10-0{ margin:10px 0; }
+.u-m10-0-0{ margin:10px 0 0; }
+.u-m10-0-4{ margin:10px 0 4px; }
+.u-m10-0-8{ margin:10px 0 8px; }
+.u-m10-4-4{ margin:10px 4px 4px; }
+.u-m12-0{ margin:12px 0; }
+.u-m14-0-10{ margin:14px 0 10px; }
+.u-m22-0-10{ margin:22px 0 10px; }
+.u-m4-0{ margin:4px 0; }
+.u-m4-0-8{ margin:4px 0 8px; }
+.u-m5-0{ margin:5px 0; }
+.u-m6-0{ margin:6px 0; }
+.u-m8-0{ margin:8px 0; }
+.u-mb10{ margin-bottom:10px; }
+.u-mb12{ margin-bottom:12px; }
+.u-mb14{ margin-bottom:14px; }
+.u-mb16{ margin-bottom:16px; }
+.u-mb3{ margin-bottom:3px; }
+.u-mb4{ margin-bottom:4px; }
+.u-mb6{ margin-bottom:6px; }
+.u-mb8{ margin-bottom:8px; }
+.u-mh24{ min-height:24px; }
+.u-mh48{ min-height:48px; }
+.u-ml6{ margin-left:6px; }
+.u-mr4{ margin-right:4px; }
+.u-mt0{ margin-top:0; }
+.u-mt10{ margin-top:10px; }
+.u-mt12{ margin-top:12px; }
+.u-mt14{ margin-top:14px; }
+.u-mt16{ margin-top:16px; }
+.u-mt18{ margin-top:18px; }
+.u-mt2{ margin-top:2px; }
+.u-mt26{ margin-top:26px; }
+.u-mt4{ margin-top:4px; }
+.u-mt6{ margin-top:6px; }
+.u-mt8{ margin-top:8px; }
+.u-mw120{ min-width:120px; }
+.u-noshrink{ flex-shrink:0; }
+.u-op75{ opacity:.75; }
+.u-op80{ opacity:.8; }
+.u-op85{ opacity:.85; }
+.u-op90{ opacity:.9; }
+.u-outline0{ outline:none; }
+.u-ovh{ overflow:hidden; }
+.u-ovy{ overflow-y:auto; }
+.u-p0{ padding:0; }
+.u-p0-14{ padding:0 14px; }
+.u-p0-22{ padding:0 22px; }
+.u-p10{ padding:10px; }
+.u-p10-12{ padding:10px 12px; }
+.u-p12{ padding:12px; }
+.u-p12-14b{ padding:12px 14px; }
+.u-p12-16{ padding:12px 16px; }
+.u-p14{ padding:14px; }
+.u-p18{ padding:18px; }
+.u-p2{ padding:2px; }
+.u-p2-8{ padding:2px 8px; }
+.u-p20{ padding:20px; }
+.u-p24{ padding:24px; }
+.u-p28-0-10{ padding:28px 0 10px; }
+.u-p28-16{ padding:28px 16px; }
+.u-p3-10{ padding:3px 10px; }
+.u-p4{ padding:4px; }
+.u-p4-12{ padding:4px 12px; }
+.u-p40-0{ padding:40px 0; }
+.u-p5-10{ padding:5px 10px; }
+.u-p6{ padding:6px; }
+.u-p6-10{ padding:6px 10px; }
+.u-p6-12{ padding:6px 12px; }
+.u-p8{ padding:8px; }
+.u-p8-0{ padding:8px 0; }
+.u-p8-10{ padding:8px 10px; }
+.u-pl10{ padding-left:10px; }
+.u-pt12{ padding-top:12px; }
+.u-r10{ border-radius:10px; }
+.u-r12{ border-radius:12px; }
+.u-r16{ border-radius:16px; }
+.u-r2{ border-radius:2px; }
+.u-r20{ border-radius:20px; }
+.u-r3{ border-radius:3px; }
+.u-r4{ border-radius:4px; }
+.u-r8{ border-radius:8px; }
+.u-rpill{ border-radius:99px; }
+.u-tc{ text-align:center; text-align:center;; }
+.u-tl{ text-align:left; }
+.u-touch0{ touch-action:none; }
+.u-tr{ text-align:right; transition:all .2s; }
+.u-w0{ width:0%; }
+.u-w1{ width:1px; }
+.u-w10{ width:10%; }
+.u-w100{ width:100%; }
+.u-w24{ width:24px; }
+.u-w4{ width:4px; }
+.u-w6{ width:6px; }
+.u-w66{ width:66px; }
+.u-w90{ width:90px; }
+.u-wrap{ flex-wrap:wrap; }
+.u-xh160{ max-height:160px; }
+.u-xw100{ max-width:100%; }
+.u-xw200{ max-width:200px; }
+.u-xw240{ max-width:240px; }
+.u-xw320{ max-width:320px; }
+.u-xw360{ max-width:360px; }
+.u-xw720{ max-width:720px; }
