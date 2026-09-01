@@ -2266,6 +2266,27 @@ body{ font-family:'Inter','PingFang SC','Hiragino Sans-serif','Microsoft YaHei',
 .m-score-row.bad{ background:#FDF2F1; }
 .m-sr-no{ font-weight:700; min-width:38px; }
 .m-sr-type{ color:var(--text-light); flex:1; }
+
+/* ===== v84 P4：知识点掌握度报告 ===== */
+.mastery-block{ margin-top:14px; }
+.mastery-block .detail-title{ font-size:14px; font-weight:700; color:var(--text); margin-bottom:10px; padding-bottom:6px; border-bottom:1.5px solid var(--border); }
+.mastery-row{ padding:9px 10px; border-radius:10px; background:var(--bg); margin-bottom:8px; }
+.mastery-row.weak{ background:#FDF2F1; border:1px solid #F3C9C4; }
+.mastery-top{ display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:6px; }
+.mastery-name{ font-weight:700; color:var(--text); }
+.mastery-row.weak .mastery-name{ color:#C0392B; }
+.mastery-pct{ color:var(--text-light); font-size:12px; }
+.mastery-bar{ height:7px; border-radius:5px; background:#E6E1D6; overflow:hidden; }
+.mastery-bar i{ display:block; height:100%; background:var(--primary,#3E4A63); border-radius:5px; }
+.mastery-row.weak .mastery-bar i{ background:#C0392B; }
+.mastery-tip{ margin-top:6px; font-size:12px; color:#C0392B; line-height:1.5; }
+
+/* ===== v84 P4：错题库知识点聚类 ===== */
+.wrong-cluster{ background:var(--bg); border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+.wrong-cluster .detail-title{ font-size:14px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.cluster-tags{ display:flex; flex-wrap:wrap; gap:8px; }
+.cluster-tag{ display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:20px; background:#fff; border:1px solid var(--border); font-size:12px; color:var(--text); }
+.cluster-tag b{ color:var(--primary,#3E4A63); font-weight:700; }
 .m-sr-mark{ width:16px; height:16px; }
 .m-sr-score{ font-weight:700; }
 .m-score-row.ok .m-sr-score{ color:#3F8C2F; }

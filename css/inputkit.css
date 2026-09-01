@@ -1,0 +1,161 @@
+/* ======================================================================
+   零打字输入面板  (js/inputKit.js)
+   挂载：index.html（移动端三科） + pc.html（电脑端）
+   变量用「移动端 style.css 名 / PC 端 pc.css 名」双 fallback 写法，
+   两端共用同一份样式，不出现两套分叉实现。
+   规范：数字键 5 列 × 键高 52px / 字号 20px；功能键 15px；
+        词卡移动端 2 列 / PC 4 列；所有热区 ≥44px。
+   ====================================================================== */
+
+.ik {
+  margin: 12px 0 2px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- 数字 / 算式键盘 ---------- */
+.ik-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  /* PC 端内容区很宽，不限宽的话 5 个数字键会被拉成一条，鼠标移动距离过长 */
+  max-width: 400px;
+}
+
+.ik-key {
+  min-height: 52px;
+  padding: 0 4px;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text, var(--ink, #23262E));
+  background: var(--card-bg, var(--surface, #FFFFFF));
+  border: 1px solid var(--border, var(--line, #ECEAE4));
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(28, 32, 48, .05);
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ik-key:active {
+  transform: scale(.94);
+  background: var(--gold-50, #FAF6EF);
+  border-color: var(--gold, #B4945A);
+}
+.ik-key:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+/* 功能键（删除 / 清空） */
+.ik-fn {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-light, var(--ink-2, #5C6370));
+  background: var(--bg-2, #F1EFEA);
+}
+
+/* ---------- 输入目标（原输入框） ---------- */
+.ik-target {
+  caret-color: var(--gold, #B4945A);
+}
+.ik-target.ik-active {
+  border-color: var(--gold, #B4945A) !important;
+  box-shadow: 0 0 0 3px rgba(180, 148, 90, .16) !important;
+}
+.ik-target[readonly] {
+  background: var(--gold-50, #FAF6EF);
+  cursor: pointer;
+}
+
+/* ---------- 逐空词卡（P3 接入） ---------- */
+.ik-words {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+@media (min-width: 720px) {
+  .ik-words { grid-template-columns: repeat(4, 1fr); }
+}
+.ik-word {
+  min-height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ---------- 词块拼句（P2 接入） ---------- */
+.ik-sel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: var(--bg-2, #F1EFEA);
+  border: 1px dashed var(--border, var(--line, #ECEAE4));
+  border-radius: 12px;
+}
+.ik-sel-ph {
+  font-size: 13px;
+  color: var(--text-lighter, var(--ink-3, #9AA0AB));
+}
+.ik-sel-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 15px;
+  background: var(--card-bg, var(--surface, #FFFFFF));
+  border: 1px solid var(--gold, #B4945A);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ik-x {
+  font-size: 15px;
+  color: var(--accent, #C2554F);
+  font-weight: 700;
+}
+
+.ik-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ik-tok {
+  min-height: 46px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--text, var(--ink, #23262E));
+  background: var(--card-bg, var(--surface, #FFFFFF));
+  border: 1px solid var(--border, var(--line, #ECEAE4));
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(28, 32, 48, .05);
+  transition: transform .08s ease, opacity .15s ease;
+}
+.ik-tok:active { transform: scale(.94); }
+.ik-tok.used {
+  opacity: .3;
+  pointer-events: none;
+  text-decoration: line-through;
+}
+
+/* ---------- 交卷后锁定面板 ---------- */
+.ik.locked {
+  opacity: .35;
+  pointer-events: none;
+}
+
+/* 鼠标设备（PC 端）给 hover 反馈；触屏设备不加，避免点完残留高亮 */
+@media (hover: hover) {
+  .ik-key:hover:not(:disabled) {
+    background: var(--gold-50, #FAF6EF);
+    border-color: var(--gold, #B4945A);
+  }
+  .ik-tok:hover:not(.used) {
+    border-color: var(--gold, #B4945A);
+  }
+}

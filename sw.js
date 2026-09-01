@@ -124,11 +124,30 @@
 //     ② judgeStatement() 拒绝「图中阴影|看图|上图|下图|左图|右图」题面，强图依赖题不再派生。
 //   验收：_smoke_v83t.js 14/14 PASS；真机 5 下期中考试判断题区（30 题）扫描
 //         「图中…题面 + 缺图」组合剩余 = 0，全部变成「X 是 Y」纯文本陈述句。
-const CACHE = 'lyj-shell-v83t';
+
+// v84 · 零打字化改造闭环（P0~P4 五期连做，2026-09-01）
+//   产品铁律（家长确立）：网站只负责「快速测出掌握情况」，孩子不会打字，
+//   任何题不允许「必须打字才能作答」。五期连续实施：
+//     P0 输入组件 + 数学数字键盘四端接入（window.InputKit 初版）。
+//     P1 语文 384 道看拼音写词语 → 四选项选词；默写（69）按「纸质承担书写」保留。
+//     P2 英语单词拼写/选词填空/补全句子 → 选择题；连词成句 → 乱序词块拼句面板。
+//     P3 数学概念/短语/多空填空题 → 渲染前归一化（js/inputKit.js normalizeConceptFill）：
+//        封闭小集合→选择题；单概念词→同源干扰项选择题；多空中文→逐空词卡；
+//        数值答案→InputKit 数字键盘点选。判分逻辑零侵入。
+//     P4 掌握度报告（答案与解析页后按知识点聚类、薄弱标红 + 纸质联动提示）+
+//        错题库按知识点聚类 + 首页「⚡ 快速测评（10题·5分钟）」跨单元随机抽题。
+//   新增资源（须进 SHELL 离线预缓存）：js/inputKit.js、css/inputkit.css、
+//   以及此前漏入清单的 PC 端入口 pc.html / css/pc.css / js/pc.js。
+//   验收（#294 全量回归）：
+//        node --check 全绿；_cap.js 容量<24 = 0/131（修正 estimateUnitCapacity 早停假阳性）；
+//        _audit_cross.js 跨年级 0；_cn_en_audit.js 语文0/英语0；
+//        _kb_free_audit.js 运行时口径：math fill 645→需打字 0、english fill 175→需打字 0；
+//        _smoke_math_p3 / _smoke_math_p4 / _smoke_cn_py / _smoke_en_p2 / _smoke_v83 / _smoke_pc_v83 全 PASS。
+const CACHE = 'lyj-shell-v84';
 const SHELL = [
-  './', './index.html', './manifest.webmanifest',
-  './css/style.css', './css/english.css',
-  './js/core.js', './js/math.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/pep.js', './js/engPep.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
+  './', './index.html', './pc.html', './manifest.webmanifest',
+  './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',
+  './js/core.js', './js/math.js', './js/pc.js', './js/inputKit.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/pep.js', './js/engPep.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
   './js/supabase-js.min.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'

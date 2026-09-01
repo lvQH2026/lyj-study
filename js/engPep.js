@@ -124,9 +124,14 @@
       tip = (v === 1) ? '（首字母 ' + w.charAt(0) + '）'
         : (it.ipa ? '（音标 ' + it.ipa + '）' : '（首字母 ' + w.charAt(0) + '）');
     }
+    // v84/P2：单词拼写改为「看中文选英文」4选1（干扰项取自同单元 PEP 词表，同源同类）。
+    // 不再要孩子手敲字母——既慢又考错位（首字母提示已泄露一半答案），且不会打字的孩子根本做不了。
+    const dis = pickDistract(unit.words, w, 3, 'w');
+    if (dis.length < 3) return null; // 单元词表不足 4 词则跳过，交给组卷补别的题型
     return {
-      type: 'fill', judge: 'eng', tag: '单词拼写',
-      question: '根据提示写出英文单词：' + it.m + tip,
+      type: 'choice', judge: 'eng', tag: '单词拼写',
+      question: '根据中文选出英文单词：' + it.m + (it.ipa ? '　（音标 ' + it.ipa + '）' : ''),
+      options: shuf([w].concat(dis)),
       answer: w,
       explain: it.m + ' → ' + w + (it.ipa ? '　' + it.ipa : '')
     };
@@ -187,21 +192,26 @@
     if (!item) return null;
     if (item.kind === 'scram') {
       const s = item.sent;
-      const parts = shuf(s.en.split(/\s+/).filter(function (x) { return x; }));
-      if (parts.length < 3) return null;
+      const toks = s.en.split(/\s+/).filter(function (x) { return x; });
+      if (toks.length < 3) return null;
+      // v84/P2：连词成句改为「乱序词块点选拼句」，不再要孩子手敲字母（InputKit TOKENS 模式自动乱序）
       return {
         type: 'fill', judge: 'eng', tag: '连词成句',
-        question: '连词成句（注意首字母大写与句末标点）：' + parts.join(' / ') + '　（' + s.zh + '）',
+        question: '连词成句（点下方词块，按顺序拼成句子）：' + s.zh,
         answer: s.en,
+        input: { mode: 'tokens', tokens: toks },
         explain: s.en + '　' + s.zh
       };
     }
     const c = item;
     const en = blankOf(c);
-    const head = diff === 1 ? '补全句子（看中文提示）：' : '补全句子（首字母 ' + String(c.word.w).charAt(0) + '）：';
+    // v84/P2：补全句子改为「选词」4选1（干扰项取自同单元 PEP 词表，同源同类），不再要孩子手敲
+    const dis = pickDistract(unit.words, c.word.w, 3, 'w');
+    if (dis.length < 3) return null;
     return {
-      type: 'fill', judge: 'eng', tag: '补全句子',
-      question: head + en + (diff === 1 ? '　（' + c.sent.zh + '）' : ''),
+      type: 'choice', judge: 'eng', tag: '补全句子',
+      question: '补全句子（选词）：' + en + (diff === 1 ? '　（' + c.sent.zh + '）' : ''),
+      options: shuf([c.word.w].concat(dis)),
       answer: c.word.w,
       explain: '完整句子：' + c.sent.en + '　' + c.sent.zh + '　【' + c.word.w + ' = ' + c.word.m + '】'
     };
@@ -561,9 +571,18 @@
         h += '</div>';
       } else {
         const disabled = res ? ' disabled' : '';
-        h += '<div class="u-mt10"><input id="pepFill" class="answer-input" type="text" '
-          + 'autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="在这里写出答案" '
-          + 'value="' + esc(res ? res.ua : '') + '"' + disabled + '></div>';
+        // v84：零打字输入面板（点选作答，不弹软键盘）。
+        // 英语单词拼写 / 连词成句将在 P2 改造（单词→单元词表 4 选 1；连词成句→乱序词块），
+        // 届时题库层写 input:{mode:'tokens',tokens:[...]}，此处无需再改即可渲染词块面板。
+        const ikHtml = res ? '' : ((window.InputKit && window.InputKit.render) ? window.InputKit.render(q) : '');
+        const ikCls = ikHtml ? ' ik-target' : '';
+        const roAttr = ikHtml ? ' data-ik-ro="1"' : '';
+        h += '<div class="u-mt10"><input id="pepFill" class="answer-input' + ikCls + '" type="text" '
+          + 'autocomplete="off" autocapitalize="off" spellcheck="false" '
+          + 'placeholder="' + (ikHtml ? '点下面的词块拼成句子' : '在这里写出答案') + '" '
+          + 'inputmode="' + (ikHtml ? 'none' : 'text') + '"'
+          + 'value="' + esc(res ? res.ua : '') + '"' + disabled + roAttr + '></div>';
+        if (ikHtml) h += ikHtml;
         if (!res) {
           h += '<div class="btn-row u-mt8"><button class="btn-primary u-f1" onclick="PEPQ.submitFill()">提交答案</button></div>';
         }
@@ -583,7 +602,10 @@
       }
       h += '</div>';
       h += '<div class="btn-row u-mt8"><button class="btn-ghost u-f1" onclick="PEPQ.finish()">提前交卷</button></div>';
-      body().innerHTML = h;
+      const bd = body();
+      bd.innerHTML = h;
+      // v84：面板渲染后把输入框设为只读（防软键盘弹出）
+      if (window.InputKit && window.InputKit.bind) window.InputKit.bind(bd);
     }, true);
   }
   function pick(oi) {

@@ -950,7 +950,13 @@
     renderQuiz();
   }
   function renderQuiz() {
-    const q = S.quiz; const c = $('pcContent'); const total = q.questions.length; const i = q.idx; const item = q.questions[i];
+    const q = S.quiz; const c = $('pcContent'); const total = q.questions.length; const i = q.idx;
+    // v84 P3：数学概念/短语/多空填空在渲染前改写成可点选形态，与移动端同一套逻辑。
+    if (window.InputKit && InputKit.normalizeConceptFill) {
+      const nq = InputKit.normalizeConceptFill(q.questions[i], q.questions);
+      if (nq) q.questions[i] = nq;
+    }
+    const item = q.questions[i];
     const res = q.results[i];
     const inHint = !!(res && !res.correct && !res.revealed);
 
@@ -983,20 +989,29 @@
       });
       h += '</div>';
     } else {
+      // v84：零打字输入面板。孩子不会打字，PC 上同样用鼠标点选（与移动端同一套面板）。
+      // InputKit 未加载时 render 返回 ''，输入框不带 readonly —— 自动降级为原生打字。
+      // res 已判分/已揭晓 → 面板置灰，防止孩子改答案造成与已记录成绩不一致
+      const ikLocked = !!(res && (res.correct || res.revealed));
+      const ikHtml = (window.InputKit && window.InputKit.render) ? window.InputKit.render(item, { locked: ikLocked }) : '';
+      const ikCls = ikHtml ? ' ik-target' : '';
+      const roAttr = ikHtml ? ' data-ik-ro="1"' : '';
       // v69：多空填空题逐空渲染输入框（旧版只有 1 个框，孩子根本没法作答）
       const nb = (typeof countFillBlanks === 'function') ? countFillBlanks(item) : 0;
       if (nb >= 2) {
-        const parts = String(q.userAnswers[i] || '').split(/[,，、\/]+/);
+        const rawUa = String(q.userAnswers[i] || '');
+        const parts = /[,，、]/.test(rawUa) ? rawUa.split(/[,，、]+/) : [rawUa];
         h += '<div class="pc-multi-blank">';
         for (let bi = 0; bi < nb; bi++) {
           h += '<span class="pc-mb-item"><span class="pc-mb-no">' + (bi + 1) + '</span>' +
-            '<input class="pc-fill pc-fill-multi" placeholder="第' + (bi + 1) + '空" value="' + esc((parts[bi] || '').trim()) + '" onkeydown="if(event.key===\'Enter\')PC.submit()"></span>';
+            '<input class="pc-fill pc-fill-multi' + ikCls + '" placeholder="第' + (bi + 1) + '空" value="' + esc(String(parts[bi] || '').trim()) + '" inputmode="' + (ikHtml ? 'none' : 'text') + '"' + roAttr + ' onkeydown="if(event.key===\'Enter\')PC.submit()"></span>';
         }
         h += '</div>';
-        h += '<div class="pc-mb-tip">共 ' + nb + ' 个空，请按顺序分别填写</div>';
+        h += '<div class="pc-mb-tip">共 ' + nb + ' 个空，请' + (ikHtml ? '点上方空位切换，再点下面键盘' : '按顺序分别填写') + '</div>';
       } else {
-        h += '<input class="pc-fill" id="pcFill" placeholder="请输入答案" value="' + esc(q.userAnswers[i] || '') + '" onkeydown="if(event.key===\'Enter\')PC.submit()">';
+        h += '<input class="pc-fill' + ikCls + '" id="pcFill" placeholder="' + (ikHtml ? '点下面的数字键作答' : '请输入答案') + '" value="' + esc(q.userAnswers[i] || '') + '" inputmode="' + (ikHtml ? 'none' : 'text') + '"' + roAttr + ' onkeydown="if(event.key===\'Enter\')PC.submit()">';
       }
+      if (ikHtml) h += ikHtml;
     }
     h += '</div>';
 
@@ -1033,6 +1048,8 @@
 
     h += '</div></div>';
     c.innerHTML = h;
+    // v84：面板渲染后把输入框设为只读（防软键盘弹出 + 防手输全角符号）
+    if (window.InputKit && window.InputKit.bind) window.InputKit.bind(c);
 
     // 只有在「已揭晓 / 已正确」时才在选项上打 correct/wrong；提示中不显示答案位置。
     if (res && !inHint && (item.type === 'choice' || item.type === 'judge')) {

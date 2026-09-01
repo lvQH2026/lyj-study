@@ -11,6 +11,7 @@
 <script src="js/supabase-js.min.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/english.css">
+<link rel="stylesheet" href="css/inputkit.css">
 </head>
 <body><div id="moduleSwitch" class="module-switch">
   <button class="mod-btn active" data-mod="math" onclick="App.switchModule('math')">数学</button>
@@ -48,6 +49,10 @@
       <button class="btn btn-outline" onclick="startQuickPractice('basic')">基础运算</button>
       <button class="btn btn-outline" onclick="startQuickPractice('mixed')">综合练习</button>
     </div>
+    <div class="btn-group u-mt10">
+      <button class="btn btn-gold" onclick="startQuickAssess()">⚡ 快速测评（10题·5分钟）</button>
+    </div>
+    <p class="u-c-light u-fs12 u-m0-8-0">快速测出各知识点掌握情况，交卷后生成「知识点掌握度」报告，薄弱点可配套纸质同步练习巩固。</p>
   </div>
 
   <div class="section-title">专项练习</div>
@@ -139,6 +144,8 @@
       <div class="detail-title">各题得分明细</div>
       <div id="questionScoreList"></div>
     </div>
+    <!-- v84 P4：知识点掌握度报告（按错题知识点聚类，最弱排前，<60% 标红，并给出纸质联动建议） -->
+    <div class="mastery-block" id="masteryBlock"></div>
     <div class="btn-group" id="scoreActions">
       <button class="btn btn-primary" id="confirmScoreBtn" onclick="confirmScore()">✅ 确认成绩</button>
     </div>
@@ -433,6 +440,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="js/inputKit.js"></script>
 <script src="js/core.js"></script>
 <script src="js/math.js"></script>
 <script src="js/data.js"></script>

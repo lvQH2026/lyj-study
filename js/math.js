@@ -10614,6 +10614,55 @@ function startQuickPractice(mode) {
   renderQuestion();
 }
 
+// v84 P4：快速测评入口（10 题 · 5 分钟）。跨单元随机抽题，快速测出各知识点掌握情况；
+// 交卷后成绩页生成「知识点掌握度」报告。复用答题/判分/零打字输入全链路。
+function startQuickAssess() {
+  state.currentGrade = state.currentGrade || 6;
+  state.currentSemester = state.currentSemester || 1;
+  state.quizMode = 'quick';
+  state.quizTitle = '快速测评';
+  let allUnits = (KNOWLEDGE_BASE[state.currentGrade] && KNOWLEDGE_BASE[state.currentGrade][state.currentSemester]) || [];
+  let pool = [];
+  allUnits.forEach(function (u) {
+    if (!u || typeof u.gen !== 'function') return;
+    for (let k = 0; k < 8; k++) {
+      try {
+        let r = u.gen();
+        (Array.isArray(r) ? r : [r]).forEach(function (x) { if (x && x.question) pool.push(x); });
+      } catch (e) {}
+    }
+  });
+  shuffleArr(pool);
+  let seen = new Set(), picked = [];
+  for (let i = 0; i < pool.length && picked.length < 10; i++) {
+    let key = pool[i].question + '|' + pool[i].answer;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    picked.push(pool[i]);
+  }
+  if (picked.length < 10) picked = picked.concat(pool.slice(0, 10 - picked.length));
+  state.quizQuestions = picked.slice(0, 10);
+  state.quizIndex = 0;
+  state.quizScore = 0;
+  state.quizCorrect = 0;
+  state.quizWrong = 0;
+  state.quizWrongQuestions = [];
+  state.qStatus = [];
+  state.wrongMap = {};
+  state.userAnswers = [];
+  state.quizStartTime = Date.now();
+  showPage('quiz');
+  document.getElementById('backBtn').style.display = 'block';
+  document.getElementById('backBtn').onclick = () => goBack();
+  renderQuestion();
+  // 5 分钟倒计时自动交卷（测评轻量，只做提交，不显示独立计时器）
+  if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
+  state.examEndTime = Date.now() + 5 * 60 * 1000;
+  state.examTimer = setInterval(function () {
+    if (Date.now() >= state.examEndTime) { clearInterval(state.examTimer); state.examTimer = null; if (!state.answered || true) finishQuiz(); }
+  }, 1000);
+}
+
 function startWrongReview() {
   let wrongBank = getWrongBank();
   if (wrongBank.length === 0) {
@@ -11006,7 +11055,7 @@ function estimateUnitCapacity(unit, budget) {
       if (!q || q.question === undefined || q.question === null) return;
       seen.add(String(q.question) + '|' + String(q.answer) + '|' + String(q.svg || ''));
     });
-    if (seen.size === before) { if (++stagnant >= 25) break; } else stagnant = 0;
+    if (seen.size === before) { if (++stagnant >= (budget || 120)) break; } else stagnant = 0;
   }
   return seen.size;
 }
@@ -12570,6 +12619,12 @@ function startExam() {
 
 function renderQuestion() {
   let q = state.quizQuestions[state.quizIndex];
+  // v84 P3：概念/短语/多空填空题在渲染前改写成可点选形态（选择题 / 逐空词卡），
+  // 保证「任何题都不许必须打字」。幂等，改写后打 _ikNorm 标记。
+  if (window.InputKit && InputKit.normalizeConceptFill) {
+    let nq = InputKit.normalizeConceptFill(q, state.quizQuestions);
+    if (nq) q = nq;
+  }
   state.selectedAnswer = null;
   state.answered = false;
   // v73.2：题号导航状态（0 未答 / 1 答对 / 2 答错），按当前题量校正长度
@@ -12652,23 +12707,38 @@ function renderQuestion() {
       html += `<div class="shape-container"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">${q.svg}</svg></div>`;
     }
     html += `<div class="question-text${sizeClass}">${qNo}${qHtml}</div>`;
+    // v84：零打字输入面板。孩子不会打字，填空题一律改点选（数字/符号键盘、词卡、词块）。
+    // InputKit 未加载时 render 返回 ''，输入框不带 readonly —— 自动降级为原生打字，不会答不了题。
+    let ikHtml = (window.InputKit && window.InputKit.render) ? window.InputKit.render(q) : '';
+    let roAttr = ikHtml ? ' data-ik-ro="1"' : '';
+    let ikCls = ikHtml ? ' ik-target' : '';
+    // v84：回跳到已答过的题时回填原答案（旧版跳回来输入框是空的，孩子点的答案凭空消失）
+    let saved = String(state.userAnswers[state.quizIndex] == null ? '' : state.userAnswers[state.quizIndex]);
+    let savedParts = /[,，、]/.test(saved) ? saved.split(/[,，、]+/).map(s => s.trim()) : [saved];
     // v69：题干含 2 个及以上空位时，逐空渲染输入框（旧版只有 1 个框，孩子根本没法作答）
     let blanks = countFillBlanks(q);
     if (blanks >= 2) {
       html += `<div class="multi-blank-row">`;
       for (let bi = 0; bi < blanks; bi++) {
         html += `<span class="mb-item"><span class="mb-no">${bi + 1}</span>` +
-          `<input type="text" class="answer-input answer-input-multi" placeholder="第${bi + 1}空" ` +
-          `inputmode="${q.inputType || 'text'}" onkeydown="if(event.key==='Enter')submitAnswer()"></span>`;
+          `<input type="text" class="answer-input answer-input-multi${ikCls}" placeholder="第${bi + 1}空" ` +
+          `value="${String(savedParts[bi] || '').replace(/"/g, '&quot;')}" ` +
+          `inputmode="${ikHtml ? 'none' : (q.inputType || 'text')}"${roAttr} onkeydown="if(event.key==='Enter')submitAnswer()"></span>`;
       }
       html += `</div>`;
-      html += `<div class="mb-tip">共 ${blanks} 个空，请按顺序分别填写</div>`;
+      html += `<div class="mb-tip">共 ${blanks} 个空，请${ikHtml ? '点上方空位切换，再点下面键盘' : '按顺序分别填写'}</div>`;
     } else {
-      html += `<input type="text" class="answer-input" id="answerInput" placeholder="输入答案" inputmode="${q.inputType || 'text'}" onkeydown="if(event.key==='Enter')submitAnswer()">`;
+      html += `<input type="text" class="answer-input${ikCls}" id="answerInput" ` +
+        `placeholder="${ikHtml ? '点下面的数字键作答' : '输入答案'}" ` +
+        `value="${saved.replace(/"/g, '&quot;')}" ` +
+        `inputmode="${ikHtml ? 'none' : (q.inputType || 'text')}"${roAttr} onkeydown="if(event.key==='Enter')submitAnswer()">`;
     }
+    if (ikHtml) html += ikHtml;
   }
 
   card.innerHTML = html;
+  // v84：面板渲染后把输入框设为只读（防软键盘弹出 + 防手输全角符号）
+  if (window.InputKit && card.querySelector('.ik')) window.InputKit.bind(card);
   document.getElementById('feedback').className = 'feedback';
   document.getElementById('submitBtn').textContent = '提交答案';
   document.getElementById('submitBtn').onclick = submitAnswer;
@@ -12841,6 +12911,8 @@ function submitAnswer() {
           input.disabled = true;
         }
       }
+      // v84：本题已判分，锁掉点选面板，防止孩子继续改答案导致与已记录的成绩不一致
+      document.querySelectorAll('#questionCard .ik').forEach(el => el.classList.add('locked'));
     }
 
     // 显示反馈
@@ -12978,9 +13050,52 @@ function renderMobileScorePage() {
   });
   document.getElementById('questionScoreList').innerHTML = detailHtml;
 
+  // v84 P4：知识点掌握度报告（按错题知识点聚类，最弱排前，<60% 标红 + 纸质联动建议）
+  renderMasteryBlock();
+
   // 默认显示成绩页、隐藏答案解析
   document.getElementById('resultScoreCard').style.display = 'block';
   document.getElementById('examAnswerKey').style.display = 'none';
+}
+
+// v84 P4：把本次测验的错题按「知识点」聚类，生成掌握度报告。
+// 知识点由 core.js 的 detectMathConcepts(题面) 归因；一道题可命中多个知识点。
+function renderMasteryBlock() {
+  var el = document.getElementById('masteryBlock');
+  if (!el) return;
+  var concepts = {};
+  state.quizQuestions.forEach(function (q, i) {
+    var st = state.qStatus[i] || 2;
+    var correct = st === 1;
+    var names = (typeof detectMathConcepts === 'function') ? detectMathConcepts(q.question) : [];
+    if (!names || !names.length) return;
+    names.forEach(function (n) {
+      if (!concepts[n]) concepts[n] = { total: 0, correct: 0 };
+      concepts[n].total++;
+      if (correct) concepts[n].correct++;
+    });
+  });
+  var keys = Object.keys(concepts);
+  if (!keys.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
+  // 掌握度升序（最弱排前）
+  keys.sort(function (a, b) {
+    return (concepts[a].correct / concepts[a].total) - (concepts[b].correct / concepts[b].total);
+  });
+  var h = '<div class="detail-title">📊 知识点掌握度（按薄弱排序）</div>';
+  keys.forEach(function (n) {
+    var c = concepts[n];
+    var pct = Math.round(c.correct / c.total * 100);
+    var weak = pct < 60;
+    var bar = pct + '%';
+    h += '<div class="mastery-row' + (weak ? ' weak' : '') + '">';
+    h += '<div class="mastery-top"><span class="mastery-name">' + n + '</span>'
+      + '<span class="mastery-pct">' + bar + '（' + c.correct + '/' + c.total + '）</span></div>';
+    h += '<div class="mastery-bar"><i style="width:' + bar + '"></i></div>';
+    if (weak) h += '<div class="mastery-tip">⚠ 薄弱：建议配套纸质《同步练习》重点巩固「' + n + '」</div>';
+    h += '</div>';
+  });
+  el.innerHTML = h;
+  el.style.display = 'block';
 }
 
 function confirmScore() {
@@ -13097,6 +13212,25 @@ function renderWrongBank() {
 
   let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
   let html = `<div class="u-fs13 u-c-light u-mb10">共 ${wrongBank.length} 道错题</div>`;
+
+  // v84 P4：错题库按知识点聚类（高频薄弱点一眼可见，并联动纸质练习建议）
+  let conceptMap = {};
+  wrongBank.forEach(w => {
+    let names = (typeof detectMathConcepts === 'function') ? detectMathConcepts((w.question && w.question.question) || '') : [];
+    names.forEach(n => { conceptMap[n] = (conceptMap[n] || 0) + 1; });
+  });
+  let ckeys = Object.keys(conceptMap);
+  if (ckeys.length) {
+    ckeys.sort((a, b) => conceptMap[b] - conceptMap[a]);
+    html += '<div class="wrong-cluster">';
+    html += '<div class="detail-title">📚 错题知识点聚类（' + ckeys.length + ' 类）</div>';
+    html += '<div class="cluster-tags">';
+    ckeys.forEach(n => { html += '<span class="cluster-tag">' + n + ' <b>' + conceptMap[n] + '</b></span>'; });
+    html += '</div>';
+    html += '<div class="mastery-tip">高频薄弱点建议配套纸质《同步练习》对应章节重点巩固。</div>';
+    html += '</div>';
+  }
+
   html += '<div class="wrong-list">';
 
   wrongBank.forEach(w => {

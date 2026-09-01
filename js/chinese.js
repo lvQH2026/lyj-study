@@ -1697,18 +1697,18 @@
   // ============================================================
 function cn4s1_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：guān cháo →（    ）', '观潮'));
-    qs.push(mkFill('看拼音写词语：nóng lì →（    ）', '农历'));
-    qs.push(mkFill('看拼音写词语：kuān kuò →（    ）', '宽阔'));
-    qs.push(mkFill('看拼音写词语：lǒng zhào →（    ）', '笼罩'));
-    qs.push(mkFill('看拼音写词语：áng shǒu →（    ）', '昂首'));
-    qs.push(mkFill('看拼音写词语：fèi téng →（    ）', '沸腾'));
-    qs.push(mkFill('看拼音写词语：héng guàn →（    ）', '横贯'));
-    qs.push(mkFill('看拼音写词语：yī jiù →（    ）', '依旧'));
-    qs.push(mkFill('看拼音写词语：huī fù →（    ）', '恢复'));
-    qs.push(mkFill('看拼音写词语：càn làn →（    ）', '灿烂'));
-    qs.push(mkFill('看拼音写词语：róu hé →（    ）', '柔和'));
-    qs.push(mkFill('看拼音写词语：é luǎn shí →（    ）', '鹅卵石'));
+    qs.push(mkChoice('看拼音写词语：guān cháo →（    ）', '观潮', ['农历', '笼罩', '柔和']));
+    qs.push(mkChoice('看拼音写词语：nóng lì →（    ）', '农历', ['观潮', '灿烂', '笼罩']));
+    qs.push(mkChoice('看拼音写词语：kuān kuò →（    ）', '宽阔', ['柔和', '鹅卵石', '昂首']));
+    qs.push(mkChoice('看拼音写词语：lǒng zhào →（    ）', '笼罩', ['鹅卵石', '柔和', '灿烂']));
+    qs.push(mkChoice('看拼音写词语：áng shǒu →（    ）', '昂首', ['宽阔', '沸腾', '观潮']));
+    qs.push(mkChoice('看拼音写词语：fèi téng →（    ）', '沸腾', ['依旧', '宽阔', '鹅卵石']));
+    qs.push(mkChoice('看拼音写词语：héng guàn →（    ）', '横贯', ['农历', '沸腾', '笼罩']));
+    qs.push(mkChoice('看拼音写词语：yī jiù →（    ）', '依旧', ['观潮', '横贯', '宽阔']));
+    qs.push(mkChoice('看拼音写词语：huī fù →（    ）', '恢复', ['沸腾', '笼罩', '依旧']));
+    qs.push(mkChoice('看拼音写词语：càn làn →（    ）', '灿烂', ['沸腾', '横贯', '农历']));
+    qs.push(mkChoice('看拼音写词语：róu hé →（    ）', '柔和', ['昂首', '笼罩', '观潮']));
+    qs.push(mkChoice('看拼音写词语：é luǎn shí →（    ）', '鹅卵石', ['沸腾', '笼罩', '宽阔']));
     qs.push(mkChoice('\'薄雾\'的\'薄\'读音是？', 'bó', ['báo', 'bò', 'bù']));
     qs.push(mkChoice('\'笼罩\'的\'笼\'在这里读？', 'lǒng', ['lóng', 'lōng', 'nóng']));
     qs.push(mkChoice('\'风号浪吼\'的\'号\'读音是？', 'háo', ['hào', 'hǎo', 'hāo']));
@@ -1740,18 +1740,18 @@ function cn4s1_pool() {
   }
 function cn4s2_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：dòu jiá →（    ）', '豆荚'));
-    qs.push(mkFill('看拼音写词语：wēn hé →（    ）', '温和'));
-    qs.push(mkFill('看拼音写词语：yán jiū →（    ）', '研究'));
-    qs.push(mkFill('看拼音写词语：jià shǐ →（    ）', '驾驶'));
-    qs.push(mkFill('看拼音写词语：tàn suǒ →（    ）', '探索'));
-    qs.push(mkFill('看拼音写词语：ào mì →（    ）', '奥秘'));
-    qs.push(mkFill('看拼音写词语：lián xì →（    ）', '联系'));
-    qs.push(mkFill('看拼音写词语：rèn hé →（    ）', '任何'));
-    qs.push(mkFill('看拼音写词语：wén zì →（    ）', '蚊子'));
-    qs.push(mkFill('看拼音写词语：jí shǐ →（    ）', '即使'));
-    qs.push(mkFill('看拼音写词语：shéng zi →（    ）', '绳子'));
-    qs.push(mkFill('看拼音写词语：zhèng míng →（    ）', '证明'));
+    qs.push(mkChoice('看拼音写词语：dòu jiá →（    ）', '豆荚', ['驾驶', '探索', '证明']));
+    qs.push(mkChoice('看拼音写词语：wēn hé →（    ）', '温和', ['研究', '探索', '驾驶']));
+    qs.push(mkChoice('看拼音写词语：yán jiū →（    ）', '研究', ['驾驶', '温和', '任何']));
+    qs.push(mkChoice('看拼音写词语：jià shǐ →（    ）', '驾驶', ['即使', '联系', '豆荚']));
+    qs.push(mkChoice('看拼音写词语：tàn suǒ →（    ）', '探索', ['即使', '研究', '任何']));
+    qs.push(mkChoice('看拼音写词语：ào mì →（    ）', '奥秘', ['温和', '蚊子', '研究']));
+    qs.push(mkChoice('看拼音写词语：lián xì →（    ）', '联系', ['温和', '绳子', '蚊子']));
+    qs.push(mkChoice('看拼音写词语：rèn hé →（    ）', '任何', ['研究', '联系', '即使']));
+    qs.push(mkChoice('看拼音写词语：wén zì →（    ）', '蚊子', ['豆荚', '探索', '研究']));
+    qs.push(mkChoice('看拼音写词语：jí shǐ →（    ）', '即使', ['蚊子', '奥秘', '探索']));
+    qs.push(mkChoice('看拼音写词语：shéng zi →（    ）', '绳子', ['探索', '豆荚', '联系']));
+    qs.push(mkChoice('看拼音写词语：zhèng míng →（    ）', '证明', ['绳子', '联系', '奥秘']));
     qs.push(mkChoice('\'系铃铛\'的\'系\'在这里读？', 'jì', ['xì', 'jī', 'qì']));
     qs.push(mkChoice('\'屏风\'的\'屏\'读音是？', 'píng', ['bǐng', 'pīn', 'bīng']));
     qs.push(mkChoice('\'载人飞船\'的\'载\'读音是？', 'zài', ['zǎi', 'zāi', 'cái']));
@@ -1782,18 +1782,18 @@ function cn4s2_pool() {
   }
 function cn4s3_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：mù jiāng yín →（    ）', '暮江吟'));
-    qs.push(mkFill('看拼音写词语：tí xī lín bì →（    ）', '题西林壁'));
-    qs.push(mkFill('看拼音写词语：xuě méi →（    ）', '雪梅'));
-    qs.push(mkFill('看拼音写词语：nèn jīng →（    ）', '嫩茎'));
-    qs.push(mkFill('看拼音写词语：hén jì →（    ）', '痕迹'));
-    qs.push(mkFill('看拼音写词语：zhù zhái →（    ）', '住宅'));
-    qs.push(mkFill('看拼音写词语：lín shí →（    ）', '临时'));
-    qs.push(mkFill('看拼音写词语：xuǎn zé →（    ）', '选择'));
-    qs.push(mkFill('看拼音写词语：zhòu yǔ →（    ）', '骤雨'));
-    qs.push(mkFill('看拼音写词语：sōu suǒ →（    ）', '搜索'));
-    qs.push(mkFill('看拼音写词语：wò shì →（    ）', '卧室'));
-    qs.push(mkFill('看拼音写词语：zhǐ zhǐ →（    ）', '住址'));
+    qs.push(mkChoice('看拼音写词语：mù jiāng yín →（    ）', '暮江吟', ['住址', '选择', '嫩茎']));
+    qs.push(mkChoice('看拼音写词语：tí xī lín bì →（    ）', '题西林壁', ['卧室', '选择', '临时']));
+    qs.push(mkChoice('看拼音写词语：xuě méi →（    ）', '雪梅', ['题西林壁', '痕迹', '嫩茎']));
+    qs.push(mkChoice('看拼音写词语：nèn jīng →（    ）', '嫩茎', ['选择', '暮江吟', '住宅']));
+    qs.push(mkChoice('看拼音写词语：hén jì →（    ）', '痕迹', ['暮江吟', '住宅', '雪梅']));
+    qs.push(mkChoice('看拼音写词语：zhù zhái →（    ）', '住宅', ['选择', '嫩茎', '雪梅']));
+    qs.push(mkChoice('看拼音写词语：lín shí →（    ）', '临时', ['搜索', '卧室', '雪梅']));
+    qs.push(mkChoice('看拼音写词语：xuǎn zé →（    ）', '选择', ['痕迹', '住宅', '暮江吟']));
+    qs.push(mkChoice('看拼音写词语：zhòu yǔ →（    ）', '骤雨', ['雪梅', '临时', '暮江吟']));
+    qs.push(mkChoice('看拼音写词语：sōu suǒ →（    ）', '搜索', ['暮江吟', '临时', '雪梅']));
+    qs.push(mkChoice('看拼音写词语：wò shì →（    ）', '卧室', ['临时', '住址', '嫩茎']));
+    qs.push(mkChoice('看拼音写词语：zhǐ zhǐ →（    ）', '住址', ['题西林壁', '住宅', '嫩茎']));
     qs.push(mkChoice('\'降服\'的\'降\'读音是？', 'xiáng', ['jiàng', 'jàng', 'qiáng']));
     qs.push(mkChoice('\'弯曲\'的\'曲\'读音是？', 'qū', ['qǔ', 'qūn', 'jū']));
     qs.push(mkChoice('\'空隙\'的\'隙\'读音是？', 'xì', ['xī', 'jì', 'xuè']));
@@ -1824,18 +1824,18 @@ function cn4s3_pool() {
   }
 function cn4s4_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：pán gǔ →（    ）', '盘古'));
-    qs.push(mkFill('看拼音写词语：fān shēn →（    ）', '翻身'));
-    qs.push(mkFill('看拼音写词语：huǎn huǎn →（    ）', '缓缓'));
-    qs.push(mkFill('看拼音写词语：xuè yè →（    ）', '血液'));
-    qs.push(mkFill('看拼音写词语：mào shèng →（    ）', '茂盛'));
-    qs.push(mkFill('看拼音写词语：jīng wèi →（    ）', '精卫'));
-    qs.push(mkFill('看拼音写词语：yán dì →（    ）', '炎帝'));
-    qs.push(mkFill('看拼音写词语：bēi cǎn →（    ）', '悲惨'));
-    qs.push(mkFill('看拼音写词语：wéi kàng →（    ）', '违抗'));
-    qs.push(mkFill('看拼音写词语：hěn xīn →（    ）', '狠心'));
-    qs.push(mkFill('看拼音写词语：zhù míng →（    ）', '著名'));
-    qs.push(mkFill('看拼音写词语：huò dé →（    ）', '获得'));
+    qs.push(mkChoice('看拼音写词语：pán gǔ →（    ）', '盘古', ['获得', '茂盛', '血液']));
+    qs.push(mkChoice('看拼音写词语：fān shēn →（    ）', '翻身', ['盘古', '血液', '著名']));
+    qs.push(mkChoice('看拼音写词语：huǎn huǎn →（    ）', '缓缓', ['血液', '著名', '盘古']));
+    qs.push(mkChoice('看拼音写词语：xuè yè →（    ）', '血液', ['狠心', '缓缓', '获得']));
+    qs.push(mkChoice('看拼音写词语：mào shèng →（    ）', '茂盛', ['翻身', '获得', '血液']));
+    qs.push(mkChoice('看拼音写词语：jīng wèi →（    ）', '精卫', ['茂盛', '血液', '炎帝']));
+    qs.push(mkChoice('看拼音写词语：yán dì →（    ）', '炎帝', ['翻身', '悲惨', '精卫']));
+    qs.push(mkChoice('看拼音写词语：bēi cǎn →（    ）', '悲惨', ['狠心', '炎帝', '翻身']));
+    qs.push(mkChoice('看拼音写词语：wéi kàng →（    ）', '违抗', ['狠心', '血液', '茂盛']));
+    qs.push(mkChoice('看拼音写词语：hěn xīn →（    ）', '狠心', ['获得', '著名', '缓缓']));
+    qs.push(mkChoice('看拼音写词语：zhù míng →（    ）', '著名', ['炎帝', '缓缓', '血液']));
+    qs.push(mkChoice('看拼音写词语：huò dé →（    ）', '获得', ['盘古', '狠心', '炎帝']));
     qs.push(mkChoice('\'少女\'在《精卫填海》中意思是？', '小女儿', ['年轻女孩', '少年', '女孩儿']));
     qs.push(mkChoice('\'浑浊\'的\'浊\'读音是？', 'zhuó', ['zuó', 'zó', 'zhú']));
     qs.push(mkChoice('\'喷射\'的\'喷\'读音是？', 'pēn', ['pèn', 'fèn', 'bēn']));
@@ -1866,18 +1866,18 @@ function cn4s4_pool() {
   }
 function cn4s5_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：xiù jué →（    ）', '嗅觉'));
-    qs.push(mkFill('看拼音写词语：nài hé →（    ）', '奈何'));
-    qs.push(mkFill('看拼音写词语：yá chǐ →（    ）', '牙齿'));
-    qs.push(mkFill('看拼音写词语：páng dà →（    ）', '庞大'));
-    qs.push(mkFill('看拼音写词语：lì liàng →（    ）', '力量'));
-    qs.push(mkFill('看拼音写词语：biàn zi →（    ）', '辫子'));
-    qs.push(mkFill('看拼音写词语：hēi yán →（    ）', '呵斥'));
-    qs.push(mkFill('看拼音写词语：fā chàn →（    ）', '发颤'));
-    qs.push(mkFill('看拼音写词语：jí qǔ →（    ）', '汲取'));
-    qs.push(mkFill('看拼音写词语：fèn lì →（    ）', '奋力'));
-    qs.push(mkFill('看拼音写词语：jū rán →（    ）', '居然'));
-    qs.push(mkFill('看拼音写词语：nián jì →（    ）', '年纪'));
+    qs.push(mkChoice('看拼音写词语：xiù jué →（    ）', '嗅觉', ['奋力', '牙齿', '奈何']));
+    qs.push(mkChoice('看拼音写词语：nài hé →（    ）', '奈何', ['力量', '居然', '牙齿']));
+    qs.push(mkChoice('看拼音写词语：yá chǐ →（    ）', '牙齿', ['庞大', '居然', '发颤']));
+    qs.push(mkChoice('看拼音写词语：páng dà →（    ）', '庞大', ['奈何', '居然', '嗅觉']));
+    qs.push(mkChoice('看拼音写词语：lì liàng →（    ）', '力量', ['嗅觉', '年纪', '牙齿']));
+    qs.push(mkChoice('看拼音写词语：biàn zi →（    ）', '辫子', ['发颤', '呵斥', '奈何']));
+    qs.push(mkChoice('看拼音写词语：hēi yán →（    ）', '呵斥', ['年纪', '辫子', '牙齿']));
+    qs.push(mkChoice('看拼音写词语：fā chàn →（    ）', '发颤', ['年纪', '庞大', '呵斥']));
+    qs.push(mkChoice('看拼音写词语：jí qǔ →（    ）', '汲取', ['嗅觉', '居然', '呵斥']));
+    qs.push(mkChoice('看拼音写词语：fèn lì →（    ）', '奋力', ['牙齿', '居然', '嗅觉']));
+    qs.push(mkChoice('看拼音写词语：jū rán →（    ）', '居然', ['汲取', '辫子', '发颤']));
+    qs.push(mkChoice('看拼音写词语：nián jì →（    ）', '年纪', ['居然', '汲取', '辫子']));
     qs.push(mkChoice('\'照相\'的\'相\'读音是？', 'xiàng', ['xiāng', 'xāng', 'shàng']));
     qs.push(mkChoice('\'似乎\'的\'似\'读音是？', 'sì', ['shì', 'shī', 'sī']));
     qs.push(mkChoice('\'汲取\'的\'汲\'读音是？', 'jí', ['xī', 'jī', 'qī']));
@@ -1906,18 +1906,18 @@ function cn4s5_pool() {
   }
 function cn4s6_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：wú yuán wú gù →（    ）', '无缘无故'));
-    qs.push(mkFill('看拼音写词语：píng jiè →（    ）', '凭借'));
-    qs.push(mkFill('看拼音写词语：xùn chì →（    ）', '训斥'));
-    qs.push(mkFill('看拼音写词语：wō nang →（    ）', '窝囊'));
-    qs.push(mkFill('看拼音写词语：kuì bài →（    ）', '溃败'));
-    qs.push(mkFill('看拼音写词语：yù liào →（    ）', '预料'));
-    qs.push(mkFill('看拼音写词语：zì háo →（    ）', '自豪'));
-    qs.push(mkFill('看拼音写词语：chè huàn →（    ）', '撤换'));
-    qs.push(mkFill('看拼音写词语：táo pǎo →（    ）', '逃跑'));
-    qs.push(mkFill('看拼音写词语：kù zi →（    ）', '裤子'));
-    qs.push(mkFill('看拼音写词语：bèn zhuō →（    ）', '笨拙'));
-    qs.push(mkFill('看拼音写词语：róng yù →（    ）', '荣誉'));
+    qs.push(mkChoice('看拼音写词语：wú yuán wú gù →（    ）', '无缘无故', ['训斥', '溃败', '笨拙']));
+    qs.push(mkChoice('看拼音写词语：píng jiè →（    ）', '凭借', ['撤换', '自豪', '窝囊']));
+    qs.push(mkChoice('看拼音写词语：xùn chì →（    ）', '训斥', ['窝囊', '预料', '无缘无故']));
+    qs.push(mkChoice('看拼音写词语：wō nang →（    ）', '窝囊', ['凭借', '溃败', '自豪']));
+    qs.push(mkChoice('看拼音写词语：kuì bài →（    ）', '溃败', ['无缘无故', '预料', '训斥']));
+    qs.push(mkChoice('看拼音写词语：yù liào →（    ）', '预料', ['自豪', '窝囊', '无缘无故']));
+    qs.push(mkChoice('看拼音写词语：zì háo →（    ）', '自豪', ['训斥', '预料', '无缘无故']));
+    qs.push(mkChoice('看拼音写词语：chè huàn →（    ）', '撤换', ['无缘无故', '凭借', '训斥']));
+    qs.push(mkChoice('看拼音写词语：táo pǎo →（    ）', '逃跑', ['自豪', '训斥', '裤子']));
+    qs.push(mkChoice('看拼音写词语：kù zi →（    ）', '裤子', ['荣誉', '窝囊', '自豪']));
+    qs.push(mkChoice('看拼音写词语：bèn zhuō →（    ）', '笨拙', ['凭借', '荣誉', '撤换']));
+    qs.push(mkChoice('看拼音写词语：róng yù →（    ）', '荣誉', ['训斥', '窝囊', '无缘无故']));
     qs.push(mkChoice('\'拳头\'的\'拳\'读音是？', 'quán', ['juán', 'qüán', 'chuán']));
     qs.push(mkChoice('\'露面\'的\'露\'读音是？', 'lòu', ['lù', 'lōu', 'lóu']));
     qs.push(mkChoice('\'角色\'的\'角\'读音是？', 'jué', ['jiǎo', 'jǎo', 'jú']));
@@ -1946,18 +1946,18 @@ function cn4s6_pool() {
   }
 function cn4s7_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：chū sài →（    ）', '出塞'));
-    qs.push(mkFill('看拼音写词语：liáng zhōu cí →（    ）', '凉州词'));
-    qs.push(mkFill('看拼音写词语：xià rì jué jù →（    ）', '夏日绝句'));
-    qs.push(mkFill('看拼音写词语：xùn chì →（    ）', '训斥'));
-    qs.push(mkFill('看拼音写词语：qīng xī →（    ）', '清晰'));
-    qs.push(mkFill('看拼音写词语：xiōng huái →（    ）', '胸怀'));
-    qs.push(mkFill('看拼音写词语：zàn tàn →（    ）', '赞叹'));
-    qs.push(mkFill('看拼音写词语：yí huò →（    ）', '疑惑'));
-    qs.push(mkFill('看拼音写词语：fǎn huí →（    ）', '返回'));
-    qs.push(mkFill('看拼音写词语：fēi fán →（    ）', '非凡'));
-    qs.push(mkFill('看拼音写词语：xùn liàn →（    ）', '训练'));
-    qs.push(mkFill('看拼音写词语：zhèng fǔ →（    ）', '政府'));
+    qs.push(mkChoice('看拼音写词语：chū sài →（    ）', '出塞', ['训斥', '胸怀', '非凡']));
+    qs.push(mkChoice('看拼音写词语：liáng zhōu cí →（    ）', '凉州词', ['训斥', '清晰', '胸怀']));
+    qs.push(mkChoice('看拼音写词语：xià rì jué jù →（    ）', '夏日绝句', ['胸怀', '政府', '训斥']));
+    qs.push(mkChoice('看拼音写词语：xùn chì →（    ）', '训斥', ['夏日绝句', '胸怀', '出塞']));
+    qs.push(mkChoice('看拼音写词语：qīng xī →（    ）', '清晰', ['赞叹', '疑惑', '凉州词']));
+    qs.push(mkChoice('看拼音写词语：xiōng huái →（    ）', '胸怀', ['夏日绝句', '训练', '出塞']));
+    qs.push(mkChoice('看拼音写词语：zàn tàn →（    ）', '赞叹', ['凉州词', '返回', '训练']));
+    qs.push(mkChoice('看拼音写词语：yí huò →（    ）', '疑惑', ['夏日绝句', '凉州词', '出塞']));
+    qs.push(mkChoice('看拼音写词语：fǎn huí →（    ）', '返回', ['出塞', '凉州词', '夏日绝句']));
+    qs.push(mkChoice('看拼音写词语：fēi fán →（    ）', '非凡', ['夏日绝句', '训斥', '赞叹']));
+    qs.push(mkChoice('看拼音写词语：xùn liàn →（    ）', '训练', ['出塞', '夏日绝句', '返回']));
+    qs.push(mkChoice('看拼音写词语：zhèng fǔ →（    ）', '政府', ['训斥', '胸怀', '凉州词']));
     qs.push(mkChoice('\'宁可\'的\'宁\'读音是？', 'nìng', ['níng', 'nīng', 'líng']));
     qs.push(mkChoice('\'要求\'的\'要\'读音是？', 'yāo', ['yào', 'yǎo', 'iào']));
     qs.push(mkChoice('\'痉挛\'的\'痉\'读音是？', 'jìng', ['jīng', 'jìn', 'qíng']));
@@ -1988,18 +1988,18 @@ function cn4s7_pool() {
   }
 function cn4s8_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：wáng róng →（    ）', '王戎'));
-    qs.push(mkFill('看拼音写词语：zhū ér →（    ）', '诸儿'));
-    qs.push(mkFill('看拼音写词语：jìng zǒu →（    ）', '竞走'));
-    qs.push(mkFill('看拼音写词语：wéi yī →（    ）', '唯一'));
-    qs.push(mkFill('看拼音写词语：xí mén bào →（    ）', '西门豹'));
-    qs.push(mkFill('看拼音写词语：guān shēn →（    ）', '官绅'));
-    qs.push(mkFill('看拼音写词语：bī pò →（    ）', '逼迫'));
-    qs.push(mkFill('看拼音写词语：pài chū →（    ）', '派出'));
-    qs.push(mkFill('看拼音写词语：gān hàn →（    ）', '干旱'));
-    qs.push(mkFill('看拼音写词语：tú dì →（    ）', '徒弟'));
-    qs.push(mkFill('看拼音写词语：qiú ráo →（    ）', '求饶'));
-    qs.push(mkFill('看拼音写词语：guàn gài →（    ）', '灌溉'));
+    qs.push(mkChoice('看拼音写词语：wáng róng →（    ）', '王戎', ['竞走', '唯一', '西门豹']));
+    qs.push(mkChoice('看拼音写词语：zhū ér →（    ）', '诸儿', ['派出', '徒弟', '干旱']));
+    qs.push(mkChoice('看拼音写词语：jìng zǒu →（    ）', '竞走', ['灌溉', '逼迫', '王戎']));
+    qs.push(mkChoice('看拼音写词语：wéi yī →（    ）', '唯一', ['徒弟', '西门豹', '官绅']));
+    qs.push(mkChoice('看拼音写词语：xí mén bào →（    ）', '西门豹', ['徒弟', '灌溉', '唯一']));
+    qs.push(mkChoice('看拼音写词语：guān shēn →（    ）', '官绅', ['诸儿', '唯一', '西门豹']));
+    qs.push(mkChoice('看拼音写词语：bī pò →（    ）', '逼迫', ['竞走', '灌溉', '诸儿']));
+    qs.push(mkChoice('看拼音写词语：pài chū →（    ）', '派出', ['王戎', '求饶', '逼迫']));
+    qs.push(mkChoice('看拼音写词语：gān hàn →（    ）', '干旱', ['诸儿', '唯一', '竞走']));
+    qs.push(mkChoice('看拼音写词语：tú dì →（    ）', '徒弟', ['求饶', '唯一', '灌溉']));
+    qs.push(mkChoice('看拼音写词语：qiú ráo →（    ）', '求饶', ['王戎', '竞走', '干旱']));
+    qs.push(mkChoice('看拼音写词语：guàn gài →（    ）', '灌溉', ['干旱', '官绅', '徒弟']));
     qs.push(mkChoice('\'差别\'的\'差\'读音是？', 'chā', ['chà', 'chāi', 'cī']));
     qs.push(mkChoice('\'漂流\'的\'漂\'读音是？', 'piāo', ['piào', 'piǎo', 'biāo']));
     qs.push(mkChoice('\'纪昌\'的\'纪\'读音是？', 'jǐ', ['jì', 'jī', 'qí']));
@@ -2030,18 +2030,18 @@ function cn4s8_pool() {
   }
 function cn4x1_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：sì shí tián yuán zá xìng →（    ）', '四时田园杂兴'));
-    qs.push(mkFill('看拼音写词语：sù xīn shì xú gōng diàn →（    ）', '宿新市徐公店'));
-    qs.push(mkFill('看拼音写词语：qīng píng lè cūn jū →（    ）', '清平乐·村居'));
-    qs.push(mkFill('看拼音写词语：wū yán →（    ）', '屋檐'));
-    qs.push(mkFill('看拼音写词语：zhuāng shì →（    ）', '装饰'));
-    qs.push(mkFill('看拼音写词语：shùn xù →（    ）', '顺序'));
-    qs.push(mkFill('看拼音写词语：tian chuāng →（    ）', '天窗'));
-    qs.push(mkFill('看拼音写词语：wèi jiè →（    ）', '慰藉'));
-    qs.push(mkFill('看拼音写词语：māo tóu yīng →（    ）', '猫头鹰'));
-    qs.push(mkFill('看拼音写词语：qí huàn →（    ）', '奇幻'));
-    qs.push(mkFill('看拼音写词语：hé tān →（    ）', '河滩'));
-    qs.push(mkFill('看拼音写词语：biān fú →（    ）', '蝙蝠'));
+    qs.push(mkChoice('看拼音写词语：sì shí tián yuán zá xìng →（    ）', '四时田园杂兴', ['宿新市徐公店', '蝙蝠', '装饰']));
+    qs.push(mkChoice('看拼音写词语：sù xīn shì xú gōng diàn →（    ）', '宿新市徐公店', ['四时田园杂兴', '慰藉', '屋檐']));
+    qs.push(mkChoice('看拼音写词语：qīng píng lè cūn jū →（    ）', '清平乐·村居', ['宿新市徐公店', '河滩', '奇幻']));
+    qs.push(mkChoice('看拼音写词语：wū yán →（    ）', '屋檐', ['宿新市徐公店', '装饰', '奇幻']));
+    qs.push(mkChoice('看拼音写词语：zhuāng shì →（    ）', '装饰', ['宿新市徐公店', '屋檐', '天窗']));
+    qs.push(mkChoice('看拼音写词语：shùn xù →（    ）', '顺序', ['宿新市徐公店', '四时田园杂兴', '奇幻']));
+    qs.push(mkChoice('看拼音写词语：tian chuāng →（    ）', '天窗', ['奇幻', '蝙蝠', '四时田园杂兴']));
+    qs.push(mkChoice('看拼音写词语：wèi jiè →（    ）', '慰藉', ['奇幻', '四时田园杂兴', '猫头鹰']));
+    qs.push(mkChoice('看拼音写词语：māo tóu yīng →（    ）', '猫头鹰', ['装饰', '四时田园杂兴', '宿新市徐公店']));
+    qs.push(mkChoice('看拼音写词语：qí huàn →（    ）', '奇幻', ['四时田园杂兴', '顺序', '装饰']));
+    qs.push(mkChoice('看拼音写词语：hé tān →（    ）', '河滩', ['四时田园杂兴', '屋檐', '装饰']));
+    qs.push(mkChoice('看拼音写词语：biān fú →（    ）', '蝙蝠', ['猫头鹰', '装饰', '清平乐·村居']));
     qs.push(mkChoice('\'清平乐\'中\'乐\'读音是？', 'yuè', ['lè', 'yuē', 'lèi']));
     qs.push(mkChoice('\'剥莲蓬\'的\'剥\'读音是？', 'bō', ['bāo', 'bò', 'pō']));
     qs.push(mkChoice('\'鸡冠花\'的\'冠\'读音是？', 'guān', ['guàn', 'guān g', 'gūn']));
@@ -2071,18 +2071,18 @@ function cn4x1_pool() {
   }
 function cn4x2_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：hǔ pò →（    ）', '琥珀'));
-    qs.push(mkFill('看拼音写词语：fú shì →（    ）', '拂拭'));
-    qs.push(mkFill('看拼音写词语：měi cān →（    ）', '美餐'));
-    qs.push(mkFill('看拼音写词语：tuī cè →（    ）', '推测'));
-    qs.push(mkFill('看拼音写词语：xiáng xì →（    ）', '详细'));
-    qs.push(mkFill('看拼音写词语：kǒng lóng →（    ）', '恐龙'));
-    qs.push(mkFill('看拼音写词语：bèn zhòng →（    ）', '笨重'));
-    qs.push(mkFill('看拼音写词语：chí dùn →（    ）', '迟钝'));
-    qs.push(mkFill('看拼音写词语：gē zi →（    ）', '鸽子'));
-    qs.push(mkFill('看拼音写词语：nà mǐ →（    ）', '纳米'));
-    qs.push(mkFill('看拼音写词语：yōng yǒu →（    ）', '拥有'));
-    qs.push(mkFill('看拼音写词语：bīng xiāng →（    ）', '冰箱'));
+    qs.push(mkChoice('看拼音写词语：hǔ pò →（    ）', '琥珀', ['美餐', '详细', '鸽子']));
+    qs.push(mkChoice('看拼音写词语：fú shì →（    ）', '拂拭', ['美餐', '纳米', '笨重']));
+    qs.push(mkChoice('看拼音写词语：měi cān →（    ）', '美餐', ['恐龙', '拂拭', '迟钝']));
+    qs.push(mkChoice('看拼音写词语：tuī cè →（    ）', '推测', ['笨重', '迟钝', '拥有']));
+    qs.push(mkChoice('看拼音写词语：xiáng xì →（    ）', '详细', ['恐龙', '迟钝', '纳米']));
+    qs.push(mkChoice('看拼音写词语：kǒng lóng →（    ）', '恐龙', ['拥有', '冰箱', '拂拭']));
+    qs.push(mkChoice('看拼音写词语：bèn zhòng →（    ）', '笨重', ['拂拭', '拥有', '详细']));
+    qs.push(mkChoice('看拼音写词语：chí dùn →（    ）', '迟钝', ['琥珀', '美餐', '冰箱']));
+    qs.push(mkChoice('看拼音写词语：gē zi →（    ）', '鸽子', ['拂拭', '美餐', '推测']));
+    qs.push(mkChoice('看拼音写词语：nà mǐ →（    ）', '纳米', ['鸽子', '恐龙', '琥珀']));
+    qs.push(mkChoice('看拼音写词语：yōng yǒu →（    ）', '拥有', ['美餐', '拂拭', '冰箱']));
+    qs.push(mkChoice('看拼音写词语：bīng xiāng →（    ）', '冰箱', ['拥有', '琥珀', '推测']));
     qs.push(mkChoice('\'挣扎\'的\'扎\'读音是？', 'zhá', ['zhā', 'zā', 'zha']));
     qs.push(mkChoice('\'率领\'的\'率\'读音是？', 'shuài', ['lǜ', 'suài', 'shuāi']));
     qs.push(mkChoice('\'着落\'的\'着\'读音是？', 'zhuó', ['zháo', 'zhāo', 'zhe']));
@@ -2112,18 +2112,18 @@ function cn4x2_pool() {
   }
 function cn4x3_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：fán xīng →（    ）', '繁星'));
-    qs.push(mkFill('看拼音写词语：bō tāo →（    ）', '波涛'));
-    qs.push(mkFill('看拼音写词语：mò lǜ →（    ）', '墨绿'));
-    qs.push(mkFill('看拼音写词语：nèn lǜ →（    ）', '嫩绿'));
-    qs.push(mkFill('看拼音写词语：jí zhōng →（    ）', '集中'));
-    qs.push(mkFill('看拼音写词语：jiāo chā →（    ）', '交叉'));
-    qs.push(mkFill('看拼音写词语：zhěng qí →（    ）', '整齐'));
-    qs.push(mkFill('看拼音写词语：bái huà →（    ）', '白桦'));
-    qs.push(mkFill('看拼音写词语：xiāo sǎ →（    ）', '潇洒'));
-    qs.push(mkFill('看拼音写词语：máo róng róng →（    ）', '毛茸茸'));
-    qs.push(mkFill('看拼音写词语：zhǐ huī →（    ）', '指挥'));
-    qs.push(mkFill('看拼音写词语：méng lóng →（    ）', '朦胧'));
+    qs.push(mkChoice('看拼音写词语：fán xīng →（    ）', '繁星', ['交叉', '嫩绿', '集中']));
+    qs.push(mkChoice('看拼音写词语：bō tāo →（    ）', '波涛', ['墨绿', '集中', '交叉']));
+    qs.push(mkChoice('看拼音写词语：mò lǜ →（    ）', '墨绿', ['波涛', '毛茸茸', '朦胧']));
+    qs.push(mkChoice('看拼音写词语：nèn lǜ →（    ）', '嫩绿', ['墨绿', '集中', '交叉']));
+    qs.push(mkChoice('看拼音写词语：jí zhōng →（    ）', '集中', ['整齐', '嫩绿', '毛茸茸']));
+    qs.push(mkChoice('看拼音写词语：jiāo chā →（    ）', '交叉', ['朦胧', '毛茸茸', '指挥']));
+    qs.push(mkChoice('看拼音写词语：zhěng qí →（    ）', '整齐', ['白桦', '集中', '墨绿']));
+    qs.push(mkChoice('看拼音写词语：bái huà →（    ）', '白桦', ['嫩绿', '潇洒', '波涛']));
+    qs.push(mkChoice('看拼音写词语：xiāo sǎ →（    ）', '潇洒', ['交叉', '嫩绿', '波涛']));
+    qs.push(mkChoice('看拼音写词语：máo róng róng →（    ）', '毛茸茸', ['嫩绿', '朦胧', '波涛']));
+    qs.push(mkChoice('看拼音写词语：zhǐ huī →（    ）', '指挥', ['整齐', '集中', '朦胧']));
+    qs.push(mkChoice('看拼音写词语：méng lóng →（    ）', '朦胧', ['波涛', '毛茸茸', '嫩绿']));
     qs.push(mkChoice('\'曝光\'的\'曝\'读音是？', 'bào', ['pù', 'pō', 'bāo']));
     qs.push(mkChoice('\'朝霞\'的\'朝\'读音是？', 'zhāo', ['cháo', 'chǎo', 'zāo']));
     qs.push(mkChoice('\'炫耀\'的\'炫\'读音是？', 'xuàn', ['xuán', 'xuǎn', 'xuàn r']));
@@ -2153,18 +2153,18 @@ function cn4x3_pool() {
   }
 function cn4x4_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：táo qì →（    ）', '淘气'));
-    qs.push(mkFill('看拼音写词语：jìn zhí →（    ）', '尽职'));
-    qs.push(mkFill('看拼音写词语：gū dōng →（    ）', '咕咚'));
-    qs.push(mkFill('看拼音写词语：zāo yāng →（    ）', '遭殃'));
-    qs.push(mkFill('看拼音写词语：tǎo yàn →（    ）', '讨厌'));
-    qs.push(mkFill('看拼音写词语：lǐ yóu →（    ）', '理由'));
-    qs.push(mkFill('看拼音写词语：jǐng jiè →（    ）', '警戒'));
-    qs.push(mkFill('看拼音写词语：yù bèi →（    ）', '预备'));
-    qs.push(mkFill('看拼音写词语：jú cù →（    ）', '局促'));
-    qs.push(mkFill('看拼音写词语：pí qi →（    ）', '脾气'));
-    qs.push(mkFill('看拼音写词语：áng shǒu →（    ）', '昂首'));
-    qs.push(mkFill('看拼音写词语：gōng yǎng →（    ）', '供养'));
+    qs.push(mkChoice('看拼音写词语：táo qì →（    ）', '淘气', ['预备', '局促', '尽职']));
+    qs.push(mkChoice('看拼音写词语：jìn zhí →（    ）', '尽职', ['供养', '警戒', '理由']));
+    qs.push(mkChoice('看拼音写词语：gū dōng →（    ）', '咕咚', ['尽职', '脾气', '供养']));
+    qs.push(mkChoice('看拼音写词语：zāo yāng →（    ）', '遭殃', ['理由', '脾气', '咕咚']));
+    qs.push(mkChoice('看拼音写词语：tǎo yàn →（    ）', '讨厌', ['脾气', '预备', '供养']));
+    qs.push(mkChoice('看拼音写词语：lǐ yóu →（    ）', '理由', ['警戒', '脾气', '尽职']));
+    qs.push(mkChoice('看拼音写词语：jǐng jiè →（    ）', '警戒', ['预备', '局促', '供养']));
+    qs.push(mkChoice('看拼音写词语：yù bèi →（    ）', '预备', ['尽职', '遭殃', '讨厌']));
+    qs.push(mkChoice('看拼音写词语：jú cù →（    ）', '局促', ['警戒', '咕咚', '供养']));
+    qs.push(mkChoice('看拼音写词语：pí qi →（    ）', '脾气', ['讨厌', '警戒', '局促']));
+    qs.push(mkChoice('看拼音写词语：áng shǒu →（    ）', '昂首', ['咕咚', '讨厌', '淘气']));
+    qs.push(mkChoice('看拼音写词语：gōng yǎng →（    ）', '供养', ['讨厌', '尽职', '咕咚']));
     qs.push(mkChoice('\'屏息\'的\'屏\'读音是？', 'bǐng', ['píng', 'pīn', 'bīng']));
     qs.push(mkChoice('\'差不多\'的\'差\'读音是？', 'chà', ['chā', 'chāi', 'cī']));
     qs.push(mkChoice('\'看守\'的\'看\'读音是？', 'kān', ['kàn', 'kǎn', 'kān r']));
@@ -2193,18 +2193,18 @@ function cn4x4_pool() {
   }
 function cn4x5_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：hǎi shàng rì chū →（    ）', '海上日出'));
-    qs.push(mkFill('看拼音写词语：fàn wéi →（    ）', '范围'));
-    qs.push(mkFill('看拼音写词语：nǔ lì →（    ）', '努力'));
-    qs.push(mkFill('看拼音写词语：càn làn →（    ）', '灿烂'));
-    qs.push(mkFill('看拼音写词语：zǐ sè →（    ）', '紫色'));
-    qs.push(mkFill('看拼音写词语：dù juān →（    ）', '杜鹃'));
-    qs.push(mkFill('看拼音写词语：kuān zhǎi →（    ）', '宽窄'));
-    qs.push(mkFill('看拼音写词语：yōng jǐ →（    ）', '拥挤'));
-    qs.push(mkFill('看拼音写词语：gēn jù →（    ）', '根据'));
-    qs.push(mkFill('看拼音写词语：shí sǔn →（    ）', '石笋'));
-    qs.push(mkFill('看拼音写词语：yuán quán →（    ）', '源泉'));
-    qs.push(mkFill('看拼音写词语：guān shǎng →（    ）', '观赏'));
+    qs.push(mkChoice('看拼音写词语：hǎi shàng rì chū →（    ）', '海上日出', ['范围', '石笋', '源泉']));
+    qs.push(mkChoice('看拼音写词语：fàn wéi →（    ）', '范围', ['努力', '紫色', '海上日出']));
+    qs.push(mkChoice('看拼音写词语：nǔ lì →（    ）', '努力', ['范围', '海上日出', '根据']));
+    qs.push(mkChoice('看拼音写词语：càn làn →（    ）', '灿烂', ['宽窄', '拥挤', '范围']));
+    qs.push(mkChoice('看拼音写词语：zǐ sè →（    ）', '紫色', ['拥挤', '努力', '宽窄']));
+    qs.push(mkChoice('看拼音写词语：dù juān →（    ）', '杜鹃', ['范围', '灿烂', '根据']));
+    qs.push(mkChoice('看拼音写词语：kuān zhǎi →（    ）', '宽窄', ['杜鹃', '灿烂', '范围']));
+    qs.push(mkChoice('看拼音写词语：yōng jǐ →（    ）', '拥挤', ['观赏', '紫色', '杜鹃']));
+    qs.push(mkChoice('看拼音写词语：gēn jù →（    ）', '根据', ['范围', '杜鹃', '石笋']));
+    qs.push(mkChoice('看拼音写词语：shí sǔn →（    ）', '石笋', ['海上日出', '范围', '根据']));
+    qs.push(mkChoice('看拼音写词语：yuán quán →（    ）', '源泉', ['范围', '紫色', '根据']));
+    qs.push(mkChoice('看拼音写词语：guān shǎng →（    ）', '观赏', ['范围', '灿烂', '杜鹃']));
     qs.push(mkChoice('\'重荷\'的\'荷\'读音是？', 'hè', ['hé', 'hē', 'hèi']));
     qs.push(mkChoice('\'系\'在\'关系\'中读？', 'xì', ['jì', 'qì', 'xī']));
     qs.push(mkChoice('\'调子\'的\'调\'读音是？', 'diào', ['tiáo', 'diāo', 'tiào']));
@@ -2233,18 +2233,18 @@ function cn4x5_pool() {
   }
 function cn4x6_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：náng yíng yè dú →（    ）', '囊萤夜读'));
-    qs.push(mkFill('看拼音写词语：tiě chǔ chéng zhēn →（    ）', '铁杵成针'));
-    qs.push(mkFill('看拼音写词语：gōng qín →（    ）', '恭勤'));
-    qs.push(mkFill('看拼音写词语：bó xué →（    ）', '博学'));
-    qs.push(mkFill('看拼音写词语：pín kùn →（    ）', '贫困'));
-    qs.push(mkFill('看拼音写词语：yǔ lái →（    ）', '雨来'));
-    qs.push(mkFill('看拼音写词语：kàng shàng →（    ）', '炕上'));
-    qs.push(mkFill('看拼音写词语：qiāng shuān →（    ）', '枪栓'));
-    qs.push(mkFill('看拼音写词语：lú huā →（    ）', '芦花'));
-    qs.push(mkFill('看拼音写词语：mài qián →（    ）', '卖钱'));
-    qs.push(mkFill('看拼音写词语：yí hàn →（    ）', '遗憾'));
-    qs.push(mkFill('看拼音写词语：wū zǐ →（    ）', '屋子'));
+    qs.push(mkChoice('看拼音写词语：náng yíng yè dú →（    ）', '囊萤夜读', ['芦花', '贫困', '铁杵成针']));
+    qs.push(mkChoice('看拼音写词语：tiě chǔ chéng zhēn →（    ）', '铁杵成针', ['枪栓', '博学', '恭勤']));
+    qs.push(mkChoice('看拼音写词语：gōng qín →（    ）', '恭勤', ['屋子', '贫困', '雨来']));
+    qs.push(mkChoice('看拼音写词语：bó xué →（    ）', '博学', ['屋子', '遗憾', '囊萤夜读']));
+    qs.push(mkChoice('看拼音写词语：pín kùn →（    ）', '贫困', ['屋子', '博学', '遗憾']));
+    qs.push(mkChoice('看拼音写词语：yǔ lái →（    ）', '雨来', ['屋子', '博学', '囊萤夜读']));
+    qs.push(mkChoice('看拼音写词语：kàng shàng →（    ）', '炕上', ['铁杵成针', '枪栓', '卖钱']));
+    qs.push(mkChoice('看拼音写词语：qiāng shuān →（    ）', '枪栓', ['博学', '芦花', '遗憾']));
+    qs.push(mkChoice('看拼音写词语：lú huā →（    ）', '芦花', ['遗憾', '博学', '炕上']));
+    qs.push(mkChoice('看拼音写词语：mài qián →（    ）', '卖钱', ['铁杵成针', '雨来', '枪栓']));
+    qs.push(mkChoice('看拼音写词语：yí hàn →（    ）', '遗憾', ['芦花', '博学', '恭勤']));
+    qs.push(mkChoice('看拼音写词语：wū zǐ →（    ）', '屋子', ['雨来', '芦花', '囊萤夜读']));
     qs.push(mkChoice('\'背包\'的\'背\'读音是？', 'bēi', ['bèi', 'bēn', 'bēn g']));
     qs.push(mkChoice('\'凶恶\'的\'恶\'读音是？', 'è', ['wù', 'ě', 'wū']));
     qs.push(mkChoice('\'吧嗒\'的\'吧\'读音是？', 'bā', ['ba', 'bá', 'pā']));
@@ -2275,18 +2275,18 @@ function cn4x6_pool() {
   }
 function cn4x7_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：fú róng lóu sòng xīn jiàn →（    ）', '芙蓉楼送辛渐'));
-    qs.push(mkFill('看拼音写词语：sāi xià qū →（    ）', '塞下曲'));
-    qs.push(mkFill('看拼音写词语：mò méi →（    ）', '墨梅'));
-    qs.push(mkFill('看拼音写词语：yīng lún →（    ）', '英伦'));
-    qs.push(mkFill('看拼音写词语：pōu kāi →（    ）', '剖开'));
-    qs.push(mkFill('看拼音写词语：kū long →（    ）', '窟窿'));
-    qs.push(mkFill('看拼音写词语：diào qiǎn →（    ）', '调遣'));
-    qs.push(mkFill('看拼音写词语：zhǔ zǎi →（    ）', '主宰'));
-    qs.push(mkFill('看拼音写词语：gǎng wèi →（    ）', '岗位'));
-    qs.push(mkFill('看拼音写词语：jī xiào →（    ）', '讥笑'));
-    qs.push(mkFill('看拼音写词语：pú fú →（    ）', '匍匐'));
-    qs.push(mkFill('看拼音写词语：bào zhà →（    ）', '爆炸'));
+    qs.push(mkChoice('看拼音写词语：fú róng lóu sòng xīn jiàn →（    ）', '芙蓉楼送辛渐', ['塞下曲', '英伦', '墨梅']));
+    qs.push(mkChoice('看拼音写词语：sāi xià qū →（    ）', '塞下曲', ['墨梅', '剖开', '主宰']));
+    qs.push(mkChoice('看拼音写词语：mò méi →（    ）', '墨梅', ['讥笑', '匍匐', '调遣']));
+    qs.push(mkChoice('看拼音写词语：yīng lún →（    ）', '英伦', ['窟窿', '讥笑', '塞下曲']));
+    qs.push(mkChoice('看拼音写词语：pōu kāi →（    ）', '剖开', ['芙蓉楼送辛渐', '窟窿', '匍匐']));
+    qs.push(mkChoice('看拼音写词语：kū long →（    ）', '窟窿', ['爆炸', '主宰', '讥笑']));
+    qs.push(mkChoice('看拼音写词语：diào qiǎn →（    ）', '调遣', ['剖开', '窟窿', '芙蓉楼送辛渐']));
+    qs.push(mkChoice('看拼音写词语：zhǔ zǎi →（    ）', '主宰', ['塞下曲', '英伦', '调遣']));
+    qs.push(mkChoice('看拼音写词语：gǎng wèi →（    ）', '岗位', ['调遣', '剖开', '墨梅']));
+    qs.push(mkChoice('看拼音写词语：jī xiào →（    ）', '讥笑', ['芙蓉楼送辛渐', '岗位', '窟窿']));
+    qs.push(mkChoice('看拼音写词语：pú fú →（    ）', '匍匐', ['塞下曲', '主宰', '英伦']));
+    qs.push(mkChoice('看拼音写词语：bào zhà →（    ）', '爆炸', ['剖开', '窟窿', '芙蓉楼送辛渐']));
     qs.push(mkChoice('\'单于\'的\'单\'读音是？', 'chán', ['dān', 'shàn', 'dàn']));
     qs.push(mkChoice('\'晕倒\'的\'晕\'读音是？', 'yūn', ['yùn', 'yún', 'yōn']));
     qs.push(mkChoice('\'倔强\'的\'强\'读音是？', 'jiàng', ['qiáng', 'qiǎng', 'jàng']));
@@ -2318,18 +2318,18 @@ function cn4x7_pool() {
   }
 function cn4x8_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：bǎo hú lu →（    ）', '宝葫芦'));
-    qs.push(mkFill('看拼音写词语：fēng shuò →（    ）', '丰硕'));
-    qs.push(mkFill('看拼音写词语：yǔn xǔ →（    ）', '允许'));
-    qs.push(mkFill('看拼音写词语：jìn zhǐ →（    ）', '禁止'));
-    qs.push(mkFill('看拼音写词语：zōng jì →（    ）', '踪迹'));
-    qs.push(mkFill('看拼音写词语：hū xiào →（    ）', '呼啸'));
-    qs.push(mkFill('看拼音写词语：liǎn jiá →（    ）', '脸颊'));
-    qs.push(mkFill('看拼音写词语：xìng fú →（    ）', '幸福'));
-    qs.push(mkFill('看拼音写词语：róu nèn →（    ）', '柔嫩'));
-    qs.push(mkFill('看拼音写词语：jìn tóu →（    ）', '尽头'));
-    qs.push(mkFill('看拼音写词语：hǎi gāng →（    ）', '海港'));
-    qs.push(mkFill('看拼音写词语：háo bù →（    ）', '毫不'));
+    qs.push(mkChoice('看拼音写词语：bǎo hú lu →（    ）', '宝葫芦', ['禁止', '脸颊', '丰硕']));
+    qs.push(mkChoice('看拼音写词语：fēng shuò →（    ）', '丰硕', ['海港', '踪迹', '幸福']));
+    qs.push(mkChoice('看拼音写词语：yǔn xǔ →（    ）', '允许', ['丰硕', '脸颊', '踪迹']));
+    qs.push(mkChoice('看拼音写词语：jìn zhǐ →（    ）', '禁止', ['踪迹', '宝葫芦', '丰硕']));
+    qs.push(mkChoice('看拼音写词语：zōng jì →（    ）', '踪迹', ['允许', '尽头', '呼啸']));
+    qs.push(mkChoice('看拼音写词语：hū xiào →（    ）', '呼啸', ['宝葫芦', '禁止', '允许']));
+    qs.push(mkChoice('看拼音写词语：liǎn jiá →（    ）', '脸颊', ['幸福', '呼啸', '宝葫芦']));
+    qs.push(mkChoice('看拼音写词语：xìng fú →（    ）', '幸福', ['丰硕', '柔嫩', '毫不']));
+    qs.push(mkChoice('看拼音写词语：róu nèn →（    ）', '柔嫩', ['丰硕', '海港', '禁止']));
+    qs.push(mkChoice('看拼音写词语：jìn tóu →（    ）', '尽头', ['脸颊', '禁止', '海港']));
+    qs.push(mkChoice('看拼音写词语：hǎi gāng →（    ）', '海港', ['柔嫩', '尽头', '宝葫芦']));
+    qs.push(mkChoice('看拼音写词语：háo bù →（    ）', '毫不', ['脸颊', '海港', '允许']));
     qs.push(mkChoice('\'少年\'的\'少\'读音是？', 'shào', ['shǎo', 'shāo', 'sào']));
     qs.push(mkChoice('\'铺垫\'的\'铺\'读音是？', 'pū', ['pù', 'pú', 'bū']));
     qs.push(mkChoice('\'旗杆\'的\'杆\'读音是？', 'gān', ['gǎn', 'gán', 'gàn']));
@@ -2359,18 +2359,18 @@ function cn4x8_pool() {
   }
 function cn5s1_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：bái lù →（    ）', '白鹭'));
-    qs.push(mkFill('看拼音写词语：jīng qiǎo →（    ）', '精巧'));
-    qs.push(mkFill('看拼音写词语：pèi hé →（    ）', '配合'));
-    qs.push(mkFill('看拼音写词语：shēn duàn →（    ）', '身段'));
-    qs.push(mkFill('看拼音写词语：wàng què →（    ）', '忘却'));
-    qs.push(mkFill('看拼音写词语：jìng xiá →（    ）', '镜匣'));
-    qs.push(mkFill('看拼音写词语：ēn huì →（    ）', '恩惠'));
-    qs.push(mkFill('看拼音写词语：guì huā →（    ）', '桂花'));
-    qs.push(mkFill('看拼音写词语：gāo bǐng →（    ）', '糕饼'));
-    qs.push(mkFill('看拼音写词语：chá yè →（    ）', '茶叶'));
-    qs.push(mkFill('看拼音写词语：měi zhōng bù zú →（    ）', '美中不足'));
-    qs.push(mkFill('看拼音写词语：zhà yóu →（    ）', '榨油'));
+    qs.push(mkChoice('看拼音写词语：bái lù →（    ）', '白鹭', ['精巧', '配合', '镜匣']));
+    qs.push(mkChoice('看拼音写词语：jīng qiǎo →（    ）', '精巧', ['配合', '榨油', '糕饼']));
+    qs.push(mkChoice('看拼音写词语：pèi hé →（    ）', '配合', ['美中不足', '身段', '忘却']));
+    qs.push(mkChoice('看拼音写词语：shēn duàn →（    ）', '身段', ['茶叶', '忘却', '镜匣']));
+    qs.push(mkChoice('看拼音写词语：wàng què →（    ）', '忘却', ['桂花', '榨油', '身段']));
+    qs.push(mkChoice('看拼音写词语：jìng xiá →（    ）', '镜匣', ['桂花', '身段', '糕饼']));
+    qs.push(mkChoice('看拼音写词语：ēn huì →（    ）', '恩惠', ['镜匣', '身段', '精巧']));
+    qs.push(mkChoice('看拼音写词语：guì huā →（    ）', '桂花', ['精巧', '身段', '忘却']));
+    qs.push(mkChoice('看拼音写词语：gāo bǐng →（    ）', '糕饼', ['镜匣', '身段', '榨油']));
+    qs.push(mkChoice('看拼音写词语：chá yè →（    ）', '茶叶', ['白鹭', '配合', '镜匣']));
+    qs.push(mkChoice('看拼音写词语：měi zhōng bù zú →（    ）', '美中不足', ['茶叶', '身段', '恩惠']));
+    qs.push(mkChoice('看拼音写词语：zhà yóu →（    ）', '榨油', ['精巧', '糕饼', '茶叶']));
     qs.push(mkChoice('\'镜匣\'的\'匣\'读音是？', 'xiá', ['jiá', 'xiā', 'jiā']));
     qs.push(mkChoice('\'待一会儿\'的\'待\'读音是？', 'dāi', ['dài', 'dāi r', 'tái']));
     qs.push(mkChoice('\'盛开\'的\'盛\'读音是？', 'shèng', ['chéng', 'shān', 'chèng']));
@@ -2400,18 +2400,18 @@ function cn5s1_pool() {
   }
 function cn5s2_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：dā shí →（    ）', '搭石'));
-    qs.push(mkFill('看拼音写词语：xùn qī →（    ）', '汛期'));
-    qs.push(mkFill('看拼音写词语：píng héng →（    ）', '平衡'));
-    qs.push(mkFill('看拼音写词语：xié tiáo →（    ）', '协调'));
-    qs.push(mkFill('看拼音写词语：lǎn duò →（    ）', '懒惰'));
-    qs.push(mkFill('看拼音写词语：zhào jí →（    ）', '召集'));
-    qs.push(mkFill('看拼音写词语：dà chén →（    ）', '大臣'));
-    qs.push(mkFill('看拼音写词语：shāng yì →（    ）', '商议'));
-    qs.push(mkFill('看拼音写词语：yǒng gǎn →（    ）', '勇敢'));
-    qs.push(mkFill('看拼音写词语：dǎn qiè →（    ）', '胆怯'));
-    qs.push(mkFill('看拼音写词语：fǔ chōng →（    ）', '俯冲'));
-    qs.push(mkFill('看拼音写词语：qīn lüè →（    ）', '侵略'));
+    qs.push(mkChoice('看拼音写词语：dā shí →（    ）', '搭石', ['汛期', '勇敢', '协调']));
+    qs.push(mkChoice('看拼音写词语：xùn qī →（    ）', '汛期', ['召集', '协调', '大臣']));
+    qs.push(mkChoice('看拼音写词语：píng héng →（    ）', '平衡', ['召集', '协调', '胆怯']));
+    qs.push(mkChoice('看拼音写词语：xié tiáo →（    ）', '协调', ['搭石', '平衡', '胆怯']));
+    qs.push(mkChoice('看拼音写词语：lǎn duò →（    ）', '懒惰', ['平衡', '汛期', '商议']));
+    qs.push(mkChoice('看拼音写词语：zhào jí →（    ）', '召集', ['侵略', '大臣', '懒惰']));
+    qs.push(mkChoice('看拼音写词语：dà chén →（    ）', '大臣', ['搭石', '懒惰', '汛期']));
+    qs.push(mkChoice('看拼音写词语：shāng yì →（    ）', '商议', ['平衡', '懒惰', '搭石']));
+    qs.push(mkChoice('看拼音写词语：yǒng gǎn →（    ）', '勇敢', ['汛期', '胆怯', '协调']));
+    qs.push(mkChoice('看拼音写词语：dǎn qiè →（    ）', '胆怯', ['侵略', '俯冲', '勇敢']));
+    qs.push(mkChoice('看拼音写词语：fǔ chōng →（    ）', '俯冲', ['汛期', '胆怯', '召集']));
+    qs.push(mkChoice('看拼音写词语：qīn lüè →（    ）', '侵略', ['平衡', '召集', '懒惰']));
     qs.push(mkChoice('\'间隔\'的\'间\'读音是？', 'jiàn', ['jiān', 'jān', 'qiān']));
     qs.push(mkChoice('\'削弱\'的\'削\'读音是？', 'xuē', ['xiāo', 'xuè', 'xiào']));
     qs.push(mkChoice('\'冠军\'的\'冠\'读音是？', 'guàn', ['guān', 'gūn', 'guǎn']));
@@ -2441,18 +2441,18 @@ function cn5s2_pool() {
   }
 function cn5s3_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：liè rén →（    ）', '猎人'));
-    qs.push(mkFill('看拼音写词语：chóu xiè →（    ）', '酬谢'));
-    qs.push(mkFill('看拼音写词语：zhēn bǎo →（    ）', '珍宝'));
-    qs.push(mkFill('看拼音写词语：dīng níng →（    ）', '叮咛'));
-    qs.push(mkFill('看拼音写词语：fā shì →（    ）', '发誓'));
-    qs.push(mkFill('看拼音写词语：bēng tā →（    ）', '崩塌'));
-    qs.push(mkFill('看拼音写词语：yán chí →（    ）', '迟延'));
-    qs.push(mkFill('看拼音写词语：zhèn dìng →（    ）', '镇定'));
-    qs.push(mkFill('看拼音写词语：bēi tòng →（    ）', '悲痛'));
-    qs.push(mkFill('看拼音写词语：sǎo zi →（    ）', '嫂子'));
-    qs.push(mkFill('看拼音写词语：shèng fàn →（    ）', '剩饭'));
-    qs.push(mkFill('看拼音写词语：qīn mì →（    ）', '亲密'));
+    qs.push(mkChoice('看拼音写词语：liè rén →（    ）', '猎人', ['叮咛', '悲痛', '酬谢']));
+    qs.push(mkChoice('看拼音写词语：chóu xiè →（    ）', '酬谢', ['亲密', '珍宝', '崩塌']));
+    qs.push(mkChoice('看拼音写词语：zhēn bǎo →（    ）', '珍宝', ['镇定', '酬谢', '嫂子']));
+    qs.push(mkChoice('看拼音写词语：dīng níng →（    ）', '叮咛', ['剩饭', '嫂子', '迟延']));
+    qs.push(mkChoice('看拼音写词语：fā shì →（    ）', '发誓', ['猎人', '崩塌', '剩饭']));
+    qs.push(mkChoice('看拼音写词语：bēng tā →（    ）', '崩塌', ['嫂子', '叮咛', '酬谢']));
+    qs.push(mkChoice('看拼音写词语：yán chí →（    ）', '迟延', ['亲密', '镇定', '叮咛']));
+    qs.push(mkChoice('看拼音写词语：zhèn dìng →（    ）', '镇定', ['亲密', '发誓', '酬谢']));
+    qs.push(mkChoice('看拼音写词语：bēi tòng →（    ）', '悲痛', ['嫂子', '猎人', '酬谢']));
+    qs.push(mkChoice('看拼音写词语：sǎo zi →（    ）', '嫂子', ['亲密', '剩饭', '珍宝']));
+    qs.push(mkChoice('看拼音写词语：shèng fàn →（    ）', '剩饭', ['发誓', '嫂子', '珍宝']));
+    qs.push(mkChoice('看拼音写词语：qīn mì →（    ）', '亲密', ['猎人', '珍宝', '叮咛']));
     qs.push(mkChoice('\'淹没\'的\'没\'读音是？', 'mò', ['méi', 'mō', 'mèi']));
     qs.push(mkChoice('\'狂风怒号\'的\'号\'读音是？', 'háo', ['hào', 'hǎo', 'hāo']));
     qs.push(mkChoice('\'落下\'的\'落\'读音是？', 'là', ['luò', 'lào', 'luō']));
@@ -2481,18 +2481,18 @@ function cn5s3_pool() {
   }
 function cn5s4_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：jì sì →（    ）', '祭祀'));
-    qs.push(mkFill('看拼音写词语：nǎi zhì →（    ）', '乃至'));
-    qs.push(mkFill('看拼音写词语：xūn táo →（    ）', '熏陶'));
-    qs.push(mkFill('看拼音写词语：háng zhōu →（    ）', '杭州'));
-    qs.push(mkFill('看拼音写词语：jǐ hài →（    ）', '己亥'));
-    qs.push(mkFill('看拼音写词语：bù jū →（    ）', '不拘'));
-    qs.push(mkFill('看拼音写词语：qián shuǐ →（    ）', '潜水'));
-    qs.push(mkFill('看拼音写词语：huáng gōng →（    ）', '皇宫'));
-    qs.push(mkFill('看拼音写词语：huī huáng →（    ）', '辉煌'));
-    qs.push(mkFill('看拼音写词语：diàn táng →（    ）', '殿堂'));
-    qs.push(mkFill('看拼音写词语：xiāo huǐ →（    ）', '销毁'));
-    qs.push(mkFill('看拼音写词语：lǒng zhào →（    ）', '笼罩'));
+    qs.push(mkChoice('看拼音写词语：jì sì →（    ）', '祭祀', ['熏陶', '潜水', '己亥']));
+    qs.push(mkChoice('看拼音写词语：nǎi zhì →（    ）', '乃至', ['杭州', '不拘', '祭祀']));
+    qs.push(mkChoice('看拼音写词语：xūn táo →（    ）', '熏陶', ['皇宫', '己亥', '销毁']));
+    qs.push(mkChoice('看拼音写词语：háng zhōu →（    ）', '杭州', ['乃至', '潜水', '己亥']));
+    qs.push(mkChoice('看拼音写词语：jǐ hài →（    ）', '己亥', ['熏陶', '潜水', '不拘']));
+    qs.push(mkChoice('看拼音写词语：bù jū →（    ）', '不拘', ['潜水', '杭州', '乃至']));
+    qs.push(mkChoice('看拼音写词语：qián shuǐ →（    ）', '潜水', ['祭祀', '皇宫', '销毁']));
+    qs.push(mkChoice('看拼音写词语：huáng gōng →（    ）', '皇宫', ['殿堂', '笼罩', '熏陶']));
+    qs.push(mkChoice('看拼音写词语：huī huáng →（    ）', '辉煌', ['不拘', '笼罩', '潜水']));
+    qs.push(mkChoice('看拼音写词语：diàn táng →（    ）', '殿堂', ['乃至', '不拘', '潜水']));
+    qs.push(mkChoice('看拼音写词语：xiāo huǐ →（    ）', '销毁', ['杭州', '不拘', '殿堂']));
+    qs.push(mkChoice('看拼音写词语：lǒng zhào →（    ）', '笼罩', ['销毁', '殿堂', '辉煌']));
     qs.push(mkChoice('\'潜力\'的\'潜\'读音是？', 'qián', ['qiǎn', 'qián r', 'qiān']));
     qs.push(mkChoice('\'估计\'的\'估\'读音是？', 'gū', ['gǔ', 'gù', 'kū']));
     qs.push(mkChoice('\'玲珑剔透\'的\'剔\'读音是？', 'tī', ['tì', 'tī r', 'dī']));
@@ -2524,18 +2524,18 @@ function cn5s4_pool() {
   }
 function cn5s5_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：cùn cǎo bù shēng →（    ）', '寸草不生'));
-    qs.push(mkFill('看拼音写词语：shè shì dù →（    ）', '摄氏度'));
-    qs.push(mkFill('看拼音写词语：fán zhí →（    ）', '繁殖'));
-    qs.push(mkFill('看拼音写词语：liáng shi →（    ）', '粮食'));
-    qs.push(mkFill('看拼音写词语：méi tàn →（    ）', '煤炭'));
-    qs.push(mkFill('看拼音写词语：dì qū →（    ）', '地区'));
-    qs.push(mkFill('看拼音写词语：shā jūn →（    ）', '杀菌'));
-    qs.push(mkFill('看拼音写词语：zhì liáo →（    ）', '治疗'));
-    qs.push(mkFill('看拼音写词语：sōng shǔ →（    ）', '松鼠'));
-    qs.push(mkFill('看拼音写词语：guāi qiǎo →（    ）', '乖巧'));
-    qs.push(mkFill('看拼音写词语：qīng xiù →（    ）', '清秀'));
-    qs.push(mkFill('看拼音写词语：xiē liáng →（    ）', '歇凉'));
+    qs.push(mkChoice('看拼音写词语：cùn cǎo bù shēng →（    ）', '寸草不生', ['繁殖', '摄氏度', '杀菌']));
+    qs.push(mkChoice('看拼音写词语：shè shì dù →（    ）', '摄氏度', ['繁殖', '歇凉', '清秀']));
+    qs.push(mkChoice('看拼音写词语：fán zhí →（    ）', '繁殖', ['治疗', '寸草不生', '煤炭']));
+    qs.push(mkChoice('看拼音写词语：liáng shi →（    ）', '粮食', ['歇凉', '煤炭', '寸草不生']));
+    qs.push(mkChoice('看拼音写词语：méi tàn →（    ）', '煤炭', ['摄氏度', '粮食', '地区']));
+    qs.push(mkChoice('看拼音写词语：dì qū →（    ）', '地区', ['乖巧', '煤炭', '治疗']));
+    qs.push(mkChoice('看拼音写词语：shā jūn →（    ）', '杀菌', ['歇凉', '松鼠', '治疗']));
+    qs.push(mkChoice('看拼音写词语：zhì liáo →（    ）', '治疗', ['繁殖', '摄氏度', '杀菌']));
+    qs.push(mkChoice('看拼音写词语：sōng shǔ →（    ）', '松鼠', ['煤炭', '摄氏度', '繁殖']));
+    qs.push(mkChoice('看拼音写词语：guāi qiǎo →（    ）', '乖巧', ['煤炭', '治疗', '地区']));
+    qs.push(mkChoice('看拼音写词语：qīng xiù →（    ）', '清秀', ['杀菌', '歇凉', '地区']));
+    qs.push(mkChoice('看拼音写词语：xiē liáng →（    ）', '歇凉', ['寸草不生', '粮食', '煤炭']));
     qs.push(mkChoice('\'差不多\'的\'差\'读音是？', 'chà', ['chā', 'chāi', 'cī']));
     qs.push(mkChoice('\'苔藓\'的\'苔\'读音是？', 'tái', ['tāi', 'tǎi', 'dài']));
     qs.push(mkChoice('\'勉强\'的\'强\'读音是？', 'qiǎng', ['qiáng', 'jiàng', 'qiāng']));
@@ -2564,18 +2564,18 @@ function cn5s5_pool() {
   }
 function cn5s6_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：cí tuì →（    ）', '辞退'));
-    qs.push(mkFill('看拼音写词语：yā yì →（    ）', '压抑'));
-    qs.push(mkFill('看拼音写词语：tuí bài →（    ）', '颓败'));
-    qs.push(mkFill('看拼音写词语：máng lù →（    ）', '忙碌'));
-    qs.push(mkFill('看拼音写词语：jǐ bèi →（    ）', '脊背'));
-    qs.push(mkFill('看拼音写词语：kǒu zhào →（    ）', '口罩'));
-    qs.push(mkFill('看拼音写词语：jūn liè →（    ）', '龟裂'));
-    qs.push(mkFill('看拼音写词语：quán lì →（    ）', '权利'));
-    qs.push(mkFill('看拼音写词语：yú chuán →（    ）', '渔船'));
-    qs.push(mkFill('看拼音写词语：bào kǎo →（    ）', '报考'));
-    qs.push(mkFill('看拼音写词语：qǐ dí →（    ）', '启迪'));
-    qs.push(mkFill('看拼音写词语：jié shěng →（    ）', '节省'));
+    qs.push(mkChoice('看拼音写词语：cí tuì →（    ）', '辞退', ['压抑', '忙碌', '龟裂']));
+    qs.push(mkChoice('看拼音写词语：yā yì →（    ）', '压抑', ['辞退', '口罩', '忙碌']));
+    qs.push(mkChoice('看拼音写词语：tuí bài →（    ）', '颓败', ['忙碌', '脊背', '辞退']));
+    qs.push(mkChoice('看拼音写词语：máng lù →（    ）', '忙碌', ['颓败', '渔船', '压抑']));
+    qs.push(mkChoice('看拼音写词语：jǐ bèi →（    ）', '脊背', ['辞退', '口罩', '节省']));
+    qs.push(mkChoice('看拼音写词语：kǒu zhào →（    ）', '口罩', ['颓败', '渔船', '脊背']));
+    qs.push(mkChoice('看拼音写词语：jūn liè →（    ）', '龟裂', ['权利', '忙碌', '压抑']));
+    qs.push(mkChoice('看拼音写词语：quán lì →（    ）', '权利', ['辞退', '报考', '龟裂']));
+    qs.push(mkChoice('看拼音写词语：yú chuán →（    ）', '渔船', ['龟裂', '脊背', '压抑']));
+    qs.push(mkChoice('看拼音写词语：bào kǎo →（    ）', '报考', ['脊背', '忙碌', '龟裂']));
+    qs.push(mkChoice('看拼音写词语：qǐ dí →（    ）', '启迪', ['节省', '龟裂', '口罩']));
+    qs.push(mkChoice('看拼音写词语：jié shěng →（    ）', '节省', ['压抑', '报考', '忙碌']));
     qs.push(mkChoice('\'龟裂\'的\'龟\'读音是？', 'jūn', ['guī', 'guǐ', 'jùn']));
     qs.push(mkChoice('\'数落\'的\'落\'读音是？', 'luo', ['luò', 'lào', 'lā']));
     qs.push(mkChoice('\'挣钱\'的\'挣\'读音是？', 'zhèng', ['zhēng', 'zèng', 'zhēn']));
@@ -2604,18 +2604,18 @@ function cn5s6_pool() {
   }
 function cn5s7_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：lí míng →（    ）', '黎明'));
-    qs.push(mkFill('看拼音写词语：hóng yùn →（    ）', '红晕'));
-    qs.push(mkFill('看拼音写词语：qī hēi →（    ）', '漆黑'));
-    qs.push(mkFill('看拼音写词语：yíng huǒ chóng →（    ）', '萤火虫'));
-    qs.push(mkFill('看拼音写词语：dà yàn →（    ）', '大雁'));
-    qs.push(mkFill('看拼音写词语：jiàng lín →（    ）', '降临'));
-    qs.push(mkFill('看拼音写词语：tàn huǒ →（    ）', '炭火'));
-    qs.push(mkFill('看拼音写词语：huǒ pén →（    ）', '火盆'));
-    qs.push(mkFill('看拼音写词语：zǒu láng →（    ）', '走廊'));
-    qs.push(mkFill('看拼音写词语：shù shāo →（    ）', '树梢'));
-    qs.push(mkFill('看拼音写词语：xián yì →（    ）', '闲逸'));
-    qs.push(mkFill('看拼音写词语：yìng jiē bù xiá →（    ）', '应接不暇'));
+    qs.push(mkChoice('看拼音写词语：lí míng →（    ）', '黎明', ['应接不暇', '大雁', '火盆']));
+    qs.push(mkChoice('看拼音写词语：hóng yùn →（    ）', '红晕', ['闲逸', '树梢', '漆黑']));
+    qs.push(mkChoice('看拼音写词语：qī hēi →（    ）', '漆黑', ['树梢', '应接不暇', '大雁']));
+    qs.push(mkChoice('看拼音写词语：yíng huǒ chóng →（    ）', '萤火虫', ['黎明', '漆黑', '闲逸']));
+    qs.push(mkChoice('看拼音写词语：dà yàn →（    ）', '大雁', ['降临', '火盆', '树梢']));
+    qs.push(mkChoice('看拼音写词语：jiàng lín →（    ）', '降临', ['树梢', '炭火', '应接不暇']));
+    qs.push(mkChoice('看拼音写词语：tàn huǒ →（    ）', '炭火', ['黎明', '火盆', '树梢']));
+    qs.push(mkChoice('看拼音写词语：huǒ pén →（    ）', '火盆', ['应接不暇', '降临', '大雁']));
+    qs.push(mkChoice('看拼音写词语：zǒu láng →（    ）', '走廊', ['黎明', '树梢', '漆黑']));
+    qs.push(mkChoice('看拼音写词语：shù shāo →（    ）', '树梢', ['红晕', '火盆', '走廊']));
+    qs.push(mkChoice('看拼音写词语：xián yì →（    ）', '闲逸', ['黎明', '红晕', '应接不暇']));
+    qs.push(mkChoice('看拼音写词语：yìng jiē bù xiá →（    ）', '应接不暇', ['炭火', '树梢', '红晕']));
     qs.push(mkChoice('\'魁梧\'的\'梧\'读音是？', 'wú', ['wǔ', 'wù', 'yú']));
     qs.push(mkChoice('\'不可计数\'的\'数\'读音是？', 'shǔ', ['shù', 'shuò', 'sù']));
     qs.push(mkChoice('\'着实\'的\'着\'读音是？', 'zhuó', ['zháo', 'zhāo', 'zhe']));
@@ -2646,18 +2646,18 @@ function cn5s7_pool() {
   }
 function cn5s8_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：suǒ wèi →（    ）', '所谓'));
-    qs.push(mkFill('看拼音写词语：sòng dú →（    ）', '诵读'));
-    qs.push(mkFill('看拼音写词语：héng xīn →（    ）', '恒心'));
-    qs.push(mkFill('看拼音写词语：jiù fù →（    ）', '舅父'));
-    qs.push(mkFill('看拼音写词语：jīn jīn yǒu wèi →（    ）', '津津有味'));
-    qs.push(mkFill('看拼音写词语：zhǎn shǒu →（    ）', '斩首'));
-    qs.push(mkFill('看拼音写词语：wú xiàn →（    ）', '无限'));
-    qs.push(mkFill('看拼音写词语：kǎi xuán →（    ）', '凯旋'));
-    qs.push(mkFill('看拼音写词语：shù shuō →（    ）', '述说'));
-    qs.push(mkFill('看拼音写词语：bào kān →（    ）', '报刊'));
-    qs.push(mkFill('看拼音写词语：shuāi bài →（    ）', '衰败'));
-    qs.push(mkFill('看拼音写词语：piān zhāng →（    ）', '篇章'));
+    qs.push(mkChoice('看拼音写词语：suǒ wèi →（    ）', '所谓', ['恒心', '篇章', '舅父']));
+    qs.push(mkChoice('看拼音写词语：sòng dú →（    ）', '诵读', ['舅父', '凯旋', '所谓']));
+    qs.push(mkChoice('看拼音写词语：héng xīn →（    ）', '恒心', ['斩首', '无限', '报刊']));
+    qs.push(mkChoice('看拼音写词语：jiù fù →（    ）', '舅父', ['述说', '所谓', '无限']));
+    qs.push(mkChoice('看拼音写词语：jīn jīn yǒu wèi →（    ）', '津津有味', ['所谓', '衰败', '凯旋']));
+    qs.push(mkChoice('看拼音写词语：zhǎn shǒu →（    ）', '斩首', ['诵读', '无限', '报刊']));
+    qs.push(mkChoice('看拼音写词语：wú xiàn →（    ）', '无限', ['津津有味', '报刊', '斩首']));
+    qs.push(mkChoice('看拼音写词语：kǎi xuán →（    ）', '凯旋', ['所谓', '报刊', '无限']));
+    qs.push(mkChoice('看拼音写词语：shù shuō →（    ）', '述说', ['无限', '舅父', '恒心']));
+    qs.push(mkChoice('看拼音写词语：bào kān →（    ）', '报刊', ['诵读', '衰败', '舅父']));
+    qs.push(mkChoice('看拼音写词语：shuāi bài →（    ）', '衰败', ['诵读', '舅父', '所谓']));
+    qs.push(mkChoice('看拼音写词语：piān zhāng →（    ）', '篇章', ['诵读', '舅父', '报刊']));
     qs.push(mkChoice('\'传记\'的\'传\'读音是？', 'zhuàn', ['chuán', 'zuàn', 'zhuān']));
     qs.push(mkChoice('\'着力\'的\'着\'读音是？', 'zhuó', ['zháo', 'zhāo', 'zhe']));
     qs.push(mkChoice('\'差事\'的\'差\'读音是？', 'chāi', ['chā', 'chà', 'cī']));
@@ -2686,18 +2686,18 @@ function cn5s8_pool() {
   }
 function cn5x1_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：zhòu yè →（    ）', '昼夜'));
-    qs.push(mkFill('看拼音写词语：yún tián →（    ）', '耘田'));
-    qs.push(mkFill('看拼音写词语：sāng shù →（    ）', '桑树'));
-    qs.push(mkFill('看拼音写词语：fú xiǎo →（    ）', '拂晓'));
-    qs.push(mkFill('看拼音写词语：hú dié →（    ）', '蝴蝶'));
-    qs.push(mkFill('看拼音写词语：mà zha →（    ）', '蚂蚱'));
-    qs.push(mkFill('看拼音写词语：yīng táo →（    ）', '樱桃'));
-    qs.push(mkFill('看拼音写词语：xiā nào →（    ）', '瞎闹'));
-    qs.push(mkFill('看拼音写词语：chú tou →（    ）', '锄头'));
-    qs.push(mkFill('看拼音写词语：chéng rèn →（    ）', '承认'));
-    qs.push(mkFill('看拼音写词语：shuǐ piáo →（    ）', '水瓢'));
-    qs.push(mkFill('看拼音写词语：xián guàng →（    ）', '闲逛'));
+    qs.push(mkChoice('看拼音写词语：zhòu yè →（    ）', '昼夜', ['瞎闹', '蚂蚱', '樱桃']));
+    qs.push(mkChoice('看拼音写词语：yún tián →（    ）', '耘田', ['昼夜', '蝴蝶', '拂晓']));
+    qs.push(mkChoice('看拼音写词语：sāng shù →（    ）', '桑树', ['拂晓', '樱桃', '蚂蚱']));
+    qs.push(mkChoice('看拼音写词语：fú xiǎo →（    ）', '拂晓', ['承认', '锄头', '耘田']));
+    qs.push(mkChoice('看拼音写词语：hú dié →（    ）', '蝴蝶', ['昼夜', '桑树', '蚂蚱']));
+    qs.push(mkChoice('看拼音写词语：mà zha →（    ）', '蚂蚱', ['耘田', '樱桃', '拂晓']));
+    qs.push(mkChoice('看拼音写词语：yīng táo →（    ）', '樱桃', ['闲逛', '桑树', '蝴蝶']));
+    qs.push(mkChoice('看拼音写词语：xiā nào →（    ）', '瞎闹', ['耘田', '闲逛', '蚂蚱']));
+    qs.push(mkChoice('看拼音写词语：chú tou →（    ）', '锄头', ['闲逛', '水瓢', '昼夜']));
+    qs.push(mkChoice('看拼音写词语：chéng rèn →（    ）', '承认', ['水瓢', '昼夜', '耘田']));
+    qs.push(mkChoice('看拼音写词语：shuǐ piáo →（    ）', '水瓢', ['昼夜', '锄头', '耘田']));
+    qs.push(mkChoice('看拼音写词语：xián guàng →（    ）', '闲逛', ['耘田', '昼夜', '承认']));
     qs.push(mkChoice('\'供耕织\'的\'供\'读音是？', 'gòng', ['gōng', 'gǒng', 'kòng']));
     qs.push(mkChoice('\'蚌壳\'的\'蚌\'读音是？', 'bàng', ['bèng', 'bāng', 'pàng']));
     qs.push(mkChoice('\'燕园\'的\'燕\'读音是？', 'yān', ['yàn', 'yán', 'yiān']));
@@ -2728,18 +2728,18 @@ function cn5x1_pool() {
   }
 function cn5x2_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：dù jì →（    ）', '妒忌'));
-    qs.push(mkFill('看拼音写词语：dū du →（    ）', '都督'));
-    qs.push(mkFill('看拼音写词语：wěi tuō →（    ）', '委托'));
-    qs.push(mkFill('看拼音写词语：chéng fá →（    ）', '惩罚'));
-    qs.push(mkFill('看拼音写词语：lǔ sù →（    ）', '鲁肃'));
-    qs.push(mkFill('看拼音写词语：zhē gài →（    ）', '遮盖'));
-    qs.push(mkFill('看拼音写词语：nà hǎn →（    ）', '呐喊'));
-    qs.push(mkFill('看拼音写词语：chā mǎn →（    ）', '插满'));
-    qs.push(mkFill('看拼音写词语：jǐng yáng gāng →（    ）', '景阳冈'));
-    qs.push(mkFill('看拼音写词语：jī kě →（    ）', '饥渴'));
-    qs.push(mkFill('看拼音写词语：dié zi →（    ）', '碟子'));
-    qs.push(mkFill('看拼音写词语：bǎng wén →（    ）', '榜文'));
+    qs.push(mkChoice('看拼音写词语：dù jì →（    ）', '妒忌', ['饥渴', '遮盖', '委托']));
+    qs.push(mkChoice('看拼音写词语：dū du →（    ）', '都督', ['妒忌', '鲁肃', '惩罚']));
+    qs.push(mkChoice('看拼音写词语：wěi tuō →（    ）', '委托', ['妒忌', '惩罚', '景阳冈']));
+    qs.push(mkChoice('看拼音写词语：chéng fá →（    ）', '惩罚', ['都督', '鲁肃', '遮盖']));
+    qs.push(mkChoice('看拼音写词语：lǔ sù →（    ）', '鲁肃', ['插满', '惩罚', '榜文']));
+    qs.push(mkChoice('看拼音写词语：zhē gài →（    ）', '遮盖', ['插满', '呐喊', '鲁肃']));
+    qs.push(mkChoice('看拼音写词语：nà hǎn →（    ）', '呐喊', ['委托', '都督', '插满']));
+    qs.push(mkChoice('看拼音写词语：chā mǎn →（    ）', '插满', ['饥渴', '惩罚', '碟子']));
+    qs.push(mkChoice('看拼音写词语：jǐng yáng gāng →（    ）', '景阳冈', ['妒忌', '鲁肃', '呐喊']));
+    qs.push(mkChoice('看拼音写词语：jī kě →（    ）', '饥渴', ['都督', '鲁肃', '榜文']));
+    qs.push(mkChoice('看拼音写词语：dié zi →（    ）', '碟子', ['插满', '遮盖', '饥渴']));
+    qs.push(mkChoice('看拼音写词语：bǎng wén →（    ）', '榜文', ['碟子', '遮盖', '惩罚']));
     qs.push(mkChoice('\'绰起\'的\'绰\'读音是？', 'chāo', ['chuò', 'chāo r', 'zhuó']));
     qs.push(mkChoice('\'踉跄\'的\'踉\'读音是？', 'liàng', ['liáng', 'láng', 'niàng']));
     qs.push(mkChoice('\'腰胯\'的\'胯\'读音是？', 'kuà', ['kuā', 'kuà r', 'kuǎ']));
@@ -2770,18 +2770,18 @@ function cn5x2_pool() {
   }
 function cn5x3_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：hàn zì →（    ）', '汉字'));
-    qs.push(mkFill('看拼音写词语：jiǎ gǔ wén →（    ）', '甲骨文'));
-    qs.push(mkFill('看拼音写词语：jīn wén →（    ）', '金文'));
-    qs.push(mkFill('看拼音写词语：xiǎo zhuàn →（    ）', '小篆'));
-    qs.push(mkFill('看拼音写词语：lì shū →（    ）', '隶书'));
-    qs.push(mkFill('看拼音写词语：kǎi shū →（    ）', '楷书'));
-    qs.push(mkFill('看拼音写词语：xié yīn →（    ）', '谐音'));
-    qs.push(mkFill('看拼音写词语：zì mí →（    ）', '字谜'));
-    qs.push(mkFill('看拼音写词语：pí pa →（    ）', '琵琶'));
-    qs.push(mkFill('看拼音写词语：fèng huáng →（    ）', '凤凰'));
-    qs.push(mkFill('看拼音写词语：míng wén →（    ）', '铭文'));
-    qs.push(mkFill('看拼音写词语：zào yì →（    ）', '造诣'));
+    qs.push(mkChoice('看拼音写词语：hàn zì →（    ）', '汉字', ['小篆', '凤凰', '甲骨文']));
+    qs.push(mkChoice('看拼音写词语：jiǎ gǔ wén →（    ）', '甲骨文', ['小篆', '凤凰', '字谜']));
+    qs.push(mkChoice('看拼音写词语：jīn wén →（    ）', '金文', ['造诣', '字谜', '小篆']));
+    qs.push(mkChoice('看拼音写词语：xiǎo zhuàn →（    ）', '小篆', ['琵琶', '隶书', '甲骨文']));
+    qs.push(mkChoice('看拼音写词语：lì shū →（    ）', '隶书', ['凤凰', '金文', '字谜']));
+    qs.push(mkChoice('看拼音写词语：kǎi shū →（    ）', '楷书', ['琵琶', '小篆', '字谜']));
+    qs.push(mkChoice('看拼音写词语：xié yīn →（    ）', '谐音', ['甲骨文', '字谜', '小篆']));
+    qs.push(mkChoice('看拼音写词语：zì mí →（    ）', '字谜', ['甲骨文', '谐音', '小篆']));
+    qs.push(mkChoice('看拼音写词语：pí pa →（    ）', '琵琶', ['小篆', '楷书', '造诣']));
+    qs.push(mkChoice('看拼音写词语：fèng huáng →（    ）', '凤凰', ['汉字', '小篆', '金文']));
+    qs.push(mkChoice('看拼音写词语：míng wén →（    ）', '铭文', ['琵琶', '金文', '小篆']));
+    qs.push(mkChoice('看拼音写词语：zào yì →（    ）', '造诣', ['谐音', '琵琶', '铭文']));
     qs.push(mkChoice('\'记载\'的\'载\'读音是？', 'zǎi', ['zài', 'zāi', 'cái']));
     qs.push(mkChoice('\'隶书\'的\'隶\'读音是？', 'lì', ['lí', 'nì', 'lī']));
     qs.push(mkChoice('\'篆书\'的\'篆\'读音是？', 'zhuàn', ['zuàn', 'zhuǎn', 'zhuān']));
@@ -2811,18 +2811,18 @@ function cn5x3_pool() {
   }
 function cn5x4_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：cóng jūn xíng →（    ）', '从军行'));
-    qs.push(mkFill('看拼音写词语：yuàn hèn →（    ）', '怨恨'));
-    qs.push(mkFill('看拼音写词语：qī liáng →（    ）', '凄凉'));
-    qs.push(mkFill('看拼音写词语：tāng chí →（    ）', '汤匙'));
-    qs.push(mkFill('看拼音写词语：jì běi →（    ）', '蓟北'));
-    qs.push(mkFill('看拼音写词语：yī cháng →（    ）', '衣裳'));
-    qs.push(mkFill('看拼音写词语：xiāng yáng →（    ）', '襄阳'));
-    qs.push(mkFill('看拼音写词语：wū xiá →（    ）', '巫峡'));
-    qs.push(mkFill('看拼音写词语：nǐ dìng →（    ）', '拟定'));
-    qs.push(mkFill('看拼音写词语：duàn liàn →（    ）', '锻炼'));
-    qs.push(mkFill('看拼音写词语：juàn liàn →（    ）', '眷恋'));
-    qs.push(mkFill('看拼音写词语：bēn fù →（    ）', '奔赴'));
+    qs.push(mkChoice('看拼音写词语：cóng jūn xíng →（    ）', '从军行', ['蓟北', '巫峡', '锻炼']));
+    qs.push(mkChoice('看拼音写词语：yuàn hèn →（    ）', '怨恨', ['汤匙', '蓟北', '巫峡']));
+    qs.push(mkChoice('看拼音写词语：qī liáng →（    ）', '凄凉', ['怨恨', '巫峡', '衣裳']));
+    qs.push(mkChoice('看拼音写词语：tāng chí →（    ）', '汤匙', ['怨恨', '巫峡', '蓟北']));
+    qs.push(mkChoice('看拼音写词语：jì běi →（    ）', '蓟北', ['奔赴', '凄凉', '锻炼']));
+    qs.push(mkChoice('看拼音写词语：yī cháng →（    ）', '衣裳', ['蓟北', '怨恨', '从军行']));
+    qs.push(mkChoice('看拼音写词语：xiāng yáng →（    ）', '襄阳', ['怨恨', '奔赴', '拟定']));
+    qs.push(mkChoice('看拼音写词语：wū xiá →（    ）', '巫峡', ['从军行', '凄凉', '蓟北']));
+    qs.push(mkChoice('看拼音写词语：nǐ dìng →（    ）', '拟定', ['怨恨', '奔赴', '汤匙']));
+    qs.push(mkChoice('看拼音写词语：duàn liàn →（    ）', '锻炼', ['怨恨', '巫峡', '汤匙']));
+    qs.push(mkChoice('看拼音写词语：juàn liàn →（    ）', '眷恋', ['襄阳', '蓟北', '凄凉']));
+    qs.push(mkChoice('看拼音写词语：bēn fù →（    ）', '奔赴', ['眷恋', '凄凉', '蓟北']));
     qs.push(mkChoice('\'终不还\'的\'还\'读音是？', 'huán', ['hái', 'huān', 'hán']));
     qs.push(mkChoice('\'企望\'的\'企\'读音是？', 'qǐ', ['qì', 'qī', 'pǐ']));
     qs.push(mkChoice('\'彼此\'的\'彼\'读音是？', 'bǐ', ['pǐ', 'bí', 'pí']));
@@ -2853,18 +2853,18 @@ function cn5x4_pool() {
   }
 function cn5x5_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：shuāi jiāo →（    ）', '摔跤'));
-    qs.push(mkFill('看拼音写词语：qī fu →（    ）', '欺负'));
-    qs.push(mkFill('看拼音写词语：náo yǎng →（    ）', '挠痒'));
-    qs.push(mkFill('看拼音写词语：bān shǒu →（    ）', '扳手'));
-    qs.push(mkFill('看拼音写词语：shǒu wàn →（    ）', '手腕'));
-    qs.push(mkFill('看拼音写词语：tì tóu →（    ）', '剃头'));
-    qs.push(mkFill('看拼音写词语：sāi bāng →（    ）', '腮帮'));
-    qs.push(mkFill('看拼音写词语：bā hén →（    ）', '疤痕'));
-    qs.push(mkFill('看拼音写词语：hóu lóng →（    ）', '喉咙'));
-    qs.push(mkFill('看拼音写词语：shuā jiāng →（    ）', '刷浆'));
-    qs.push(mkFill('看拼音写词语：shī fu →（    ）', '师傅'));
-    qs.push(mkFill('看拼音写词语：bāo fu →（    ）', '包袱'));
+    qs.push(mkChoice('看拼音写词语：shuāi jiāo →（    ）', '摔跤', ['剃头', '手腕', '扳手']));
+    qs.push(mkChoice('看拼音写词语：qī fu →（    ）', '欺负', ['包袱', '腮帮', '手腕']));
+    qs.push(mkChoice('看拼音写词语：náo yǎng →（    ）', '挠痒', ['疤痕', '欺负', '剃头']));
+    qs.push(mkChoice('看拼音写词语：bān shǒu →（    ）', '扳手', ['摔跤', '挠痒', '疤痕']));
+    qs.push(mkChoice('看拼音写词语：shǒu wàn →（    ）', '手腕', ['摔跤', '剃头', '挠痒']));
+    qs.push(mkChoice('看拼音写词语：tì tóu →（    ）', '剃头', ['刷浆', '扳手', '摔跤']));
+    qs.push(mkChoice('看拼音写词语：sāi bāng →（    ）', '腮帮', ['摔跤', '挠痒', '疤痕']));
+    qs.push(mkChoice('看拼音写词语：bā hén →（    ）', '疤痕', ['喉咙', '摔跤', '包袱']));
+    qs.push(mkChoice('看拼音写词语：hóu lóng →（    ）', '喉咙', ['手腕', '欺负', '挠痒']));
+    qs.push(mkChoice('看拼音写词语：shuā jiāng →（    ）', '刷浆', ['欺负', '剃头', '包袱']));
+    qs.push(mkChoice('看拼音写词语：shī fu →（    ）', '师傅', ['喉咙', '扳手', '剃头']));
+    qs.push(mkChoice('看拼音写词语：bāo fu →（    ）', '包袱', ['挠痒', '欺负', '腮帮']));
     qs.push(mkChoice('\'使绊子\'的\'绊\'读音是？', 'bàn', ['pàn', 'bàng', 'bān']));
     qs.push(mkChoice('\'蘸浆\'的\'蘸\'读音是？', 'zhàn', ['zàn', 'jiāo', 'zhān']));
     qs.push(mkChoice('\'发怔\'的\'怔\'读音是？', 'zhèng', ['zhēng', 'zhéng', 'zèng']));
@@ -2894,18 +2894,18 @@ function cn5x5_pool() {
   }
 function cn5x6_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：máo dùn →（    ）', '矛盾'));
-    qs.push(mkFill('看拼音写词语：dùn pái →（    ）', '盾牌'));
-    qs.push(mkFill('看拼音写词语：chǔ guó →（    ）', '楚国'));
-    qs.push(mkFill('看拼音写词语：zàn yù →（    ）', '赞誉'));
-    qs.push(mkFill('看拼音写词语：tián jì →（    ）', '田忌'));
-    qs.push(mkFill('看拼音写词语：sūn bìn →（    ）', '孙膑'));
-    qs.push(mkFill('看拼音写词语：jī fěng →（    ）', '讥讽'));
-    qs.push(mkFill('看拼音写词语：qīng miè →（    ）', '轻蔑'));
-    qs.push(mkFill('看拼音写词语：fān chuán →（    ）', '帆船'));
-    qs.push(mkFill('看拼音写词语：háng xíng →（    ）', '航行'));
-    qs.push(mkFill('看拼音写词语：fàng sì →（    ）', '放肆'));
-    qs.push(mkFill('看拼音写词语：miáo zhǔn →（    ）', '瞄准'));
+    qs.push(mkChoice('看拼音写词语：máo dùn →（    ）', '矛盾', ['讥讽', '田忌', '航行']));
+    qs.push(mkChoice('看拼音写词语：dùn pái →（    ）', '盾牌', ['孙膑', '航行', '矛盾']));
+    qs.push(mkChoice('看拼音写词语：chǔ guó →（    ）', '楚国', ['帆船', '放肆', '田忌']));
+    qs.push(mkChoice('看拼音写词语：zàn yù →（    ）', '赞誉', ['盾牌', '瞄准', '讥讽']));
+    qs.push(mkChoice('看拼音写词语：tián jì →（    ）', '田忌', ['孙膑', '楚国', '赞誉']));
+    qs.push(mkChoice('看拼音写词语：sūn bìn →（    ）', '孙膑', ['田忌', '盾牌', '瞄准']));
+    qs.push(mkChoice('看拼音写词语：jī fěng →（    ）', '讥讽', ['轻蔑', '楚国', '航行']));
+    qs.push(mkChoice('看拼音写词语：qīng miè →（    ）', '轻蔑', ['瞄准', '讥讽', '矛盾']));
+    qs.push(mkChoice('看拼音写词语：fān chuán →（    ）', '帆船', ['盾牌', '轻蔑', '孙膑']));
+    qs.push(mkChoice('看拼音写词语：háng xíng →（    ）', '航行', ['矛盾', '帆船', '楚国']));
+    qs.push(mkChoice('看拼音写词语：fàng sì →（    ）', '放肆', ['瞄准', '赞誉', '楚国']));
+    qs.push(mkChoice('看拼音写词语：miáo zhǔn →（    ）', '瞄准', ['矛盾', '帆船', '孙膑']));
     qs.push(mkChoice('\'夫不可陷之盾\'的\'夫\'读音是？', 'fú', ['fū', 'fǔ', 'fù']));
     qs.push(mkChoice('\'龇牙咧嘴\'的\'龇\'读音是？', 'zī', ['cī', 'zǐ', 'cì']));
     qs.push(mkChoice('\'瞄准\'的\'瞄\'读音是？', 'miáo', ['miào', 'máo', 'miāo r']));
@@ -2935,18 +2935,18 @@ function cn5x6_pool() {
   }
 function cn5x7_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：wēi ní sī →（    ）', '威尼斯'));
-    qs.push(mkFill('看拼音写词语：xiǎo tǐng →（    ）', '小艇'));
-    qs.push(mkFill('看拼音写词语：chuán shāo →（    ）', '船艄'));
-    qs.push(mkFill('看拼音写词语：chuán cāng →（    ）', '船舱'));
-    qs.push(mkFill('看拼音写词语：bǎo mǔ →（    ）', '保姆'));
-    qs.push(mkFill('看拼音写词语：dǎo gào →（    ）', '祷告'));
-    qs.push(mkFill('看拼音写词语：huá xiào →（    ）', '哗笑'));
-    qs.push(mkFill('看拼音写词语：gù yōng →（    ）', '雇佣'));
-    qs.push(mkFill('看拼音写词语：niú dú →（    ）', '牛犊'));
-    qs.push(mkFill('看拼音写词语：yí tài →（    ）', '仪态'));
-    qs.push(mkFill('看拼音写词语：yuǎn tiào →（    ）', '远眺'));
-    qs.push(mkFill('看拼音写词语：liáo kuò →（    ）', '辽阔'));
+    qs.push(mkChoice('看拼音写词语：wēi ní sī →（    ）', '威尼斯', ['仪态', '祷告', '小艇']));
+    qs.push(mkChoice('看拼音写词语：xiǎo tǐng →（    ）', '小艇', ['仪态', '雇佣', '远眺']));
+    qs.push(mkChoice('看拼音写词语：chuán shāo →（    ）', '船艄', ['船舱', '仪态', '雇佣']));
+    qs.push(mkChoice('看拼音写词语：chuán cāng →（    ）', '船舱', ['雇佣', '小艇', '船艄']));
+    qs.push(mkChoice('看拼音写词语：bǎo mǔ →（    ）', '保姆', ['辽阔', '威尼斯', '祷告']));
+    qs.push(mkChoice('看拼音写词语：dǎo gào →（    ）', '祷告', ['哗笑', '船舱', '小艇']));
+    qs.push(mkChoice('看拼音写词语：huá xiào →（    ）', '哗笑', ['威尼斯', '船舱', '辽阔']));
+    qs.push(mkChoice('看拼音写词语：gù yōng →（    ）', '雇佣', ['威尼斯', '哗笑', '船艄']));
+    qs.push(mkChoice('看拼音写词语：niú dú →（    ）', '牛犊', ['小艇', '远眺', '船艄']));
+    qs.push(mkChoice('看拼音写词语：yí tài →（    ）', '仪态', ['远眺', '哗笑', '牛犊']));
+    qs.push(mkChoice('看拼音写词语：yuǎn tiào →（    ）', '远眺', ['哗笑', '小艇', '威尼斯']));
+    qs.push(mkChoice('看拼音写词语：liáo kuò →（    ）', '辽阔', ['祷告', '船舱', '远眺']));
     qs.push(mkChoice('\'哗笑\'的\'哗\'读音是？', 'huá', ['huā', 'huà', 'huǎ']));
     qs.push(mkChoice('\'膘肥\'的\'膘\'读音是？', 'biāo', ['piāo', 'biǎo', 'piào']));
     qs.push(mkChoice('\'湛蓝\'的\'湛\'读音是？', 'zhàn', ['shèn', 'kān', 'zàn']));
@@ -2976,18 +2976,18 @@ function cn5x7_pool() {
   }
 function cn5x8_pool() {
     const qs = [];
-    qs.push(mkFill('看拼音写词语：liáng guó →（    ）', '梁国'));
-    qs.push(mkFill('看拼音写词语：zào yì →（    ）', '造诣'));
-    qs.push(mkFill('看拼音写词语：jiā qín →（    ）', '家禽'));
-    qs.push(mkFill('看拼音写词语：sāo yǎng →（    ）', '搔痒'));
-    qs.push(mkFill('看拼音写词语：yǎo tiǎo →（    ）', '窈窕'));
-    qs.push(mkFill('看拼音写词语：niǔ kòu →（    ）', '纽扣'));
-    qs.push(mkFill('看拼音写词语：xiāng mào →（    ）', '相貌'));
-    qs.push(mkFill('看拼音写词语：miǎo xiǎo →（    ）', '渺小'));
-    qs.push(mkFill('看拼音写词语：xiǎng lè →（    ）', '享乐'));
-    qs.push(mkFill('看拼音写词语：fù yōng →（    ）', '附庸'));
-    qs.push(mkFill('看拼音写词语：zēng hèn →（    ）', '憎恨'));
-    qs.push(mkFill('看拼音写词语：pēi tāi →（    ）', '胚胎'));
+    qs.push(mkChoice('看拼音写词语：liáng guó →（    ）', '梁国', ['造诣', '附庸', '搔痒']));
+    qs.push(mkChoice('看拼音写词语：zào yì →（    ）', '造诣', ['渺小', '附庸', '胚胎']));
+    qs.push(mkChoice('看拼音写词语：jiā qín →（    ）', '家禽', ['搔痒', '窈窕', '相貌']));
+    qs.push(mkChoice('看拼音写词语：sāo yǎng →（    ）', '搔痒', ['家禽', '渺小', '梁国']));
+    qs.push(mkChoice('看拼音写词语：yǎo tiǎo →（    ）', '窈窕', ['搔痒', '附庸', '造诣']));
+    qs.push(mkChoice('看拼音写词语：niǔ kòu →（    ）', '纽扣', ['家禽', '附庸', '窈窕']));
+    qs.push(mkChoice('看拼音写词语：xiāng mào →（    ）', '相貌', ['胚胎', '憎恨', '窈窕']));
+    qs.push(mkChoice('看拼音写词语：miǎo xiǎo →（    ）', '渺小', ['窈窕', '搔痒', '胚胎']));
+    qs.push(mkChoice('看拼音写词语：xiǎng lè →（    ）', '享乐', ['造诣', '相貌', '胚胎']));
+    qs.push(mkChoice('看拼音写词语：fù yōng →（    ）', '附庸', ['梁国', '相貌', '窈窕']));
+    qs.push(mkChoice('看拼音写词语：zēng hèn →（    ）', '憎恨', ['胚胎', '家禽', '相貌']));
+    qs.push(mkChoice('看拼音写词语：pēi tāi →（    ）', '胚胎', ['窈窕', '憎恨', '家禽']));
     qs.push(mkChoice('\'应声\'的\'应\'读音是？', 'yìng', ['yīng', 'yíng', 'yīng r']));
     qs.push(mkChoice('\'窈窕\'的\'窈\'读音是？', 'yǎo', ['yáo', 'yòu', 'yāo']));
     qs.push(mkChoice('\'薄弱\'的\'薄\'读音是？', 'bó', ['báo', 'bò', 'bù']));
@@ -3503,10 +3503,26 @@ function cn5x8_pool() {
       html += '</div>';
     } else if (item.type === 'fill') {
       const val = q.userAnswers[q.idx] || '';
-      html += '<input class="u-w100 u-p12 u-fs16 u-bd2 u-r10 u-outline0 u-bbox" type="text" id="cnFillInput" value="' + (typeof val === 'string' ? val.replace(/"/g, '&quot;') : '') + '" placeholder="请输入答案" onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'" onkeydown="if(event.key===\'Enter\')CN.submit()">';
+      // v84：零打字输入面板（点选作答，不弹软键盘）。
+      // 语文看拼音写词语将随 P1 批量改为「选词」，届时题库层写 input:{mode:'word',cands:[...]}，
+      // 这里无需再改代码即可渲染词卡；未改造前 render 返回 ''，自动降级为原生输入。
+      const ikHtml = (window.InputKit && window.InputKit.render) ? window.InputKit.render(item) : '';
+      const ikCls = ikHtml ? ' ik-target' : '';
+      const roAttr = ikHtml ? ' data-ik-ro="1"' : '';
+      html += '<input class="u-w100 u-p12 u-fs16 u-bd2 u-r10 u-outline0 u-bbox' + ikCls + '" type="text" id="cnFillInput" '
+        + 'value="' + (typeof val === 'string' ? val.replace(/"/g, '&quot;') : '') + '" '
+        + 'placeholder="' + (ikHtml ? '点下面的候选词作答' : '请输入答案') + '" '
+        + 'inputmode="' + (ikHtml ? 'none' : 'text') + '"' + roAttr + ' '
+        + 'onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'" onkeydown="if(event.key===\'Enter\')CN.submit()">';
+      if (ikHtml) html += ikHtml;
     }
 
     el('cnQuestionCard').innerHTML = html;
+    // v84：面板渲染后把输入框设为只读（防软键盘弹出）
+    if (window.InputKit && window.InputKit.bind) {
+      const cardEl = el('cnQuestionCard');
+      if (cardEl && cardEl.querySelector('.ik')) window.InputKit.bind(cardEl);
+    }
 
     // v73.2：题号导航（全部题号可点击跳转，不强制顺序）
     renderCnQuizNav();
