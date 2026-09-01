@@ -387,8 +387,8 @@ ok('v58：supabase-js 已自托管为本地 js/supabase-js.min.js', /js\/supabas
 const sbMin = fs.readFileSync(path.join(ROOT, 'js', 'supabase-js.min.js'), 'utf8');
 ok('v58：supabase-js.min.js 是自托管 UMD（含 createClient 且非 CDN 重定向）', sbMin.includes('createClient') && sbMin.length > 50000 && !/cdn\.jsdelivr/.test(sbMin));
 ok('v58：组件 CSS 已静态化进 css/style.css（.option-btn.wrong + --danger）', /\.option-btn\.wrong\{/.test(mainCss) && /--danger:/.test(mainCss));
-ok('v75：考试/练习批改结果页 + 答案解析 + SW 缓存升级为 lyj-shell-v75',
-  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v75') &&
+ok('v77：考试/练习批改结果页 + 答案解析 + 移除题型筛选 + SW 缓存升级为 lyj-shell-v77',
+  fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('lyj-shell-v77') &&
   /window\.AI_GRADE/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&
   /AI 批改给分数，模拟真实老师手写批注/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) &&
   /drawScoreStamp/.test(fs.readFileSync(path.join(ROOT, 'js/aiGrade.js'), 'utf8')) &&

@@ -687,16 +687,15 @@
       title: '练习设置',
       note: (unit && unit.name ? unit.name + ' · ' : '') + '每次固定 30 题',
       okText: '开始练习',
-      onStart: function (diff, type) { startMathUnitWithDiff(idx, diff, type); },
+      onStart: function (diff) { startMathUnitWithDiff(idx, diff); },
     });
   };
-  function startMathUnitWithDiff(idx, diff, type) {
+  function startMathUnitWithDiff(idx, diff) {
     const unit = KNOWLEDGE_BASE[S.grade][S.semester][idx];
-    const tf = (type && type !== 0 && type !== '0') ? type : null;
     let qs;
-    if (unit.paper) { let arr = unit.gen(); qs = Array.isArray(arr) ? arr : [arr]; if (tf) qs = qs.filter(q => classifyQType(q) === tf); }
+    if (unit.paper) { let arr = unit.gen(); qs = Array.isArray(arr) ? arr : [arr]; }
     else if (typeof buildUnitQuizQuestions === 'function') {
-      qs = buildUnitQuizQuestions(unit, diff || 0, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 30, tf);
+      qs = buildUnitQuizQuestions(unit, diff || 1, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 30);
     } else {
       const first = unit.gen();
       if (Array.isArray(first)) qs = first;
@@ -706,12 +705,11 @@
         for (let i = 1; i < N; i++) { const g = unit.gen(); if (Array.isArray(g)) cand.push.apply(cand, g); else cand.push(g); }
         qs = shuffle(cand).slice(0, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 20);
       }
-      if (tf) qs = qs.filter(q => classifyQType(q) === tf);
     }
-    if (!qs || !qs.length) { toast('该单元暂无此类题型'); return; }
-    beginQuiz(qs, 'unit', unit.name, '数学', S.grade, false, function () { startMathUnitWithDiff(idx, diff, type); });
+    if (!qs || !qs.length) { toast('该单元暂无题目'); return; }
+    beginQuiz(qs, 'unit', unit.name, '数学', S.grade, false, function () { startMathUnitWithDiff(idx, diff); });
   }
-  function startMathUnit(idx) { startMathUnitWithDiff(idx, 0); }
+  function startMathUnit(idx) { startMathUnitWithDiff(idx, 1); }
   function startMathExam(type) {
     if (typeof examState === 'undefined' || typeof generateExamPaper !== 'function') { toast('考试功能不可用'); return; }
     examState.grade = S.grade; examState.semester = S.semester; examState.type = type;
@@ -732,20 +730,20 @@
       title: '练习设置',
       note: u.name + ' · 每次固定 30 题',
       okText: '开始练习',
-      onStart: function (diff, type) { startCnUnitWithDiff(idx, diff, type); },
+      onStart: function (diff) { startCnUnitWithDiff(idx, diff); },
     });
   };
-  function startCnUnitWithDiff(idx, diff, type) {
+  function startCnUnitWithDiff(idx, diff) {
     const units = (window.CN && CN.data[S.grade]) || [];
     const u = units[idx];
     if (!u || !u.pool) { toast('该单元暂无题目'); return; }
     let qs = (window.CN && typeof CN.samplePool === 'function')
-      ? CN.samplePool(u, 30, diff || 0, type)
+      ? CN.samplePool(u, 30, diff || 1)
       : shuffle(u.pool()).slice(0, 20);
-    if (!qs || !qs.length) { toast('该单元暂无此类题型'); return; }
-    beginQuiz(qs, 'unit', u.name, '语文', S.grade, false, function () { startCnUnitWithDiff(idx, diff, type); });
+    if (!qs || !qs.length) { toast('该单元暂无题目'); return; }
+    beginQuiz(qs, 'unit', u.name, '语文', S.grade, false, function () { startCnUnitWithDiff(idx, diff); });
   }
-  function startCnUnit(idx) { startCnUnitWithDiff(idx, 0); }
+  function startCnUnit(idx) { startCnUnitWithDiff(idx, 1); }
   function startCnExam(kind) {
     const units = (window.CN && CN.data[S.grade]) || [];
     const term = S.semester === 1 ? '上' : '下';

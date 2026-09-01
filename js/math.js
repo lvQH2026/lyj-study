@@ -10185,40 +10185,17 @@ function renderShapeExplore(container){
   if(s2)s2.addEventListener('input',function(){update(this.value);if(s1)s1.value=this.value;});
 }
 
-// v73：6:3:1 配比挑 n 道题，且**绝不重复**。
-// 与 pickDifficultyMix 的区别：旧函数在「某难度档候选不足」时会用 band[k % band.length]
-// 循环复用同一批题，卷面上就是几道题反复出现；练习是给孩子刷熟练度的，
-// 重复题只会浪费时间，故这里某档不够就从相邻档补，凑不满就少出几道。
-function pickDifficultyMixUnique(cands, n) {
-  let byDiff = { 1: [], 2: [], 3: [] };
-  (cands || []).forEach(q => byDiff[questionDifficulty(q)].push(q));
-  [1, 2, 3].forEach(d => shuffleArr(byDiff[d]));
-  let target = Math.min(n, cands.length);
-  let want = diffMixFor(target);
-  let out = [];
-  [1, 2, 3].forEach((d, i) => {
-    out = out.concat(byDiff[d].slice(0, Math.min(want[i], byDiff[d].length)));
-  });
-  if (out.length < target) {
-    let rest = byDiff[1].concat(byDiff[2], byDiff[3]).filter(q => out.indexOf(q) < 0);
-    out = out.concat(rest.slice(0, target - out.length));
-  }
-  return out;
-}
-
 // v73：单元练习出题。
-// diff：0 混合（6:3:1）/ 1 基础 / 2 提高 / 3 拓展（沿用站内既有难度命名）。
+// diff：1 基础 / 2 提高 / 3 拓展（沿用站内既有难度命名，默认基础）。
 // 策略（用户确认）：反复调用 unit.gen() 生成新题，直到凑满 30 道「视觉上互不相同」的题；
 // 达到采样上限仍凑不满时按实际上限出卷——克隆凑数等于让孩子连做 30 道一模一样的题。
-function buildUnitQuizQuestions(unit, diff, want, typeFilter) {
+function buildUnitQuizQuestions(unit, diff, want) {
   want = want || UNIT_QUIZ_LENGTH;
   let seen = new Set();
   let cands = [];
   let stall = 0;
-  const wantType = (typeFilter && typeFilter !== 0 && typeFilter !== '0') ? String(typeFilter) : null;
   const push = q => {
     if (!q || !q.question || q.answer == null || q.answer === undefined) return false;
-    if (wantType && classifyQType(q) !== wantType) return false;   // v73.2：仅收集目标题型
     let k = visKey(q);
     if (seen.has(k)) return false;
     seen.add(k);
@@ -10235,7 +10212,7 @@ function buildUnitQuizQuestions(unit, diff, want, typeFilter) {
   }
   if (!cands.length) return [];
   tagRelativeDifficulty(cands);
-  if (!diff) return pickDifficultyMixUnique(cands, want);
+  if (!diff) diff = 1;
   // 指定难度档：只出该档的题；该单元压根没有这一档时退回全量（否则孩子会看到空白页）
   let band = cands.filter(q => questionDifficulty(q) === diff);
   if (band.length === 0) band = cands;
@@ -10246,16 +10223,16 @@ function buildUnitQuizQuestions(unit, diff, want, typeFilter) {
 // v73：单元练习的入口——先弹「练习设置」选难度，再开始练习。
 // 从「错题同类练习」等快捷入口进来时不弹层（那里已经明确知道要练什么）。
 function askUnitQuizSettings(idx, grade, sem, unitName) {
-  if (typeof openPracticeSettings !== 'function') { beginUnitQuiz(idx, grade, sem, 0); return; }
+  if (typeof openPracticeSettings !== 'function') { beginUnitQuiz(idx, grade, sem, 1); return; }
   openPracticeSettings({
     title: '练习设置',
     note: (unitName ? unitName + ' · ' : '') + '每次固定 30 题',
     okText: '开始练习',
-    onStart: function (diff, type) { beginUnitQuiz(idx, grade, sem, diff, type); },
+    onStart: function (diff) { beginUnitQuiz(idx, grade, sem, diff); },
   });
 }
 
-function beginUnitQuiz(idx, grade, sem, diff, typeFilter) {
+function beginUnitQuiz(idx, grade, sem, diff) {
   let unit = KNOWLEDGE_BASE[grade][sem][idx];
   // v51：practiceSimilarWrong 等入口直连时不经过 showUnitDiagrams，须在此确保年级/学期上下文
   state.currentGrade = grade;
@@ -10270,15 +10247,15 @@ function beginUnitQuiz(idx, grade, sem, diff, typeFilter) {
       arr = arr.map(q => Object.assign({}, q));
       tagRelativeDifficulty(arr);
     }
-    state.quizQuestions = (typeFilter && typeFilter !== 0 && typeFilter !== '0') ? arr.filter(q => classifyQType(q) === typeFilter) : arr;
+    state.quizQuestions = arr;
   } else {
     let first = unit.gen();
     if (Array.isArray(first)) {
       // gen 已返回完整题组（如角度计算：一次从题库随机抽 N 道）
-      state.quizQuestions = (typeFilter && typeFilter !== 0 && typeFilter !== '0') ? first.filter(q => classifyQType(q) === typeFilter) : first;
+      state.quizQuestions = first;
     } else {
       // v73：固定 30 题 + 难度筛选，反复 gen() 直到凑满，绝不出现重复题。
-      state.quizQuestions = buildUnitQuizQuestions(unit, diff || 0, UNIT_QUIZ_LENGTH, typeFilter);
+      state.quizQuestions = buildUnitQuizQuestions(unit, diff || 1, UNIT_QUIZ_LENGTH);
     }
   }
   state.quizIndex = 0;
@@ -10692,16 +10669,6 @@ function isApplicationLike(q) {
   let t = q.question || '';
   if (NOT_APP_PREFIX.test(t)) return false;
   return APP_KEYWORDS.test(t);
-}
-
-// v73.2：把一道题归到「题型筛选」的某一类（与真题分区口径一致）
-// 选择题 / 填空题 / 计算题 / 应用题（判断题不单列，仅在考试卷中出现）
-function classifyQType(q) {
-  if (q.judge) return 'judge';
-  if ((q.type === 'choice' || q.type === 'shape_choice') && !q.forceFill) return 'choice';
-  if (isPureExpression(q) || (q.type === 'calc')) return 'calc';
-  if (isApplicationLike(q) || q._unitType === 'application') return 'app';
-  return 'fill';
 }
 
 // v69：估算一个单元「到底能出多少道互不相同的题」。

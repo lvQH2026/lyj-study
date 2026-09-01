@@ -3215,11 +3215,11 @@ function cn5x8_pool() {
     return arr;
   }
 
-  // v73：单元练习选题。diff：0 混合（6:3:1）/ 1 基础 / 2 提高 / 3 拓展。
+  // v73：单元练习选题。diff：1 基础 / 2 提高 / 3 拓展（默认基础）。
   // 语文题库是静态 pool（不像数学那样有 gen() 可反复生成），
   // 凑不满 30 题时按实际上限出卷——旧版用 pool[i % len] 循环克隆凑数，
   // 孩子会连着做到两道一模一样的题，那是在浪费他的时间。
-  function cnSamplePool(unit, n, diff, type) {
+  function cnSamplePool(unit, n, diff) {
     const seen = new Set();
     const uniq = [];
     (unit.pool() || []).forEach(function (q) {
@@ -3229,16 +3229,6 @@ function cn5x8_pool() {
       seen.add(k);
       uniq.push(q);
     });
-    // v73.2：题型筛选（语文无计算题；应用题≈阅读/积累类带 passage 的题）
-    if (type && type !== 0 && type !== '0') {
-      uniq = uniq.filter(function (q) {
-        if (type === 'choice') return q.type === 'choice';
-        if (type === 'fill') return q.type === 'fill';
-        if (type === 'judge') return q.type === 'judge';
-        if (type === 'app') return q.type === 'app' || !!q.passage;
-        return false;   // calc：语文无计算题
-      });
-    }
     if (!uniq.length) return [];
     cnTagDifficulty(uniq);
     let by = { 1: [], 2: [], 3: [] };
@@ -3246,20 +3236,9 @@ function cn5x8_pool() {
     [1, 2, 3].forEach(function (d) { by[d] = shuffle(by[d]); });
     const target = Math.min(n, uniq.length);
     let out = [];
-    if (!diff) {
-      const b = Math.round(target * 0.6), m = Math.round(target * 0.9);
-      const take1 = Math.min(b, by[1].length);
-      const take2 = Math.min(Math.max(0, m - take1), by[2].length);
-      const take3 = Math.min(Math.max(0, target - take1 - take2), by[3].length);
-      out = by[1].slice(0, take1).concat(by[2].slice(0, take2), by[3].slice(0, take3));
-      if (out.length < target) {
-        const rest = by[1].concat(by[2], by[3]).filter(function (q) { return out.indexOf(q) < 0; });
-        out = out.concat(rest.slice(0, target - out.length));
-      }
-    } else {
-      const band = (by[diff] && by[diff].length) ? by[diff] : uniq;
-      out = band.slice(0, target);
-    }
+    if (!diff) diff = 1;
+    const band = (by[diff] && by[diff].length) ? by[diff] : uniq;
+    out = band.slice(0, target);
     return out;
   }
 
@@ -3280,45 +3259,35 @@ function cn5x8_pool() {
     return out;
   }
 
-  // v73.2：语文题型选项（无计算题）
-  const CN_TYPE_OPTIONS = [
-    { v: 0, label: '全部题型', desc: '混合各题型' },
-    { v: 'choice', label: '选择题', desc: '四选一' },
-    { v: 'fill', label: '填空题', desc: '直接写答案' },
-    { v: 'app', label: '应用题', desc: '阅读/积累' },
-  ];
-
   // ---- 开始练习（随机30题） ----
   // v73：先弹「练习设置」选难度，再出题（从错题同类练习等快捷入口进来时直接传 diff 调本函数）
   function cnAskQuiz(idx) {
     const units = CN_DATA[cnState.grade] || [];
     const unit = units[idx];
-    if (typeof openPracticeSettings !== 'function') { cnBeginQuiz(idx, 0); return; }
+    if (typeof openPracticeSettings !== 'function') { cnBeginQuiz(idx, 1); return; }
     openPracticeSettings({
       title: '练习设置',
       note: (unit ? unit.name + ' · ' : '') + '每次固定 ' + PRAC_N + ' 题',
       okText: '开始练习',
-      typeOptions: CN_TYPE_OPTIONS,
-      onStart: function (d, t) { cnBeginQuiz(idx, d, t); },
+      onStart: function (d) { cnBeginQuiz(idx, d); },
     });
   }
 
   // 「再练一次」沿用上次选的难度，不再把设置弹层再弹一遍。
   function cnReplayQuiz() {
-    cnBeginQuiz(window.CN._lastUnitIdx || 0, window.CN._lastUnitDiff || 0, window.CN._lastUnitType || 0);
+    cnBeginQuiz(window.CN._lastUnitIdx || 0, window.CN._lastUnitDiff || 1);
   }
 
-  function cnBeginQuiz(idx, diff, type) {
+  function cnBeginQuiz(idx, diff) {
     const units = CN_DATA[cnState.grade] || [];
     const unit = units[idx];
     if (!unit) return;
     cnState.unitIdx = idx;
     window.CN._lastUnitIdx = idx;
-    window.CN._lastUnitDiff = diff || 0;
-    window.CN._lastUnitType = type || 0;
+    window.CN._lastUnitDiff = diff || 1;
 
     const fcount = unit.fidx && unit.fidx.length ? 3 : 1;
-    const poolQs = cnSamplePool(unit, PRAC_N - fcount, diff || 0, type);
+    const poolQs = cnSamplePool(unit, PRAC_N - fcount, diff || 1);
     const fq = formulaQuestionsFor(unit, fcount);
     const questions = shuffle(poolQs.concat(fq));
     questions.forEach(function (q) {
