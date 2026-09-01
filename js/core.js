@@ -284,6 +284,40 @@ function wpCls(p) {
 }
 
 // ============================================================
+// v83 · 英语判分（PC beginQuiz + 移动端 PEPQ 共用）
+// ------------------------------------------------------------
+// pcJudge 走的是严格字符串比较（只容忍数字与多空），直接拿去判英语会大量误判：
+// 孩子写 "went" 和 "Went"、"I'm tall." 和 "I'm tall" 都被判错，体验很差。
+// 这里统一放宽：忽略大小写、统一省略号/撇号写法、忽略句末标点、折叠空格。
+// 题目带 judge:'eng' 时，pc.js 的 pcJudge 会转调本函数。
+// ============================================================
+function engNorm(s) {
+  return String(s == null ? '' : s)
+    .replace(/[’‘`]/g, "'")     // 中文弯撇号 / 反引号 -> 直撇号
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, ' ')       // 折叠空白
+    .trim()
+    .toLowerCase()
+    .replace(/[.,!?;:。！？；：]+$/, ''); // 去句末标点
+}
+function engAnswerEquals(ua, ans) {
+  const a = engNorm(ua), b = engNorm(ans);
+  if (!a) return false;
+  if (a === b) return true;
+  // 缩写等价：don't <-> do not、I'm <-> I am 之类
+  const expand = function (x) {
+    return x
+      .replace(/\b(\w+)n't\b/g, '$1 not')
+      .replace(/\b(\w+)'s\b/g, '$1 is')
+      .replace(/\b(\w+)'re\b/g, '$1 are')
+      .replace(/\b(\w+)'ve\b/g, '$1 have')
+      .replace(/\b(\w+)'ll\b/g, '$1 will')
+      .replace(/\bi'm\b/g, 'i am');
+  };
+  return expand(a) === expand(b);
+}
+
+// ============================================================
 // v75：考试/练习批改结果页公共工具函数（PC + 移动端共用）
 // ============================================================
 function formatDuration(ms) {

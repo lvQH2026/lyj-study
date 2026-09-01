@@ -74,11 +74,23 @@
 //         原先只列题干和错次，现补「你的答案 / 正确答案 + 分步讲解」。
 //      ④ 容错：generateSteps 兜底生成的步骤会打 q.stepsGeneric，difficultyScore 与
 //         questionDifficulty 不再把它当作「多步运算」的难度信号，避免 6:3:1 梯度被压平。
-const CACHE = 'lyj-shell-v82';
+// v83：S5 英语 PEP 双轨模块（B4）。
+//      ① 新建 js/pep.js 教材库：旧版 PEP 三~五年级 6 册 36 单元（补欠账）+ 2024 修订版
+//         六年级上 6 单元 / 下 4 单元（同步新课），共 8 册 46 单元 552 词 185 句型。
+//         六上 U1 标题经家长核对课本目录确认为 Amazing places。
+//      ② 新建 js/engPep.js 练习引擎：英译中 / 中译英 / 单词拼写 / 选词填空 /
+//         补全句子 / 连词成句，三档难度自动配比题型，20 题一练，两段式批改
+//         （成绩页 → 确认成绩 → 答案与解析），记录进 history(module:英语) 与错题本。
+//      ③ core.js 新增 engNorm / engAnswerEquals：英语判分放宽（忽略大小写、句末标点、
+//         撇号写法、缩写展开），PC 端 pcJudge 对 judge:'eng' 的题转调该函数。
+//      ④ PC 端解除「英语暂只支持单元练习」限制：考试中心可按 PEP 单元 / 阶段 / 期中 /
+//         期末出卷（30 题，可选难度），单元练习页新增「人教 PEP 教材同步」区块。
+//      ⑤ 移动端英语首页新增「教材同步」入口，册 → 单元 → 单词表 / 核心句型 / 语法要点 → 练习。
+const CACHE = 'lyj-shell-v83';
 const SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css', './css/english.css',
-  './js/core.js', './js/math.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
+  './js/core.js', './js/math.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/pep.js', './js/engPep.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
   './js/supabase-js.min.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'

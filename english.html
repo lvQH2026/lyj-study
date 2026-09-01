@@ -147,11 +147,11 @@ body {
 
 <div class="navbar">
   <button class="nav-icon-btn" onclick="location.href='index.html'" title="返回学习站">站</button>
-  <button class="nav-icon-btn" id="backBtn" onclick="goBack()" style="display:none">←</button>
+  <button class="nav-icon-btn u-hide" id="backBtn" onclick="goBack()">←</button>
   <h1 id="navTitle">英语 · 学习中心</h1>
 </div>
 
-<div id="app" style="padding:14px"></div>
+<div class="u-p14" id="app"></div>
 
 <!-- 底部导航 -->
 <div class="bottom-nav">
@@ -414,9 +414,9 @@ function renderPhonicsHome(){
   viewStack.length = 0;
   setView(d.title, ()=>{
     let lessonCount = 0; d.levels.forEach(l=> lessonCount += l.lessons.length);
-    let html = '<div class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff">'
-      + '<div style="font-size:17px;font-weight:700">自然拼读 Phonics</div>'
-      + '<div style="font-size:13px;opacity:.9;margin-top:4px">四级体系 · 共 '+d.levels.length+' 级 '+lessonCount+' 课 · 每课 5 步闭环 + 20 个单词 · 关卡全开放</div></div>';
+    let html = '<div class="card u-bg-grad u-c-white">'
+      + '<div class="u-fs17 u-fw700">自然拼读 Phonics</div>'
+      + '<div class="u-fs13 u-op90 u-mt4">四级体系 · 共 '+d.levels.length+' 级 '+lessonCount+' 课 · 每课 5 步闭环 + 20 个单词 · 关卡全开放</div></div>';
     d.levels.forEach((lv, li)=>{
       html += '<div class="section-title">'+lv.no+' · '+lv.name+'</div><div class="lesson-grid">';
       lv.lessons.forEach((ls)=>{
@@ -446,7 +446,7 @@ function renderPhonicsPlayer(ls){
         '<p class="muted-note">点击「听」逐词听美式发音，可反复听</p>'
         + '<div class="word-list" id="listenList"></div>' },
     { t:'麦克风跟读打分（Hy3 鼓励）', body:
-        '<div id="recogBox" style="text-align:center;padding:8px 0">'
+        '<div class="u-tc u-p8-0" id="recogBox">'
         + '<button class="btn-primary" onclick="doPhonicsRecog(\''+ls.id+'\')">开始跟读</button>'
         + '<div class="muted-note" id="recogNote"></div></div>' },
     { t:'听音辨别选择题', body:
@@ -454,18 +454,18 @@ function renderPhonicsPlayer(ls){
         + '<div id="disBox"></div>' },
     { t:'错题自动入错题库（Hy3 讲解）', body:
         '<p class="muted-note">听音辨选答错会自动记录到错题本，讲解由 Hy3 生成（无密钥时降级）。</p>'
-        + '<button class="btn-ghost" style="width:100%" onclick="switchMain(\'wrong\')">查看错题本</button>' }
+        + '<button class="btn-ghost u-w100" onclick="switchMain(\'wrong\')">查看错题本</button>' }
   ];
-  let html = '<div class="card"><div style="font-weight:700;font-size:16px">'+ls.title+'</div>'
-    + '<div class="pill" style="margin-top:6px">'+ls.sub+'</div></div>';
+  let html = '<div class="card"><div class="u-fw700 u-fs16">'+ls.title+'</div>'
+    + '<div class="pill u-mt6">'+ls.sub+'</div></div>';
   stepDefs.forEach((s, i)=>{
     html += '<div class="card step'+(i===0?' active':'')+'" data-step="'+i+'">'
       + '<div class="step-title"><span class="step-num">'+(i+1)+'</span>'+s.t+'</div>'
-      + '<div class="step-wrap" style="margin-top:10px">'+s.body+'</div></div>';
+      + '<div class="step-wrap u-mt10">'+s.body+'</div></div>';
   });
-  html += '<div class="btn-row" style="margin-top:6px">'
-    + '<button class="btn-ghost" style="flex:1" onclick="phonicsStep(-1)">上一步</button>'
-    + '<button class="btn-primary" style="flex:1" onclick="phonicsStep(1)">下一步</button></div>';
+  html += '<div class="btn-row u-mt6">'
+    + '<button class="btn-ghost u-f1" onclick="phonicsStep(-1)">上一步</button>'
+    + '<button class="btn-primary u-f1" onclick="phonicsStep(1)">下一步</button></div>';
   document.getElementById('app').innerHTML = html;
   // 第 2 步：列出本课全部单词（每课 20 个），可逐词听
   const listen = document.getElementById('listenList');
@@ -494,8 +494,8 @@ function doPhonicsRecog(id){
   const target = ls.words[Math.floor(Math.random()*ls.words.length)].w;
   const note = document.getElementById('recogNote');
   if(!recogSupported()){
-    note.innerHTML = '<span style="color:var(--warning)">当前环境不支持麦克风，已模拟跟读（'+target+'）</span>';
-    HY3.encourage(95).then(t=> note.innerHTML += '<br><span style="color:var(--success)">'+t+'</span>');
+    note.innerHTML = '<span class="u-c-warn">当前环境不支持麦克风，已模拟跟读（'+target+'）</span>';
+    HY3.encourage(95).then(t=> note.innerHTML += '<br><span class="u-c-ok">'+t+'</span>');
     return;
   }
   note.textContent = '请跟读：'+target+' …';
@@ -518,17 +518,17 @@ function renderPhonicsDis(){
   if(phDis.idx >= phDis.total){
     const acc = Math.round(phDis.correct / phDis.total * 100);
     recordAccuracy('ph_'+phDis.ls.id, phDis.ls.title, phDis.correct, phDis.total);
-    box.innerHTML = '<div class="feedback ok" style="display:block">本轮完成！正确 '+phDis.correct+' / '+phDis.total+'（正确率 '+acc+'%）</div>'
-      + '<button class="btn-ghost" style="width:100%;margin-top:10px" onclick="switchMain(\'progress\')">查看学习进度</button>';
+    box.innerHTML = '<div class="feedback ok u-block">本轮完成！正确 '+phDis.correct+' / '+phDis.total+'（正确率 '+acc+'%）</div>'
+      + '<button class="btn-ghost u-w100 u-mt10" onclick="switchMain(\'progress\')">查看学习进度</button>';
     return;
   }
   const target = phDis.queue[phDis.idx];
   const others = shuffle(phDis.ls.words.map(w=>w.w).filter(w=>w!==target)).slice(0,3);
   const opts = shuffle([target].concat(others));
   box.innerHTML = '<p class="muted-note">第 '+(phDis.idx+1)+' / '+phDis.total+' 题 · 点击播放，选出你听到的单词</p>'
-    + '<button class="btn-gold" style="width:100%;margin:8px 0" onclick="speak(\''+target+'\')">▶ 播放单词</button>'
+    + '<button class="btn-gold u-w100 u-m8-0" onclick="speak(\''+target+'\')">▶ 播放单词</button>'
     + '<div id="optWrap"></div>'
-    + '<div id="disFeedback" class="feedback" style="display:none"></div>';
+    + '<div id="disFeedback" class="feedback u-hide"></div>';
   const wrap = box.querySelector('#optWrap');
   opts.forEach(o=>{
     const b = document.createElement('button');
@@ -561,9 +561,9 @@ function renderIpaHome(){
   const d = DATA.ipa;
   viewStack.length = 0;
   setView(d.title, ()=>{
-    let html = '<div class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff">'
-      + '<div style="font-size:17px;font-weight:700">国际音标 IPA</div>'
-      + '<div style="font-size:13px;opacity:.9;margin-top:4px">标准 44 音素 · 共 8 课 · 每课 5 步闭环</div></div>'
+    let html = '<div class="card u-bg-grad u-c-white">'
+      + '<div class="u-fs17 u-fw700">国际音标 IPA</div>'
+      + '<div class="u-fs13 u-op90 u-mt4">标准 44 音素 · 共 8 课 · 每课 5 步闭环</div></div>'
       + '<div class="section-title">课程列表</div><div class="lesson-grid">';
     d.lessons.forEach((ls)=>{
       html += '<div class="lesson-card" onclick="openIpaLesson(\''+ls.id+'\')">'
@@ -585,22 +585,22 @@ function renderIpaPlayer(ls){
   const stepDefs = [
     { t:'看符号 + 文字发音要领', body:'<div id="ipaSymBox"></div>' },
     { t:'听标准发音', body:'<p class="muted-note">点击播放该音标的例词（美式）</p><div id="ipaListen" class="word-list"></div>' },
-    { t:'麦克风跟读打分（Hy3 鼓励）', body:'<div id="ipaRecog" style="text-align:center;padding:8px 0"><button class="btn-primary" onclick="doIpaRecog(\''+ls.id+'\')">开始跟读</button><div class="muted-note" id="ipaRecogNote"></div></div>' },
+    { t:'麦克风跟读打分（Hy3 鼓励）', body:'<div class="u-tc u-p8-0" id="ipaRecog"><button class="btn-primary" onclick="doIpaRecog(\''+ls.id+'\')">开始跟读</button><div class="muted-note" id="ipaRecogNote"></div></div>' },
     { t:'听音辨别选择题', body:'<div id="ipaDis"></div>' },
-    { t:'错题自动入错题库（Hy3 讲解）', body:'<p class="muted-note">答错自动记录，讲解由 Hy3 生成（无密钥降级）。</p><button class="btn-ghost" style="width:100%" onclick="switchMain(\'wrong\')">查看错题本</button>' }
+    { t:'错题自动入错题库（Hy3 讲解）', body:'<p class="muted-note">答错自动记录，讲解由 Hy3 生成（无密钥降级）。</p><button class="btn-ghost u-w100" onclick="switchMain(\'wrong\')">查看错题本</button>' }
   ];
-  let html = '<div class="card"><div style="font-weight:700;font-size:16px">'+ls.title+'</div><div class="pill" style="margin-top:6px">'+ls.sub+'</div></div>';
+  let html = '<div class="card"><div class="u-fw700 u-fs16">'+ls.title+'</div><div class="pill u-mt6">'+ls.sub+'</div></div>';
   stepDefs.forEach((s,i)=>{
-    html += '<div class="card step'+(i===0?' active':'')+'" data-step="'+i+'"><div class="step-title"><span class="step-num">'+(i+1)+'</span>'+s.t+'</div><div class="step-wrap" style="margin-top:10px">'+s.body+'</div></div>';
+    html += '<div class="card step'+(i===0?' active':'')+'" data-step="'+i+'"><div class="step-title"><span class="step-num">'+(i+1)+'</span>'+s.t+'</div><div class="step-wrap u-mt10">'+s.body+'</div></div>';
   });
-  html += '<div class="btn-row" style="margin-top:6px"><button class="btn-ghost" style="flex:1" onclick="ipaStep(-1)">上一步</button><button class="btn-primary" style="flex:1" onclick="ipaStep(1)">下一步</button></div>';
+  html += '<div class="btn-row u-mt6"><button class="btn-ghost u-f1" onclick="ipaStep(-1)">上一步</button><button class="btn-primary u-f1" onclick="ipaStep(1)">下一步</button></div>';
   document.getElementById('app').innerHTML = html;
   // 符号 + 要领
   const symBox = document.getElementById('ipaSymBox');
   phs.forEach(p=>{
     const c = document.createElement('div');
     c.className='card'; c.style.marginBottom='10px';
-    c.innerHTML = '<div class="phoneme-big">'+p.sym+'</div><div class="tip-box" style="margin:10px 0 0">'+p.tip+'</div>';
+    c.innerHTML = '<div class="phoneme-big">'+p.sym+'</div><div class="tip-box u-m10-0-0">'+p.tip+'</div>';
     symBox.appendChild(c);
   });
   // 听音例词：用符号近似例词（取 tip 中 "如 x" 的例词）
@@ -627,8 +627,8 @@ function doIpaRecog(id){
   const m = p.tip.match(/如\s*([a-zA-Z]+)/); const ex = m? m[1] : p.sym.replace(/[\/]/g,'');
   const note = document.getElementById('ipaRecogNote');
   if(!recogSupported()){
-    note.innerHTML = '<span style="color:var(--warning)">当前环境不支持麦克风，已模拟跟读（'+ex+'）</span>';
-    HY3.encourage(95).then(t=> note.innerHTML += '<br><span style="color:var(--success)">'+t+'</span>');
+    note.innerHTML = '<span class="u-c-warn">当前环境不支持麦克风，已模拟跟读（'+ex+'）</span>';
+    HY3.encourage(95).then(t=> note.innerHTML += '<br><span class="u-c-ok">'+t+'</span>');
     return;
   }
   note.textContent='请跟读：'+ex+' …';
@@ -647,8 +647,8 @@ function renderIpaDis(ls, idx){
   const others = shuffle(phs.filter(p=>p!==target)).slice(0,3);
   const opts = shuffle([target].concat(others));
   box.innerHTML = '<p class="muted-note">第 '+(idx+1)+' 题 · 播放例词，选出对应音标</p>'
-    + '<button class="btn-gold" style="width:100%;margin:8px 0" onclick="speak(\''+ex+'\')">▶ 播放例词</button>'
-    + '<div id="optWrap"></div><div id="ipaFb" class="feedback" style="display:none"></div>';
+    + '<button class="btn-gold u-w100 u-m8-0" onclick="speak(\''+ex+'\')">▶ 播放例词</button>'
+    + '<div id="optWrap"></div><div id="ipaFb" class="feedback u-hide"></div>';
   const wrap = box.querySelector('#optWrap');
   opts.forEach(o=>{
     const b=document.createElement('button'); b.className='option-btn'; b.textContent=o.sym;
@@ -671,15 +671,15 @@ function renderWrong(){
   viewStack.length = 0;
   setView('错题本', ()=>{
     const list = loadWrong();
-    let html = '<div class="card" style="display:flex;justify-content:space-between;align-items:center">'
-      + '<div><div style="font-weight:700">错题本</div><div class="muted-note" style="text-align:left">共 '+list.length+' 条</div></div>'
+    let html = '<div class="card u-flex u-between u-ac">'
+      + '<div><div class="u-fw700">错题本</div><div class="muted-note u-tl">共 '+list.length+' 条</div></div>'
       + (list.length? '<button class="btn-ghost" onclick="clearWrong()">清空</button>':'') + '</div>';
     if(!list.length){ html += '<div class="empty">还没有错题，加油练习！</div>'; }
     list.forEach(r=>{
       html += '<div class="wrong-item"><div class="w-top">'+r.module+' · '+r.lesson+' · '+r.prompt+'</div>'
         + '<div class="w-body">正确答案：'+(r.answer||'')+'</div>'
         + (r.your? '<div class="w-ans">你的作答：'+r.your+'</div>':'')
-        + '<div class="muted-note" style="text-align:left">'+r.time+'</div></div>';
+        + '<div class="muted-note u-tl">'+r.time+'</div></div>';
     });
     document.getElementById('app').innerHTML = html;
   }, false);
@@ -713,26 +713,26 @@ function renderProgress(){
       if(s && s.done){ doneLessons++; accSum += s.acc; accCount++; }
     }));
     const overall = accCount ? Math.round(accSum/accCount) : 0;
-    let html = '<div class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff">'
-      + '<div style="font-size:17px;font-weight:700">学习进度（家长视图）</div>'
-      + '<div style="font-size:13px;opacity:.9;margin-top:4px">自然拼读 · 已学 '+doneLessons+' / '+totalLessons+' 课 · 平均正确率 '+(accCount?overall+'%':'—')+'</div></div>'
-      + '<div class="muted-note" style="text-align:left;margin:10px 4px 4px">软件仅记录正确率数据，供家长监督学习进度。</div>';
+    let html = '<div class="card u-bg-grad u-c-white">'
+      + '<div class="u-fs17 u-fw700">学习进度（家长视图）</div>'
+      + '<div class="u-fs13 u-op90 u-mt4">自然拼读 · 已学 '+doneLessons+' / '+totalLessons+' 课 · 平均正确率 '+(accCount?overall+'%':'—')+'</div></div>'
+      + '<div class="muted-note u-tl u-m10-4-4">软件仅记录正确率数据，供家长监督学习进度。</div>';
     levels.forEach(lv=>{
       html += '<div class="section-title">'+lv.no+' · '+lv.name+'</div>';
       lv.lessons.forEach(ls=>{
         const s = stats['ph_'+ls.id];
         const badge = (s && s.done)
-          ? '<span class="pill" style="color:var(--success);background:rgba(78,140,110,.1)">'+s.acc+'%</span>'
-          : '<span class="pill" style="color:var(--text-lighter)">未学</span>';
-        html += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px">'
-          + '<div><div style="font-weight:600;font-size:14px">'+ls.title+'</div>'
-          + '<div class="muted-note" style="text-align:left">'+ls.sub+(s&&s.done?(' · '+s.time):'')+'</div></div>'
+          ? '<span class="pill u-c-ok u-bg-ok-s">'+s.acc+'%</span>'
+          : '<span class="pill u-c-lighter">未学</span>';
+        html += '<div class="card u-flex u-between u-ac u-p12-14b">'
+          + '<div><div class="u-fw600 u-fs14">'+ls.title+'</div>'
+          + '<div class="muted-note u-tl">'+ls.sub+(s&&s.done?(' · '+s.time):'')+'</div></div>'
           + badge + '</div>';
       });
     });
-    html += '<div class="btn-row" style="margin-top:8px">'
-      + '<button class="btn-ghost" style="flex:1" onclick="clearStats()">清空进度</button>'
-      + '<button class="btn-ghost" style="flex:1" onclick="switchMain(\'phonics\')">返回学习</button></div>';
+    html += '<div class="btn-row u-mt8">'
+      + '<button class="btn-ghost u-f1" onclick="clearStats()">清空进度</button>'
+      + '<button class="btn-ghost u-f1" onclick="switchMain(\'phonics\')">返回学习</button></div>';
     document.getElementById('app').innerHTML = html;
   }, false);
 }

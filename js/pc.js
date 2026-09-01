@@ -283,6 +283,11 @@
   }
   function pcJudge(q, ua) {
     if (ua === undefined || ua === null || ua === '') return false;
+    // v83：英语题走宽松判分（core.js 的 engAnswerEquals：忽略大小写、句末标点、
+    // 撇号写法、缩写展开）。原来的严格字符串比较会把 "Went" / "I'm tall." 判错。
+    if (q && q.judge === 'eng' && typeof engAnswerEquals === 'function') {
+      return engAnswerEquals(ua, q.answer);
+    }
     const a = q.answer;
     if (String(ua) === String(a)) return true;
     if (!isNaN(parseFloat(ua)) && !isNaN(parseFloat(a)) && parseFloat(ua) === parseFloat(a)) return true;
@@ -442,17 +447,17 @@
   /* ---------------- 学生 · 单元列表 ---------------- */
   function renderUnits(c) {
     let h = '';
-    if (S.subject !== 'english') {
-      h += '<div class="pc-row"><span class="lab">' + S.grade + '年级</span><div class="pc-seg" id="semSeg">';
-      h += '<button data-s="1" class="' + (S.semester === 1 ? 'active' : '') + '">上册</button><button data-s="2" class="' + (S.semester === 2 ? 'active' : '') + '">下册</button>';
-      h += '</div></div>';
-    }
+    // v83：英语此前也排除了册别（当时只有自然拼读 Level）。PEP 教材库按册组织，
+    // 英语现在同样需要「上册 / 下册」切换。
+    h += '<div class="pc-row"><span class="lab">' + S.grade + '年级</span><div class="pc-seg" id="semSeg">';
+    h += '<button data-s="1" class="' + (S.semester === 1 ? 'active' : '') + '">上册</button><button data-s="2" class="' + (S.semester === 2 ? 'active' : '') + '">下册</button>';
+    h += '</div></div>';
     let units;
     if (S.subject === 'math') units = (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) || [];
     else if (S.subject === 'chinese') units = (window.CN && CN.data[S.grade]) || [];
     else units = (window.ENG_DATA && ENG_DATA.phonics && ENG_DATA.phonics.levels) || [];
 
-    h += '<div class="pc-section-title">' + esc(subjName(S.subject)) + ' · ' + S.grade + '年级' + (S.subject === 'english' ? '' : ' · ' + (S.semester === 1 ? '上册' : '下册')) + '</div>';
+    h += '<div class="pc-section-title">' + esc(subjName(S.subject)) + ' · ' + S.grade + '年级 · ' + (S.semester === 1 ? '上册' : '下册') + '</div>';
     h += '<div class="pc-unit-list">';
     units.forEach(function (u, i) {
       const name = S.subject === 'english' ? (u.name || ('Level ' + (i + 1))) : (u.name || ('第' + (i + 1) + '单元'));
@@ -465,6 +470,27 @@
         '</div></div>';
     });
     h += '</div>';
+    // v83：英语加「人教 PEP 教材同步」区块 —— 自然拼读练的是发音，
+    // 教材同步练的是课本单元，两者互补，孩子要按课本进度复习时从这里进。
+    if (S.subject === 'english' && window.PEPQ) {
+      const book = pepBookOf(S.grade, S.semester);
+      if (book) {
+        h += '<div class="pc-section-title">人教 PEP 教材同步 · ' + esc(book.name)
+          + (book.edition === 'new' ? ' <span class="u-tag">2024 新版</span>' : '') + '</div>';
+        if (book.tip) h += '<div class="pc-hint">' + esc(book.tip) + '</div>';
+        h += '<div class="pc-unit-list">';
+        (book.units || []).forEach(function (u, i) {
+          h += '<div class="pc-unit"><div class="u-name">Unit ' + u.no + '. ' + esc(u.title || '') + '</div>'
+            + '<div class="u-meta">' + esc(u.zh || '') + ' · ' + ((u.words || []).length) + ' 词 · ' + ((u.sents || []).length) + ' 句型</div>'
+            + '<div class="pc-unit-actions">'
+            + '<button class="pc-btn primary sm" onclick="PC.startPepUnit(' + i + ')">练习</button>'
+            + '</div></div>';
+        });
+        h += '</div>';
+      } else {
+        h += '<div class="pc-hint">人教 PEP 暂无该年级册别的教材（目前收录三~六年级）。</div>';
+      }
+    }
     c.innerHTML = h;
     const seg = $('semSeg');
     if (seg) bindSeg('semSeg', function (s) { S.semester = +s; renderContent(); });
@@ -473,6 +499,29 @@
     if (S.subject === 'math') PC.startMathUnit(i);
     else if (S.subject === 'chinese') PC.startCnUnit(i);
     else startEngUnit(i);
+  };
+  /* v83：PC 端按 PEP 单元练习（弹难度层，30 题，与自然拼读 Level 练习分开） */
+  PC.startPepUnit = function (i) {
+    const book = pepBookOf(S.grade, S.semester);
+    if (!book || !window.PEPQ) { toast('英语教材库未加载'); return; }
+    const u = (book.units || [])[i];
+    if (!u) return;
+    const run = function (diff) {
+      const qs = PEPQ.buildQuestions(book.id, u.id, diff, 30);
+      if (!qs.length) { toast('该单元暂无可用题目'); return; }
+      beginQuiz(qs, 'unit', '英语 · ' + book.label + ' Unit ' + u.no + ' · ' + (u.title || ''),
+        '英语', S.grade, false, function () { PC.startPepUnit(i); },
+        '教材同步 · ' + ['基础题', '提高题', '拓展题'][diff - 1]);
+    };
+    if (typeof openPracticeSettings === 'function') {
+      openPracticeSettings({
+        title: book.label + ' Unit ' + u.no + ' · ' + (u.title || ''),
+        note: '每次固定 30 题 · 题型按难度自动配比',
+        okText: '开始练习',
+        value: S.pepDiff || 1,
+        onStart: function (d) { S.pepDiff = d; run(d); }
+      });
+    } else run(S.pepDiff || 1);
   };
 
   /* ---------------- 学生 · 同步学习（知识点总结 / 万能公式 / 万能答题方法 / 交互动图） ---------------- */
@@ -594,26 +643,65 @@
     h += '<div class="pc-row"><span class="lab">年级</span><div class="pc-seg" id="examGrade">';
     for (let g = 1; g <= 6; g++) h += '<button data-g="' + g + '" class="' + (g === S.grade ? 'active' : '') + '">' + g + '年级</button>';
     h += '</div></div>';
-    if (S.subject !== 'english') {
-      h += '<div class="pc-row"><span class="lab">册别</span><div class="pc-seg" id="examSem">';
-      h += '<button data-s="1" class="' + (S.semester === 1 ? 'active' : '') + '">上册</button><button data-s="2" class="' + (S.semester === 2 ? 'active' : '') + '">下册</button>';
-      h += '</div></div>';
-    }
+    // v83：英语此前被排除在册别之外（当时英语只有自然拼读 Level，没有教材概念），
+    // 现在 PEP 教材库有 8 册，册别选择对英语同样有意义，取消这个例外。
+    h += '<div class="pc-row"><span class="lab">册别</span><div class="pc-seg" id="examSem">';
+    h += '<button data-s="1" class="' + (S.semester === 1 ? 'active' : '') + '">上册</button><button data-s="2" class="' + (S.semester === 2 ? 'active' : '') + '">下册</button>';
+    h += '</div></div>';
     h += '<div id="examExtra"></div>';
     h += '<button class="pc-btn gold" onclick="PC.runExam()">开始考试</button></div>';
     c.innerHTML = h;
     bindSeg('examType', function (t) { S.examType = t; renderExamExtra(); });
     bindSeg('examGrade', function (g) { S.grade = +g; renderExamExtra(); });
-    bindSeg('examSem', function (s) { S.semester = +s; });
+    bindSeg('examSem', function (s) { S.semester = +s; renderExamExtra(); });
     renderExamExtra();
   }
+
+  /* v83：英语教材库访问。年级 3~6 + 册别 上/下 -> PEP 的 book.id（g6a / g6b ...）。
+     三~五年级是旧版 PEP（补欠账），六年级是 2024 修订版（同步新课），双轨都在库里。 */
+  function pepBookOf(grade, sem) {
+    if (!window.PEPQ) return null;
+    const bid = 'g' + grade + (sem === 2 ? 'b' : 'a');
+    return PEPQ.getBook(bid) || null;
+  }
+
   function renderExamExtra() {
     const box = $('examExtra'); if (!box) return;
+    if (S.subject === 'english') {
+      // v83：英语进考试中心。此前这里只给一句「请在单元练习里选 Level」，
+      // 孩子想考 PEP 单元根本没入口；现在按年级+册别列出 PEP 单元。
+      // 难度段对所有考试类型都保留（综合卷也分基础/提高/拓展），
+      // 所以不能跟着数学/语文那套「非单元考就清空」的逻辑走。
+      let eh = '';
+      if (S.examType === 'unit') {
+        const book = pepBookOf(S.grade, S.semester);
+        if (!book) {
+          box.innerHTML = '<div class="pc-hint">人教 PEP 暂无该年级册别的教材（目前收录三~六年级）。</div>';
+          return;
+        }
+        eh += '<div class="pc-row"><span class="lab">单元</span><div class="pc-seg" id="examUnit">';
+        (book.units || []).forEach(function (u, i) {
+          eh += '<button data-u="' + i + '" class="' + (i === (S.examUnitIdx || 0) ? 'active' : '') + '">'
+            + esc(String(u.no) + '. ' + String(u.title || '').slice(0, 10)) + '</button>';
+        });
+        eh += '</div></div>';
+        if (book.tip) eh += '<div class="pc-hint">' + esc(book.tip) + '</div>';
+      }
+      eh += '<div class="pc-row"><span class="lab">难度</span><div class="pc-seg" id="examDiff">';
+      [[1, '基础题'], [2, '提高题'], [3, '拓展题']].forEach(function (p) {
+        eh += '<button data-d="' + p[0] + '" class="' + (p[0] === (S.examDiff || 2) ? 'active' : '') + '">' + p[1] + '</button>';
+      });
+      eh += '</div></div>';
+      box.innerHTML = eh;
+      const bu = $('examUnit');
+      if (bu) bindSeg('examUnit', function (u) { S.examUnitIdx = +u; });
+      bindSeg('examDiff', function (d) { S.examDiff = +d; });
+      return;
+    }
     if (S.examType !== 'unit') { box.innerHTML = ''; return; }
     let list;
     if (S.subject === 'math') list = (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) || [];
     else if (S.subject === 'chinese') list = (window.CN && CN.data[S.grade]) || [];
-    else { box.innerHTML = '<div class="pc-hint">英语单元练习请在「单元练习」中选择对应 Level。</div>'; return; }
     let h = '<div class="pc-row"><span class="lab">单元</span><div class="pc-seg" id="examUnit">';
     list.forEach(function (u, i) {
       const nm = (u.name || ('第' + (i + 1) + '单元')).replace(/^(四年级|五年级|六年级).*?·/, '').slice(0, 8);
@@ -631,7 +719,10 @@
     } else if (S.subject === 'chinese') {
       if (t === 'unit') PC.startCnUnit(S.examUnitIdx || 0);
       else startCnExam(t);
-    } else { toast('英语暂只支持单元练习'); }
+    } else {
+      // v83：英语支持单元考 / 月考 / 期中 / 期末，题都从 PEP 教材库出
+      startEngExam(t);
+    }
   };
 
   /* ---------------- 学生 · 错题 / 统计 ---------------- */
@@ -791,6 +882,59 @@
       return { type: 'choice', question: '选出「' + it.w + '」的中文意思', options: shuffle([it.m].concat(others)), answer: it.m, _word: it.w };
     });
     beginQuiz(qs, 'unit', lv.name, '英语', S.grade, false, function () { startEngUnit(levelIdx); });
+  }
+
+  /* ---------------- v83 · 英语考试中心（PEP 教材库出题） ----------------
+   * 此前 PC 英语只能做自然拼读的「单元练习」，考试中心一直把英语挡在门外
+   * （renderExamExtra 里直接 return 一句提示）。现在按年级+册别找到 PEP 那册，
+   * 单元考只考一个单元，期中/期末按册内单元汇总出题，题量与数学一致（30 题）。
+   */
+  function engPickQuestions(book, units, diff, n) {
+    const per = Math.max(6, Math.ceil(n / Math.max(1, units.length)) + 2); // 多取一些，供去重后截断
+    const out = [], seen = {};
+    for (let round = 0; round < 3 && out.length < n; round++) {
+      units.forEach(function (u) {
+        if (out.length >= n) return;
+        PEPQ.buildQuestions(book.id, u.id, diff, per).forEach(function (q) {
+          if (!q || out.length >= n) return;
+          const k = (q.tag || '') + '|' + q.question;
+          if (seen[k]) return;
+          seen[k] = 1; out.push(q);
+        });
+      });
+    }
+    return shuffle(out).slice(0, n);
+  }
+  function startEngExam(t) {
+    if (!window.PEPQ) { toast('英语教材库未加载，请刷新页面'); return; }
+    const book = pepBookOf(S.grade, S.semester);
+    if (!book || !(book.units || []).length) { toast('人教 PEP 暂无该年级册别的教材'); return; }
+    const diff = S.examDiff || 2;
+    const units = book.units;
+    let scope = units, title, badge;
+    if (t === 'unit') {
+      const u = units[S.examUnitIdx || 0] || units[0];
+      scope = [u];
+      title = book.label + ' Unit ' + u.no + ' · ' + (u.title || '');
+      badge = '单元考 · ' + ['基础题', '提高题', '拓展题'][diff - 1];
+    } else if (t === 'month') {
+      // 英语没有独立的月考概念，按阶段测试处理：取册内前两个单元
+      scope = units.slice(0, Math.min(2, units.length));
+      title = book.name + ' 阶段测试';
+      badge = '阶段测试 · ' + ['基础题', '提高题', '拓展题'][diff - 1];
+    } else if (t === 'mid') {
+      scope = units.slice(0, Math.max(1, Math.ceil(units.length / 2)));
+      title = book.name + ' 期中测试';
+      badge = '期中 · 覆盖 Unit 1-' + scope[scope.length - 1].no;
+    } else {
+      scope = units;
+      title = book.name + ' 期末测试';
+      badge = '期末 · 全册 ' + units.length + ' 个单元';
+    }
+    const qs = engPickQuestions(book, scope, diff, 30);
+    if (!qs.length) { toast('该范围暂无可用题目'); return; }
+    beginQuiz(qs, 'exam', '英语 · ' + title, '英语', S.grade, true,
+      function () { startEngExam(t); }, badge);
   }
 
   /* ---------------- 答题引擎 ---------------- */
@@ -1242,7 +1386,13 @@
   function bindSeg(id, cb) {
     const el = $(id); if (!el) return;
     el.querySelectorAll('button').forEach(function (b) {
-      b.onclick = function () { el.querySelectorAll('button').forEach(function (x) { x.classList.remove('active'); }); b.classList.add('active'); cb(b.dataset.t || b.dataset.g || b.dataset.s || b.dataset.u); };
+      b.onclick = function () {
+        el.querySelectorAll('button').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        // v83：补 data-d（英语考试中心的难度档）。原来只认 t/g/s/u，
+        // 新增的分段如果用了别的属性名，cb 会拿到 undefined 静默失效。
+        cb(b.dataset.t || b.dataset.g || b.dataset.s || b.dataset.u || b.dataset.d);
+      };
     });
   }
 
