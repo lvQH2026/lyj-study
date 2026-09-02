@@ -12761,16 +12761,26 @@ function countFillBlanks(q) {
 }
 
 // v69：填空题判分——支持单空、多空（逗号/顿号/斜杠分隔），并保留数值容差
+// v84r：数值容差改用 core.js 的 looseNumericEquals。
+//   修复 P0：旧逻辑 parseFloat("8/5") 与 parseFloat("8/3") 都取到 8 → 分母写错也判对；
+//   「7个十和4个一」与「7个十和5个一」都取到 7 → 个位写错也判对。
+//   现在：分数用交叉相乘精确判等，含中文（计数器/带单位）只用精确字符串比较。
 function fillAnswerEquals(user, correct) {
   let u = String(user == null ? '' : user).trim();
   let c = String(correct == null ? '' : correct).trim();
   if (u === c) return true;
-  if (u !== '' && c !== '' && !isNaN(parseFloat(u)) && !isNaN(parseFloat(c)) && parseFloat(u) === parseFloat(c)) return true;
+  if (typeof looseNumericEquals === 'function') {
+    if (looseNumericEquals(u, c)) return true;
+  } else if (u !== '' && c !== '' && !isNaN(parseFloat(u)) && !isNaN(parseFloat(c)) && parseFloat(u) === parseFloat(c)) {
+    return true; // 兜底（core.js 未加载时保留旧行为，正常不会发生）
+  }
   let up = u.split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
   let cp = c.split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
   if (up.length > 1 && up.length === cp.length) {
     return up.every((v, i) => v === cp[i] ||
-      (v !== '' && !isNaN(parseFloat(v)) && !isNaN(parseFloat(cp[i])) && parseFloat(v) === parseFloat(cp[i])));
+      (typeof looseNumericEquals === 'function'
+        ? looseNumericEquals(v, cp[i])
+        : (v !== '' && !isNaN(parseFloat(v)) && !isNaN(parseFloat(cp[i])) && parseFloat(v) === parseFloat(cp[i]))));
   }
   return false;
 }

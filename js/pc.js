@@ -290,13 +290,22 @@
     }
     const a = q.answer;
     if (String(ua) === String(a)) return true;
-    if (!isNaN(parseFloat(ua)) && !isNaN(parseFloat(a)) && parseFloat(ua) === parseFloat(a)) return true;
+    // v84r：数值容差改用 core.js 的 looseNumericEquals（与移动端 fillAnswerEquals 同口径）。
+    //   修复 P0：旧逻辑 parseFloat("5/4") 与 parseFloat("5/3") 都取到 5 → 分母写错也判对。
+    if (typeof looseNumericEquals === 'function') {
+      if (looseNumericEquals(ua, a)) return true;
+    } else if (!isNaN(parseFloat(ua)) && !isNaN(parseFloat(a)) && parseFloat(ua) === parseFloat(a)) {
+      return true; // 兜底（core.js 未加载时保留旧行为，正常不会发生）
+    }
     // v69：多空填空题，按逗号/顿号/斜杠逐空比对（容忍中文标点与空格）
     const up = String(ua).split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
     const ap = String(a).split(/[,，、\/]+/).map(s => s.trim()).filter(s => s !== '');
     if (up.length > 1 && up.length === ap.length) {
       return up.every(function (v, i) {
-        return v === ap[i] || (!isNaN(parseFloat(v)) && !isNaN(parseFloat(ap[i])) && parseFloat(v) === parseFloat(ap[i]));
+        if (v === ap[i]) return true;
+        return typeof looseNumericEquals === 'function'
+          ? looseNumericEquals(v, ap[i])
+          : (!isNaN(parseFloat(v)) && !isNaN(parseFloat(ap[i])) && parseFloat(v) === parseFloat(ap[i]));
       });
     }
     return false;
