@@ -443,7 +443,7 @@
   function renderHome(c) {
     let h = '';
     h += '<div class="pc-section-title">选择年级</div><div class="pc-grade-grid">';
-    for (let g = 1; g <= 6; g++) h += '<div class="pc-grade" onclick="PC.pickGrade(' + g + ')">' + g + '年级</div>';
+    for (let g = 1; g <= 9; g++) h += '<div class="pc-grade" onclick="PC.pickGrade(' + g + ')">' + g + '年级</div>';
     h += '</div>';
     if (S.subject === 'math') {
       h += '<div class="pc-section-title">快速练习</div><div class="pc-row"><button class="pc-btn primary" onclick="PC.startMathQuick(\'basic\')">基础运算</button><button class="pc-btn primary" onclick="PC.startMathQuick(\'mixed\')">综合练习</button></div>';
@@ -467,6 +467,9 @@
     else units = (window.ENG_DATA && ENG_DATA.phonics && ENG_DATA.phonics.levels) || [];
 
     h += '<div class="pc-section-title">' + esc(subjName(S.subject)) + ' · ' + S.grade + '年级 · ' + (S.semester === 1 ? '上册' : '下册') + '</div>';
+    if (!units || !units.length) {
+      h += '<div class="pc-hint">该年级内容建设中，敬请期待。</div>';
+    }
     h += '<div class="pc-unit-list">';
     units.forEach(function (u, i) {
       const name = S.subject === 'english' ? (u.name || ('Level ' + (i + 1))) : (u.name || ('第' + (i + 1) + '单元'));
@@ -650,7 +653,7 @@
     });
     h += '</div></div>';
     h += '<div class="pc-row"><span class="lab">年级</span><div class="pc-seg" id="examGrade">';
-    for (let g = 1; g <= 6; g++) h += '<button data-g="' + g + '" class="' + (g === S.grade ? 'active' : '') + '">' + g + '年级</button>';
+    for (let g = 1; g <= 9; g++) h += '<button data-g="' + g + '" class="' + (g === S.grade ? 'active' : '') + '">' + g + '年级</button>';
     h += '</div></div>';
     // v83：英语此前被排除在册别之外（当时英语只有自然拼读 Level，没有教材概念），
     // 现在 PEP 教材库有 8 册，册别选择对英语同样有意义，取消这个例外。

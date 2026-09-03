@@ -6930,6 +6930,9 @@ function g1_5_addsub(){
     {q:`比${a}大1的数是几？`,a:a+1,d:[a,a+2,Math.max(0,a-1)]},
     {q:`比${c}小1的数是几？`,a:c-1,d:[c,c+1,Math.max(0,c-2)]},
     {q:`${a}和${b}合起来是几？`,a:s,d:[Math.max(0,s-1),s+1,s+2]},
+    {q:'小明有'+a+'块糖，小华有'+b+'块糖，谁的多？',a:a>b?'小明':(a<b?'小华':'一样多'),d:[a>b?'小华':(a<b?'小明':'小明'),'一样多','无法比较']},
+    {q:'小朋友排队，从前往后数小红排第2，她前面有（　）人',a:'1人',d:['2人','0人','3人']},
+    {q:'5个苹果和3个苹果比，（　）多一些',a:'5个',d:['3个','一样多','不知道']},
   ];
   let it=pick(reps);
   if(Math.random()<0.35) return mf(it.q,it.a);
@@ -7051,6 +7054,11 @@ function g1_shape(){
 
 function g1_clock(){
   let h=ri(1,12), m=pick([0,15,30,45]);
+  // 快几时（人教版一上·认识钟表）：分针快到12，快到下一整时
+  if(m===0 && Math.random()<0.3){
+    let nh=h%12+1;
+    return mc(`钟面上分针快指向12，时针快到${nh}，这时是快几时？`,`快${nh}时`,[`${h}时`,`快${h}时`,`${nh}时整`]);
+  }
   let lbl=m===0?`${h}点整`:m===15?`${h}点一刻`:m===30?`${h}点半`:`${h}点三刻`;
   let d=[`${(h%12+1)+1>12?1:h%12+1}点整`,`${h}点${m===0?'半':'整'}`];
   if(h>1)d.push(`${h-1}点整`);else d.push('12点整');
@@ -7264,6 +7272,12 @@ function g2_length(){
     {q:`${m}米=_____厘米`,a:`${m*100}`,d:[`${m*10}`,`${m*1000}`,`${m}`]},
     {q:'量物体的长度时，一般要把尺子的哪一刻度对准物体的一端？',a:'0刻度',d:['1刻度','10刻度','最末端']},
   ];
+  // 线段（人教版二上·长度单位 第1节）
+  reps.push({q:'线段有几个端点？',a:'2个',d:['1个','0个','3个']});
+  reps.push({q:'下面图形中，可以量出长度的是？',a:'线段',d:['直线','射线','曲线']});
+  reps.push({q:'线段是（　）的',a:'直的，有两个端点',d:['弯的，没有端点','直的，没有端点','弯的，有两个端点']});
+  reps.push({q:'拉紧的一段绳子，可以看作一条？',a:'线段',d:['直线','射线','曲线']});
+  reps.push({q:'画一条线段，通常要画出它的两个（　）',a:'端点',d:['中点','延长线','箭头']});
   let all=items.concat(reps);
   let it=pick(all); return mc(it.q,it.a,it.d);
 }
@@ -7366,7 +7380,18 @@ function g_shape_identify(){
 function g_app_age(){let a=ri(6,12),d=ri(20,40);return mc(`小明今年${a}岁，爸爸比他大${d}岁，爸爸多少岁？`,a+d,[a+d-3,a+d+2,a+d-5])}
 
 // ===== 2年级下册 =====
-function g_div_1(){let a=ri(2,6)*ri(2,6); let b=ri(2,6); while(a%b!==0){a=ri(2,6)*ri(2,6);b=ri(2,6)} return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1,b])}
+function g_div_1(){
+  const reps=[];
+  let a=ri(2,6)*ri(2,6); let b=ri(2,6); while(a%b!==0){a=ri(2,6)*ri(2,6);b=ri(2,6)}
+  reps.push({q:`${a}÷${b}=？`,a:a/b,d:[a/b-1,a/b+1,b]});
+  // 平均分（人教版二下·表内除法（一））
+  let k=ri(2,4), per=ri(2,4), n=k*per;
+  reps.push({q:`把${n}个桃平均放在${k}个盘子里，每盘放几个？`,a:String(per),d:[String(per+1),String(per-1>0?per-1:1),String(n)]});
+  reps.push({q:`把${n}本书平均分成${k}份，每份是几本？`,a:String(per),d:[String(per+1),String(n),String(k)]});
+  reps.push({q:'把12个平均分成3份，每份是几个？',a:'4个',d:['3个','6个','2个']});
+  reps.push({q:'“平均分”就是每份（　）',a:'分得同样多',d:['随便分','越多越好','越少越好']});
+  let it=pick(reps); return mc(it.q,it.a,it.d);
+}
 function g_div_2(){let a=ri(4,9)*ri(4,9); let b=ri(4,9); while(a%b!==0){a=ri(4,9)*ri(4,9);b=ri(4,9)} return mc(`${a}÷${b}=？`,a/b,[a/b-2,a/b+2])}
 function g_remainder(){let a=ri(11,50),b=ri(3,9); if(a%b===0)a+=1;return mc(`${a}÷${b}=？（商和余数）`,`${Math.floor(a/b)}余${a%b}`,[`${Math.floor(a/b)-1}余${a%b+1}`,`${Math.floor(a/b)+1}`,`${Math.floor(a/b)}余${a%b-1}`])}
 function g2_mixed(){let a=ri(2,6),b=ri(2,6),c=ri(5,20);return mc(`${a}×${b}+${c}=？`,a*b+c,[a*b+c-1,a*b+c+1,a*(b+c)])}
@@ -7902,9 +7927,22 @@ function g3_area(){
   const unit=Math.min(100/w, 70/h, 12);
   const pw=w*unit, ph=Math.max(h*unit, 22);
   const x0=(120-pw)/2, y0=(100-ph)/2+1;
-  return msc(`下面长方形的面积是多少？(长${w}cm 宽${h}cm)`,
-    svgR(x0,y0,pw,ph,'#BBDEFB')+svgTxt(x0+pw/2,y0-2,w+'cm',9)+svgTxt(x0-10,y0+ph/2+3,h+'cm',9),
-    String(w*h),[String(w+h),String(2*(w+h)),String(w*h-1)]);
+  const rectQ = {s:svgR(x0,y0,pw,ph,'#BBDEFB')+svgTxt(x0+pw/2,y0-2,w+'cm',9)+svgTxt(x0-10,y0+ph/2+3,h+'cm',9),
+    q:`下面长方形的面积是多少？(长${w}cm 宽${h}cm)`, a:String(w*h), d:[String(w+h),String(2*(w+h)),String(w*h-1)]};
+  const reps=[
+    {q:'测量教室地面的面积，通常用什么单位？',a:'平方米',d:['平方厘米','厘米','平方分米']},
+    {q:'边长1厘米的正方形，面积是？',a:'1平方厘米',d:['1厘米','1平方分米','1米']},
+    {q:'边长1米的正方形，面积是？',a:'1平方米',d:['1米','1平方厘米','10平方米']},
+  ];
+  let s2=ri(3,12);
+  reps.push({q:`一个正方形边长是${s2}厘米，它的面积是多少？`,a:String(s2*s2)+'平方厘米',d:[String(4*s2)+'平方厘米',String(2*s2)+'平方厘米',String(s2)+'平方厘米']});
+  let a2=ri(2,9);
+  reps.push({q:`${a2}平方米等于多少平方分米？`,a:String(a2*100)+'平方分米',d:[String(a2*10)+'平方分米',String(a2)+'平方分米',String(a2*1000)+'平方分米']});
+  reps.push({q:`${a2*100}平方分米等于多少平方米？`,a:String(a2)+'平方米',d:[String(a2*100)+'平方米',String(a2*10)+'平方米',String(a2+1)+'平方米']});
+  let b2=ri(2,9);
+  reps.push({q:`${b2}平方分米等于多少平方厘米？`,a:String(b2*100)+'平方厘米',d:[String(b2*10)+'平方厘米',String(b2)+'平方厘米',String(b2*1000)+'平方厘米']});
+  if(Math.random()<0.5) return msc(rectQ.q,rectQ.s,rectQ.a,rectQ.d);
+  let it=pick(reps); return mc(it.q,it.a,it.d);
 }
 function g3_decimal(){
   const reps=[];
@@ -8099,6 +8137,19 @@ function g4_bignum(){
   ].forEach(([q,a,dd])=>{
     reps.push({q:q+'？',a:a,d:dd});
   });
+  // 7. 大数的读法与写法（人教版四上·大数的认识）
+  [
+    {q:'3040000 读作？',a:'三百零四万',d:['三千零四十万','三十万四千','三百四十万']},
+    {q:'50800000 读作？',a:'五千零八十万',d:['五千八十万','五百零八万','五千八百万']},
+    {q:'70050000 读作？',a:'七千零五万',d:['七千五百万','七百零五万','七千零五十万']},
+    {q:'10030000 读作？',a:'一千零三万',d:['一千三百万','一百零三万','一千零三十万']},
+    {q:'42000000 读作？',a:'四千二百万',d:['四千零二百万','四百二十万','四亿二千万']},
+    {q:'305000000 读作？',a:'三亿零五百万',d:['三亿五百万','三十亿零五百万','三亿零五十万']},
+    {q:'八千零五万 写作？',a:'80050000',d:['8050000','80005000','85000000']},
+    {q:'三千零四十万 写作？',a:'30400000',d:['30040000','34000000','3040000']},
+    {q:'六亿零三十万 写作？',a:'600300000',d:['60300000','600030000','630000000']},
+    {q:'五百零八万 写作？',a:'5080000',d:['50080000','5800000','50800000']},
+  ].forEach(o=>reps.push(o));
   let it=pick(reps); return mc(it.q,it.a,it.d);
 }
 function g4_angle(){
@@ -8142,11 +8193,61 @@ function g4_angle(){
     {q:'用一副三角尺能拼出的最大角是（　）',a:'165°',d:['150°','180°','135°']},
     {q:'钟面上12时整，时针与分针成（　）',a:'0°（重合）',d:['90°','180°','360°']},
   ].forEach(o=>reps.push(o));
+  // 4. 线段、射线、直线（角的度量 第1节）
+  [
+    {q:'线段有（　）个端点',a:'2',d:['0','1','3']},
+    {q:'射线有（　）个端点',a:'1',d:['0','2','3']},
+    {q:'直线（　）端点',a:'没有',d:['有1个','有2个','有3个']},
+    {q:'把线段向两端无限延伸就得到（　）',a:'直线',d:['射线','线段','角']},
+    {q:'把线段向一端无限延伸就得到（　）',a:'射线',d:['直线','线段','曲线']},
+    {q:'经过一点可以画（　）条直线',a:'无数',d:['1','2','3']},
+    {q:'经过两点可以画（　）条直线',a:'1',d:['2','无数','0']},
+    {q:'两点之间（　）最短',a:'线段',d:['直线','射线','曲线']},
+    {q:'从一点引出两条（　）所组成的图形叫做角',a:'射线',d:['线段','直线','曲线']},
+    {q:'角的计量单位是（　）',a:'度',d:['米','厘米','千克']},
+  ].forEach(o=>reps.push(o));
+  // 5. 画角（用量角器）
+  [
+    {q:'用量角器画一个60°的角，第一步应（　）',a:'画一条射线作为角的一条边',d:['直接点一个点','先画一个圆','先量长度']},
+    {q:'画角时，量角器的（　）要与射线的端点重合',a:'中心',d:['0刻度线','外圈','内圈']},
+    {q:'画角时，量角器的0°刻度线要与（　）重合',a:'射线',d:['量角器边缘','另一点','纸边']},
+    {q:'画指定度数的角，一般要用量角器和（　）',a:'射线（或直尺画射线）',d:['圆规','三角板','量角器本身']},
+  ].forEach(o=>reps.push(o));
   let it=pick(reps); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
-function g4_mul(){let a=ri(100,500),b=ri(20,50);let p=a*b;return mc(`${a}×${b}=？`,p,[a*(b+1),a*(b-1),(a+1)*b])}
+function g4_mul(){
+  const reps=[];
+  let a=ri(100,500),b=ri(20,50);let p=a*b;
+  reps.push({q:`${a}×${b}=？`,a:p,d:[a*(b+1),a*(b-1),(a+1)*b]});
+  // 因数末尾有0的乘法
+  let m=ri(2,9), n=ri(2,9);
+  reps.push({q:`${m}0×${n}0=？`,a:String(m*n*100),d:[String(m*n*10),String(m*n),String((m+1)*(n+1)*100)]});
+  // 积的变化规律
+  reps.push({q:'一个因数不变，另一个因数乘5，积（　）',a:'也乘5',d:['除以5','不变','减5']});
+  reps.push({q:'一个因数不变，另一个因数除以3，积（　）',a:'也除以3',d:['乘3','不变','加3']});
+  reps.push({q:'两个因数都乘2，积（　）',a:'乘4',d:['乘2','不变','除以4']});
+  // 常见数量关系：速度×时间=路程
+  let v=ri(40,90), t=ri(2,5);
+  reps.push({q:`一辆汽车每小时行${v}千米，行驶${t}小时，共行多少千米？`,a:String(v*t),d:[String(v*t-v),String(v*t+v),String(v+t)]});
+  // 单价×数量=总价
+  let price=ri(3,15), cnt=ri(2,8);
+  reps.push({q:`每本练习本${price}元，买${cnt}本应付多少元？`,a:String(price*cnt),d:[String(price*cnt-price),String(price*cnt+price),String(price+cnt)]});
+  let it=pick(reps); return mc(it.q,it.a,it.d);
+}
 function g_special_3x2_mul(){let P=200,S=30,s=new Set(),p=[];while(p.length<P){let a=ri(100,999),b=ri(10,99),k=a+'×'+b;if(!s.has(k)){s.add(k);p.push({a,b})}}for(let i=p.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]]}return p.slice(0,S).map(q=>mf(`${q.a}×${q.b}=？`,q.a*q.b))}
-function g4_div(){let a=ri(200,600),b=ri(10,30);if(a%b!==0)a+=b-a%b;return mc(`${a}÷${b}=？`,a/b,[a/b-1,a/b+1])}
+function g4_div(){
+  const reps=[];
+  let a=ri(200,600),b=ri(10,30);if(a%b!==0)a+=b-a%b;
+  reps.push({q:`${a}÷${b}=？`,a:a/b,d:[a/b-1,a/b+1]});
+  // 商的变化规律
+  reps.push({q:'被除数不变，除数乘5，商（　）',a:'除以5',d:['乘5','不变','加5']});
+  reps.push({q:'除数不变，被除数除以4，商（　）',a:'除以4',d:['乘4','不变','减4']});
+  // 商不变的规律
+  reps.push({q:'被除数和除数同时乘（或除以）相同的数（0除外），商（　）',a:'不变',d:['乘相同的数','除以相同的数','变大']});
+  // 余数随被除数、除数扩大的变化
+  reps.push({q:'在有余数的除法里，被除数和除数同时乘10，商（　），余数（　）',a:'商不变，余数乘10',d:['商乘10，余数不变','商不变，余数不变','商和余数都乘10']});
+  let it=pick(reps); return mc(it.q,it.a,it.d);
+}
 function g4_parallel(){
   // v56：参数化扩容，去重键 ≥36（分类/特征/高/对称/关系）
   const reps=[
@@ -8231,7 +8332,20 @@ function g_app_speed(){
   if(k===1){let v=ri(40,60),w=ri(50,70),t=ri(2,4),s=(v+w)*t;return msc(`甲、乙两车从相距${s}千米的两地同时相向开出，甲车每小时行${v}千米，乙车每小时行${w}千米，几小时后两车相遇？`,figMeet(s),t,[t+1,t-1,t+2])}
   let v=ri(50,90),t=ri(3,6),s=v*t;return mc(`一辆汽车每小时行${v}千米，要行驶${s}千米，需要多少小时？`,t,[t+1,t-1,t+2])
 }
-function g4_mixed(){let a=ri(3,8),b=ri(4,8),c=ri(10,50);return mc(`${a}×${b}+${c}=？`,a*b+c,[a*(b+c),a*b+c-1])}
+function g4_mixed(){
+  const reps=[];
+  let a=ri(3,8),b=ri(4,8),c=ri(10,50);
+  reps.push({q:`${a}×${b}+${c}=？`,a:a*b+c,d:[a*(b+c),a*b+c-1]});
+  // 四则运算顺序
+  reps.push({q:'在没有括号的算式里，先算（　），后算（　）',a:'乘除，加减',d:['加减，乘除','从左到右依次','随便']});
+  reps.push({q:'算式里有括号，要先算（　）',a:'括号里面的',d:['括号外面的','乘除','加减']});
+  // 0 的运算性质
+  reps.push({q:'一个数加上0，得（　）',a:'原数',d:['0','1','10']});
+  reps.push({q:'被减数等于减数，差是（　）',a:'0',d:['1','原数','减数']});
+  reps.push({q:'0除以一个非0的数，得（　）',a:'0',d:['原数','1','无穷大']});
+  reps.push({q:'一个数和0相乘，得（　）',a:'0',d:['原数','1','这个数']});
+  let it=pick(reps); return mc(it.q,it.a,it.d);
+}
 function g4_law(){
   // v56：参数化扩容，去重键 ≥42（定律判定/简便计算/常用积）
   const reps=[
@@ -8584,6 +8698,12 @@ function g5_mul(){
     {q:`一个数的小数点向右移动一位后是${m*n}，这个数原来是？`,a:fmt(m*n/10),d:[String(m*n),String(m*n*10),fmt(m*n/100)]},
     {q:'计算小数乘法，先按什么算，再点小数点？',a:'整数乘法',d:['小数加法','除法','减法']},
     {q:'一个数（0除外）乘大于1的数，积比原数？',a:'大',d:['小','相等','无法确定']},
+    // —— 缺口补题：严格按人教版五上·小数乘法（小数乘小数/近似数/运算律/应用）——
+    {q:`${fmt(a)}×0.25=？`,a:fmt(+(a*0.25).toFixed(3)),d:[fmt(a*0.5),fmt(a*0.2),fmt(a)]},
+    {q:'两个因数都是小数，积的小数位数等于？',a:'两个因数小数位数之和',d:['第一个因数的小数位数','第二个因数的小数位数','两数整数位数之和']},
+    {q:`${fmt(a)}×${b}的积保留一位小数约是？`,a:fmt(+(a*b).toFixed(1)),d:[fmt(+(a*b).toFixed(2)),String(Math.round(a*b)),fmt(+(a*b+0.5).toFixed(1))]},
+    {q:'计算2.5×3.2，可以想成2.5×4×0.8来简便，运用的是？',a:'乘法结合律',d:['乘法交换律','乘法分配律','加法结合律']},
+    {q:`苹果每千克${fmt(a)}元，买${b}千克应付多少元？`,a:fmt(+(a*b).toFixed(2)),d:[fmt(a+b),fmt(a/b),fmt(a)]},
   ];
   let it=pick(items);
   return it.d?mc(it.q,it.a,it.d):mf(it.q,it.a);
@@ -8598,6 +8718,9 @@ function g5_div(){
     {q:'6.3232…（32依次不断重复出现）的循环节是？',a:'32',d:['3232','23','3']},
     {q:'一个数（0除外）除以大于1的数，商比原数？',a:'小',d:['大','相等','无法确定']},
     {q:'除数是小数的除法，移动除数小数点把它变成整数时，被除数的小数点要？',a:'同时向右移动相同的位数',d:['保持不动','向左移动','随意移动']},
+    // —— 缺口补题：严格按人教版五上·小数除法（计算器/应用·进一法）——
+    {q:'计算较复杂的小数除法时，可以借助什么工具？',a:'计算器',d:['算盘','尺子','圆规']},
+    {q:`有${m*3+1}升油，每瓶装${m}升，至少需要几个瓶子？`,a:String(Math.ceil((m*3+1)/m)),d:[String(Math.floor((m*3+1)/m)),String(Math.floor((m*3+1)/m)+2),String(m)]},
   ];
   let it=pick(items);
   return it.d?mc(it.q,it.a,it.d):mf(it.q,it.a);
@@ -8613,13 +8736,19 @@ function g5_equation(){
     {q:'等式两边同时加上同一个数，所得结果？',a:'仍是等式',d:['不再是等式','变成不等式','无法确定']},
     {q:'方程的解指的是？',a:'使方程左右两边相等的未知数的值',d:['解方程的过程','方程里的已知数','随便一个数']},
     {q:'解方程的最后一步应该做什么？',a:'把x的值代入原方程检验',d:['再乘一遍','画图','把x擦掉']},
+    // —— 缺口补题：严格按人教版五上·简易方程（用字母表示数/列方程解应用）——
+    {q:'正方形的周长用字母表示是？',a:'C=4a',d:['S=a²','a+4','2a']},
+    {q:'正方形的面积用字母表示是？',a:'S=a²',d:['C=4a','2a','a+2']},
+    {q:'路程=速度×时间，用字母表示是？',a:'s=vt',d:['s=v+t','s=v÷t','s=t-v']},
+    {q:'“比x多5的数”用式子表示是？',a:'x+5',d:['x-5','5x','x÷5']},
+    {q:'列方程解应用题时，第一步通常要做什么？',a:'设未知数',d:['直接算结果','先画图','先背公式']},
   ];
   let it=pick(items);
   return it.d?mc(it.q,it.a,it.d):mf(it.q,it.a);
 }
 function g5_area(){
-  // 图形多样化：直角三角形 / 平行四边形 / 梯形，配专业制图（直角标记·虚线高·标注）
-  let kind=ri(0,2);
+  // 图形多样化：直角三角形 / 平行四边形 / 梯形 / 组合图形，配专业制图
+  let kind=ri(0,3);
   if(kind===0){
     let b=ri(5,12),h=ri(4,8);
     let items=[
@@ -8633,6 +8762,17 @@ function g5_area(){
     let items=[
       {s:figPara(b,h),q:`图中平行四边形的底是${b}cm、高是${h}cm，它的面积是多少平方厘米？`,a:fmt(b*h),d:[fmt(b*h*2),fmt((b+h)/2),fmt(b+h)]},
       {q:`一个平行四边形的底是${b}cm、高是${h}cm，面积是多少平方厘米？`,a:fmt(b*h),d:[fmt(b*h*2),fmt((b+h)/2),fmt(b+h)]},
+    ];
+    let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+  }
+  if(kind===2){
+    // —— 缺口补题：严格按人教版五上·多边形的面积（组合图形·分割法）——
+    let a3=ri(4,8), h3=ri(3,6), b3=ri(3,6);
+    const combArea=a3*h3 + b3*h3/2;
+    let items=[
+      {q:`一个图形可看成：长${a3}cm、宽${h3}cm的长方形，与底${b3}cm、高${h3}cm的直角三角形拼成，它的面积是？`,a:fmt(combArea),d:[fmt(a3*h3),fmt(b3*h3/2),fmt((a3+b3)*h3)]},
+      {q:'求组合图形的面积，常用什么方法？',a:'分割成已学过的简单图形分别算再相加',d:['直接用一个公式算','估一个大概数','用尺子量']},
+      {q:'估计一个不规则池塘的面积，常用什么方法？',a:'数方格（整格+半格）',d:['直接量边长','用三角板拼','随便猜一个']},
     ];
     let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
   }
@@ -8753,6 +8893,13 @@ function g5_factor(){
     {s:figArray(3,4),q:'上图数阵中共有多少个小正方形？这个数是质数还是合数？',a:'12，合数',d:['12，质数','7，合数','14，合数']},
     {q:'20以内最大的质数是？',a:'19',d:['17','18','20']},
     {q:'一个数既是6的因数又是6的倍数，这个数是？',a:'6',d:['3','12','2']},
+    // —— 缺口补题：严格按人教版五下·因数与倍数（2/3/5的倍数特征）——
+    {q:'2的倍数有什么特征？',a:'个位上是0、2、4、6、8',d:['个位上是0或5','各位上的数的和是3的倍数','是奇数']},
+    {q:'5的倍数有什么特征？',a:'个位上是0或5',d:['个位上是0、2、4、6、8','各位上的数的和是3的倍数','是偶数']},
+    {q:'3的倍数有什么特征？',a:'各位上的数的和是3的倍数',d:['个位上是0或5','个位上是偶数','末两位是3的倍数']},
+    {q:'下面哪个数既是2的倍数又是5的倍数？',a:'10',d:['12','15','9']},
+    {q:'个位上是0、2、4、6、8的数是？',a:'2的倍数',d:['3的倍数','5的倍数','质数']},
+    {q:'最小的偶数是？',a:'0',d:['2','1','4']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -8784,11 +8931,23 @@ function g5_fraction(){
     {q:'10/15约分后等于？',a:'2/3',d:['5/15','10/3','1/3']},
     {q:'约分的依据是？',a:'分数的基本性质',d:['加法交换律','乘法分配律','等式的性质']},
     {q:'最简分数的分子和分母只有公因数？',a:'1',d:['2','3','没有公因数']},
+    // —— 缺口补题：严格按人教版五下·分数的意义和性质（分数意义/分数单位/真假分数/通分/互化）——
+    {q:'把单位"1"平均分成8份，表示这样3份的数是？',a:'3/8',d:['8/3','1/8','3']},
+    {q:'3/8的分数单位是？',a:'1/8',d:['3/8','1/3','8']},
+    {q:'分子比分母小的分数是？',a:'真分数',d:['假分数','带分数','整数']},
+    {q:'分子比分母大或相等的分数是？',a:'假分数',d:['真分数','带分数','小数']},
+    {q:'下面哪个分数是真分数？',a:'3/8',d:['8/3','5/5','9/4']},
+    {q:'假分数5/3化成带分数是？',a:'1又2/3',d:['1又3/2','3/5','2']},
+    {q:'把1/2和1/3化成分母相同的分数，通常用分母？',a:'6',d:['2','3','5']},
+    {q:'通分是为了把异分母分数化成？',a:'同分母分数',d:['同分子分数','小数','整数']},
+    {q:'把0.5化成分数是？',a:'1/2',d:['1/5','5/10','2']},
+    {q:'把3/4化成小数是？',a:'0.75',d:['0.34','0.25','7.5']},
+    {q:'把2/5化成小数是？',a:'0.4',d:['0.2','0.25','2.5']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
 function g5_fraction_calc(){
-  let a=ri(2,9), c=ri(3,9), p=ri(2,6), q=ri(2,6);
+  let a=ri(2,9), c=ri(3,9), p=ri(2,6), q=ri(2,6), m=pick([4,5,6,7,8,9]);
   while(q===p) q=ri(2,6);
   let items=[
     {q:`1/${a}+1/${a}=？`,a:fracStr(2,a),d:[`2/${a}`,`1/${a}`,`1/${a*2}`]},
@@ -8798,6 +8957,11 @@ function g5_fraction_calc(){
     {q:'异分母分数相加减，要先做什么？',a:'通分',d:['约分','化成小数','分子相加']},
     {q:'计算1−3/8时，先把1写成？',a:'8/8',d:['3/3','1/8','8/3']},
     {q:'同分母分数相加减，什么不变？',a:'分母',d:['分子','分子分母都变','都不变']},
+    // —— 缺口补题：严格按人教版五下·分数的加法和减法（连加/简便/通分步骤/应用）——
+    {q:`1/${m}+2/${m}+3/${m}=？`,a:fracStr(6,m),d:[`5/${m}`,`7/${m}`,`1/${m}`]},
+    {q:'计算2/7+3/7+4/7，可以怎样简便？',a:'先把同分母的分数相加',d:['先通分','先化成小数','先约分']},
+    {q:'计算1/2+1/3，第一步要做什么？',a:'通分（化成分母相同的分数）',d:['直接把分子相加','先约分','化成带分数']},
+    {q:'一桶油重1千克，第一次用去1/4千克，第二次用去1/4千克，两次一共用去多少千克？',a:'1/2',d:['1/8','1/4','3/4']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -8878,6 +9042,10 @@ function g5_line(){
     {s:chart,q:`上图折线统计图中，${names[hi]}比${names[lo]}的气温高多少摄氏度？`,a:`${diff}℃`,d:[`${diff+1}℃`,`${diff+2}℃`,`${Math.max(1,diff-1)}℃`]},
     {s:chart,q:`上图折线统计图中，${names[mi]}的最高气温是多少摄氏度？`,a:`${temps[mi]}℃`,d:[`${temps[mi]+1}℃`,`${temps[mi]-1}℃`,`${temps[mi]+2}℃`]},
     {s:chart,q:'上图折线统计图中，这一周的最高气温与最低气温相差多少摄氏度？',a:`${mx-mn}℃`,d:[`${mx-mn+1}℃`,`${Math.max(1,mx-mn-1)}℃`,`${mx-mn+2}℃`]},
+    // —— 缺口补题：严格按人教版五下·折线统计图（复式折线：两组数据对比）——
+    {q:'要同时比较两城市一周气温的变化情况，用哪种统计图更合适？',a:'复式折线统计图',d:['单式折线统计图','条形统计图','统计表']},
+    {q:'复式折线统计图里，一般用不同颜色或线型来区分？',a:'两组数据',d:['横轴和纵轴','图例和标题','最大值和最小值']},
+    {q:'复式折线统计图的图例作用是？',a:'说明每条折线分别代表什么',d:['表示数据单位','表示时间','表示最大值']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -8975,6 +9143,11 @@ function g5_cuboid(){
     {q:'做一个无盖的长方体玻璃鱼缸，要算几个面的面积？',a:'5个面',d:['6个面','4个面','3个面']},
     {s:figCuboid(),q:'像上图这样的长方体，它的体积公式是？',a:'长×宽×高',d:['（长+宽+高）×2','长×高','长+宽+高']},
     {s:figCube(),q:'像上图这样的正方体，它的表面积公式是？',a:'棱长×棱长×6',d:['棱长×6','棱长×棱长×棱长','棱长×12']},
+    // —— 缺口补题：严格按人教版五下·长方体和正方体（表面积应用/容积/排水法）——
+    {q:`一个无盖长方体鱼缸，长${a}分米、宽${b}分米、高${h}分米，至少需要多少平方分米玻璃？`,a:String(a*b+2*(a*h+b*h)),d:[String(S),String(2*(a*b+a*h+b*h)),String(E)]},
+    {q:'用排水法求不规则物体的体积，水面上升的那部分水的体积就是？',a:'不规则物体的体积',d:['容器的体积','水面上升的高度','水的体积']},
+    {q:'一瓶洗发水大约有500？',a:'毫升',d:['升','立方米','千克']},
+    {q:`一个正方体容器，从里面量棱长${s}分米，它的容积是多少？`,a:`${s*s*s}升`,d:[`${6*s*s}升`,`${12*s}升`,`${s*s}升`]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9010,6 +9183,22 @@ function g6_mul(){
   let a=ri(1,4), b=ri(2,5);
   while (gcd(a, b) > 1) { a=ri(1,4); b=ri(2,5); }   // 题面用最简分数
   let c=ri(2,5);
+  // —— 缺口补题参数（人教版六上·分数乘法，严格按课本）——
+  let e=ri(2,5), f=ri(2,5); while(gcd(e,f)>1){e=ri(2,5);f=ri(2,5);}
+  let c2=ri(1,4), d2=ri(2,5); while(gcd(c2,d2)>1){c2=ri(1,4);d2=ri(2,5);}
+  const DEC={0.5:'1/2',0.25:'1/4',0.75:'3/4',0.2:'1/5',0.4:'2/5',0.6:'3/5',0.8:'4/5'};
+  const decKey=pick(Object.keys(DEC)); const _da=DEC[decKey].split('/'); const _dn=+_da[0], _dd=+_da[1];
+  function fmL(an,ad,bn,bd){const n=an*bn,g=gcd(n,ad*bd);return [n/g,(ad*bd)/g];}
+  function faL(an,ad,bn,bd){const n=an*bd+bn*ad,dx=ad*bd,g=gcd(n,dx);return [n/g,dx/g];}
+  let p=ri(1,4),q=ri(2,5); while(gcd(p,q)>1){p=ri(1,4);q=ri(2,5);}
+  let r=ri(1,4),s=ri(2,5); while(gcd(r,s)>1){r=ri(1,4);s=ri(2,5);}
+  let t=ri(2,4);
+  const mix1=(()=>{const [mn,md]=fmL(r,s,t,1);const [an,ad]=faL(p,q,mn,md);return fracStr(an,ad);})();
+  const mix2=(()=>{const [mn,md]=fmL(p,q,r,s);const [an,ad]=faL(mn,md,t,1);return fracStr(an,ad);})();
+  let bb=ri(2,4), dv=ri(2,3); let baseN=bb*dv*ri(2,4);
+  let ca=ri(1,bb-1); while(gcd(ca,bb)>1)ca=ri(1,bb-1);
+  let cb=ri(1,dv-1); while(gcd(cb,dv)>1)cb=ri(1,dv-1);
+  let bp=ri(2,4); let fr=ri(1,bp-1); while(gcd(fr,bp)>1)fr=ri(1,bp-1); let Mnum=bp*ri(2,5);
   let items=[
     {t:'f',q:`${a}/${b}×${c}=？`,a:fracStr(a*c,b)},
     {t:'f',q:`${a}/${b}×${c}×${c}=？`,a:fracStr(a*c*c,b)},
@@ -9018,6 +9207,16 @@ function g6_mul(){
     {t:'c',q:'一个不为0的数乘真分数，积比原数？',a:'小',d:['大','相等','无法比较']},
     {t:'c',q:'一个不为0的数乘假分数，积与原数相比？',a:'大于或等于原数',d:['一定大于原数','一定小于原数','一定等于原数']},
     {t:'c',q:'分数乘整数，用分数的分子和整数相乘的积作？',a:'分子，分母不变',d:['分母，分子不变','分子和分母','都不是']},
+    // —— 缺口补题：严格按人教版六上·分数乘法 ——
+    {t:'f',q:`${a}/${b}×${e}/${f}=？`,a:fracStr(a*e,b*f)},
+    {t:'f',q:`${a}/${b}×${decKey}=？`,a:fracStr(a*_dn,b*_dd)},
+    {t:'f',q:`${p}/${q}+${r}/${s}×${t}=？`,a:mix1},
+    {t:'f',q:`${p}/${q}×${r}/${s}+${t}=？`,a:mix2},
+    {t:'f',q:`${a}/${b}×${e}+${a}/${b}×${f}=？`,a:fracStr(a*(e+f),b)},
+    {t:'f',q:`${a}/${b}×${c2}/${d2}×${b}/${a}=？`,a:fracStr(c2,d2)},
+    {t:'f',q:`饲养场有鸡${baseN}只，鸭的只数是鸡的${ca}/${bb}，鹅的只数是鸭的${cb}/${dv}。鹅有多少只？`,a:String(baseN*ca/bb*cb/dv)},
+    {t:'f',q:`六(1)班有男生${Mnum}人，女生比男生多${fr}/${bp}，女生有多少人？`,a:String(Mnum*(bp+fr)/bp)},
+    {t:'f',q:`六(1)班有男生${Mnum}人，女生比男生少${fr}/${bp}，女生有多少人？`,a:String(Mnum*(bp-fr)/bp)},
   ];
   let it=pick(items);
   return it.t==='f'?mf(it.q,it.a):mc(it.q,it.a,it.d);
@@ -9032,13 +9231,35 @@ function g6_div(){
   // 倒数
   let b=ri(2,12), a=ri(1,b-1);
   while(gcd(a,b)>1) a=ri(1,b-1);
+  // —— 缺口补题参数（人教版六上·分数除法，严格按课本）——
+  let fnum=ri(2,5), fden=ri(2,9); while(gcd(fnum,fden)>1){fnum=ri(2,5);fden=ri(2,9);}
+  let bn=ri(2,5), bd=ri(2,7); while(gcd(bn,bd)>1)bn=ri(2,5);
+  let cn=ri(2,5), cd=ri(2,7); while(cn===cd||gcd(cn,cd)>1)cn=ri(2,5);
+  let civ=ri(2,5); let civ2=ri(2,5); let t2=ri(2,4);
+  function fmd(an,ad,bn2,bd2){const n=an*bn2,g=gcd(n,ad*bd2);return [n/g,(ad*bd2)/g];}
+  function fad(an,ad,bn2,bd2){const n=an*bd2+bn2*ad,dx=ad*bd2,g=gcd(n,dx);return [n/g,dx/g];}
+  let pp=ri(1,4),qq=ri(2,5); while(gcd(pp,qq)>1){pp=ri(1,4);qq=ri(2,5);}
+  let rr=ri(2,5),ss=ri(2,7); while(gcd(rr,ss)>1||rr===ss){rr=ri(2,5);ss=ri(2,7);}
+  const divMix1=(()=>{const [mn,md]=fmd(rr,ss,1,civ2);const [an,ad]=fad(pp,qq,mn,md);return fracStr(an,ad);})();
+  const divMix2=(()=>{const [mn,md]=fmd(pp,qq,ss,rr);const [an,ad]=fad(mn,md,t2,1);return fracStr(an,ad);})();
+  let bp2=ri(2,4); let fr2=ri(1,bp2-1); while(gcd(fr2,bp2)>1)fr2=ri(1,bp2-1); let M2=bp2*ri(2,5);
   let items=[
     {q:`${n}÷(1/${d})=？`,a:n*d,d:[Math.round(n/d*100)/100,n+d,n*2]},
     {q:`一个数的${cc}/${dd}是${cc*tt}，这个数是多少？`,a:dd*tt,d:[cc*tt,dd*tt+cc,(dd+1)*tt]},
-    {q:`${a}/${b}的倒数是？`,a:`${b}/${a}`,d:[`${a}/${b}`,`${b}/${a+1}`,`${a+1}/${b}`]},
+    // v84t：a=1 时倒数是整数 b，不能写成 b/1。课本口径「1/6 的倒数是 6」。
+    // 判分侧 looseNumericEquals 交叉相乘本就判对，但答案与解析页展示 6/1 会让孩子
+    // 误以为倒数必须写成 n/1 的形式（家长不在身边，只能靠解析自学，形式错=教错）。
+    {q:`${a}/${b}的倒数是？`,a:(a===1?`${b}`:`${b}/${a}`),d:[`${a}/${b}`,`${b}/${a+1}`,`${a+1}/${b}`]},
     {q:'除以一个不为0的数，等于？',a:'乘这个数的倒数',d:['乘这个数','除以这个数的倒数','减这个数']},
     {q:'0有倒数吗？',a:'0没有倒数',d:['0的倒数是0','0的倒数是1','0的倒数是1/0']},
     {q:'1的倒数是？',a:'1',d:['0','2','1/1不能写']},
+    // —— 缺口补题：严格按人教版六上·分数除法 ——
+    {q:`${fnum}/${fden}÷${civ}=？`,a:fracStr(fnum,fden*civ),d:[fracStr(fnum*civ,fden),fracStr(fnum,fden+civ),fracStr(fnum*civ,fden*civ)]},
+    {q:`${bn}/${bd}÷${cn}/${cd}=？`,a:fracStr(bn*cd,bd*cn),d:[fracStr(bn*cn,bd*cd),fracStr(bd*cn,bn*cd),fracStr(bn*cd+1,bd*cn)]},
+    {q:`${pp}/${qq}+${rr}/${ss}÷${civ2}=？`,a:divMix1,d:[fracStr(pp+rr,qq+ss),fracStr(pp*qq+rr,qq*ss),fracStr(pp,qq)]},
+    {q:`${pp}/${qq}÷${rr}/${ss}+${t2}=？`,a:divMix2,d:[fracStr(pp*ss,qq*rr),fracStr(pp,qq),fracStr(pp*ss+qq*rr,qq*rr)]},
+    {q:`某工厂一月份用电${M2}千瓦时，二月份比一月份节约${fr2}/${bp2}，二月份用电多少千瓦时？`,a:String(M2*(bp2-fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2+fr2)/bp2)]},
+    {q:`小红有故事书${M2}本，科技书比故事书多${fr2}/${bp2}，科技书有多少本？`,a:String(M2*(bp2+fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2-fr2)/bp2)]},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -9099,6 +9320,12 @@ function g6_circle(){
     {q:`一个圆的半径扩大${k}倍，直径扩大？`,a:`${k}倍`,d:[`${k*k}倍`,`${2*k}倍`,'不变']},
     {q:`一个圆的半径扩大${k}倍，周长扩大？`,a:`${k}倍`,d:[`${k*k}倍`,`${2*k}倍`,'不变']},
     {q:`一个圆的半径扩大${k}倍，面积扩大？`,a:`${k*k}倍`,d:[`${k}倍`,`${2*k}倍`,'不变']},
+    // —— 缺口补题：严格按人教版六上·圆·扇形 ——
+    {q:'由一条弧和经过这条弧两端的两条半径所围成的图形叫？',a:'扇形',d:['弓形','圆形','三角形']},
+    {q:'在同一个圆中，扇形的大小主要由什么决定？',a:'圆心角的大小',d:['半径的长短','圆周率','直径']},
+    {q:'圆心角是90°的扇形占整个圆的几分之几？',a:'1/4',d:['1/2','1/3','1/8']},
+    {q:'半圆实际上是一个圆心角为多少度的扇形？',a:'180°',d:['90°','360°','270°']},
+    {s:circ,q:`图中圆的半径r=${r}厘米，圆心角90°的扇形面积约是多少平方厘米？(π取3.14)`,a:fmt(+(3.14*r*r/4).toFixed(2)),d:[fmt(+(3.14*r*r/2).toFixed(2)),fmt(+(3.14*r).toFixed(2)),fmt(+(3.14*r*r*3/4).toFixed(2))]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9224,6 +9451,8 @@ function g6_proportion(){
   // b<a 防止 b*kk 与 a*kk 撞干扰项；面积倍数干扰项避开 kk=2 时 kk²=2kk
   let a=ri(3,6), b=ri(2,5), kk=pick([2,3,4]);
   if(b>=a) b=a-1;
+  // —— 缺口补题参数（人教版六下·比例，严格按课本）——
+  let t1=ri(2,4), spd=ri(50,90); let d1=spd*t1; let t2=ri(2,5);
   let rect=`<rect x="34" y="32" width="${a*7}" height="${b*7}" fill="rgba(180,148,90,0.16)" stroke="${FIG_STROKE}" stroke-width="1.8"/>`+figLabel(34+a*7/2,26,a+'厘米')+figLabel(24,32+b*7/2,b+'厘米');
   let items=[
     {q:'若a:b=c:d，则ad=?',a:'bc',d:['ac','bd','ab']},
@@ -9233,6 +9462,15 @@ function g6_proportion(){
     {q:'0.5:0.2=x:4，则x=?',a:'10',d:['8','5','16']},
     {s:rect,q:`上图长方形（长${a}厘米、宽${b}厘米）按${kk}:1放大后，长是多少厘米？`,a:String(a*kk),d:[String(a+kk),String(a*(kk+1)),String(b*kk)]},
     {s:rect,q:`上图长方形按${kk}:1放大后，新图形的面积是原图形的几倍？`,a:String(kk*kk)+'倍',d:[String(kk)+'倍',String(kk*kk-1)+'倍',String(kk+1)+'倍']},
+    // —— 缺口补题：严格按人教版六下·比例（正反比例/比例尺/用比例解决问题）——
+    {q:'速度一定，路程和时间成什么比例关系？',a:'正比例',d:['反比例','不成比例','无法确定']},
+    {q:'三角形的面积一定，底和高成什么比例关系？',a:'反比例',d:['正比例','不成比例','无法确定']},
+    {q:'圆的周长和直径成什么比例关系？',a:'正比例',d:['反比例','不成比例','无法确定']},
+    {q:'总价一定，单价和数量成什么比例关系？',a:'反比例',d:['正比例','不成比例','无法确定']},
+    {q:'分母（0除外）一定，分数值和分子成什么比例关系？',a:'正比例',d:['反比例','不成比例','无法确定']},
+    {q:'一幅图的比例尺是1:500，图上1厘米表示实际多少？',a:'5米',d:['500米','50米','5厘米']},
+    {q:'实际距离300米，画在比例尺1:6000的图上应画多少厘米？',a:'5厘米',d:['50厘米','30厘米','5米']},
+    {q:`一辆汽车${t1}小时行驶${d1}千米，照这样的速度，${t2}小时行驶多少千米？`,a:String(d1/t1*t2),d:[String(d1+t1*t2),String(d1*t2/t1+1),String(d1-t1)]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -10152,7 +10390,8 @@ function renderHome() {
   if (!grid) return;
   let gradeNames = {
     1: '一年级', 2: '二年级', 3: '三年级',
-    4: '四年级', 5: '五年级', 6: '六年级'
+    4: '四年级', 5: '五年级', 6: '六年级',
+    7: '七年级', 8: '八年级', 9: '九年级'
   };
 
   // v79：年级已持久化，这里回显「当前年级」并高亮对应卡片，
@@ -10165,7 +10404,7 @@ function renderHome() {
   }
 
   grid.innerHTML = '';
-  for (let g = 1; g <= 6; g++) {
+  for (let g = 1; g <= 9; g++) {
     let card = document.createElement('div');
     card.className = 'grade-card' + (g === state.currentGrade ? ' active' : '');
     card.dataset.grade = g;
@@ -10186,7 +10425,7 @@ function renderHome() {
     recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon u-c-lighter"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></div><div class="empty-text">还没有练习记录，快开始吧！</div></div>`;
   } else {
     recentEl.innerHTML = recent.map(r => {
-      let gradeNames2 = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
+      let gradeNames2 = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
       let rateLabel = r.accuracy >= 90 ? '优秀' : r.accuracy >= 60 ? '良好' : '加油';
       return `<div class="card u-flex u-ac u-g10 u-p12-16">
         <div class="u-fs12 u-fw700 u-c-ok u-bg-ok-s2 u-p3-10 u-rpill">${rateLabel}</div>
@@ -10209,11 +10448,15 @@ function renderHome() {
 function renderSpecialSection() {
   const el = document.getElementById('specialList');
   if (!el) return;
-  const gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
+  const gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
   const found = [];
-  for (let g = 1; g <= 6; g++) {
+  for (let g = 1; g <= 9; g++) {
+    const gradeUnits = KNOWLEDGE_BASE[g];
+    if (!gradeUnits) continue;            // 防御：初中(7-9)由 math_junior.js 注入，缺失时不抛错
     for (let s = 1; s <= 2; s++) {
-      KNOWLEDGE_BASE[g][s].forEach((unit, idx) => {
+      const units = gradeUnits[s];
+      if (!units) continue;
+      units.forEach((unit, idx) => {
         if (unit.group === '专项' || unit.name.includes('专项')) found.push({ grade: g, sem: s, idx, unit });
       });
     }
@@ -10262,7 +10505,7 @@ function switchSemester(sem) {
 }
 
 function renderUnits() {
-  let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
+  let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
   let semName = state.currentSemester == 1 ? '上册' : '下册';
   document.getElementById('unitsTitle').textContent = `${gradeNames[state.currentGrade]}${semName} · 单元列表`;
 
@@ -10773,7 +11016,8 @@ function exportWrongBookText() {
     lines.push(`${i + 1}. 【${w.unitName || '未知单元'}】${(q.question || '').replace(/\n/g, ' ')}`);
     if (q.options && q.options.length) {
       let labels = ['A', 'B', 'C', 'D'];
-      lines.push('   选项：' + q.options.map((o, k) => labels[k] + '. ' + (typeof o === 'object' ? o.value : o)).join('　'));
+      // v85：labels 只有 A~D，选项超 4 个时旧版导出「undefined.」
+      lines.push('   选项：' + q.options.map((o, k) => (labels[k] || String.fromCharCode(65 + k)) + '. ' + (typeof o === 'object' ? o.value : o)).join('　'));
     }
     lines.push(`   正确答案：${q.answer}　我的答案：${w.userAnswer}　错误次数：${w.count || 1}`);
     lines.push('');
@@ -10908,7 +11152,7 @@ function renderExamCenter() {
 
   // 年级
   let gHtml = '';
-  for (let g = 1; g <= 6; g++) {
+  for (let g = 1; g <= 9; g++) {
     gHtml += `<button class="chip ${examState.grade === g ? 'selected' : ''}" onclick="selectExamGrade(${g})">${g}年级</button>`;
   }
   document.getElementById('examGradeBtns').innerHTML = gHtml;
@@ -11614,8 +11858,12 @@ function buildSmartSteps(q, unit) {
 
   // 倒数：a/b → b/a
   m = t.match(/^(\d+)\/(\d+)的倒数是？$/);
-  if (m) return ['求一个分数的倒数，就是把分子和分母调换位置',
-    `${m[1]}/${m[2]} 的倒数是 ${m[2]}/${m[1]}`];
+  if (m) {
+    // v84t：分子为 1 时倒数是整数，不写 n/1（与题库答案口径一致）
+    const rec = (+m[1] === 1) ? `${m[2]}` : `${m[2]}/${m[1]}`;
+    return ['求一个分数的倒数，就是把分子和分母调换位置',
+      `${m[1]}/${m[2]} 的倒数是 ${rec}`];
+  }
   m = t.match(/^(\d+)的倒数是？$/);
   if (m) {
     const n = +m[1];
@@ -12507,11 +12755,19 @@ function generateExamPaper() {
     // 用独立 seen：初始题池构建时已把大量配图题计入 seen，若沿用会把可补充的配图题全部排除，保底失效。
     // 去重铁律：按题面文本去重（跨单元模板题题面可能相同而答案不同，按题面+答案去重会导致重复题）。
     let seenText = new Set(questions.map(q => visKey(q)));
+    // v84s：再兜一层「题面+答案」去重。visKey 对带图题是「题面+图形」，
+    // 于是同一道题的无图版与有图版会被判成两张不同的图，配图保底就把有图版补进卷面，
+    // 结果卷面上出现两道题干与答案完全相同的题（如「从上面看一个圆柱，看到的形状是？」）。
+    // 按「题面+答案」判重不会误伤参数化图形题（同题面、不同图、不同答案，如不同时刻的钟面）。
+    let seenQA = new Set(questions.map(q => String(q.question) + '|' + String(q.answer)));
     // 采样量放大到 200：配图题集中在少数单元（如 6 下仅 9 种），target 过小会漏捞导致保底补不满。
     let imgPool = [];
     buildQuestionPool(imgSrc, 200, new Set(), false).forEach(q => {
       if (!String(q.svg || '').includes('<')) return;
+      const qa = String(q.question) + '|' + String(q.answer);
+      if (seenQA.has(qa)) return;
       if (seenText.has(visKey(q))) return;
+      seenQA.add(qa);
       seenText.add(visKey(q));
       imgPool.push(q);
     });
@@ -13220,7 +13476,7 @@ function renderWrongBank() {
     return;
   }
 
-  let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
+  let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
   let html = `<div class="u-fs13 u-c-light u-mb10">共 ${wrongBank.length} 道错题</div>`;
 
   // v84 P4：错题库按知识点聚类（高频薄弱点一眼可见，并联动纸质练习建议）
@@ -13431,7 +13687,8 @@ function printCurrentPaper() {
         h += '<div class="prt-opts">';
         q.options.forEach((o, i2) => {
           let val = typeof o === 'object' ? o.value : o;
-          let lab = typeof o === 'object' ? o.label : labels[i2];
+          // v85：labels 只有 A~D，选项超 4 个时旧版打印出「undefined.」
+          let lab = typeof o === 'object' ? o.label : (labels[i2] || String.fromCharCode(65 + i2));
           h += `<div class="prt-opt"><span class="prt-optlab">${lab}.</span> ${val}</div>`;
         });
         h += '</div>';
@@ -13499,9 +13756,9 @@ function renderStats() {
   `;
 
   // 各年级统计
-  let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级'};
+  let gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
   let tableHtml = `<thead><tr><th>年级</th><th>已做题数</th><th>答对</th><th>正确率</th></tr></thead><tbody>`;
-  for (let g = 1; g <= 6; g++) {
+  for (let g = 1; g <= 9; g++) {
     let s = stats[g] || { totalDone: 0, totalCorrect: 0 };
     let acc = s.totalDone > 0 ? Math.round(s.totalCorrect / s.totalDone * 100) : 0;
     tableHtml += `<tr>

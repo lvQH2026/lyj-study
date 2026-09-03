@@ -20,12 +20,12 @@ window.App = (function () {
 
   function getGrade(mod) {
     const g = parseInt(readGradeMap()[mod], 10);
-    return (g >= 1 && g <= 6) ? g : DEFAULT_GRADE;
+    return (g >= 1 && g <= 9) ? g : DEFAULT_GRADE;
   }
 
   function setGrade(mod, g) {
     g = parseInt(g, 10);
-    if (!(g >= 1 && g <= 6)) return;
+    if (!(g >= 1 && g <= 9)) return;
     const m = readGradeMap();
     m[mod] = g;
     try { localStorage.setItem(GRADE_KEY, JSON.stringify(m)); } catch (e) {}

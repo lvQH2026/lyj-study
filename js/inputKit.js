@@ -350,7 +350,17 @@
 
   function convertToChoice(item, choices) {
     if (!choices || choices.length < 2) return;
-    item.options = choices.slice();
+    var cs = choices.slice();
+    // v85：渲染层只排 A~D 四个位置。封闭集合里角类 ANGLE5=[锐,直,钝,平,周] 有 5 项，
+    // 旧版原样塞进 options，答题页靠 fromCharCode 兜出个「E」，而打印视图与错题本导出
+    // 用的是写死的 labels=['A','B','C','D']，第 5 项直接打成「undefined. 锐」。
+    // 这里统一裁到 4 项：正确答案必留，其余随机留 3 个干扰项。
+    if (cs.length > 4) {
+      var ans = String(item.answer == null ? '' : item.answer).trim();
+      var rest = shuffle(cs.filter(function (x) { return String(x).trim() !== ans; })).slice(0, 3);
+      cs = shuffle([ans].concat(rest));
+    }
+    item.options = cs;
     item.type = 'choice';
     item._ikNorm = true;
     if (item.answerIdx !== undefined) delete item.answerIdx;
@@ -363,7 +373,18 @@
     if (item._ikNorm) return item;
     // 已选择题 / 判断题 / 图形选择题 / 强制数字填空（数字键盘已覆盖）：不动
     if (item.type === 'choice' || item.type === 'shape_choice' || item.judge) return item;
-    if (item.forceFill) return item;
+    // v85 P0：forceFill 是考试组卷「把这题塞进填空题区」的标记。旧版无条件早退，
+    // 于是「在计数器上拨出61…」（答案「6个十和1个一」）在考试里被渲染成纯输入框——
+    // 数字键盘覆盖不到中文答案，detect 返回 none，孩子不会打字直接丢分（违反零打字铁律）。
+    // 现在：数字/小数/分数/算式答案键盘能覆盖 → 保留 forceFill；
+    //       中文概念答案 → 撤销 forceFill，继续往下走封闭集合/词卡/选择题改写。
+    if (item.forceFill) {
+      var fa = String(item.answer == null ? '' : item.answer).trim();
+      var fsh = shapeOf(fa);
+      if (fsh === 'int' || fsh === 'num' || fsh === 'frac' || fsh === 'expr') return item;
+      if (!/[一-龥]/.test(fa)) return item;
+      item.forceFill = false;
+    }
     if (item.input && item.input.mode) return item;
     var a = String(item.answer == null ? '' : item.answer).trim();
     if (!a) return item;
