@@ -5681,7 +5681,7 @@ const KNOWLEDGE_BASE = {
         fidx: [{ t: '最优次数', f: '2~3个→1次；4~9个→2次；10~27个→3次' }],
         method: [{ t: '三分法', s: '把物品尽量平均分成3份，天平两边各放一份：平衡则在剩下那份，不平衡则在轻（重）的那份' }] },
       // ---- 五下 · 专项练习 ----
-      { name: '专项·分数应用题', group: '专项', type: 'application', gen: g_app_fraction },
+      { name: '专项·分数应用题', group: '专项', type: 'application', gen: g5_app_fraction },
       { name: '专项·立体图形', group: '专项', type: 'shape', gen: g_shape_3d },
     ]
   },
@@ -5747,7 +5747,10 @@ const KNOWLEDGE_BASE = {
         method: [{ t: '万能思路', s: '先找「物体」和「抽屉」（扑克4种花色是4个抽屉、12生肖是12个抽屉），再用公式算至少数' }, { t: '最不利原则', s: '要「保证」取出，就先想最倒霉的情况全取出来，再多取1个就一定满足' }] },
       // ---- 六下 · 专项练习 ----
       { name: '专项·统计', group: '专项', type: 'application', gen: g6_stats },
-      { name: '专项·行程问题', group: '专项', type: 'application', gen: g_app_speed },
+      { name: '专项·行程问题', group: '专项', type: 'application', gen: g6_speed,
+        summary: ['基本关系：路程 = 速度 × 时间', '相遇：路程和 = 速度和 × 时间；追及：路程差 = 速度差 × 时间', '平均速度 = 总路程 ÷ 总时间，不是「速度的平均数」', '速度一定→路程与时间成正比例；路程一定→速度与时间成反比例'],
+        fidx: [{ t: '基本关系', f: '路程 = 速度 × 时间' }, { t: '相遇', f: '相遇时间 = 总路程 ÷ 速度和' }, { t: '追及', f: '追及时间 = 路程差 ÷ 速度差' }, { t: '平均速度', f: '平均速度 = 总路程 ÷ 总时间', warn: '不是 (v₁+v₂)÷2' }],
+        method: [{ t: '万能思路', s: '先画线段图标出「谁在哪、往哪走、相距多少」，再套相遇（加）或追及（减）' }, { t: '易错点', s: '往返/上下山求平均速度，一定要用「总路程÷总时间」，不能直接把两个速度平均' }] },
       { name: '专项·工程问题', group: '专项', type: 'application', gen: g_app工程 },
       { name: '专项·视图与展开', group: '专项', type: 'shape', gen: g_shape_view },
       { name: '专项·总复习', group: '专项', type: 'mixed', gen: g6_review },
@@ -8326,11 +8329,59 @@ function g4_bar(){
   let it=pick(reps); return mc(it.q,it.a,it.d);
 }
 // 行程问题三模板：求路程 / 相遇（配线段图）/ 求时间（先定答案反推条件，保证整除）
+// 干扰项去重生成器：把若干候选干扰项去掉与正确答案相同的、并补齐到 3 个
+// 参数：dis3(正确答案, 候选1, 候选2, ...)；返回长度固定为 3 的字符串数组
+function dis3(ans){
+  var A=String(ans), out=[], i;
+  for(i=1;i<arguments.length;i++){ var v=String(arguments[i]);
+    if(v!==A && out.indexOf(v)<0 && out.length<3) out.push(v); }
+  var g=1;
+  while(out.length<3){ var c=String(Number(ans)+g*3);
+    if(!isFinite(Number(ans))) c=A+'（错'+g+'）';
+    if(c!==A && out.indexOf(c)<0) out.push(c);
+    g++; }
+  return out.slice(0,3);
+}
 function g_app_speed(){
   let k=ri(0,2);
   if(k===0){let v=ri(40,80),t=ri(2,5);return mc(`汽车每小时行${v}千米，${t}小时行多少千米？`,v*t,[v*t-v,v*t+v,v*t*2])}
   if(k===1){let v=ri(40,60),w=ri(50,70),t=ri(2,4),s=(v+w)*t;return msc(`甲、乙两车从相距${s}千米的两地同时相向开出，甲车每小时行${v}千米，乙车每小时行${w}千米，几小时后两车相遇？`,figMeet(s),t,[t+1,t-1,t+2])}
   let v=ri(50,90),t=ri(3,6),s=v*t;return mc(`一辆汽车每小时行${v}千米，要行驶${s}千米，需要多少小时？`,t,[t+1,t-1,t+2])
+}
+// 六年级专项·行程问题：在 g_app_speed 基础上补「追及 / 平均速度 / 行程中的比例关系」
+// 说明：四五年级仍用 g_app_speed（不含超纲的追及与比例行程），六年级单独走本函数
+function g6_speed(){
+  let k=ri(0,7);
+  if(k===0){let v=ri(40,80),t=ri(2,5);return mc(`汽车每小时行${v}千米，${t}小时行多少千米？`,v*t,[v*t-v,v*t+v,v*t*2])}
+  if(k===1){let v=ri(40,60),w=ri(50,70),t=ri(2,4),s=(v+w)*t;return msc(`甲、乙两车从相距${s}千米的两地同时相向开出，甲车每小时行${v}千米，乙车每小时行${w}千米，几小时后两车相遇？`,figMeet(s),t,[t+1,t-1,t+2])}
+  if(k===2){let v=ri(50,90),t=ri(3,6),s=v*t;return mc(`一辆汽车每小时行${v}千米，要行驶${s}千米，需要多少小时？`,t,[t+1,t-1,t+2])}
+  // —— 追及问题（同向而行）：① 求相距 ② 求追上时间 ——
+  if(k===3){let vf=ri(60,90), gap=ri(4,9), vs=vf-gap, td=ri(2,5), d0=gap*td;
+    return mc(`甲、乙两车同时同地同向出发，甲车每小时行${vf}千米，乙车每小时行${vs}千米，${td}小时后两车相距多少千米？`,d0,dis3(d0,d0+gap,d0-gap,gap*td*2))}
+  if(k===4){let vs=ri(40,58), gap=ri(6,20), vf=vs+gap, td=ri(2,5), d0=gap*td;
+    return mc(`甲车在乙车后面${d0}千米处，两车同时同向而行，乙车每小时行${vs}千米，甲车每小时行${vf}千米，甲车几小时能追上乙车？`,td,dis3(td,td+1,td-1,td+3))}
+  // —— 平均速度（往返 / 上下山）：总路程 ÷ 总时间，不是速度的平均数 ——
+  if(k===5){let t1=ri(2,4), t2=ri(1,3); if(t2===t1) t2=(t1===1)?2:(t1-1);
+    let a=t1,b=t2,r; while(b){r=a%b;a=b;b=r;} let lcm=t1*t2/a;
+    let kk3=ri(4,12); while((2*lcm*kk3)%(t1+t2)!==0) kk3++;
+    let s=lcm*kk3, v1=s/t1, v2=s/t2, avg=2*s/(t1+t2);
+    let half=(v1+v2)/2, halfS=(half%1===0)?String(half):half.toFixed(1);
+    return mc(`一辆汽车上山每小时行${v1}千米，${t1}小时到达山顶；沿原路下山每小时行${v2}千米，${t2}小时回到出发点。这辆汽车往返的平均速度是多少千米/时？`,avg,dis3(avg,halfS,v1+v2,avg+t1+t2))}
+  if(k===6){let v1=ri(30,60), t1=ri(2,5), s=v1*t1, v2=ri(20,50); if(v2===v1) v2=v1-10;
+    let t2=ri(1,4), s2=v2*t2, tot=s+s2, tt=t1+t2;
+    let avg=tot/tt, avgS=(avg%1===0)?String(avg):avg.toFixed(1);
+    let wA=((v1+v2)/2), wAS=(wA%1===0)?String(wA):wA.toFixed(1);
+    return mc(`一辆汽车前${t1}小时每小时行${v1}千米，后${t2}小时每小时行${v2}千米。这辆汽车全程的平均速度是多少千米/时？`,avgS,dis3(avgS,wAS,String(v1),String(v2)))}
+  // —— 行程中的比例关系 ——
+  let cases=[
+    {q:'速度一定，路程和时间成什么比例？',a:'正比例',w:['反比例','不成比例','无法确定']},
+    {q:'路程一定，速度和时间成什么比例？',a:'反比例',w:['正比例','不成比例','无法确定']},
+    {q:'时间一定，路程和速度成什么比例？',a:'正比例',w:['反比例','不成比例','无法确定']},
+    {q:'速度一定时，路程和时间成正比例，是因为它们的？',a:'比值一定',w:['乘积一定','和一定','差一定']},
+    {q:'路程一定时，速度和时间成反比例，是因为它们的？',a:'乘积一定',w:['比值一定','和一定','差一定']},
+  ];
+  let c=pick(cases);
+  return mc(c.q,c.a,dis3(c.a,c.w[0],c.w[1],c.w[2]));
 }
 function g4_mixed(){
   const reps=[];
@@ -8344,6 +8395,15 @@ function g4_mixed(){
   reps.push({q:'被减数等于减数，差是（　）',a:'0',d:['1','原数','减数']});
   reps.push({q:'0除以一个非0的数，得（　）',a:'0',d:['原数','1','无穷大']});
   reps.push({q:'一个数和0相乘，得（　）',a:'0',d:['原数','1','这个数']});
+  // v87 补题：原实现只有 1 条参数化模板，容量在 22~24 间抖动（_cap 验收不稳定）
+  reps.push({q:'一个数和1相乘，得（　）',a:'原数',d:['1','0','这个数的2倍']});
+  reps.push({q:'一个数除以1，得（　）',a:'原数',d:['1','0','这个数的一半']});
+  reps.push({q:'0不能作（　）',a:'除数',d:['被除数','加数','因数']});
+  reps.push({q:'在没有括号的算式里，如果只有加减法或只有乘除法，要（　）',a:'从左往右依次计算',d:['先算最右边的','先算加法','先算乘法']});
+  reps.push({q:'既有加减法又有乘除法的算式里，要先算（　）',a:'乘除法',d:['加减法','最左边的','括号外面的']});
+  reps.push({q:'被减数、减数与差的关系是？',a:'被减数 = 减数 + 差',d:['减数 = 被减数 + 差','差 = 被减数 + 减数','被减数 = 减数 − 差']});
+  reps.push({q:`根据 ${a} × ${b} = ${a*b}，可以写出两道除法算式，其中一道是 ${a*b} ÷ ${a} = ${b}，另一道是？`,a:`${a*b} ÷ ${b} = ${a}`,d:[`${a} ÷ ${b} = ${a*b}`,`${b} ÷ ${a*b} = ${a}`,`${a*b} × ${a} = ${b}`]});
+  reps.push({q:`根据 ${c} + ${a} = ${c+a}，可以写出两道减法算式，其中一道是 ${c+a} − ${c} = ${a}，另一道是？`,a:`${c+a} − ${a} = ${c}`,d:[`${c} − ${a} = ${c+a}`,`${a} − ${c+a} = ${c}`,`${c+a} + ${a} = ${c}`]});
   let it=pick(reps); return mc(it.q,it.a,it.d);
 }
 function g4_law(){
@@ -8629,6 +8689,8 @@ function g_app_price(){let a=ri(2,9)+ri(1,9)/10,b=ri(2,6);return mc(`一个笔�
 // 工程问题：v50 扩容——参数化独做天数/合做效率，去重键 ~90
 function g_app工程(){
   const a=ri(4,20), b=ri(4,20), c=ri(3,15);
+  // 中途离开：left1 严格小于 a，保证「剩下的」不为 0
+  let left1=ri(1,Math.max(1,a-1));
   let items=[
     {q:`一项工程甲队独做${a}天完成，甲队每天完成工程的几分之几？`,a:`1/${a}`,d:[`1/${a*2}`,String(a),`1/${a*a}`]},
     {q:`一项工程甲队独做${a}天完成，乙队独做${b}天完成，两队合做每天完成工程的几分之几？`,a:fracStr(a+b,a*b),d:[`1/${a+b}`,fracStr(Math.abs(a-b)+1,a*b),`1/${a*b}`]},
@@ -8637,6 +8699,11 @@ function g_app工程(){
     {q:'把一项工程看作单位"1"，甲队独做a天完成，甲队的工作效率是？',a:'1/a',d:['a','a/1','1/(a+1)']},
     {q:'工程问题中，工作效率、工作时间、工作量的关系是？',a:'工作量=工作效率×工作时间',d:['工作量=工作效率÷工作时间','工作量=工作效率+工作时间','工作量=工作时间÷工作效率']},
     {q:'一项工程甲队独做10天完成，乙队独做15天完成，两队合做几天完成？',a:'6天',d:['12.5天','5天','25天']},
+    // —— 二次补题：中途离开 / 分段施工（原 0 道）——
+    {q:`一项工程，甲队独做${a}天完成。甲队先做了${left1}天，剩下的工程占总工程的几分之几？`,a:fracStr(a-left1,a),d:[fracStr(left1,a),fracStr(a,left1),fracStr(a-left1,a*2)]},
+    {q:`一项工程，甲队独做${a}天完成。甲队先做${left1}天后离开，剩下的由乙队独做${b}天完成。两队一共做了多少天？`,a:String(left1+b)+'天',d:[String(a)+'天',String(b)+'天',String(left1+b+1)+'天']},
+    {q:'一项工程，甲队做了几天后中途离开，剩下的由乙队完成。计算这类问题的关键是？',a:'把工程分成「已做的」和「剩下的」两段分别计算',d:['把两队天数相加即可','只算甲队做的部分','按两队的平均效率计算']},
+    {q:`修一条路，甲队每天修全长的1/${a}，修了${left1}天后因故离开。已修部分占全长的几分之几？`,a:fracStr(left1,a),d:[fracStr(a,left1),fracStr(a-left1,a),fracStr(left1,a*2)]},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -9051,6 +9118,67 @@ function g5_line(){
 }
 // 分数应用题：v50 扩容——多情境（总数/绳子/看书/修路/正向求部分），去重键 ~140
 function g_app_fraction(){
+  // ⚠️ 本函数是【六年级】专项·百分数应用题专用。
+  //    五年级「专项·分数应用题」另走 g5_app_fraction（只含分数，不含百分数）——
+  //    两者曾共用同一 gen，导致百分数题泄漏到五年级（跨年级超纲，_audit_cross 实测 10 题次）。
+  // v86 补题：本单元名为「专项·百分数应用题」，但原实现 5 条模板全是 1/k 的分数题，
+  //   一道百分数都没有（覆盖检测实测 40%，140 道题全部错位到「分数乘法/求一个数的几分之几」）。
+  //   现保留原分数应用题（属同一考点族），补入真正的百分数应用题：
+  //   求一个数的百分之几 / 已知部分求整体 / 求百分率(出勤率·发芽率) / 折扣·成数 / 增减百分比。
+  // 参数取整除友好的值，保证所有答案都是整数，不会出现 37.5 这类孩子无法口算的数。
+  let n=ri(3,9), k=ri(2,5);
+  let base=20*ri(1,10);                                   // 20~200（20 的倍数）
+  let p=pick([10,15,20,25,30,40,50,60,75,80]);
+  let val=base*p/100;                                     // base 的 p%，必为整数
+  let price=20*ri(2,15);                                  // 原价 40~300
+  let z=pick([5,6,7,8,9]);
+  let cur=price*z/10;                                     // 打 z 折后的现价，必为整数
+  let c=pick([1,2,3]), base10=10*ri(3,20);                // 成数：base10 的 c 成
+  let qu=pick([10,20,25,50]), qd=pick([10,20,25]);        // 涨/降百分比（降价避开 50%，否则与「降价部分」撞值）
+  let base20=20*ri(2,10);
+  let up=base20*(100+qu)/100, down=base20*(100-qd)/100;   // 涨价后 / 降价后，均为整数
+  let total=20*ri(1,5), part=total*p/100;                 // 求百分率：total 中的 part
+  let fw=20*ri(1,5), mw=fw*p/100;                         // 男/女生人数求百分比
+  // 百分率类干扰项：优先给「补数率(100−p)%」「100%」，再补一个常见百分率，自动避开正确答案
+  const pctDis=(ans)=>{
+    const o=[]; const add=v=>{const s=v+'%'; if(s!==ans+'%' && o.indexOf(s)<0) o.push(s);};
+    add(100-ans); add(100); [10,20,25,50,75].forEach(add);
+    return o.slice(0,3);
+  };
+  let items=[
+    // —— 分数应用题（单位「1」已知 / 未知，原模板保留）——
+    {q:`总数的1/${k}是${n}，总数是多少？`,a:n*k,d:[n*(k-1),n+k,n*(k+1)]},
+    {q:`一根绳子用去${n}米，正好是全长的1/${k}，这根绳子全长多少米？`,a:n*k,d:[n*(k-1),n+k,n*(k+1)]},
+    {q:`一本书，小明第一天看了${n}页，占全书的1/${k}，这本书共多少页？`,a:n*k,d:[n*(k-1),n+k,n*(k+1)]},
+    {q:`修一条路，已经修了${n}千米，占全长的1/${k}，这条路全长多少千米？`,a:n*k,d:[n*(k-1),n+k,n*(k+1)]},
+    {q:`一箱苹果共${n*k}个，它的1/${k}是多少个？`,a:n,d:[n*k,n+k,n+1]},
+    // —— 求一个数的百分之几是多少 / 已知部分求整体 ——
+    {q:`六年级有学生${base}人，其中男生占${p}%，男生有多少人？`,a:String(val),d:[String(base-val),String(base),String(val*10)]},
+    {q:`六年级有学生${base}人，其中女生占${p}%，女生有多少人？`,a:String(val),d:[String(base-val),String(base),String(base+val)]},
+    {q:`六年级有男生${val}人，占全年级人数的${p}%，全年级有学生多少人？`,a:String(base),d:[String(Math.round(val*p/100)),String(base+val),String(val)]},
+    {q:`一本书共${base}页，小红已经看了全书的${p}%，她已经看了多少页？`,a:String(val),d:[String(base-val),String(base),String(val+base)]},
+    // —— 求百分率（出勤率 / 发芽率 / 合格率）——
+    {q:`六(1)班有${total}人，今天出勤${part}人，今天的出勤率是多少？`,a:p+'%',d:pctDis(p)},
+    {q:`一批种子共${total}粒，发芽的有${part}粒，这批种子的发芽率是多少？`,a:p+'%',d:pctDis(p)},
+    {q:`一批零件共${total}个，经检验合格的有${part}个，这批零件的合格率是多少？`,a:p+'%',d:pctDis(p)},
+    {q:`某班有女生${fw}人，男生${mw}人，男生人数是女生人数的百分之几？`,a:p+'%',d:pctDis(p)},
+    // —— 折扣 / 成数 ——
+    {q:`一件商品原价${price}元，现在打${z}折出售，现价是多少元？`,a:String(cur),d:[String(price-cur),String(price),String(cur*10)]},
+    {q:`一件商品原价${price}元，现在打${z}折出售，比原价便宜了多少元？`,a:String(price-cur),d:[String(cur),String(price),String(price+cur)]},
+    {q:`一件商品打${z}折后的售价是${cur}元，这件商品的原价是多少元？`,a:String(price),d:[String(Math.round(cur*z/10)),String(price-cur),String(cur)]},
+    {q:`今年粮食产量比去年增产${c}成，去年产量是${base10}吨，今年比去年增产了多少吨？`,a:String(base10*c/10),d:[String(base10),String(base10*c),String(base10*c/10+base10)]},
+    {q:`某工厂去年的产值是${base10}万元，今年比去年增产${c}成，今年的产值是多少万元？`,a:String(base10*(10+c)/10),d:[String(base10),String(base10*c/10),String(base10*2)]},
+    // —— 增加 / 减少百分之几 ——
+    {q:`一件商品原价${base20}元，现在涨价${qu}%，现价是多少元？`,a:String(up),d:[String(base20*qu/100),String(base20),String(down)]},
+    {q:`一件商品原价${base20}元，现在降价${qd}%，现价是多少元？`,a:String(down),d:[String(base20*qd/100),String(base20),String(up)]},
+    {q:`一件商品原价${base20}元，现价${down}元，现价比原价降低了百分之几？`,a:qd+'%',d:pctDis(qd)},
+    {q:`一件商品原价${base20}元，现价${up}元，现价比原价上涨了百分之几？`,a:qu+'%',d:pctDis(qu)},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
+}
+// 五年级「专项·分数应用题」专用：只含分数应用题（单位「1」已知/未知），
+// 不含任何百分数——百分数是六上第6单元内容，出现在五年级属超纲。
+function g5_app_fraction(){
   let n=ri(3,9), k=ri(2,5);
   let items=[
     {q:`总数的1/${k}是${n}，总数是多少？`,a:n*k,d:[n*(k-1),n+k,n*(k+1)]},
@@ -9217,6 +9345,10 @@ function g6_mul(){
     {t:'f',q:`饲养场有鸡${baseN}只，鸭的只数是鸡的${ca}/${bb}，鹅的只数是鸭的${cb}/${dv}。鹅有多少只？`,a:String(baseN*ca/bb*cb/dv)},
     {t:'f',q:`六(1)班有男生${Mnum}人，女生比男生多${fr}/${bp}，女生有多少人？`,a:String(Mnum*(bp+fr)/bp)},
     {t:'f',q:`六(1)班有男生${Mnum}人，女生比男生少${fr}/${bp}，女生有多少人？`,a:String(Mnum*(bp-fr)/bp)},
+    // —— 二次补题：约分（原 0 道，属「能约分的先约分」考点）——
+    {q:'计算分数乘法时，分子和分母能约分的，一般要？',a:'先约分，再计算',d:['先计算出结果再约分','不用约分','把分子分母都除以2']},
+    {q:`计算 ${ca}/${bb} × ${cb}/${dv} 时，可以先把哪两个数约分？`,a:'交叉或同侧能整除的分子与分母',d:['只能把两个分子约分','只能把两个分母约分','不能约分，直接相乘']},
+    {q:'分数乘法的计算结果一般要化成？',a:'最简分数',d:['带分数','小数','百分数']},
   ];
   let it=pick(items);
   return it.t==='f'?mf(it.q,it.a):mc(it.q,it.a,it.d);
@@ -9243,6 +9375,15 @@ function g6_div(){
   const divMix1=(()=>{const [mn,md]=fmd(rr,ss,1,civ2);const [an,ad]=fad(pp,qq,mn,md);return fracStr(an,ad);})();
   const divMix2=(()=>{const [mn,md]=fmd(pp,qq,ss,rr);const [an,ad]=fad(mn,md,t2,1);return fracStr(an,ad);})();
   let bp2=ri(2,4); let fr2=ri(1,bp2-1); while(gcd(fr2,bp2)>1)fr2=ri(1,bp2-1); let M2=bp2*ri(2,5);
+  // —— 二次补题参数：求单位「1」/ 和倍差倍 / 合作完成 ——
+  //  · rest：已修 fr2/bp2 后剩余的长度，取 (bp2−fr2) 的倍数保证全长为整数
+  let rest=(bp2-fr2)*ri(2,9);
+  //  · 和倍：两数和取 (bp2+fr2) 的倍数 → 乙 = 和×bp2÷(bp2+fr2) 为整数
+  let sumAB=(bp2+fr2)*ri(2,8);
+  //  · 和倍（整数倍）/ 差倍（整数倍）：和与差分别取 (k1+1)、(k1−1) 的倍数
+  let k1=ri(2,5), sum2=(k1+1)*ri(2,9), dif2=(k1-1)*ri(2,9);
+  //  · 合作完成：ta/tb 取 2~15 的不同整数，fracStr 会自动约分
+  let ta=ri(2,15), tb=ri(2,15); if(tb===ta) tb=(ta>=15)?(ta-1):(ta+1);
   let items=[
     {q:`${n}÷(1/${d})=？`,a:n*d,d:[Math.round(n/d*100)/100,n+d,n*2]},
     {q:`一个数的${cc}/${dd}是${cc*tt}，这个数是多少？`,a:dd*tt,d:[cc*tt,dd*tt+cc,(dd+1)*tt]},
@@ -9260,6 +9401,16 @@ function g6_div(){
     {q:`${pp}/${qq}÷${rr}/${ss}+${t2}=？`,a:divMix2,d:[fracStr(pp*ss,qq*rr),fracStr(pp,qq),fracStr(pp*ss+qq*rr,qq*rr)]},
     {q:`某工厂一月份用电${M2}千瓦时，二月份比一月份节约${fr2}/${bp2}，二月份用电多少千瓦时？`,a:String(M2*(bp2-fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2+fr2)/bp2)]},
     {q:`小红有故事书${M2}本，科技书比故事书多${fr2}/${bp2}，科技书有多少本？`,a:String(M2*(bp2+fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2-fr2)/bp2)]},
+    // —— 二次补题：求单位「1」 / 和倍差倍 / 合作完成（工程问题雏形）——
+    {q:`六(1)班有女生${M2}人，女生比男生少${fr2}/${bp2}，男生有多少人？`,a:String(M2*bp2/(bp2-fr2)),d:[String(M2*(bp2-fr2)/bp2),String(M2*fr2/bp2),String(M2+M2*fr2/bp2)]},
+    {q:`六(1)班有女生${M2}人，女生比男生多${fr2}/${bp2}，男生有多少人？`,a:String(M2*bp2/(bp2+fr2)),d:[String(M2*(bp2+fr2)/bp2),String(M2*fr2/bp2),String(M2-M2*fr2/bp2)]},
+    {q:`修一条路，已经修了全长的${fr2}/${bp2}，还剩${rest}千米没有修，这条路全长多少千米？`,a:String(rest*bp2/(bp2-fr2)),d:[String(rest*fr2/bp2),String(rest+bp2),String(rest*bp2/fr2)]},
+    {q:`甲乙两数的和是${sumAB}，甲数是乙数的${fr2}/${bp2}，乙数是多少？`,a:String(sumAB*bp2/(bp2+fr2)),d:[String(sumAB*fr2/(bp2+fr2)),String(sumAB*fr2/bp2),String(sumAB*bp2/fr2)]},
+    {q:`甲乙两数的和是${sum2}，甲数是乙数的${k1}倍，乙数是多少？`,a:String(sum2/(k1+1)),d:[String(sum2*k1/(k1+1)),String(sum2/(k1-1)),String(sum2*k1)]},
+    {q:`甲乙两数相差${dif2}，甲数是乙数的${k1}倍（甲>乙），乙数是多少？`,a:String(dif2/(k1-1)),d:[String(dif2/(k1+1)),String(dif2*k1/(k1-1)),String(dif2*(k1-1))]},
+    {q:`一项工程，甲队单独做${ta}天完成，乙队单独做${tb}天完成。两队合作，多少天可以完成？`,a:fracStr(ta*tb,ta+tb)+'天',d:[String(ta+tb)+'天',fracStr(ta+tb,2)+'天',fracStr(ta*tb,Math.abs(ta-tb)+1)+'天']},
+    {q:`打印一份稿件，甲单独打${ta}小时完成，乙单独打${tb}小时完成。两人一起打，多少小时完成？`,a:fracStr(ta*tb,ta+tb)+'小时',d:[String(ta+tb)+'小时',fracStr(ta*tb,ta)+'小时',fracStr(ta+tb,ta*tb)+'小时']},
+    {q:`一条公路，甲队单独修${ta}天完成，乙队单独修${tb}天完成。两队合修，每天完成这条公路的几分之几？`,a:fracStr(ta+tb,ta*tb),d:[fracStr(1,ta+tb),fracStr(ta*tb,ta+tb),fracStr(Math.abs(ta-tb)+1,ta*tb)]},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -9304,6 +9455,21 @@ function g6_ratio(){
 // 圆：v50 扩容——参数化周长/面积/直径/半径扩大倍数，去重键 ~60
 function g6_circle(){
   let r=ri(1,9), d=r*2, k=pick([2,3,4,5]);
+  // v86 补题用：圆环（外圆半径 R > 内圆半径 ri1）、方中圆（边长取偶数）、扇形圆心角
+  let ri1=ri(1,6), R=ri1+ri(1,4);
+  let sq=2*ri(2,8);
+  let deg=pick([60,90,120,180]);
+  // 二次补题用：组合图形（π 统一取 3.14）
+  //  · cl×cw 长方形里剪最大圆：cw 取偶数（4~10）为直径，cl = cw + 2~6 保证长 > 宽
+  //  · ca 正方形 + 外接半圆：ca 取偶数（4~12）
+  //  · 跑道：tl 为 40~90（10 的倍数）、tw 为 20~60（10 的倍数）
+  //  · rc2 圆内最大正方形：rc2 取 2~6，正方形面积 = 2r²
+  const PI=3.14;
+  const r2=(v)=>String(+(Math.round(v*100)/100));
+  let cw=pick([4,6,8,10]), cl=cw+ri(2,6), rc=cw/2, sc=PI*rc*rc, rectA=cl*cw;
+  let ca=pick([4,6,8,10,12]);
+  let tl=ri(4,9)*10, tw=ri(2,6)*10;
+  let rc2=ri(2,6);
   let circ=figCircle(r);
   let items=[
     {q:'圆的周长公式是？',a:'C=2πr',d:['C=πr²','C=πr/2','C=4r']},
@@ -9326,6 +9492,31 @@ function g6_circle(){
     {q:'圆心角是90°的扇形占整个圆的几分之几？',a:'1/4',d:['1/2','1/3','1/8']},
     {q:'半圆实际上是一个圆心角为多少度的扇形？',a:'180°',d:['90°','360°','270°']},
     {s:circ,q:`图中圆的半径r=${r}厘米，圆心角90°的扇形面积约是多少平方厘米？(π取3.14)`,a:fmt(+(3.14*r*r/4).toFixed(2)),d:[fmt(+(3.14*r*r/2).toFixed(2)),fmt(+(3.14*r).toFixed(2)),fmt(+(3.14*r*r*3/4).toFixed(2))]},
+    // —— v86 补题：原单元覆盖率 67%（缺 圆周率意义 / 圆环面积 / 组合图形 /
+    //     方中圆），题面容量仅 76（半径只取 1~9），练 2~3 场就重复。补 15 条模板。
+    {q:'圆周率表示什么？',a:'圆的周长与直径的比值',d:['圆的面积与半径的比值','圆的直径与半径的比值','圆周长的一半']},
+    {q:'圆周率π是一个什么数？',a:'无限不循环小数',d:['有限小数','循环小数','整数']},
+    {q:`一个圆的直径是${d}厘米，它的周长约是多少厘米？(π取3.14)`,a:fmt(+(3.14*d).toFixed(2)),d:[fmt(+(3.14*r).toFixed(2)),fmt(+(3.14*r*r).toFixed(2)),fmt(+(6.28*d).toFixed(2))]},
+    {q:`一个圆的直径是${d}厘米，它的面积约是多少平方厘米？(π取3.14)`,a:fmt(+(3.14*r*r).toFixed(2)),d:[fmt(+(3.14*d*d).toFixed(2)),fmt(+(3.14*d).toFixed(2)),fmt(+(2*3.14*r).toFixed(2))]},
+    {q:`一个圆的周长是${fmt(+(2*3.14*r).toFixed(2))}厘米，它的半径约是多少厘米？(π取3.14)`,a:`${r}厘米`,d:[`${d}厘米`,`${3*r}厘米`,`${Math.max(1,r-1)}厘米`]},
+    {q:`一个半圆的半径是${r}厘米，它的周长约是多少厘米？(π取3.14)`,a:fmt(+(3.14*r+2*r).toFixed(2)),d:[fmt(+(3.14*r).toFixed(2)),fmt(+(6.28*r).toFixed(2)),fmt(+(3.14*r*r).toFixed(2))]},
+    {q:`一个半圆的半径是${r}厘米，它的面积约是多少平方厘米？(π取3.14)`,a:fmt(+(3.14*r*r/2).toFixed(2)),d:[fmt(+(3.14*r*r).toFixed(2)),fmt(+(3.14*r*r/4).toFixed(2)),fmt(+(3.14*r).toFixed(2))]},
+    {q:`一个圆环，外圆半径${R}厘米、内圆半径${ri1}厘米，它的面积约是多少平方厘米？(π取3.14)`,a:fmt(+(3.14*(R*R-ri1*ri1)).toFixed(2)),d:[fmt(+(3.14*R*R).toFixed(2)),fmt(+(3.14*(R-ri1)*(R-ri1)).toFixed(2)),fmt(+(3.14*ri1*ri1).toFixed(2))]},
+    {q:`在一个边长${sq}厘米的正方形里画一个最大的圆，这个圆的半径是多少厘米？`,a:`${sq/2}厘米`,d:[`${sq}厘米`,`${sq/4}厘米`,`${sq*2}厘米`]},
+    {q:`在一个边长${sq}厘米的正方形里画一个最大的圆，圆的面积约是多少平方厘米？(π取3.14)`,a:fmt(+(3.14*(sq/2)*(sq/2)).toFixed(2)),d:[fmt(+(3.14*sq*sq).toFixed(2)),fmt(+(sq*sq).toFixed(2)),fmt(+(3.14*sq).toFixed(2))]},
+    {q:`在一个边长${sq}厘米的正方形里画一个最大的圆，正方形与圆之间部分的面积约是多少平方厘米？(π取3.14)`,a:fmt(+(sq*sq-3.14*(sq/2)*(sq/2)).toFixed(2)),d:[fmt(+(3.14*(sq/2)*(sq/2)).toFixed(2)),fmt(+(sq*sq).toFixed(2)),fmt(+(sq*sq/2).toFixed(2))]},
+    {q:`一个扇形的圆心角是${deg}°，它占整个圆的几分之几？`,a:fracStr(deg,360),d:[fracStr(deg,180),fracStr(360,deg),'1/2']},
+    {q:`一个扇形所在圆的面积是${fmt(+(3.14*r*r).toFixed(2))}平方厘米，圆心角是${deg}°，这个扇形的面积约是多少平方厘米？`,a:fmt(+(3.14*r*r*deg/360).toFixed(2)),d:[fmt(+(3.14*r*r/2).toFixed(2)),fmt(+(3.14*r*r/4).toFixed(2)),fmt(+(3.14*r*r*2).toFixed(2))]},
+    {q:`一个圆的半径是${r}厘米，它的周长与面积的数值相比？`,a:'无法直接比较（单位不同）',d:['周长更大','面积更大','一样大']},
+    {q:'画圆时，圆规两脚之间的距离是圆的什么？',a:'半径',d:['直径','圆心','周长']},
+    {q:`车轮滚动一周前进的路程，等于车轮的什么？`,a:'周长',d:['面积','半径','直径的一半']},
+    // —— 二次补题：组合图形的周长与面积 / 方中圆·圆中方 ——
+    // 以下答案统一 π=3.14，且参数取偶数，保证结果最多两位小数（孩子可笔算）
+    {q:`在一个长${cl}厘米、宽${cw}厘米的长方形里剪去一个最大的圆，剩下部分的面积约是多少平方厘米？(π取3.14)`,a:r2(rectA-sc)+'平方厘米',d:[r2(rectA+sc)+'平方厘米',r2(rectA-cw)+'平方厘米',r2(sc)+'平方厘米']},
+    {q:`一个组合图形由一个边长${ca}厘米的正方形和一个以正方形一边为直径的半圆组成（半圆在正方形外侧），它的周长约是多少厘米？(π取3.14)`,a:r2(3*ca+PI*(ca/2))+'厘米',d:[r2(4*ca+PI*(ca/2))+'厘米',r2(3*ca+PI*ca)+'厘米',r2(2*ca+PI*(ca/2))+'厘米']},
+    {q:`一个组合图形由一个边长${ca}厘米的正方形和一个以正方形一边为直径的半圆组成（半圆在正方形外侧），它的面积约是多少平方厘米？(π取3.14)`,a:r2(ca*ca+PI*(ca/2)*(ca/2)/2)+'平方厘米',d:[r2(ca*ca+PI*(ca/2)*(ca/2))+'平方厘米',r2(ca*ca-PI*(ca/2)*(ca/2)/2)+'平方厘米',r2(ca*ca)+'平方厘米']},
+    {q:`一个运动场的跑道由一个长方形（长${tl}米、宽${tw}米）和两个半圆组成，半圆的直径正好是长方形的宽。这个组合图形的一周长约多少米？(π取3.14)`,a:r2(2*tl+PI*tw)+'米',d:[r2(2*tl+2*tw)+'米',r2(2*tl+PI*tw*2)+'米',r2(tl+PI*tw)+'米']},
+    {q:`在一个半径${rc2}厘米的圆里画一个最大的正方形，圆与正方形之间部分的面积约是多少平方厘米？(π取3.14)`,a:r2(PI*rc2*rc2-2*rc2*rc2)+'平方厘米',d:[r2(PI*rc2*rc2+2*rc2*rc2)+'平方厘米',r2(PI*rc2*rc2)+'平方厘米',r2(2*rc2*rc2)+'平方厘米']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9336,6 +9527,17 @@ function g6_percent(){
   const dec=(pick([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18])/100);
   const price=pick([50,80,100,120,150,200,250,300]);
   const zk=pick([5,6,7,8,9]);
+  // v86 补题用：百分数读法对照表、成数对照表、求「一个数的百分之几」的整除友好基数
+  const READ=[[10,'百分之十'],[15,'百分之十五'],[20,'百分之二十'],[25,'百分之二十五'],[30,'百分之三十'],
+              [35,'百分之三十五'],[40,'百分之四十'],[45,'百分之四十五'],[50,'百分之五十'],[60,'百分之六十'],
+              [65,'百分之六十五'],[75,'百分之七十五'],[80,'百分之八十'],[85,'百分之八十五'],
+              [90,'百分之九十'],[95,'百分之九十五'],[100,'百分之一百'],[120,'百分之一百二十']];
+  const CHENG=[['一成',10],['二成',20],['三成',30],['四成',40],['五成',50],['六成',60],
+               ['七成',70],['八成',80],['九成',90],['一成五',15],['二成五',25],['三成五',35]];
+  const [rp,rw]=pick(READ);
+  const [cnName,cnVal]=pick(CHENG);
+  const base=20*ri(1,10);          // 20 的倍数；pcts 全为 5 的倍数 → base*p/100 必为整数
+  const val=base*p/100;
   let items=[
     {q:`${p}%等于几分之几（约成最简分数）？`,a:fracStr(p,100),d:[`${p}/100`,fracStr(p*2,100),fracStr(p,200)]},
     {q:`把${dec}化成百分数是？`,a:`${Math.round(dec*100)}%`,d:[`${dec}%`,`${Math.round(dec*10)}%`,`${Math.round(dec*1000)}%`]},
@@ -9347,6 +9549,17 @@ function g6_percent(){
     {q:'百分数表示一个数是另一个数的？',a:'百分之几',d:['几分之几','多少倍（只能是整数）','相差多少']},
     {q:`一件商品原价${price}元，打${zk}折出售，现价是多少元？`,a:`${price*zk/10}元`,d:[`${price*(10-zk)/10}元`,`${price-zk}元`,`${price*zk}元`]},
     {q:`一件商品打${zk}折出售，现价是原价的百分之几？`,a:`${zk*10}%`,d:[`${zk}%`,`${100-zk*10}%`,`${zk*100}%`]},
+    // —— v86 补题：原单元覆盖率 60%，「读法与写法 / 求一个数的百分之几 /
+    //     已知一个数的百分之几求这个数 / 成数」4 项各 0 道，且题面容量仅 98（连场易重复）。
+    {q:`${rp}%读作什么？`,a:rw,d:[`一百分之${rp}`,`百分之${Math.round(rp/10)}`,`千分之${rp}`]},
+    {q:`「${rw}」写作什么？`,a:`${rp}%`,d:[`${rp/10}%`,`${rp*10}%`,`${rp}`]},
+    {q:`「${cnName}」表示百分之几？`,a:`${cnVal}%`,d:[`${cnVal/10}%`,`${cnVal*10}%`,`${100-cnVal}%`]},
+    {q:`今年粮食产量比去年增产${cnName}，今年的产量是去年的百分之几？`,a:`${100+cnVal}%`,d:[`${cnVal}%`,`${100-cnVal}%`,`${100+cnVal*10}%`]},
+    {q:`六年级有学生${base}人，参加兴趣小组的人数占${p}%，参加兴趣小组的有多少人？`,a:String(val),d:[String(base-val),String(base),String(val*10)]},
+    {q:`一堆煤重${base}吨，用去了${p}%，用去了多少吨？`,a:String(val),d:[String(base-val),String(base),String(base+val)]},
+    {q:`一个数的${p}%是${val}，这个数是多少？`,a:String(base),d:[String(Math.round(val*p/100)),String(base+val),String(val)]},
+    {q:`一堆煤用去了${val}吨，正好是这堆煤的${p}%，这堆煤原有多少吨？`,a:String(base),d:[String(base-val),String(Math.round(val*p/100)),String(val)]},
+    {q:`一本书共${base}页，已经读了全书的${p}%，还剩多少页没读？`,a:String(base-val),d:[String(val),String(base),String(base+val)]},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
@@ -9388,6 +9601,9 @@ function g6_negative(){
   let a=ri(2,9), k=ri(3,9), n=ri(1,4);
   // 数轴移动题：移动量放在题面里（A 点数值只在图中）→ 题面随参数变化，避免视觉重复
   let mv=ri(2,5); if(mv===n) mv++;
+  // v86 补题用：负数的读法（中文数字）、收支/方向的相反意义的量、温差
+  const CN=['零','一','二','三','四','五','六','七','八','九'];
+  let b2=ri(2,9), inc=ri(2,9)*100, out=ri(1,9)*100;
   let items=[
     {q:'比0小5的数是？',a:'-5',d:['5','0','-4']},
     {q:'海拔-100米表示？',a:'低于海平面100米',d:['高于海平面100米','海平面上100米','平地']},
@@ -9399,6 +9615,24 @@ function g6_negative(){
     {s:figNumLine(n),q:'上图数轴上，A点在原点的哪一边？',a:'左边',d:['右边','原点上','无法确定']},
     {s:figNumLine(n),q:`上图数轴上，A点向右移动${mv}个单位长度后，表示的数是？`,a:String(mv-n),d:[String(-mv-n),String(n-mv),String(mv+n)]},
     {s:figNumLine(n),q:`上图数轴上，A点向左移动${mv}个单位长度后，表示的数是？`,a:String(-n-mv),d:[String(mv-n),String(n-mv),String(n+mv)]},
+    // —— v86 补题：原单元覆盖率 63%（缺 读法与写法 / 0 既不是正数也不是负数 /
+    //     大小比较），题面容量仅 103。补 12 条模板，容量提升到数百。
+    {q:`-${b2}读作什么？`,a:`负${CN[b2]}`,d:[`负${CN[Math.max(1,b2-1)]}`,`正${CN[b2]}`,`${CN[b2]}`]},
+    {q:`「正${CN[b2]}」写作什么？`,a:`+${b2}`,d:[`${b2}`,`-${b2}`,`+${b2+1}`]},
+    {q:'关于0，下面说法正确的是？',a:'0既不是正数，也不是负数',d:['0是最小的正数','0是负数','0是最小的负数']},
+    {q:`下列各数中，最大的是？`,a:String(k),d:[String(-k),'0',String(-k-1)]},
+    {q:`下列各数中，最小的是？`,a:String(-k-1),d:[String(k),'0',String(-k)]},
+    {q:`-3和-7相比，哪个数更大？`,a:'-3',d:['-7','一样大','无法比较']},
+    {q:`-1、0、${k}、-5 这四个数按从大到小排列，正确的是？`,a:`${k} > 0 > -1 > -5`,d:[`-5 > -1 > 0 > ${k}`,`0 > ${k} > -1 > -5`,`${k} > -1 > -5 > 0`]},
+    {q:`如果收入${inc}元记作+${inc}元，那么支出${out}元记作？`,a:`-${out}元`,d:[`+${out}元`,`${out}元`,`+${inc}元`]},
+    {q:`如果向东走${a*10}米记作+${a*10}米，那么向西走${k*10}米记作？`,a:`-${k*10}米`,d:[`+${k*10}米`,`${k*10}米`,`-${a*10}米`]},
+    {q:`比-${b2}大${b2+k}的数是多少？`,a:String(k),d:[String(-k),String(b2+k),String(-(b2+k))]},
+    {q:`-${a}+${a}=？`,a:'0',d:[String(a),String(-a),String(2*a)]},
+    {q:`某天最低气温是-${a}℃，最高气温是${k}℃，这天的温差是多少℃？`,a:`${a+k}℃`,d:[`${k-a}℃`,`${a}℃`,`${k}℃`]},
+    // —— 二次补题：负数的意义 / 0 的特殊性（原只在选项里出现，属弱覆盖）——
+    {q:'负数是用来表示什么的数？',a:'与正数意义相反的量',d:['比0大的量','没有意义的量','整数以外的量']},
+    {q:'0是正数还是负数？',a:'0既不是正数，也不是负数',d:['0是正数','0是负数','0既是正数又是负数']},
+    {q:'下面各数中，是负数的是？',a:`-${b2}`,d:[String(b2),'0',String(b2+k)]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9411,6 +9645,19 @@ function g6_percent2(){
   const ben=1000*ri(1,9);
   const years=ri(1,3);
   const income=1000*ri(2,20);
+  // —— 二次补题参数：最优购物方案 ——
+  //  · 满减：price 是 100 的倍数（price 取自上方常量表，均为 50 的倍数，此处取偶数档）
+  let mj=pick([10,20,30]);
+  let priceA=price*zk/10;                       // 甲店：打 zk 折
+  let priceB=price-Math.floor(price/100)*mj;    // 乙店：每满100减 mj
+  let planA=(priceA<priceB)?'甲店（打折）':'乙店（满减）';
+  let planB=(priceA<priceB)?'乙店（满减）':'甲店（打折）';
+  if(priceA===priceB){ planA='两家一样划算'; planB='甲店（打折）'; }
+  let milk=pick([2,3,4,5]);
+  let costA=milk*4, costB=+(milk*5*0.8).toFixed(2);   // 买4送1 = 付4盒钱拿5盒；八折 = 5盒×0.8
+  let shopAB=(costA<costB)?'甲店（买4送1）':'乙店（八折）';
+  let shopBB=(costA<costB)?'乙店（八折）':'甲店（买4送1）';
+  if(costA===costB){ shopAB='两家一样划算'; shopBB='乙店（八折）'; }
   let items=[
     {q:'25% = 几分之几（约分）？',a:'1/4',d:['25/100','1/25','1/5']},
     {q:'75% = 几分之几（约分）？',a:'3/4',d:['75/100','3/10','1/4']},
@@ -9427,22 +9674,86 @@ function g6_percent2(){
     {q:'利息的计算公式是？',a:'利息=本金×利率×存期',d:['利息=本金×利率','利息=本金+利率','利息=本金÷存期']},
     {q:'打"八折"表示现价是原价的？',a:'80%',d:['8%','20%','108%']},
     {q:'"二成五"表示百分之几？',a:'25%',d:['2.5%','250%','52%']},
+    // —— 二次补题：最优购物方案（原 0 道，属六下「解决问题」重点）——
+    {q:'比较不同促销方式时，正确的做法是？',a:'都算出实际付多少钱（或每份多少钱），再比较',d:['看哪个打折的字眼更响亮','直接选广告打得多的那家','选离得最近的那家']},
+    {q:`一件商品原价${price}元。甲店打${zk}折出售，乙店每满100元减${mj}元。去哪家店买更划算？`,a:planA,d:[planB,'两家一样','无法比较']},
+    {q:`一种牛奶每盒${milk}元。甲店买4送1，乙店一律八折。买5盒去哪家店更划算？`,a:shopAB,d:[shopBB,'两家一样','无法比较']},
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g6_cylinder(){
   // 计算题：r/h 放在题面里 → 题面随参数变化（配图仅示意立体形状，不标数值不泄题）
-  // r 取 3-5：r=2 时 πr²h 与 2πrh 相等、r=3 时圆锥体积会撞「πrh」干扰项
-  let r=pick([3,4,5]), h=ri(4,9), hc=3*ri(2,3);
+  // r 取 3-6：r=2 时 πr²h 与 2πrh 数值相等，会撞干扰项
+  // v86 补题：原单元仅 8 条模板、题面容量 47（全年级最低，连场练习 56% 重复），
+  //   且圆柱表面积 / 容积 / 等底等高圆柱圆锥关系 / 排水法 4 个知识点各 0 道。
+  //   现补到 28 条模板，覆盖人教版六下第三单元全部知识点，容量提升到数百。
+  let r=pick([3,4,5,6]), h=ri(3,12), hc=3*ri(2,4);
+  let B,S,L,V,Vc,Vc3,T,T1;
+  const calc=()=>{
+    B=+(3.14*r*r).toFixed(2);        // 一个底面积
+    S=+(2*B).toFixed(2);             // 两个底面积
+    L=+(2*3.14*r*h).toFixed(2);      // 侧面积
+    V=+(B*h).toFixed(2);             // 圆柱体积
+    Vc=+(B*hc/3).toFixed(2);         // 圆锥体积
+    Vc3=+(B*hc).toFixed(2);          // 与圆锥等底等高的圆柱体积
+    T=+(L+S).toFixed(2);             // 表面积
+    T1=+(L+B).toFixed(2);            // 无盖（只有一个底面）
+  };
+  calc();
+  // 选项防撞：体积与侧面积/表面积/底面积数值相等时换参数（否则出现"两个正确答案"）
+  let g=0;
+  while(g<30 && (V===T || V===T1 || V===L || V===S || V===B || B===L || Vc===L || Vc===S)){
+    r=pick([3,4,5,6]); h=ri(3,12); hc=3*ri(2,4); calc(); g++;
+  }
+  // 削成最大圆锥：体积取 3 的倍数，保证 ÷3 后仍是整数
+  const kk=ri(4,20), Vs=3*kk;
+  // 反求高：底面积取整除友好的值；Bk 须与所有高值选项区分
+  let Bk=pick([10,12,15,20,25]), hv=ri(3,10), hk=3*ri(2,4);
+  let g2=0;
+  while(g2<30 && (Bk===hv || Bk===hv*3 || Bk===hv+3 || Bk===hk || Bk===hk/3 || Bk===hk+3)){
+    Bk=pick([10,12,15,20,25]); hv=ri(3,10); hk=3*ri(2,4); g2++;
+  }
+  const Vv=Bk*hv, Vk=Bk*hk/3;
+  // 排水法（up 取 2/4/5/6，避开 up=3 —— 此时「除以 3」的错误项会与正确答案撞值）
+  const up=pick([2,4,5,6]);
+  const Vup=+(B*up).toFixed(2);
+  const aw=ri(6,12), bw=ri(4,9), upw=ri(2,5);
+  const Vw=aw*bw*upw;
   let items=[
     {q:'圆柱有几个底面？',a:'2个',d:['1个','3个','0个']},
-    {q:'圆柱的侧面沿高展开后是什么形状？',a:'长方形',d:['三角形','梯形','扇形']},
     {q:'圆锥有几个底面？',a:'1个',d:['2个','0个','3个']},
+    {q:'圆柱的高有多少条？',a:'无数条',d:['1条','2条','3条']},
+    {q:'圆锥的高有多少条？',a:'1条',d:['无数条','2条','3条']},
+    {q:'从圆锥的顶点到底面圆心的距离，是圆锥的什么？',a:'高',d:['底面半径','母线','直径']},
+    {q:'圆柱的两个底面是什么关系？',a:'完全相同',d:['一个大一个小','一个是圆一个是椭圆','无法确定']},
+    {q:'圆锥的侧面展开后是什么形状？',a:'扇形',d:['长方形','三角形','圆形']},
+    {q:'圆柱的侧面沿高展开后是什么形状？',a:'长方形',d:['三角形','梯形','扇形']},
+    {q:'圆柱的侧面沿高剪开得到一个长方形，长方形的长等于圆柱的什么？',a:'底面周长',d:['高','底面直径','底面半径']},
+    {q:'圆柱的侧面沿高剪开得到一个长方形，长方形的宽等于圆柱的什么？',a:'高',d:['底面周长','底面直径','底面半径']},
+    {q:'一个圆柱的侧面沿高展开后是一个正方形，说明这个圆柱的什么相等？',a:'底面周长和高',d:['底面半径和高','底面直径和高','底面积和侧面积']},
+    {q:'把一张长方形的纸卷成一个圆柱的侧面，这张纸的长相当于圆柱的什么？',a:'底面周长',d:['高','底面面积','底面半径']},
     {s:figCylinder(),q:'上图立体图形是什么？',a:'圆柱',d:['圆锥','长方体','球']},
     {s:figCone(),q:'上图立体图形是什么？',a:'圆锥',d:['圆柱','四棱锥','球']},
-    {s:figCylinder(),q:`一个圆柱（如上图）底面半径${r}厘米、高${h}厘米，它的侧面积是多少平方厘米？(π取3.14)`,a:fmt(+(2*3.14*r*h).toFixed(2)),d:[fmt(+(3.14*r*h).toFixed(2)),fmt(+(3.14*r*r).toFixed(2)),fmt(+(2*3.14*r).toFixed(2))]},
-    {s:figCylinder(),q:`一个圆柱（如上图）底面半径${r}厘米、高${h}厘米，它的体积是多少立方厘米？(π取3.14)`,a:fmt(+(3.14*r*r*h).toFixed(2)),d:[fmt(+(2*3.14*r*h).toFixed(2)),fmt(+(3.14*r*h).toFixed(2)),fmt(+(3.14*r*r).toFixed(2))]},
-    {s:figCone(),q:`一个圆锥（如上图）底面半径${r}厘米、高${hc}厘米，它的体积是多少立方厘米？(π取3.14)`,a:fmt(+(3.14*r*r*hc/3).toFixed(2)),d:[fmt(+(3.14*r*r*hc).toFixed(2)),fmt(+(3.14*r*r).toFixed(2)),fmt(+(2*3.14*r*hc).toFixed(2))]},
+    // —— 侧面积 / 表面积 / 体积 / 容积（π取3.14）——
+    {s:figCylinder(),q:`一个圆柱（如上图）底面半径${r}厘米、高${h}厘米，它的侧面积是多少平方厘米？(π取3.14)`,a:fmt(L),d:[fmt(+(3.14*r*h).toFixed(2)),fmt(B),fmt(+(2*3.14*r).toFixed(2))]},
+    {s:figCylinder(),q:`一个圆柱（如上图）底面半径${r}厘米、高${h}厘米，它的表面积是多少平方厘米？(π取3.14)`,a:fmt(T),d:[fmt(L),fmt(T1),fmt(V)]},
+    {q:`一个无盖的圆柱形水桶，底面半径${r}分米、高${h}分米，做这个水桶至少需要多少平方分米的铁皮？(π取3.14)`,a:fmt(T1),d:[fmt(T),fmt(L),fmt(B)]},
+    {s:figCylinder(),q:`一个圆柱（如上图）底面半径${r}厘米、高${h}厘米，它的体积是多少立方厘米？(π取3.14)`,a:fmt(V),d:[fmt(L),fmt(+(3.14*r*h).toFixed(2)),fmt(B)]},
+    {s:figCone(),q:`一个圆锥（如上图）底面半径${r}厘米、高${hc}厘米，它的体积是多少立方厘米？(π取3.14)`,a:fmt(Vc),d:[fmt(Vc3),fmt(B),fmt(L)]},
+    {q:`一个圆柱形水桶，从里面量底面半径${r}分米、高${h}分米，这个水桶最多能装水多少升？(π取3.14)`,a:fmt(V),d:[fmt(L),fmt(B),fmt(+(V*2).toFixed(2))]},
+    {q:`一个圆柱形水池，底面半径${r}米、深${h}米，这个水池最多能装水多少立方米？(π取3.14)`,a:fmt(V),d:[fmt(B),fmt(L),fmt(+(V/2).toFixed(2))]},
+    // —— 等底等高的圆柱与圆锥（六下核心考点，原题库 0 道）——
+    {q:`一个圆柱和一个圆锥等底等高，圆柱的体积是${fmt(Vc3)}立方厘米，圆锥的体积是多少立方厘米？`,a:fmt(Vc),d:[fmt(Vc3),fmt(+(Vc3*3).toFixed(2)),fmt(+(Vc3/2).toFixed(2))]},
+    {q:`一个圆锥和一个圆柱等底等高，圆锥的体积是${fmt(Vc)}立方厘米，圆柱的体积是多少立方厘米？`,a:fmt(Vc3),d:[fmt(Vc),fmt(+(Vc*2).toFixed(2)),fmt(+(Vc/3).toFixed(2))]},
+    {q:'等底等高的圆柱和圆锥，圆柱的体积是圆锥体积的几倍？',a:'3倍',d:['2倍','6倍','1/3倍']},
+    {q:`一个圆柱的体积是${Vs}立方厘米，把它削成一个最大的圆锥，这个圆锥的体积是多少立方厘米？`,a:String(kk),d:[String(Vs),String(Vs*3),String(kk*2)]},
+    {q:`一个圆柱的体积是${Vs}立方厘米，把它削成一个最大的圆锥，削去部分的体积是多少立方厘米？`,a:String(kk*2),d:[String(kk),String(Vs),String(Vs*3)]},
+    // —— 反求高（体积公式逆用）——
+    {q:`一个圆柱的体积是${Vv}立方厘米，底面积是${Bk}平方厘米，它的高是多少厘米？`,a:String(hv),d:[String(hv*3),String(hv+3),String(Bk)]},
+    {q:`一个圆锥的体积是${Vk}立方厘米，底面积是${Bk}平方厘米，它的高是多少厘米？`,a:String(hk),d:[String(hk/3),String(hk+3),String(Bk)]},
+    // —— 不规则物体的体积（排水法）——
+    {q:`一个底面半径为${r}厘米的圆柱形容器里装有一些水，把一个铁块完全浸入水中，水面上升了${up}厘米。这个铁块的体积是多少立方厘米？(π取3.14)`,a:fmt(Vup),d:[fmt(+(2*3.14*r*up).toFixed(2)),fmt(B),fmt(+(Vup/3).toFixed(2))]},
+    {q:`一个长方体容器，从里面量长${aw}厘米、宽${bw}厘米，往里面放入一块石头并完全浸没，水面上升了${upw}厘米。这块石头的体积是多少立方厘米？`,a:String(Vw),d:[String(aw*bw),String(aw+bw+upw),String(Vw*2)]},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9454,6 +9765,13 @@ function g6_proportion(){
   // —— 缺口补题参数（人教版六下·比例，严格按课本）——
   let t1=ri(2,4), spd=ri(50,90); let d1=spd*t1; let t2=ri(2,5);
   let rect=`<rect x="34" y="32" width="${a*7}" height="${b*7}" fill="rgba(180,148,90,0.16)" stroke="${FIG_STROKE}" stroke-width="1.8"/>`+figLabel(34+a*7/2,26,a+'厘米')+figLabel(24,32+b*7/2,b+'厘米');
+  // 真比例的四个项：p1:p2 = p3:p4（用于内项/外项辨识题）
+  let p1=ri(2,5), p2=ri(2,6); if(p2===p1) p2=(p1===6)?5:(p1+1);
+  let pk=ri(2,4), p3=p1*pk, p4=p2*pk;
+  // 用反比例解决问题：铺地砖（总面积一定，每块面积 × 块数 = 定值）
+  let s1=ri(2,4), s2=ri(2,4); if(s2===s1) s2=(s1===4)?3:(s1+1);
+  let kf=ri(3,9), n1=s2*s2*kf, n2=s1*s1*kf;
+  let fdis=dis3(n2+'块', Math.round(n1*s1/s2)+'块', (n2+kf)+'块', Math.max(2,n2-kf)+'块');
   let items=[
     {q:'若a:b=c:d，则ad=?',a:'bc',d:['ac','bd','ab']},
     {q:'比例的基本性质是？',a:'两外项之积=两内项之积',d:['两外项之和=两内项之和','两外项之差=两内项之差','两外项之积=两内项之差']},
@@ -9471,6 +9789,19 @@ function g6_proportion(){
     {q:'一幅图的比例尺是1:500，图上1厘米表示实际多少？',a:'5米',d:['500米','50米','5厘米']},
     {q:'实际距离300米，画在比例尺1:6000的图上应画多少厘米？',a:'5厘米',d:['50厘米','30厘米','5米']},
     {q:`一辆汽车${t1}小时行驶${d1}千米，照这样的速度，${t2}小时行驶多少千米？`,a:String(d1/t1*t2),d:[String(d1+t1*t2),String(d1*t2/t1+1),String(d1-t1)]},
+    // —— 二次补题：比例的意义 / 内项外项 / 正反比例判断 / 用反比例解决问题 ——
+    {q:'表示两个比相等的式子叫做？',a:'比例',d:['比','比值','除法算式']},
+    {q:'比例的意义是？',a:'表示两个比相等的式子',d:['表示两个数相等的式子','表示两个乘法算式','表示两个加法算式']},
+    {q:`在比例 ${p1}:${p2} = ${p3}:${p4} 中，${p2} 和 ${p3} 是比例的内项还是外项？`,a:'内项',d:['外项','既是内项又是外项','都不是']},
+    {q:`在比例 ${p1}:${p2} = ${p3}:${p4} 中，${p1} 和 ${p4} 是比例的内项还是外项？`,a:'外项',d:['内项','既是内项又是外项','都不是']},
+    {q:'比例中，两端的两项叫做外项，中间的两项叫做？',a:'内项',d:['外项','前项','后项']},
+    {q:'判断两个量是否成正比例，关键看它们的？',a:'比值（商）一定',d:['乘积一定','和一定','差一定']},
+    {q:'下面各组中，成正比例关系的是？',a:'单价一定，总价和数量',d:['总价一定，单价和数量','周长一定的长方形，长和宽','人的身高和年龄']},
+    {q:'正比例关系用字母表示是？',a:'y ÷ x = k（一定）',d:['x × y = k（一定）','x + y = k（一定）','x − y = k（一定）']},
+    {q:'判断两个量是否成反比例，关键看它们的？',a:'乘积一定',d:['比值（商）一定','和一定','差一定']},
+    {q:'下面各组中，成反比例关系的是？',a:'路程一定，速度和时间',d:['速度一定，路程和时间','圆的半径和它的周长','正方形的边长和周长']},
+    {q:'反比例关系用字母表示是？',a:'x × y = k（一定）',d:['y ÷ x = k（一定）','x + y = k（一定）','x ÷ y = k（一定）']},
+    {q:`用比例解（成反比例）：一间会议室用边长${s1}分米的方砖铺地，需要${n1}块；改用边长${s2}分米的方砖，需要多少块？`,a:String(n2)+'块',d:fdis},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9493,6 +9824,31 @@ function g6_stats(){
   const median=modeArr[2];
   // 扇形统计图：真实数据 + 百分比标签 + 图例（可据图作答）
   let pie=figPie([['故事书',40,'#B4945A'],['科技书',35,'#3E4A63'],['漫画书',25,'#8FA3C4']]);
+  // 二次补题：条形统计图 / 折线统计图
+  //  · bd：5 个互不相同的气温值（20~34），保证最高/最低唯一
+  //  · bd2：均值组，总和固定为 5×bmean，平均气温为整数
+  const BWK=['一','二','三','四','五'];
+  let bd=[]; while(bd.length<5){ let v=ri(20,34); if(bd.indexOf(v)<0) bd.push(v); }
+  let bdmax=Math.max.apply(null,bd), bdmin=Math.min.apply(null,bd);
+  let bi=bd.indexOf(bdmax), bj=bd.indexOf(bdmin), bdsum=bd.reduce((x,y)=>x+y,0);
+  let bmean=ri(22,30); let bd2=[bmean,bmean,bmean,bmean,bmean];
+  for(let rr=0;rr<6;rr++){ const i=ri(0,4), j=ri(0,4);
+    if(i!==j){ const t=ri(1,4); if(bd2[i]-t>=15){ bd2[i]-=t; bd2[j]+=t; } } }
+  // 条形图：柱高按最大值归一化，柱顶标数值、柱下标星期（答案可从图中读出）
+  const barSvg=(vals)=>{
+    const x0=26,y0=84,W=88,H=54, mx=Math.max.apply(null,vals)*1.18;
+    const bw=W/vals.length*0.58, gap=W/vals.length;
+    let s=`<line x1="${x0}" y1="${y0}" x2="${x0+W+6}" y2="${y0}" stroke="${FIG_STROKE}" stroke-width="1.6"/>`;
+    s+=`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y0-H-8}" stroke="${FIG_STROKE}" stroke-width="1.6"/>`;
+    vals.forEach((v,i)=>{
+      const h=v/mx*H, x=x0+i*gap+(gap-bw)/2, y=y0-h;
+      s+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="rgba(180,148,90,0.35)" stroke="${FIG_STROKE}" stroke-width="1.2"/>`;
+      s+=figLabel((x+bw/2).toFixed(1),(y-3).toFixed(1),String(v));
+      s+=`<text x="${(x+bw/2).toFixed(1)}" y="${y0+10}" text-anchor="middle" font-size="7" fill="#8A93A6">${BWK[i]}</text>`;
+    });
+    return s;
+  };
+  let bar=barSvg(bd), barAvg=barSvg(bd2), line=figLineChart(bd,'℃');
   let items=[
     {q:'平均数反映数据的？',a:'总体一般水平（集中趋势）',d:['最大值','最小值','离散程度']},
     {q:'要表示一组数据的多数情况，一般用？',a:'众数',d:['平均数','最大数','最小数']},
@@ -9507,6 +9863,19 @@ function g6_stats(){
     {s:pie,q:'上图扇形统计图中，科技书比漫画书多占全部图书的百分之几？',a:'10%',d:['5%','15%','20%']},
     {s:pie,q:'上图扇形统计图中，故事书和漫画书一共占全部图书的百分之几？',a:'65%',d:['40%','50%','75%']},
     {s:pie,q:'上图扇形统计图中，圆心角最大的扇形是哪类图书？',a:'故事书',d:['科技书','漫画书','一样大']},
+    // —— 二次补题：条形统计图 / 折线统计图（原 0 道，毕业考必考）——
+    {q:'条形统计图是用什么来表示数量多少的？',a:'直条的长短',d:['折线的起伏','扇形的大小','面积的大小']},
+    {q:'折线统计图是用什么来表示数量增减变化的？',a:'折线的上升与下降',d:['直条的长短','扇形的大小','颜色的深浅']},
+    {q:'要清楚地看出数量的多少，便于比较，应选用？',a:'条形统计图',d:['折线统计图','扇形统计图','统计表']},
+    {q:'要清楚地看出数量的增减变化趋势，应选用？',a:'折线统计图',d:['条形统计图','扇形统计图','统计表']},
+    {q:'要看出各部分数量占总数的百分比，应选用？',a:'扇形统计图',d:['条形统计图','折线统计图','统计表']},
+    {s:bar,q:'上图是五天内最高气温的条形统计图，气温最高的是？',a:'星期'+BWK[bi],d:['星期'+BWK[(bi+1)%5],'星期'+BWK[(bi+2)%5],'星期'+BWK[bj]]},
+    {s:bar,q:`上图条形统计图中，最高气温比最低气温高多少℃？`,a:String(bdmax-bdmin)+'℃',d:[String(bdmax)+'℃',String(bdmin)+'℃',String(bdmax-bdmin+2)+'℃']},
+    {s:bar,q:'上图条形统计图中，这五天一共的最高气温合计是多少℃？',a:String(bdsum)+'℃',d:[String(bdsum+5)+'℃',String(bdsum-5)+'℃',String(bdmax*5)+'℃']},
+    {s:barAvg,q:'上图条形统计图中，这五天的平均最高气温是多少℃？',a:String(bmean)+'℃',d:[String(bmean+1)+'℃',String(bmean-1)+'℃',String(bdmax)+'℃']},
+    {s:line,q:'上图是某地一周最高气温的折线统计图，气温最高的一天是？',a:'星期'+BWK[bi],d:['星期'+BWK[(bi+1)%5],'星期'+BWK[(bi+2)%5],'星期'+BWK[bj]]},
+    {s:line,q:`上图折线统计图中，从星期${BWK[bi]}到星期${BWK[(bi+1)%5]}，气温的变化趋势是？`,a:(bd[(bi+1)%5]>bd[bi]?'上升':'下降'),d:[(bd[(bi+1)%5]>bd[bi]?'下降':'上升'),'不变','无法确定']},
+    {s:line,q:'上图折线统计图中，一周内气温相差最大是多少℃？',a:String(bdmax-bdmin)+'℃',d:[String(bdmax)+'℃',String(bdmin)+'℃',String(bdmax-bdmin+3)+'℃']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9532,6 +9901,10 @@ function g6_direction2(){
   let cm=ri(2,8);
   let realKm=+(cm*scale/100000).toFixed(cm*scale%100000?1:0); // 厘米→千米
   let realKmStr=(realKm%1===0)?String(realKm):String(realKm);
+  // 路线图（分段行走）与求图上距离：rm 为 200~900 米（100 的倍数），
+  // sc ∈ {1000,2000,5000,10000} 时 图上厘米 = rm×100÷sc 恒为整数
+  let r1=ri(2,9)*100, r2=ri(2,9)*100;
+  let sc=pick([1000,2000,5000,10000]), ru=ri(2,9), rm=ru*100, cm2=rm*100/sc;
   let items=[
     {s:comp,q:figQ,a:name,d:[opp[it0[0]]+'偏'+it1[0]+deg+'°',it0[0]+'偏'+opp[it1[0]]+deg+'°',it1[0]+'偏'+it0[0]+deg+'°']},
     {q:`「${name}」方向的另一种说法是？`,a:it1[0]+'偏'+it0[0]+(90-deg)+'°',d:[it1[0]+'偏'+it0[0]+deg+'°',opp[it0[0]]+'偏'+it1[0]+deg+'°',it0[0]+'偏'+opp[it1[0]]+deg+'°']},
@@ -9543,6 +9916,13 @@ function g6_direction2(){
     {q:'比例尺 1:100000 表示图上1厘米相当于实际？',a:'1千米',d:['100米','10千米','100千米']},
     {q:`在平面图上量得两地图上距离是${cm}厘米，比例尺1:${scale.toLocaleString('en-US')}，两地实际距离是多少千米？`,a:realKmStr+'千米',d:[String(cm*scale)+'千米',String(cm)+'千米',String(+((cm*scale/10000).toFixed(1)))+'千米']},
     {q:'图上距离、实际距离、比例尺之间的关系是？',a:'图上距离 : 实际距离 = 比例尺',d:['实际距离 : 图上距离 = 比例尺','图上距离 × 实际距离 = 比例尺','图上距离 + 实际距离 = 比例尺']},
+    // —— 二次补题：路线图的描述与绘制 / 按比例尺求图上距离 ——
+    {q:'描述行走路线时，每走一段都要说清楚？',a:'方向和距离',d:['只有方向','只有距离','速度和时间']},
+    {q:'绘制路线图时，每到一个地点都要重新确定？',a:'观测点',d:['纸张大小','图上的颜色','比例尺的单位']},
+    {q:`小明从家出发，先向东走${r1}米到书店，再向北走${r2}米到学校。小明从家到学校一共走了多少米？`,a:String(r1+r2),d:[String(Math.abs(r1-r2)),String(r1*r2),String(r2)]},
+    {q:`小红从学校出发，先向南走${r1}米到邮局，再向西走${r2}米到家。她从学校到家一共走了多少米？`,a:String(r1+r2),d:[String(Math.abs(r1-r2)),String(r1+r2+r1),String(r1)]},
+    {q:`实际距离${rm}米，画在比例尺1:${sc.toLocaleString('en-US')}的图上，图上应画多少厘米？`,a:String(cm2)+'厘米',d:[String(cm2*10)+'厘米',String(cm2+2)+'厘米',String(ru)+'厘米']},
+    {q:`一条路实际长${rm}米，画在图上应画${cm2}厘米，这幅图的比例尺是多少？`,a:'1:'+sc.toLocaleString('en-US'),d:['1:'+(sc*10).toLocaleString('en-US'),'1:'+Math.round(sc/10).toLocaleString('en-US'),sc.toLocaleString('en-US')+':1']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9617,9 +9997,53 @@ function g_app_perimeter(){
     String(2*(w+h)),[String(w+h),String(w*h),String(2*(w+h)-1)]);
 }
 function g_app_ratio(){
-  const ratios=[[2,3],[3,4],[3,5],[4,5],[2,5],[5,6]];
-  let [a,b]=pick(ratios), k=ri(2,9), c=b*k, x=a*k;
-  return mc(`${a}:${b} = x:${c}，x=？`, x, [x-1, x+1, x+2]);
+  // v86 重写：原实现只出「a:b = x:c，x=？」——那是六下《比例》的**解比例**，
+  //   与本单元「按比分配」无关（知识点覆盖检测实测：本单元 5 个知识点覆盖率 0%，
+  //   48 道题全部错位到 2·3 比例/解比例）。现按人教版六上《比》第4课时重写，
+  //   覆盖：已知总量求各部分 / 已知部分量求另一部分或总量 / 连比 / 与分数互化 / 实际情境。
+  // ratios 全部取互质数对，保证「占总数的几分之几」无需再约分。
+  const ratios=[[2,3],[3,4],[3,5],[4,5],[2,5],[5,6],[1,4],[3,7],[4,7],[5,8]];
+  const triples=[[2,3,5],[1,2,3],[3,4,5],[2,3,4],[1,3,4]];
+  let [a,b]=pick(ratios), k=ri(2,9);
+  const T=(a+b)*k;                       // 总量
+  const pa=a*k, pb=b*k;                  // 两部分量
+  const big=Math.max(pa,pb), small=Math.min(pa,pb);
+  const diff=(Math.max(a,b)-Math.min(a,b))*k;
+  let [c1,c2,c3]=pick(triples), k3=ri(2,8);
+  const T3=(c1+c2+c3)*k3;
+  const p1=c1*k3, p2=c2*k3, p3=c3*k3;
+  const mx=Math.max(p1,p2,p3), mn=Math.min(p1,p2,p3);
+  let w=ri(9,20), k2=ri(2,9);            // 药水：药粉:水 = 1:w
+  const Tw=(1+w)*k2;
+  let items=[
+    // —— 已知总量，求各部分（按比分配基本题型）——
+    {q:`把${T}个苹果按${a}:${b}分给两个班，较多的一份是多少个？`,a:String(big),d:[String(small),String(T),String(k)]},
+    {q:`把${T}个苹果按${a}:${b}分给两个班，较少的一份是多少个？`,a:String(small),d:[String(big),String(k),String(T)]},
+    {q:`六(1)班男生与女生人数的比是${a}:${b}，全班共${T}人，男生有多少人？`,a:String(pa),d:[String(pb),String(T),String(k)]},
+    {q:`六(1)班男生与女生人数的比是${a}:${b}，全班共${T}人，女生有多少人？`,a:String(pb),d:[String(pa),String(k),String(T)]},
+    {q:`把${T}本书按${a}:${b}分给甲、乙两人，甲分到多少本？`,a:String(pa),d:[String(pb),String(T),String(diff)]},
+    {q:`一个三角形三个内角的度数比是1:1:2，这个三角形中最大的角是多少度？`,a:'90',d:['45','60','120']},
+    // —— 已知一个部分量，求另一部分或总量 ——
+    {q:`甲、乙两个数的比是${a}:${b}，甲数是${pa}，乙数是多少？`,a:String(pb),d:[String(pa),String(T),String(k)]},
+    {q:`甲、乙两个数的比是${a}:${b}，乙数是${pb}，甲、乙两数的和是多少？`,a:String(T),d:[String(pb),String(pa),String(T*2)]},
+    {q:`甲、乙两个数的比是${a}:${b}，甲数是${pa}，甲数比乙数少多少？`,a:String(diff),d:[String(pb),String(diff+k),String(k)]},
+    // —— 连比（三个量的按比分配）——
+    {q:`把${T3}个球按${c1}:${c2}:${c3}分给三个小组，最多的一组是多少个？`,a:String(mx),d:[String(mn),String(T3),String(k3)]},
+    {q:`把${T3}个球按${c1}:${c2}:${c3}分给三个小组，最少的一组是多少个？`,a:String(mn),d:[String(mx),String(k3),String(T3)]},
+    {q:`三个数的比是${c1}:${c2}:${c3}，它们的和是${T3}，其中最大的数是多少？`,a:String(mx),d:[String(mn),String(T3),String(k3)]},
+    {q:`混凝土中水泥、沙子、石子的质量比是${c1}:${c2}:${c3}，要配制${T3}吨混凝土，需要水泥多少吨？`,a:String(p1),d:[String(p2),String(p3),String(T3)]},
+    // —— 按比分配与分数的相互转化 ——
+    {q:`甲、乙两个数的比是${a}:${b}，甲数占两数之和的几分之几？`,a:fracStr(a,a+b),d:[fracStr(b,a+b),fracStr(a,b),fracStr(a+b,a)]},
+    {q:`甲、乙两个数的比是${a}:${b}，乙数占两数之和的几分之几？`,a:fracStr(b,a+b),d:[fracStr(a,a+b),fracStr(b,a),fracStr(a+b,b)]},
+    {q:`把${T}按${a}:${b}分配，较多的一份占总数的几分之几？`,a:fracStr(Math.max(a,b),a+b),d:[fracStr(Math.min(a,b),a+b),fracStr(a,a+b),'1/2']},
+    {q:`某班男生与女生人数的比是${a}:${b}，男生人数是女生人数的几分之几？`,a:fracStr(a,b),d:[fracStr(b,a),fracStr(a,a+b),fracStr(b,a+b)]},
+    // —— 实际情境（混凝土 / 药水 / 分摊）——
+    {q:`混凝土中水泥、沙子、石子的质量比是${c1}:${c2}:${c3}，要配制${T3}吨混凝土，需要石子多少吨？`,a:String(p3),d:[String(p1),String(p2),String(T3)]},
+    {q:`一种药水按药粉和水的比为1:${w}配制，要配制${Tw}克这样的药水，需要药粉多少克？`,a:String(k2),d:[String(w*k2),String(Tw),String(k2+1)]},
+    {q:`甲、乙两人合租一套房，房租按${a}:${b}分摊。一个月房租${T}元，乙应付多少元？`,a:String(pb),d:[String(pa),String(T),String(k)]},
+    {q:`一种盐水，盐与水的质量比是1:${w}，要配制${Tw}克这样的盐水，需要水多少克？`,a:String(w*k2),d:[String(k2),String(Tw),String(w)]},
+  ];
+  let it=pick(items); return mc(it.q,it.a,it.d);
 }
 function g_app_chicken_rabbit(){
   let heads=ri(8,15),r=ri(1,heads-2),c=heads-r,feet=r*4+c*2;
@@ -9741,6 +10165,21 @@ function g_shape_expand(){
     {q:`棱长${s}厘米的正方体，它的展开图总面积是多少平方厘米？`,a:`${6*s*s}平方厘米`,d:[`${4*s*s}平方厘米`,`${6*s}平方厘米`,`${s*s}平方厘米`]},
     {q:`棱长${s}厘米的正方体，棱长总和是多少厘米？`,a:`${12*s}厘米`,d:[`${6*s}厘米`,`${4*s}厘米`,`${s*s}厘米`]},
     {q:'把圆柱的侧面沿高剪开，得到的长方形的长如果是底面直径的π倍，说明剪开方向？',a:'沿高剪开（竖直剪）',d:['斜着剪','沿底面剪','任意剪']},
+    // v86 扩容：原 13 条模板里只有 4 条带参数，题面容量仅 41（全年级最低，
+    // 练到第 2 场就大面积重复）。补 12 条参数化模板，容量提升到数百。
+    {s:cyl,q:`一个圆柱底面直径是${r*2}厘米，它的侧面沿高展开后，长方形的长约是多少厘米？(π取3.14)`,a:fmt(L),d:[fmt(+(3.14*r).toFixed(2)),fmt(r),fmt(+(3.14*r*r).toFixed(2))]},
+    {s:cyl,q:`一个圆柱底面半径是${r}厘米、高${h}厘米，它的侧面沿高展开后的长方形面积约是多少平方厘米？(π取3.14)`,a:fmt(+(L*h).toFixed(2)),d:[fmt(+(3.14*r*r).toFixed(2)),fmt(+(L+h).toFixed(2)),fmt(h)]},
+    {q:`一个圆柱的侧面展开图是一个长${L}厘米、宽${h}厘米的长方形，这个圆柱的底面半径约是多少厘米？(π取3.14)`,a:fmt(r),d:[fmt(r*2),fmt(+(3.14*r).toFixed(2)),fmt(h)]},
+    {q:`一个圆柱的底面周长是${L}厘米、高是${h}厘米，它的侧面沿高展开后的长方形面积是多少平方厘米？`,a:fmt(+(L*h).toFixed(2)),d:[fmt(+(L*2).toFixed(2)),fmt(+(L+h).toFixed(2)),fmt(+(3.14*h).toFixed(2))]},
+    {q:`棱长${s}厘米的正方体，它的一个面的面积是多少平方厘米？`,a:`${s*s}平方厘米`,d:[`${6*s*s}平方厘米`,`${4*s}平方厘米`,`${12*s}平方厘米`]},
+    {q:`棱长${s}厘米的正方体，它的表面积是多少平方厘米？`,a:`${6*s*s}平方厘米`,d:[`${s*s}平方厘米`,`${12*s}平方厘米`,`${6*s}平方厘米`]},
+    {q:`一个正方体的棱长总和是${12*s}厘米，它的棱长是多少厘米？`,a:`${s}厘米`,d:[`${6*s}厘米`,`${s*s}厘米`,`${3*s}厘米`]},
+    {q:`一个正方体的表面积是${6*s*s}平方厘米，它的棱长是多少厘米？`,a:`${s}厘米`,d:[`${2*s}厘米`,`${6*s}厘米`,`${s*s}厘米`]},
+    {q:`棱长${s}厘米的正方体，它的体积是多少立方厘米？`,a:`${s*s*s}立方厘米`,d:[`${6*s*s}立方厘米`,`${3*s}立方厘米`,`${s*s}立方厘米`]},
+    {q:`把${s}个棱长1厘米的小正方体拼成一行，拼成的长方体表面积是多少平方厘米？`,a:`${4*s+2}平方厘米`,d:[`${6*s}平方厘米`,`${2*s+4}平方厘米`,`${6*s*s}平方厘米`]},
+    {q:`一个长方体长${s}厘米、宽${s+1}厘米、高${s+2}厘米，它的棱长总和是多少厘米？`,a:`${12*s+12}厘米`,d:[`${3*s+3}厘米`,`${6*s}厘米`,`${4*s+4}厘米`]},
+    {q:`一个长方体长${s}厘米、宽${s+1}厘米、高${s+2}厘米，它的表面积是多少平方厘米？`,a:`${2*(s*(s+1)+(s+1)*(s+2)+s*(s+2))}平方厘米`,d:[`${6*s*s}平方厘米`,`${s*(s+1)*(s+2)}平方厘米`,`${4*s+4}平方厘米`]},
+    {q:'正方体一共有几种不同的展开图？',a:'11种',d:['6种','9种','12种']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
@@ -9765,6 +10204,27 @@ function g_shape_view(){
     {q:`一个长方体长${a}厘米、宽${b}厘米、高${h}厘米，从正面看到的形状是？`,a:`长${a}厘米、宽${h}厘米的长方形`,d:[`长${a}厘米、宽${b}厘米的长方形`,`边长${h}厘米的正方形`,`长${b}厘米、宽${h}厘米的长方形`]},
     {q:`用${n}个相同的小正方体排成一行，从正面看到的图形的长，是单个正方体棱长的几倍？`,a:`${n}倍`,d:[`${n-1}倍`,`${n+1}倍`,`2倍`]},
     {q:`用${n}个相同的小正方体排成一行，从侧面看到的形状是？`,a:'正方形',d:['长方形','圆形','三角形']},
+    // v86 补题：本单元名为「视图与展开」，但原实现 16 条模板全是**视图**，
+    //   展开图相关 4 个知识点 0 道（覆盖率 20%，且约 200 道题错位到「圆的面积」）。
+    //   现按单元名补入展开图内容，使「视图」与「展开」名副其实。
+    {q:'正方体的展开图中，相对的两个面在展开图上一定（　）',a:'不相邻',d:['相邻','重合','垂直']},
+    {q:'长方体的展开图由几个面组成？',a:'6个',d:['4个','8个','12个']},
+    {q:'正方体的展开图由几个正方形组成？',a:'6个',d:['4个','8个','12个']},
+    {q:'圆柱的侧面沿高展开后是什么形状？',a:'长方形',d:['正方形','三角形','扇形']},
+    {q:'圆锥的侧面展开后是什么形状？',a:'扇形',d:['长方形','三角形','圆形']},
+    {q:'一个立体图形，从正面看是正方形、从上面看是正方形、从左面看也是正方形，这个立体图形可能是？',a:'正方体',d:['圆柱','圆锥','球']},
+    {q:'一个立体图形，从正面看是长方形、从上面看是圆形，这个立体图形是？',a:'圆柱',d:['正方体','圆锥','长方体']},
+    {q:'一个立体图形，从正面看是三角形、从上面看是圆（带圆心），这个立体图形是？',a:'圆锥',d:['圆柱','正方体','三棱柱']},
+    {q:`一个圆柱的底面周长是${2*a}厘米、高是${h}厘米，它的侧面沿高展开后的长方形面积是多少平方厘米？`,a:`${2*a*h}平方厘米`,d:[`${2*a}平方厘米`,`${a*h}平方厘米`,`${4*a*h}平方厘米`]},
+    {q:`棱长${s}厘米的正方体，它的展开图总面积是多少平方厘米？`,a:`${6*s*s}平方厘米`,d:[`${4*s*s}平方厘米`,`${6*s}平方厘米`,`${s*s}平方厘米`]},
+    {q:`棱长${s}厘米的正方体，它的表面积与一个面的面积的比是？`,a:'6:1',d:['4:1','3:1','12:1']},
+    // —— 二次补题：展开图与立体图形的对应判断（原 0 道）——
+    {q:'一个立体图形的展开图由6个完全相同的正方形组成，它折叠后是什么立体图形？',a:'正方体',d:['长方体','圆柱','三棱柱']},
+    {q:'一个立体图形的展开图由一个扇形和一个圆组成，它折叠后是什么立体图形？',a:'圆锥',d:['圆柱','球','三棱锥']},
+    {q:'一个立体图形的展开图由两个完全相同的圆和一个长方形组成，它折叠后是什么立体图形？',a:'圆柱',d:['圆锥','球','正方体']},
+    {q:'一个立体图形的展开图由6个长方形组成，它折叠后可能是什么立体图形？',a:'长方体',d:['正方体','圆柱','圆锥']},
+    {q:'判断一个展开图能否折成正方体，关键看什么？',a:'是否有6个正方形，且排列符合11种展开图之一',d:['是否一共有6个面','展开图是否左右对称','是否含有4个正方形']},
+    {q:'同一个正方体，沿不同的棱剪开，得到的展开图形状？',a:'可能不同，但都由6个正方形组成',d:['一定完全相同','一定是长方形','一定由4个正方形组成']},
   ];
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
 }
