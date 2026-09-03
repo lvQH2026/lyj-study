@@ -10750,20 +10750,63 @@ function renderShapeExplore(container){
 // diff：1 基础 / 2 提高 / 3 拓展（沿用站内既有难度命名，默认基础）。
 // 策略（用户确认）：反复调用 unit.gen() 生成新题，直到凑满 30 道「视觉上互不相同」的题；
 // 达到采样上限仍凑不满时按实际上限出卷——克隆凑数等于让孩子连做 30 道一模一样的题。
-function buildUnitQuizQuestions(unit, diff, want) {
+// v86 P0：单元练习「跨场次」题面记忆——记录每个单元近期出过的题面，
+// 下次练习优先出没练过的；单元题面枯竭时按「最久没练」的顺序回收复用。
+// 只存题面 key（不含答案），按单元分桶、每桶最多保留 UNIT_SEEN_CAP 条。
+const UNIT_SEEN_KEY = 'math_unit_seen_v1';
+const UNIT_SEEN_CAP = 300;
+function unitSeenSlot(g, s, i) { return g + '_' + s + '_' + i; }
+function loadUnitSeenMap() {
+  try { return JSON.parse(localStorage.getItem(UNIT_SEEN_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+// 返回 { seen:Set, rank:Map }，rank 越小 = 越久没练过
+function unitSeenCtx(g, s, i) {
+  const m = loadUnitSeenMap();
+  const arr = m[unitSeenSlot(g, s, i)] || [];
+  const rank = new Map();
+  arr.forEach((k, idx) => { if (!rank.has(k)) rank.set(k, idx); });
+  return { seen: new Set(arr), rank: rank };
+}
+function markUnitSeen(g, s, i, keys) {
+  if (!keys || !keys.length) return;
+  try {
+    const m = loadUnitSeenMap();
+    const slot = unitSeenSlot(g, s, i);
+    const arr = (m[slot] || []).concat(keys);
+    const st = new Set(), out = [];
+    for (let j = arr.length - 1; j >= 0; j--) { if (st.has(arr[j])) continue; st.add(arr[j]); out.unshift(arr[j]); }
+    m[slot] = out.slice(-UNIT_SEEN_CAP);
+    localStorage.setItem(UNIT_SEEN_KEY, JSON.stringify(m));
+  } catch (e) {}
+}
+// 单元题面已全部练过时清空记忆，让题库重新循环（避免永远出不到「新题」）
+function resetUnitSeen(g, s, i) {
+  try {
+    const m = loadUnitSeenMap();
+    delete m[unitSeenSlot(g, s, i)];
+    localStorage.setItem(UNIT_SEEN_KEY, JSON.stringify(m));
+  } catch (e) {}
+}
+
+function buildUnitQuizQuestions(unit, diff, want, ctx) {
   want = want || UNIT_QUIZ_LENGTH;
+  // v86 P0：候选池扩到 want*3（原只凑 want 道，导致 6:3:1 分档后
+  // 基础档只剩 18 题、提高档 9 题、拓展档 3 题 —— 与「固定 30 题」不符）。
+  const CAND = Math.max(want * 3, 90);
+  const seenSet = (ctx && ctx.seen) || null;
+  const rankMap = (ctx && ctx.rank) || null;
   let seen = new Set();
-  let cands = [];
+  let fresh = [], old = [];
   let stall = 0;
   const push = q => {
     if (!q || !q.question || q.answer == null || q.answer === undefined) return false;
     let k = visKey(q);
     if (seen.has(k)) return false;
     seen.add(k);
-    cands.push(q);
+    if (seenSet && seenSet.has(k)) old.push(q); else fresh.push(q);
     return true;
   };
-  while (cands.length < want && stall < UNIT_GEN_MAX_STALL) {
+  while (fresh.length < CAND && stall < UNIT_GEN_MAX_STALL) {
     let g;
     try { g = unit.gen(); } catch (e) { stall++; continue; }
     let arr = Array.isArray(g) ? g : [g];
@@ -10771,14 +10814,29 @@ function buildUnitQuizQuestions(unit, diff, want) {
     arr.forEach(q => { if (push(q)) got = true; });
     stall = got ? 0 : stall + 1;      // 连续拿不到新题面 = 生成器已榨干
   }
+  // 新鲜题不够时用旧题补齐：优先挑「最久没练过」的，避免连场撞题
+  let cands = fresh.slice();
+  if (cands.length < want && old.length) {
+    if (rankMap && rankMap.size) old.sort((a, b) => (rankMap.get(visKey(a)) || 0) - (rankMap.get(visKey(b)) || 0));
+    else shuffleArr(old);
+    cands = cands.concat(old.slice(0, Math.max(0, CAND - cands.length)));
+  }
   if (!cands.length) return [];
   tagRelativeDifficulty(cands);
   if (!diff) diff = 1;
-  // 指定难度档：只出该档的题；该单元压根没有这一档时退回全量（否则孩子会看到空白页）
-  let band = cands.filter(q => questionDifficulty(q) === diff);
-  if (band.length === 0) band = cands;
-  shuffleArr(band);
-  return band.slice(0, Math.min(want, band.length));
+  // v86：命中难度档优先，不足时按「由易到难」用相邻档补齐到 want（不再只给 18/9/3 题）
+  const order = diff === 2 ? [2, 1, 3] : diff === 3 ? [3, 2, 1] : [1, 2, 3];
+  let out = [];
+  order.forEach(function (d) {
+    if (out.length >= want) return;
+    let band = cands.filter(q => questionDifficulty(q) === d);
+    shuffleArr(band);
+    out = out.concat(band.slice(0, want - out.length));
+  });
+  if (!out.length) { shuffleArr(cands); out = cands.slice(0, want); }
+  // 卷面顺序：基础 → 提高 → 拓展
+  out.sort((a, b) => (questionDifficulty(a) - questionDifficulty(b)));
+  return out;
 }
 
 // v73：单元练习的入口——先弹「练习设置」选难度，再开始练习。
@@ -10815,9 +10873,19 @@ function beginUnitQuiz(idx, grade, sem, diff) {
       // gen 已返回完整题组（如角度计算：一次从题库随机抽 N 道）
       state.quizQuestions = first;
     } else {
-      // v73：固定 30 题 + 难度筛选，反复 gen() 直到凑满，绝不出现重复题。
-      state.quizQuestions = buildUnitQuizQuestions(unit, diff || 1, UNIT_QUIZ_LENGTH);
+      // v86：带上该单元的「已练题面」上下文，优先出没练过的题
+      const ctx = unitSeenCtx(grade, sem, idx);
+      state.quizQuestions = buildUnitQuizQuestions(unit, diff || 1, UNIT_QUIZ_LENGTH, ctx);
     }
+  }
+  // v86：本场题面入库，下一场优先避开；题面已练遍时自动清空记忆重新循环
+  if (!unit.paper && state.quizQuestions && state.quizQuestions.length) {
+    try {
+      const keys = state.quizQuestions.map(q => visKey(q));
+      const ctxNow = unitSeenCtx(grade, sem, idx);
+      if (ctxNow.seen.size >= UNIT_SEEN_CAP && keys.every(k => ctxNow.seen.has(k))) resetUnitSeen(grade, sem, idx);
+      markUnitSeen(grade, sem, idx, keys);
+    } catch (e) {}
   }
   state.quizIndex = 0;
   state.quizScore = 0;
