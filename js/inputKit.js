@@ -183,6 +183,17 @@
     h += '<button type="button" class="ik-key" data-ik-act="fracback">← 删除</button>';
     h += '<button type="button" class="ik-key" data-ik-act="fracclear">清空</button>';
     h += '</div>';
+    // v97: 操作提示——告诉孩子怎么输入分数
+    h += '<div class="ik-frac-guide">';
+    h += '<div class="ik-frac-guide-title">📝 怎么输入答案？</div>';
+    h += '<div class="ik-frac-guide-steps">';
+    h += '<div class="ik-frac-guide-step"><span class="ik-frac-guide-num">1</span>先点数字输入<span class="ik-frac-guide-highlight">分子</span>（上面的数）</div>';
+    h += '<div class="ik-frac-guide-step"><span class="ik-frac-guide-num">2</span>点黄色的<span class="ik-frac-guide-highlight">分母</span>按钮切换</div>';
+    h += '<div class="ik-frac-guide-step"><span class="ik-frac-guide-num">3</span>再点数字输入<span class="ik-frac-guide-highlight">分母</span>（下面的数）</div>';
+    h += '<div class="ik-frac-guide-step"><span class="ik-frac-guide-num">4</span>最后点<span class="ik-frac-guide-highlight">提交答案</span></div>';
+    h += '</div>';
+    h += '<div class="ik-frac-guide-example">例：答案是 64/5，就先点 6、4，再点"分母"，再点 5</div>';
+    h += '</div>';
     h += '</div>';
     return h;
   }
@@ -798,7 +809,14 @@
       '.ik-frac-switch{font-size:13px;padding:8px 0;background:#fff;border:1px solid #ddd;border-radius:6px;cursor:pointer;}' +
       '.ik-frac-switch:active{background:#e8f4fd;}' +
       '.ik-frac-switch.ik-frac-hint{background:#fff3cd;border-color:#ffc107;color:#856404;font-weight:700;animation:ik-frac-pulse 1s infinite;}' +
-      '@keyframes ik-frac-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,193,7,0.4);}50%{box-shadow:0 0 0 6px rgba(255,193,7,0);}}';
+      '@keyframes ik-frac-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,193,7,0.4);}50%{box-shadow:0 0 0 6px rgba(255,193,7,0);}}' +
+      '.ik-frac-guide{margin-top:12px;padding:10px 12px;background:#f0f7ff;border:1px solid #d0e8ff;border-radius:8px;}' +
+      '.ik-frac-guide-title{font-size:13px;font-weight:700;color:#1a73e8;margin-bottom:8px;}' +
+      '.ik-frac-guide-steps{display:flex;flex-direction:column;gap:4px;}' +
+      '.ik-frac-guide-step{font-size:12px;color:#555;line-height:1.6;display:flex;align-items:center;gap:6px;}' +
+      '.ik-frac-guide-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1a73e8;color:#fff;border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0;}' +
+      '.ik-frac-guide-highlight{color:#e67e22;font-weight:700;}' +
+      '.ik-frac-guide-example{margin-top:8px;padding:6px 8px;background:#fffbe6;border:1px dashed #ffd54f;border-radius:4px;font-size:11px;color:#856404;line-height:1.5;}';
     var style = document.createElement('style');
     style.id = 'ik-frac-style-v96';
     style.textContent = css;
