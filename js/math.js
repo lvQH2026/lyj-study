@@ -13321,7 +13321,8 @@ function judgeStatement(question, value) {
   }
   if (/[？?]/.test(s)) return '';              // 还有问号就不是一个陈述句
   if (s.length > 46) return '';                // 太长的陈述不适合做判断题
-  return s + BLANK;
+  // v97: 生成判断题后，把纯文本分数转回上下叠放HTML
+  return _fracHtml(s + BLANK);
 }
 
 // 在真值附近造一个「像那么回事但确实错」的值

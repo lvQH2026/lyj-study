@@ -594,8 +594,7 @@
     if (cur === 'num') {
       num = (num + v).slice(-2);  // 分子最多2位
       pad._fracNum = num;
-      // 分子填1位后自动跳分母（小学分数分子一般1位）
-      if (num.length >= 1) { pad._fracPos = 'den'; }
+      // v97: 不自动跳分母，孩子手动点"分母"按钮切换（支持两位数分子如16/15）
     } else {
       den = (den + v).slice(-2);  // 分母最多2位
       pad._fracDen = den;
@@ -664,6 +663,11 @@
     // 高亮当前位置
     if (numEl) numEl.classList.toggle('ik-frac-active', cur === 'num');
     if (denEl) denEl.classList.toggle('ik-frac-active', cur === 'den');
+    // v97: 分子已输入但还在分子位置时，高亮分母按钮提示切换
+    var denBtn = pad.querySelector('[data-ik-act="fracpos"][data-ik-v="den"]');
+    if (denBtn) {
+      denBtn.classList.toggle('ik-frac-hint', cur === 'num' && num.length > 0);
+    }
     // 更新输入框值为"分子/分母"格式
     if (target && num && den) {
       target.value = num + '/' + den;
@@ -792,7 +796,9 @@
       '.ik-frac-num-key:active{background:#e8f4fd;}' +
       '.ik-frac-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}' +
       '.ik-frac-switch{font-size:13px;padding:8px 0;background:#fff;border:1px solid #ddd;border-radius:6px;cursor:pointer;}' +
-      '.ik-frac-switch:active{background:#e8f4fd;}';
+      '.ik-frac-switch:active{background:#e8f4fd;}' +
+      '.ik-frac-switch.ik-frac-hint{background:#fff3cd;border-color:#ffc107;color:#856404;font-weight:700;animation:ik-frac-pulse 1s infinite;}' +
+      '@keyframes ik-frac-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,193,7,0.4);}50%{box-shadow:0 0 0 6px rgba(255,193,7,0);}}';
     var style = document.createElement('style');
     style.id = 'ik-frac-style-v96';
     style.textContent = css;
