@@ -11927,11 +11927,38 @@ function renderExamCenter() {
   let unitRow = document.getElementById('examUnitRow');
   if (examState.type === 'unit') {
     unitRow.style.display = 'flex';
+    // 专项关联映射：课本单元名 → 关联的专项名列表
+    var _specialMap = {
+      '分数乘法': ['分数应用题', '分数与小数混合运算'],
+      '分数除法': ['分数应用题'],
+      '比': ['按比分配'],
+      '圆': ['展开图'],
+      '百分数（一）': ['百分数应用题']
+    };
+    // 建立专项名→原始索引的映射
+    var _specialIdx = {};
+    units.forEach(function(u, i) {
+      if (u.group === '专项') _specialIdx[u.name] = i;
+    });
+    // 如果当前选中的是专项单元，自动跳到第一个课本单元（专项不再独立显示）
+    var _curUnit = units[examState.unitIdx];
+    if (_curUnit && _curUnit.group === '专项') examState.unitIdx = 0;
     if (examState.unitIdx >= units.length) examState.unitIdx = 0;
     let uHtml = '';
     units.forEach((u, i) => {
-      let label = (u.group === '课本') ? `第${u.unit}单元 ${u.name}` : u.name;
+      if (u.group !== '课本') return;  // 只显示课本单元
+      let label = `第${u.unit}单元 ${u.name}`;
       uHtml += `<button class="chip chip-sm ${examState.unitIdx === i ? 'selected' : ''}" onclick="selectExamUnit(${i})">${label}</button>`;
+      // 该课本单元有关联专项时，加"专项"按钮
+      var _linked = _specialMap[u.name];
+      if (_linked && _linked.length) {
+        _linked.forEach(function(spName) {
+          var spIdx = _specialIdx[spName];
+          if (spIdx !== undefined) {
+            uHtml += `<button class="chip chip-sm chip-special" onclick="startSpecialExam(${spIdx})" title="进入${spName}专项练习">🎯${spName}</button>`;
+          }
+        });
+      }
     });
     document.getElementById('examUnitBtns').innerHTML = uHtml;
   } else {
@@ -11966,6 +11993,23 @@ function selectExamGrade(g) { examState.grade = g; examState.unitIdx = 0; examSt
 function selectExamSemester(s) { examState.semester = s; examState.unitIdx = 0; examState.month = 1; renderExamCenter(); }
 function selectExamUnit(i) { examState.unitIdx = i; renderExamCenter(); }
 function selectExamMonth(m) { examState.month = m; renderExamCenter(); }
+
+// 直接进入专项练习（从课本单元下的"专项"按钮触发）
+function startSpecialExam(specialIdx) {
+  examState.type = 'unit';
+  examState.unitIdx = specialIdx;
+  // 直接开始考试
+  if (typeof startExam === 'function') {
+    startExam();
+  } else {
+    renderExamCenter();
+    // 延迟点击开始按钮
+    setTimeout(function() {
+      var btn = document.getElementById('startExamBtn');
+      if (btn) btn.click();
+    }, 100);
+  }
+}
 
 // 根据考试类型确定考查范围
 function getExamUnits() {
@@ -14943,7 +14987,7 @@ function g6_app_frac(){
   if (document.getElementById('frac-style-injected')) return;
   var s = document.createElement('style');
   s.id = 'frac-style-injected';
-  s.textContent = '.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}';
+  s.textContent = '.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}.chip-special{background:linear-gradient(135deg,#fff3e0,#ffe0b2)!important;color:#e65100!important;border:1px solid #ffb74d!important;font-size:12px!important;margin:3px!important;}.chip-special:hover{background:linear-gradient(135deg,#ffe0b2,#ffcc80)!important;}';
   document.head.appendChild(s);
 })();
 
