@@ -11558,7 +11558,8 @@ function beginUnitQuiz(idx, grade, sem, diff) {
     } else {
       // v86：带上该单元的「已练题面」上下文，优先出没练过的题
       const ctx = unitSeenCtx(grade, sem, idx);
-      state.quizQuestions = buildUnitQuizQuestions(unit, diff || 1, UNIT_QUIZ_LENGTH, ctx);
+      var _unitWant = (unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : UNIT_QUIZ_LENGTH;
+      state.quizQuestions = buildUnitQuizQuestions(unit, diff || 1, _unitWant, ctx);
     }
   }
   // v86：本场题面入库，下一场优先避开；题面已练遍时自动清空记忆重新循环
@@ -13398,7 +13399,7 @@ function generateExamPaper() {
   // 于是出现「6上·分数乘法 估 40 题、实际只组出 21 题且夹带克隆」的怪相。
   // 这里用视觉去重口径（题面+图形）数一遍真实容量，据此封顶，
   // 卷头如实写明题数，让孩子拿到的是一份每题都不同的卷子。
-  let capQ = GX_PAPER_TOTAL;
+  let capQ = (units && units[0] && units[0].name && units[0].name.indexOf('分数应用题') >= 0) ? 20 : GX_PAPER_TOTAL;
   let capLimited = false;
   let realCap = new Set(pool.map(q => visKey(q))).size;
   if (realCap > 0 && realCap < capQ) { capQ = realCap; capLimited = true; }
@@ -14935,6 +14936,16 @@ function g6_app_frac(){
   return q;
 }
 
+
+
+// ===== 分数上下叠放样式（专项·分数应用题专用，手机端+PC端通用）=====
+(function(){
+  if (document.getElementById('frac-style-injected')) return;
+  var s = document.createElement('style');
+  s.id = 'frac-style-injected';
+  s.textContent = '.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}';
+  document.head.appendChild(s);
+})();
 
 // ============================================================
 // 初始化
