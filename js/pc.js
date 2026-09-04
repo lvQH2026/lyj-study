@@ -471,16 +471,35 @@
       h += '<div class="pc-hint">该年级内容建设中，敬请期待。</div>';
     }
     h += '<div class="pc-unit-list">';
+    // 分离课本单元和专项单元（专项合并成一个入口）
+    var _normalUnits = [], _specialUnits = [];
     units.forEach(function (u, i) {
+      if (S.subject === 'math' && u.group === '专项') _specialUnits.push({u:u, i:i});
+      else _normalUnits.push({u:u, i:i});
+    });
+    // 渲染课本单元
+    _normalUnits.forEach(function (item) {
+      var u = item.u, i = item.i;
       const name = S.subject === 'english' ? (u.name || ('Level ' + (i + 1))) : (u.name || ('第' + (i + 1) + '单元'));
       const meta = S.subject === 'math' ? (u.type || '') : S.subject === 'chinese' ? (u.group || '') : ((u.lessons ? u.lessons.length : 0) + ' 课');
-      const tag = (S.subject === 'math' && u.name && u.name.indexOf('专项') >= 0) ? '<span class="u-tag">专项</span>' : '';
-      h += '<div class="pc-unit"><div class="u-name">' + esc(name) + '</div><div class="u-meta">' + esc(meta) + '</div>' + tag +
+      h += '<div class="pc-unit"><div class="u-name">' + esc(name) + '</div><div class="u-meta">' + esc(meta) + '</div>' +
         '<div class="pc-unit-actions">' +
         '<button class="pc-btn primary sm" onclick="PC.goStudy(' + i + ')">学习</button>' +
         '<button class="pc-btn ghost sm" onclick="PC.startUnit(' + i + ')">练习</button>' +
         '</div></div>';
     });
+    // 渲染专项合并卡片
+    if (_specialUnits.length) {
+      h += '<div class="pc-unit"><div class="u-name">专项练习</div><div class="u-meta">' + _specialUnits.length + ' 个专项</div><span class="u-tag">专项</span>' +
+        '<div class="pc-unit-actions">' +
+        '<button class="pc-btn ghost sm" onclick="PC.toggleSpecial()">选择专项 ▾</button>' +
+        '</div>' +
+        '<div class="pc-special-list" id="specialList" style="display:none;margin-top:8px;">';
+      _specialUnits.forEach(function (item) {
+        h += '<div class="pc-special-item" onclick="PC.startUnit(' + item.i + ')">' + esc(item.u.name) + ' →</div>';
+      });
+      h += '</div></div>';
+    }
     h += '</div>';
     // v83：英语加「人教 PEP 教材同步」区块 —— 自然拼读练的是发音，
     // 教材同步练的是课本单元，两者互补，孩子要按课本进度复习时从这里进。
@@ -757,7 +776,8 @@
         }
         const ua = w.userAnswer === undefined || w.userAnswer === '' ? '未作答' : w.userAnswer;
         h += '<div class="pc-wrong-item">';
-        h += '<div class="pc-wrong-head"><span class="lr-name">' + esc(q.question || '') + '</span>'
+        var _wq = (q.question && q.question.indexOf('class="frac"') >= 0) ? q.question : esc(q.question || '');
+        h += '<div class="pc-wrong-head"><span class="lr-name">' + _wq + '</span>'
           + '<span class="lr-meta">' + esc(w.unitName || '') + ' · 答错 ' + (w.count || 1) + ' 次</span></div>';
         h += '<div class="pc-wrong-ans">你的答案：<b class="bad">' + esc(String(ua)) + '</b>'
           + '　正确答案：<b class="ok">' + esc(String(q.answer === undefined ? '' : q.answer)) + '</b></div>';
@@ -822,7 +842,8 @@
     let qs;
     if (unit.paper) { let arr = unit.gen(); qs = Array.isArray(arr) ? arr : [arr]; }
     else if (typeof buildUnitQuizQuestions === 'function') {
-      qs = buildUnitQuizQuestions(unit, diff || 1, (typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 30);
+      var _want = (unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : ((typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 30);
+      qs = buildUnitQuizQuestions(unit, diff || 1, _want);
     } else {
       const first = unit.gen();
       if (Array.isArray(first)) qs = first;
@@ -990,7 +1011,8 @@
     h += '<div class="pc-q-card" id="pcQCard">';
     if (item.passage) h += '<div class="pc-passage">' + item.passage + '</div>';
     if (item.paperSection) h += '<div class="pc-section-banner">' + esc(item.paperSection) + '</div>';
-    h += '<div class="pc-q-text">' + esc(item.question) + '</div>';
+    var _qTxt = (item.question && item.question.indexOf('class="frac"') >= 0) ? item.question : esc(item.question);
+    h += '<div class="pc-q-text">' + _qTxt + '</div>';
     if (item.svg) h += '<div class="pc-q-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + item.svg + '</svg></div>';
     if (item.type === 'choice' || item.type === 'judge') {
       h += '<div class="pc-options" id="pcOpts">';
@@ -1279,7 +1301,8 @@
         h += '<span class="pc-ai-mark">' + (isCorrect ? svgHandwrittenCheck(true) : svgHandwrittenCheck(false)) + '</span>';
         h += '</div>';
         if (item.passage) h += '<div class="pc-passage">' + item.passage + '</div>';
-        h += '<div class="pc-ai-stem">' + esc(item.question) + '</div>';
+        var _aiq = (item.question && item.question.indexOf('class="frac"') >= 0) ? item.question : esc(item.question);
+        h += '<div class="pc-ai-stem">' + _aiq + '</div>';
         if (item.svg) h += '<div class="pc-q-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + item.svg + '</svg></div>';
         if (item.options && item.options.length) {
           h += '<div class="pc-ai-opts">';
@@ -1354,7 +1377,8 @@
       const ua = (raw && raw.userAnswer != null) ? raw.userAnswer : '—';
       h += '<div class="pc-wrong-item"><div class="pc-wrong-meta">' + esc(it.unitName || '') + (it.grade ? ' · ' + it.grade + '年级' : '') + (it.module ? ' · ' + it.module : '') + '</div>';
       if (q.passage) h += '<div class="pc-passage">' + q.passage + '</div>';
-      h += '<div class="pc-wrong-stem">' + esc(q.question) + '</div>';
+      var _wsq = (q.question && q.question.indexOf('class="frac"') >= 0) ? q.question : esc(q.question);
+      h += '<div class="pc-wrong-stem">' + _wsq + '</div>';
       if (q.svg) h += '<div class="pc-wrong-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + q.svg + '</svg></div>';
       h += '<div class="pc-wrong-ans">你的答案：<span class="me">' + esc(ua) + '</span>　正确答案：<span class="ok">' + esc(q.answer) + '</span></div>';
       if (q.explain) h += '<div class="pc-wrong-explain">解析：' + esc(q.explain) + '</div>';
@@ -1441,3 +1465,16 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+
+// ===== 专项合并入口 + 分数上下叠放样式（注入）=====
+(function(){
+  var style = document.createElement('style');
+  style.textContent = '.pc-special-item{padding:8px 12px;cursor:pointer;border-radius:6px;font-size:13px;color:#3E4A63;}.pc-special-item:hover{background:#f0f0f0;}.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}';
+  document.head.appendChild(style);
+})();
+
+PC.toggleSpecial = function(){
+  var el = document.getElementById('specialList');
+  if (el) el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+};

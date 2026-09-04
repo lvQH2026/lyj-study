@@ -5727,6 +5727,7 @@ const KNOWLEDGE_BASE = {
         summary: ['分数与小数混合运算：先统一形式（都化分数或都化小数），再按运算顺序计算', '乘法：分数乘小数可把小数化成分数，分子乘分子、分母乘分母', '加减法：统一成同分母分数或同计数单位的小数后再相加减', '两步混合：先算乘除，后算加减，有括号先算括号里的', '结果能约分的要约成最简分数，能化成有限小数的也可写小数'],
         fidx: [{ t: '小数化分数', f: '0.6=3/5、0.25=1/4、0.125=1/8' }, { t: '分数化小数', f: '3/4=0.75、5/8=0.625' }, { t: '运算顺序', f: '先乘除后加减，有括号先算括号' }],
         method: [{ t: '统一形式', s: '分数和小数混在一起，先决定统一成分数还是小数，再计算最稳' }, { t: '易错点', s: '别把小数点和分数线搞混；结果要化成最简分数或最简小数' }] },
+      { name: '专项·分数应用题', group: '专项', type: 'application', gen: g6_app_frac },
     ],
     2: [ // 六下 · 课本同步（人教版5单元）+ 专项练习
       { name: '负数', group: '课本', term: '下', unit: 1, type: 'basic', gen: g6_negative,
@@ -14554,6 +14555,386 @@ function showToast(msg) {
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
 }
+
+
+// ============================================================
+// 专项·分数应用题（六上）—— 10题型×10场景，填空+配图+分数上下叠放
+// ============================================================
+// ============================================================
+// 专项·分数应用题（六年级上册）—— 10题型 × 10场景 = 100题模板
+// 每次 gen() 随机抽1题；组卷时 buildUnitQuizQuestions 凑20题
+// 题型：填空（只填数字，零键盘友好）
+// 配图：每题带 svg 场景图
+// 分数：题目内分数用 HTML 上下叠放 <span class="frac">
+// ============================================================
+function g6_app_frac(){
+  // ---- 分数上下叠放 HTML（仅题目渲染用，答案保持纯文本）----
+  const F=(n,d)=>'<span class="frac"><span class="num">'+n+'</span><span class="den">'+d+'</span></span>';
+
+  // ---- 工具：生成最简分数 a/b ----
+  const mkFrac=()=>{
+    const denoms=[2,3,4,5,6,8,10];
+    let b=pick(denoms), a=ri(1,Math.min(4,b-1));
+    while(gcd(a,b)>1) a=ri(1,Math.min(4,b-1));
+    return [a,b];
+  };
+
+  // ---- 10个 svg 配图函数（统一 320×96，扁平风格）----
+  const svgWrap=(inner)=>'<svg width="320" height="96" viewBox="0 0 320 96" xmlns="http://www.w3.org/2000/svg">'+inner+'</svg>';
+
+  // 1. 水果/物品（圆形堆叠）
+  const svgFruit=()=>{
+    let s='';
+    const colors=['#E57373','#FFB74D','#81C784','#64B5F6','#BA68C8'];
+    for(let i=0;i<5;i++){
+      const cx=40+i*55, cy=50+ (i%2)*8;
+      s+='<circle cx="'+cx+'" cy="'+cy+'" r="18" fill="'+colors[i%colors.length]+'" opacity="0.85"/>';
+      s+='<ellipse cx="'+(cx-5)+'" cy="'+(cy-6)+'" rx="5" ry="3" fill="#fff" opacity="0.4"/>';
+    }
+    return svgWrap(s);
+  };
+
+  // 2. 花朵
+  const svgFlower=()=>{
+    let s='';
+    const colors=['#F48FB1','#CE93D8','#FFD54F','#EF9A9A'];
+    for(let f=0;f<3;f++){
+      const cx=60+f*100, cy=52;
+      for(let p=0;p<6;p++){
+        const ang=p*Math.PI/3;
+        const px=cx+14*Math.cos(ang), py=cy+14*Math.sin(ang);
+        s+='<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="10" fill="'+colors[f%colors.length]+'" opacity="0.8"/>';
+      }
+      s+='<circle cx="'+cx+'" cy="'+cy+'" r="8" fill="#FFB300"/>';
+      s+='<line x1="'+cx+'" y1="'+(cy+8)+'" x2="'+cx+'" y2="88" stroke="#66BB6A" stroke-width="3"/>';
+    }
+    return svgWrap(s);
+  };
+
+  // 3. 价格标签
+  const svgPrice=()=>{
+    let s='';
+    s+='<rect x="60" y="20" width="200" height="56" rx="8" fill="#FFF8E1" stroke="#B4945A" stroke-width="2"/>';
+    s+='<polygon points="60,20 44,48 60,76" fill="#FFF8E1" stroke="#B4945A" stroke-width="2"/>';
+    s+='<circle cx="52" cy="48" r="4" fill="#B4945A"/>';
+    s+='<text x="160" y="55" text-anchor="middle" font-size="22" font-weight="bold" fill="#3E4A63">¥ 价格</text>';
+    return svgWrap(s);
+  };
+
+  // 4. 电表
+  const svgMeter=()=>{
+    let s='';
+    s+='<rect x="80" y="14" width="160" height="68" rx="6" fill="#E3F2FD" stroke="#3E4A63" stroke-width="2"/>';
+    s+='<rect x="100" y="26" width="120" height="28" rx="3" fill="#fff" stroke="#3E4A63" stroke-width="1"/>';
+    s+='<text x="160" y="46" text-anchor="middle" font-size="16" font-family="monospace" fill="#E53935">kWh</text>';
+    s+='<circle cx="120" cy="68" r="5" fill="#4CAF50"/>';
+    s+='<circle cx="145" cy="68" r="5" fill="#4CAF50"/>';
+    s+='<text x="200" y="72" font-size="11" fill="#3E4A63">电表</text>';
+    return svgWrap(s);
+  };
+
+  // 5. 油桶
+  const svgBarrel=()=>{
+    let s='';
+    s+='<ellipse cx="160" cy="22" rx="50" ry="10" fill="#B4945A"/>';
+    s+='<rect x="110" y="22" width="100" height="56" fill="#D4A574" stroke="#8D6E63" stroke-width="2"/>';
+    s+='<ellipse cx="160" cy="78" rx="50" ry="10" fill="#8D6E63"/>';
+    s+='<line x1="110" y1="40" x2="210" y2="40" stroke="#8D6E63" stroke-width="1.5"/>';
+    s+='<line x1="110" y1="60" x2="210" y2="60" stroke="#8D6E63" stroke-width="1.5"/>';
+    s+='<text x="160" y="55" text-anchor="middle" font-size="14" fill="#5D4037">油</text>';
+    return svgWrap(s);
+  };
+
+  // 6. 树
+  const svgTree=()=>{
+    let s='';
+    for(let i=0;i<3;i++){
+      const cx=60+i*100;
+      s+='<rect x="'+(cx-6)+'" y="58" width="12" height="28" fill="#8D6E63"/>';
+      s+='<polygon points="'+cx+',10 '+(cx-28)+',58 '+(cx+28)+',58" fill="#66BB6A"/>';
+      s+='<polygon points="'+cx+',24 '+(cx-22)+',56 '+(cx+22)+',56" fill="#81C784"/>';
+    }
+    return svgWrap(s);
+  };
+
+  // 7. 书本
+  const svgBook=()=>{
+    let s='';
+    for(let i=0;i<4;i++){
+      const x=40+i*65, h=50+(i%2)*12;
+      const colors=['#E57373','#64B5F6','#FFB74D','#81C784'];
+      s+='<rect x="'+x+'" y="'+(86-h)+'" width="50" height="'+h+'" rx="2" fill="'+colors[i]+'" stroke="#3E4A63" stroke-width="1.5"/>';
+      s+='<rect x="'+x+'" y="'+(86-h)+'" width="6" height="'+h+'" fill="rgba(0,0,0,0.15)"/>';
+    }
+    return svgWrap(s);
+  };
+
+  // 8. 书本套装（上下册）
+  const svgBookSet=()=>{
+    let s='';
+    s+='<rect x="70" y="22" width="70" height="56" rx="3" fill="#64B5F6" stroke="#3E4A63" stroke-width="2"/>';
+    s+='<rect x="70" y="22" width="8" height="56" fill="rgba(0,0,0,0.2)"/>';
+    s+='<text x="105" y="54" text-anchor="middle" font-size="13" fill="#fff" font-weight="bold">上册</text>';
+    s+='<rect x="180" y="22" width="70" height="56" rx="3" fill="#E57373" stroke="#3E4A63" stroke-width="2"/>';
+    s+='<rect x="180" y="22" width="8" height="56" fill="rgba(0,0,0,0.2)"/>';
+    s+='<text x="215" y="54" text-anchor="middle" font-size="13" fill="#fff" font-weight="bold">下册</text>';
+    return svgWrap(s);
+  };
+
+  // 9. 线段图（差倍/和倍）
+  const svgLineSeg=()=>{
+    let s='';
+    // 上线段（甲数，较长）
+    s+='<line x1="40" y1="32" x2="280" y2="32" stroke="#3E4A63" stroke-width="3"/>';
+    s+='<polygon points="280,32 270,27 270,37" fill="#3E4A63"/>';
+    s+='<text x="30" y="37" text-anchor="end" font-size="12" fill="#3E4A63">甲</text>';
+    // 下线段（乙数，较短，约为甲的 a/b）
+    s+='<line x1="40" y1="64" x2="180" y2="64" stroke="#B4945A" stroke-width="3"/>';
+    s+='<polygon points="180,64 170,59 170,69" fill="#B4945A"/>';
+    s+='<text x="30" y="69" text-anchor="end" font-size="12" fill="#B4945A">乙</text>';
+    // 差标注
+    s+='<line x1="180" y1="38" x2="180" y2="58" stroke="#E57373" stroke-width="1" stroke-dasharray="3,2"/>';
+    s+='<line x1="280" y1="38" x2="280" y2="58" stroke="#E57373" stroke-width="1" stroke-dasharray="3,2"/>';
+    s+='<text x="230" y="54" text-anchor="middle" font-size="11" fill="#E57373">差</text>';
+    return svgWrap(s);
+  };
+
+  // 10. 工程进度（两人+进度条）
+  const svgWork=()=>{
+    let s='';
+    // 甲
+    s+='<circle cx="70" cy="30" r="10" fill="#FFCC80"/>';
+    s+='<rect x="60" y="40" width="20" height="28" rx="4" fill="#64B5F6"/>';
+    s+='<text x="70" y="84" text-anchor="middle" font-size="11" fill="#3E4A63">甲</text>';
+    // 乙
+    s+='<circle cx="250" cy="30" r="10" fill="#FFCC80"/>';
+    s+='<rect x="240" y="40" width="20" height="28" rx="4" fill="#E57373"/>';
+    s+='<text x="250" y="84" text-anchor="middle" font-size="11" fill="#3E4A63">乙</text>';
+    // 进度条
+    s+='<rect x="100" y="46" width="120" height="16" rx="8" fill="#E0E0E0"/>';
+    s+='<rect x="100" y="46" width="72" height="16" rx="8" fill="#66BB6A"/>';
+    s+='<text x="160" y="58" text-anchor="middle" font-size="10" fill="#fff">合作中</text>';
+    return svgWrap(s);
+  };
+
+  const svgs=[svgFruit, svgFlower, svgPrice, svgMeter, svgBarrel, svgTree, svgBook, svgBookSet, svgLineSeg, svgWork];
+
+  // ============================================================
+  // 10种题型生成函数（每种10个场景，随机选1）
+  // ============================================================
+
+  // 题型1：求一个数的几分之几是多少（基础乘法）  公式：n × a/b
+  const t1=()=>{
+    const scenes=[
+      {place:'超市运来', obj:'橘子', unit:'千克', q:(n,F)=>'超市运来'+n+'千克橘子，香蕉的质量是橘子的'+F+'，香蕉有多少千克？'},
+      {place:'水果店有', obj:'苹果', unit:'个', q:(n,F)=>'水果店有'+n+'个苹果，卖出了'+F+'，卖出了多少个？'},
+      {place:'图书馆有', obj:'书', unit:'本', q:(n,F)=>'图书馆有'+n+'本书，故事书占'+F+'，故事书有多少本？'},
+      {place:'学校有', obj:'学生', unit:'人', q:(n,F)=>'学校有'+n+'名学生，男生占'+F+'，男生有多少人？'},
+      {place:'一袋大米', obj:'大米', unit:'千克', q:(n,F)=>'一袋大米重'+n+'千克，吃了'+F+'，吃了多少千克？'},
+      {place:'停车场有', obj:'汽车', unit:'辆', q:(n,F)=>'停车场有'+n+'辆汽车，小汽车占'+F+'，小汽车有多少辆？'},
+      {place:'果园有', obj:'果树', unit:'棵', q:(n,F)=>'果园有'+n+'棵果树，苹果树占'+F+'，苹果树有多少棵？'},
+      {place:'一盒铅笔', obj:'铅笔', unit:'支', q:(n,F)=>'一盒铅笔有'+n+'支，红铅笔占'+F+'，红铅笔有多少支？'},
+      {place:'养殖场有', obj:'鸡', unit:'只', q:(n,F)=>'养殖场有'+n+'只鸡，母鸡占'+F+'，母鸡有多少只？'},
+      {place:'仓库有', obj:'货物', unit:'吨', q:(n,F)=>'仓库有'+n+'吨货物，运走了'+F+'，运走了多少吨？'},
+    ];
+    const [a,b]=mkFrac();
+    const n=b*ri(2,12);  // 保证 n*a/b 是整数
+    const s=pick(scenes);
+    return {q:s.q(n,F(a,b)), a:String(n*a/b), svg:svgs[0]()};
+  };
+
+  // 题型2：连续求一个数的几分之几（连乘）  公式：n × a/b × c/d
+  const t2=()=>{
+    const scenes=[
+      {q:(n,F1,F2)=>'学校花坛里有'+n+'株月季，玫瑰的数量是月季的'+F1+'，百合的数量是玫瑰的'+F2+'，百合有多少株？'},
+      {q:(n,F1,F2)=>'超市运来'+n+'千克苹果，香蕉是苹果的'+F1+'，橘子是香蕉的'+F2+'，橘子有多少千克？'},
+      {q:(n,F1,F2)=>'学校有'+n+'名学生，六年级占'+F1+'，六(1)班占六年级的'+F2+'，六(1)班有多少人？'},
+      {q:(n,F1,F2)=>'图书馆有'+n+'本书，科技书占'+F1+'，天文类占科技书的'+F2+'，天文类有多少本？'},
+      {q:(n,F1,F2)=>'果园有'+n+'棵果树，桃树占'+F1+'，水蜜桃占桃树的'+F2+'，水蜜桃有多少棵？'},
+      {q:(n,F1,F2)=>'一袋大米重'+n+'千克，第一天吃了'+F1+'，第二天吃了第一天的'+F2+'，第二天吃了多少千克？'},
+      {q:(n,F1,F2)=>'养殖场有'+n+'只鸡，母鸡占'+F1+'，产蛋鸡占母鸡的'+F2+'，产蛋鸡有多少只？'},
+      {q:(n,F1,F2)=>'停车场有'+n+'辆汽车，私家车占'+F1+'，白色车占私家车的'+F2+'，白色车有多少辆？'},
+      {q:(n,F1,F2)=>'仓库有'+n+'吨货物，第一天运走'+F1+'，第二天运走第一天的'+F2+'，第二天运走多少吨？'},
+      {q:(n,F1,F2)=>'一盒笔有'+n+'支，钢笔占'+F1+'，蓝钢笔占钢笔的'+F2+'，蓝钢笔有多少支？'},
+    ];
+    const [a,b]=mkFrac();
+    const [c,d]=mkFrac();
+    const n=b*d*ri(1,4);  // 保证连乘结果是整数
+    const s=pick(scenes);
+    return {q:s.q(n,F(a,b),F(c,d)), a:String(n*a/b*c/d), svg:svgs[1]()};
+  };
+
+  // 题型3：比单位"1"多几分之几（乘法）  公式：n × (1 + a/b)
+  const t3=()=>{
+    const scenes=[
+      {q:(n,F)=>'一件外套标价'+n+'元，现在售价比原价高'+F+'，这件外套现价是多少元？'},
+      {q:(n,F)=>'六(1)班有男生'+n+'人，女生比男生多'+F+'，女生有多少人？'},
+      {q:(n,F)=>'水果店有苹果'+n+'千克，梨比苹果多'+F+'，梨有多少千克？'},
+      {q:(n,F)=>'去年产量是'+n+'吨，今年比去年增产'+F+'，今年产量是多少吨？'},
+      {q:(n,F)=>'一件商品原价'+n+'元，涨价'+F+'后售价是多少元？'},
+      {q:(n,F)=>'第一天修路'+n+'米，第二天比第一天多修'+F+'，第二天修了多少米？'},
+      {q:(n,F)=>'养殖场有鸡'+n+'只，鸭比鸡多'+F+'，鸭有多少只？'},
+      {q:(n,F)=>'上册书有'+n+'页，下册比上册多'+F+'，下册有多少页？'},
+      {q:(n,F)=>'甲车速度是'+n+'千米/时，乙车比甲车快'+F+'，乙车速度是多少？'},
+      {q:(n,F)=>'小明第一天看书'+n+'页，第二天比第一天多看'+F+'，第二天看了多少页？'},
+    ];
+    const [a,b]=mkFrac();
+    const n=b*ri(2,10);
+    const s=pick(scenes);
+    return {q:s.q(n,F(a,b)), a:String(n*(b+a)/b), svg:svgs[2]()};
+  };
+
+  // 题型4：比单位"1"少几分之几（乘法）  公式：n × (1 - a/b)
+  const t4=()=>{
+    const scenes=[
+      {q:(n,F)=>'小区8月份用电'+n+'度，9月份比8月份节约'+F+'，9月份用电多少度？'},
+      {q:(n,F)=>'六(1)班有男生'+n+'人，女生比男生少'+F+'，女生有多少人？'},
+      {q:(n,F)=>'水果店有苹果'+n+'千克，梨比苹果少'+F+'，梨有多少千克？'},
+      {q:(n,F)=>'一件商品原价'+n+'元，降价'+F+'后售价是多少元？'},
+      {q:(n,F)=>'去年产量是'+n+'吨，今年比去年减产'+F+'，今年产量是多少吨？'},
+      {q:(n,F)=>'第一天修路'+n+'米，第二天比第一天少修'+F+'，第二天修了多少米？'},
+      {q:(n,F)=>'养殖场有鸡'+n+'只，鸭比鸡少'+F+'，鸭有多少只？'},
+      {q:(n,F)=>'上册书有'+n+'页，下册比上册少'+F+'，下册有多少页？'},
+      {q:(n,F)=>'甲车速度是'+n+'千米/时，乙车比甲车慢'+F+'，乙车速度是多少？'},
+      {q:(n,F)=>'一桶油重'+n+'千克，用去'+F+'，还剩多少千克？'},
+    ];
+    const [a,b]=mkFrac();
+    const n=b*ri(2,10);
+    const s=pick(scenes);
+    return {q:s.q(n,F(a,b)), a:String(n*(b-a)/b), svg:svgs[3]()};
+  };
+
+  // 题型5：已知一个数的几分之几是多少，求单位"1"（基础除法）  公式：part ÷ a/b = part*b/a
+  const t5=()=>{
+    const scenes=[
+      {q:(part,F)=>'一桶油用掉'+F+'，刚好倒掉'+part+'千克，这桶油原本重多少千克？'},
+      {q:(part,F)=>'一本书看了'+F+'，正好看了'+part+'页，这本书共有多少页？'},
+      {q:(part,F)=>'一箱苹果卖了'+F+'，刚好卖了'+part+'个，这箱苹果共有多少个？'},
+      {q:(part,F)=>'一条路修了'+F+'，正好修了'+part+'米，这条路全长多少米？'},
+      {q:(part,F)=>'男生占全班人数的'+F+'，男生有'+part+'人，全班共有多少人？'},
+      {q:(part,F)=>'一袋大米吃了'+F+'，正好吃了'+part+'千克，这袋大米重多少千克？'},
+      {q:(part,F)=>'停车场小汽车占'+F+'，小汽车有'+part+'辆，停车场共有多少辆汽车？'},
+      {q:(part,F)=>'果园苹果树占'+F+'，苹果树有'+part+'棵，果园共有多少棵果树？'},
+      {q:(part,F)=>'仓库运走了'+F+'的货物，刚好运走'+part+'吨，仓库原有多少吨货物？'},
+      {q:(part,F)=>'养殖场母鸡占'+F+'，母鸡有'+part+'只，养殖场共有多少只鸡？'},
+    ];
+    const [a,b]=mkFrac();
+    const part=a*ri(3,15);  // 保证 part*b/a 是整数
+    const s=pick(scenes);
+    return {q:s.q(part,F(a,b)), a:String(part*b/a), svg:svgs[4]()};
+  };
+
+  // 题型6：已知比单位"1"多几分之几，求单位"1"  公式：known ÷ (1 + a/b) = known*b/(b+a)
+  const t6=()=>{
+    const scenes=[
+      {q:(known,F)=>'果园苹果树有'+known+'棵，苹果树比梨树多'+F+'，梨树有多少棵？'},
+      {q:(known,F)=>'一件商品现价'+known+'元，现价比原价高'+F+'，原价是多少元？'},
+      {q:(known,F)=>'六(1)班女生有'+known+'人，女生比男生多'+F+'，男生有多少人？'},
+      {q:(known,F)=>'今年产量是'+known+'吨，今年比去年增产'+F+'，去年产量是多少吨？'},
+      {q:(known,F)=>'第二天修路'+known+'米，第二天比第一天多修'+F+'，第一天修了多少米？'},
+      {q:(known,F)=>'养殖场鸭有'+known+'只，鸭比鸡多'+F+'，鸡有多少只？'},
+      {q:(known,F)=>'下册书有'+known+'页，下册比上册多'+F+'，上册有多少页？'},
+      {q:(known,F)=>'乙车速度是'+known+'千米/时，乙车比甲车快'+F+'，甲车速度是多少？'},
+      {q:(known,F)=>'水果店梨有'+known+'千克，梨比苹果多'+F+'，苹果有多少千克？'},
+      {q:(known,F)=>'小明第二天看书'+known+'页，第二天比第一天多看'+F+'，第一天看了多少页？'},
+    ];
+    const [a,b]=mkFrac();
+    const known=(b+a)*ri(2,8);  // 保证 known*b/(b+a) 是整数
+    const s=pick(scenes);
+    return {q:s.q(known,F(a,b)), a:String(known*b/(b+a)), svg:svgs[5]()};
+  };
+
+  // 题型7：已知比单位"1"少几分之几，求单位"1"  公式：known ÷ (1 - a/b) = known*b/(b-a)
+  const t7=()=>{
+    const scenes=[
+      {q:(known,F)=>'书店卖出漫画书'+known+'本，漫画书比故事书少卖'+F+'，故事书卖出多少本？'},
+      {q:(known,F)=>'一件商品现价'+known+'元，现价比原价低'+F+'，原价是多少元？'},
+      {q:(known,F)=>'六(1)班女生有'+known+'人，女生比男生少'+F+'，男生有多少人？'},
+      {q:(known,F)=>'今年产量是'+known+'吨，今年比去年减产'+F+'，去年产量是多少吨？'},
+      {q:(known,F)=>'第二天修路'+known+'米，第二天比第一天少修'+F+'，第一天修了多少米？'},
+      {q:(known,F)=>'养殖场鸭有'+known+'只，鸭比鸡少'+F+'，鸡有多少只？'},
+      {q:(known,F)=>'下册书有'+known+'页，下册比上册少'+F+'，上册有多少页？'},
+      {q:(known,F)=>'乙车速度是'+known+'千米/时，乙车比甲车慢'+F+'，甲车速度是多少？'},
+      {q:(known,F)=>'水果店梨有'+known+'千克，梨比苹果少'+F+'，苹果有多少千克？'},
+      {q:(known,F)=>'小区9月份用电'+known+'度，9月份比8月份节约'+F+'，8月份用电多少度？'},
+    ];
+    const [a,b]=mkFrac();
+    const known=(b-a)*ri(3,12);  // 保证 known*b/(b-a) 是整数
+    const s=pick(scenes);
+    return {q:s.q(known,F(a,b)), a:String(known*b/(b-a)), svg:svgs[6]()};
+  };
+
+  // 题型8：分数和倍问题  公式：较小数 = 和×b/(a+b)，较大数 = 和×a/(a+b)（a>b时a为较大份数）
+  // 这里设 乙是甲的 a/b（a<b，即乙<甲），甲 = 和×b/(a+b)，乙 = 和×a/(a+b)，问甲（较大数）
+  const t8=()=>{
+    const scenes=[
+      {q:(sum,F)=>'一套书总价'+sum+'元，下册的价格是上册的'+F+'，上册多少元？'},
+      {q:(sum,F)=>'甲乙两数的和是'+sum+'，乙数是甲数的'+F+'，甲数是多少？'},
+      {q:(sum,F)=>'果园苹果树和梨树共'+sum+'棵，梨树是苹果树的'+F+'，苹果树有多少棵？'},
+      {q:(sum,F)=>'六(1)班男生女生共'+sum+'人，女生是男生的'+F+'，男生有多少人？'},
+      {q:(sum,F)=>'上下两层书架共'+sum+'本书，下层是上层的'+F+'，上层有多少本？'},
+      {q:(sum,F)=>'甲乙两车共行驶'+sum+'千米，乙车路程是甲车的'+F+'，甲车行驶了多少千米？'},
+      {q:(sum,F)=>'养殖场鸡鸭共'+sum+'只，鸭是鸡的'+F+'，鸡有多少只？'},
+      {q:(sum,F)=>'两袋大米共重'+sum+'千克，第二袋是第一袋的'+F+'，第一袋重多少千克？'},
+      {q:(sum,F)=>'花坛红花黄花共'+sum+'朵，黄花是红花的'+F+'，红花有多少朵？'},
+      {q:(sum,F)=>'一二班共'+sum+'人，二班人数是一班的'+F+'，一班有多少人？'},
+    ];
+    const [a,b]=mkFrac();  // a<b，乙是甲的 a/b
+    const sum=(a+b)*ri(2,10);  // 保证 甲=sum*b/(a+b) 是整数
+    const s=pick(scenes);
+    return {q:s.q(sum,F(a,b)), a:String(sum*b/(a+b)), svg:svgs[7]()};
+  };
+
+  // 题型9：分数差倍问题  公式：较大数 = 差×b/(b-a)，较小数 = 差×a/(b-a)，问较大数
+  const t9=()=>{
+    const scenes=[
+      {q:(diff,F)=>'甲数比乙数大'+diff+'，乙数是甲数的'+F+'，甲数是多少？'},
+      {q:(diff,F)=>'果园苹果树比梨树多'+diff+'棵，梨树是苹果树的'+F+'，苹果树有多少棵？'},
+      {q:(diff,F)=>'六(1)班男生比女生多'+diff+'人，女生是男生的'+F+'，男生有多少人？'},
+      {q:(diff,F)=>'上册书比下册多'+diff+'页，下册是上册的'+F+'，上册有多少页？'},
+      {q:(diff,F)=>'甲车比乙车快'+diff+'千米/时，乙车速度是甲车的'+F+'，甲车速度是多少？'},
+      {q:(diff,F)=>'养殖场鸡比鸭多'+diff+'只，鸭是鸡的'+F+'，鸡有多少只？'},
+      {q:(diff,F)=>'第一袋大米比第二袋多'+diff+'千克，第二袋是第一袋的'+F+'，第一袋重多少千克？'},
+      {q:(diff,F)=>'花坛红花比黄花多'+diff+'朵，黄花是红花的'+F+'，红花有多少朵？'},
+      {q:(diff,F)=>'一班比二班多'+diff+'人，二班人数是一班的'+F+'，一班有多少人？'},
+      {q:(diff,F)=>'上层书架比下层多'+diff+'本书，下层是上层的'+F+'，上层有多少本？'},
+    ];
+    const [a,b]=mkFrac();  // a<b
+    const diff=(b-a)*ri(2,10);  // 保证 甲=diff*b/(b-a) 是整数
+    const s=pick(scenes);
+    return {q:s.q(diff,F(a,b)), a:String(diff*b/(b-a)), svg:svgs[8]()};
+  };
+
+  // 题型10：工程分数应用题  公式：合作时间 = 1 ÷ (1/X + 1/Y) = XY/(X+Y)
+  const t10=()=>{
+    // 预定义整除友好的 (X,Y) 对，保证 XY/(X+Y) 是整数
+    const pairs=[[6,3],[4,4],[8,8],[12,6],[12,4],[10,10],[15,10],[9,18],[8,24],[20,5]];
+    const [X,Y]=pick(pairs);
+    const scenes=[
+      {q:(x,y)=>'一项任务，甲单独完成需要'+x+'小时，乙单独完成需要'+y+'小时。两人合作，多久可以完成全部任务？'},
+      {q:(x,y)=>'一项工程，甲队单独做需'+x+'天完成，乙队单独做需'+y+'天完成。两队合作，几天完成？'},
+      {q:(x,y)=>'一个水池，甲管'+x+'小时注满，乙管'+y+'小时注满。两管同时开，几小时注满？'},
+      {q:(x,y)=>'打一份稿件，甲'+x+'小时打完，乙'+y+'小时打完。两人合作，几小时打完？'},
+      {q:(x,y)=>'加工一批零件，师傅'+x+'小时完成，徒弟'+y+'小时完成。两人合作，几小时完成？'},
+      {q:(x,y)=>'修一条路，甲队'+x+'天修完，乙队'+y+'天修完。两队合作，几天修完？'},
+      {q:(x,y)=>'搬运一堆货物，甲车'+x+'次运完，乙车'+y+'次运完。两车合作，几次运完？'},
+      {q:(x,y)=>'打扫一间教室，甲组'+x+'分钟完成，乙组'+y+'分钟完成。两组合作，几分钟完成？'},
+      {q:(x,y)=>'做一批玩具，甲工人'+x+'天完成，乙工人'+y+'天完成。两人合作，几天完成？'},
+      {q:(x,y)=>'整理一批图书，甲组'+x+'小时完成，乙组'+y+'小时完成。两组合作，几小时完成？'},
+    ];
+    const s=pick(scenes);
+    const ans=X*Y/(X+Y);
+    return {q:s.q(X,Y), a:String(ans), svg:svgs[9]()};
+  };
+
+  // ---- 主函数：随机选一种题型 ----
+  const types=[t1,t2,t3,t4,t5,t6,t7,t8,t9,t10];
+  const it=pick(types)();
+  let q=mf(it.q, it.a);
+  if(it.svg) q.svg=it.svg;
+  return q;
+}
+
 
 // ============================================================
 // 初始化
