@@ -5606,7 +5606,7 @@ const KNOWLEDGE_BASE = {
         summary: ['从前面、上面、左面观察同一个立体图形，看到的形状可能不同','用小正方体拼搭立体图形，数方块要分层数、按列数','只看一个方向的视图不能确定唯一的立体图形，要结合多个方向','无论从哪个方向看，看到的都是平面图形'],
         fidx: [{ t: '三个方向', f: '从前面看 / 从上面看 / 从左面看' }, { t: '数方块', f: '先数看得见的，再想被挡住的' }],
         method: [{ t: '画视图', s: '先确定看到几列几行，再逐格判断该位置有没有方块，最后描出外轮廓' }, { t: '还原立体图形', s: '单个方向的视图答案不唯一，三个方向合起来才能确定' }] },
-      { name: '专项·平均数应用', group: '专项', type: 'application', gen: g_app_planting },
+      { name: '专项·平均数应用', group: '专项', type: 'application', gen: g_app_average },
       { name: '专项·对称图形', group: '专项', type: 'shape', gen: g_shape_symmetry },
       { name: '专项·价格应用', group: '专项', type: 'application', gen: g_app_price },
       { name: '专项·鸡兔同笼进阶', group: '专项', type: 'application', gen: g_app_chicken_rabbit },
@@ -7107,9 +7107,34 @@ function g_shape_compose(){
 }
 
 // ===== 1年级下册 =====
-function g20_subtraction(){let a=ri(11,18),b=ri(2,9);if(a-b<0)[a,b]=[b,a];return mc(`${a}-${b}=?`,a-b,[a-b+2,a-b-1,a-b+3])}
+// v89 修复：原 a∈[11,18]、b∈[2,9] 只保证不出现负数，一半的题目个位够减、根本不用退位（如 15-4）。
+// 退位的充要条件是被减数个位 < 减数，即 a%10 < b；据此取 b∈[a%10+1, 9]，差必为 2~9 的单数。
+function g20_subtraction(){
+  let a=ri(11,18), ones=a%10, b=ri(ones+1,9), r=a-b;
+  return mc(`${a}-${b}=?`, r, [r+2, Math.max(1,r-1), r+3]);
+}
 function g100_count(){let n=ri(20,99);return mf(`在计数器上拨出${n}，这个数是由几个十和几个一组成的？`, `${Math.floor(n/10)}个十和${n%10}个一`)}
-function g100_addsub_nocarry(){let a=ri(20,80),b=ri(10,99-a);return mc(`${a}+${b}=？`,a+b,[a+b-5,a+b+5,a+b+10])}
+// v89 修复：① 原只出加法，与单元名「加减法」不符；② 更严重的是原 a∈[20,80]、b∈[10,99-a]
+// 只保证和≤99，不保证不进位（如 43+29，个位 3+9=12 要进位）。
+// 不进位条件：个位相加 <10 且 十位相加 <10；改为直接按「十位/个位」构造，天然满足。
+function g100_addsub_nocarry(){
+  if(Math.random()<0.5){
+    if(Math.random()<0.35){                       // 整十数加一位数（第1课时）
+      let t=ri(2,8)*10, o=ri(1,9), s=t+o;
+      return mc(`${t}+${o}=？`, s, [s+1, Math.max(1,s-1), s+10]);
+    }
+    let aT=ri(2,7), aO=ri(0,9), bT=ri(1,9-aT), bO=ri(0,9-aO);
+    let a=aT*10+aO, b=bT*10+bO, s=a+b;            // 个位、十位均不进位，和 ≤99
+    return mc(`${a}+${b}=？`, s, [s-5, s+5, s+10]);
+  }
+  if(Math.random()<0.4){                          // 两位数减一位数（不退位）
+    let t=ri(2,9), aO=ri(1,9), o=ri(1,aO), a=t*10+aO, d=a-o;
+    return mc(`${a}-${o}=？`, d, [d+1, d-1, d+10]);
+  }
+  let aT=ri(3,9), aO=ri(0,9), bT=ri(1,aT-1), bO=ri(0,aO);
+  let a=aT*10+aO, b=bT*10+bO, d=a-b;              // 个位、十位均不退位，a-b ≥10
+  return mc(`${a}-${b}=？`, d, [d+2, d-1, d+3]);
+}
 function g100_addsub_carry(){let a=ri(15,40),b=ri(10,80-a);if((a%10)+(b%10)<10){b+=10-((a%10)+(b%10))%10+ri(1,3)}return mc(`竖式计算：${a}+${b}=？`,a+b,[a+b-3,a+b+2])}
 
 function g_money(){
@@ -7287,10 +7312,27 @@ function g2_length(){
 
 function g100_add(){let a=ri(20,70),b=ri(10,99-a);return mc(`竖式计算：${a}+${b}=？`,a+b,[a+b-2,a+b+2,a+b-1])}
 function g100_sub(){let a=ri(40,99),b=ri(10,a);return mc(`竖式计算：${a}-${b}=？`,a-b,[a-b+2,a-b-1,a-b+3])}
-function g_mul_1(){let a=ri(2,5),b=ri(1,9); if(a*b>36)return g_mul_1(); return mc(`${a}×${b}=？`,a*b,[a*b-1,a*b+1,a*b+a])}
+// v89 修复：原 a∈[2,5]、b∈[1,9] 会出 5×7 这类题——「五七三十五」是 **7 的口诀**，
+// 按人教版归表内乘法（二），放在本单元即超纲错位。表内乘法（一）= 2~6 的口诀，两因数都取 2~6。
+// 同时补齐单元另外 4 个知识点（乘法初步认识 / 各部分名称 / 乘加乘减 / 用乘法解决问题）。
+function g_mul_1(){
+  let a=ri(2,6), b=ri(2,6), p=a*b, r=Math.random();
+  if(r<0.40) return mc(`${a}×${b}=？`, p, dis3(p, p-1, p+1, a+b));                     // 2~6的乘法口诀
+  if(r<0.58){                                                                          // 乘加、乘减
+    if(Math.random()<0.5){ let c=ri(1,20), v=p+c;
+      return mc(`${a}×${b}+${c}=？`, v, dis3(v, v-1, v+1, p-c>0?p-c:p+c+3)); }
+    let c=ri(1,p), s=p-c;
+    return mc(`${a}×${b}-${c}=？`, s, dis3(s, s+1, Math.max(0,s-1), s+2));
+  }
+  if(r<0.74) return mc(`${a}个${b}相加，写成乘法算式是？`, `${a}×${b}`,
+    dis3(`${a}×${b}`, `${a}+${b}`, `${b}+${a}`, `${a}×${ri(2,6)}`));                    // 乘法的初步认识
+  if(r<0.86) return mc(`${a}×${b}的积是？`, p, dis3(p, p+a, p+b, a+b));                 // 各部分名称
+  return mc(`每组有${a}个，${b}组一共有多少个？`, p, dis3(p, p+b, a+b, p*a));            // 用乘法解决问题
+}
 function g_mul_2(){
   // v73.2 扩容：原单行算式（容量约 27）。补乘法口诀概念题，容量 35+
-  let a=ri(6,9), b=ri(1,9); if(a*b<20) return g_mul_2();
+  // v89：a 由 ri(6,9) 改为 ri(7,9)——6 的口诀属表内乘法（一），两单元不应重叠。
+  let a=ri(7,9), b=ri(1,9); if(a*b<20) return g_mul_2();
   let reps=[
     {q:'一个乘数是7，另一个乘数是8，积是？',a:'56',d:['15','63','54']},
     {q:'9的乘法口诀一共有几句？',a:'9句',d:['8句','10句','7句']},
@@ -10049,6 +10091,58 @@ function g_app_chicken_rabbit(){
   let heads=ri(8,15),r=ri(1,heads-2),c=heads-r,feet=r*4+c*2;
   return mc(`鸡兔同笼，共${heads}个头${feet}只脚，兔有几只？`,r,[c,r+1,heads-r+1]);
 }
+// ===== 专项·平均数应用（v89 新建）=====
+// 原 4下·11 误挂 g_app_planting（植树问题）：既是「内容与单元名矛盾」，
+// 又是跨年级超纲（植树问题在 5上·数学广角）。现按本单元 6 个知识点重写。
+function g_app_average(){
+  const reps=[
+    {q:'求平均数用（　）÷（　）',a:'总数÷总份数',d:['总份数÷总数','总数×总份数','总数−总份数']},
+    {q:'平均数一定在最大数与最小数之间，对吗？',a:'对',d:['不对','不一定','只对整数成立']},
+    {q:'用"移多补少"求平均数，就是把多的部分（　）',a:'补给少的',d:['全部去掉','再加一遍','乘2']},
+    {q:'一组数据中的每个数都加上5，平均数会（　）',a:'也加上5',d:['不变','加上50','乘5']},
+    {q:'去掉一个特别大的数后，平均数会（　）',a:'变小',d:['变大','不变','变成0']},
+    {q:'平均数反映的是一组数据的（　）',a:'总体水平',d:['最大数','最小数','数据的个数']},
+  ];
+  const r=Math.random();
+  if(r<0.22){                                    // 求平均数（总数÷份数，保证整除）
+    let n=pick([3,4,5]), avg=ri(15,80), left=n*avg, arr=[];
+    for(let j=0;j<n-1;j++){
+      let remain=n-1-j, share=left/(n-j);
+      arr.push(ri(Math.max(1,Math.round(share)-12), Math.min(left-remain, Math.round(share)+12)));
+      left-=arr[j];
+    }
+    arr.push(left);
+    return mc(`数据：${arr.join('、')}，平均数是？`, avg, dis3(avg, avg+ri(1,4), Math.max(1,avg-ri(1,4)), arr[0]));
+  }
+  if(r<0.42){                                    // 逆用：已知平均数求总数
+    let n=pick([3,4,5,6]), avg=ri(12,90);
+    return mc(`${n}个数的平均数是${avg}，这${n}个数的和是？`, n*avg, dis3(n*avg, n+avg, n*avg-avg, avg));
+  }
+  if(r<0.66){                                    // 实际问题：平均每天 / 平均每月 / 平均身高 / 平均成绩
+    let k=ri(0,3), n=pick([3,4,5,6,7]), v=ri(8,90);
+    if(k===0) return mc(`小明${n}天平均每天练字${v}个，这些天一共练了多少个？`, n*v, dis3(n*v, n+v, n*v-v, v));
+    if(k===1) return mc(`工厂前${n}个月平均每月生产${v}台机器，一共生产多少台？`, n*v, dis3(n*v, n+v, n*v-v, v));
+    if(k===2) return mc(`6名同学的平均身高是${130+v}厘米，他们的身高和是多少厘米？`, 6*(130+v), dis3(6*(130+v), 130+v+6, 6*130+v, v));
+    return mc(`小华${n}次测验的平均成绩是${v+10}分，他的总分是多少分？`, n*(v+10), dis3(n*(v+10), n+v+10, (n-1)*(v+10), v+10));
+  }
+  if(r<0.86){                                    // 用平均数比较两组数据
+    let n=pick([3,4,5]), arrA, arrB, sa, sb, guard=0;
+    do{
+      let baseA=ri(62,78);
+      let baseB=baseA + (Math.random()<0.5 ? -ri(6,12) : ri(6,12));
+      arrA=[]; arrB=[];
+      for(let i=0;i<n;i++){ arrA.push(baseA+ri(-5,5)); arrB.push(baseB+ri(-5,5)); }
+      sa=arrA.reduce((x,y)=>x+y,0); sb=arrB.reduce((x,y)=>x+y,0);
+    } while(sa===sb && ++guard<30);
+    if(sa===sb){ arrA[0]+=1; sa+=1; }
+    let better=sa>sb?'甲组':'乙组', worse=sa>sb?'乙组':'甲组';
+    return mc(`甲组成绩：${arrA.join('、')}；乙组成绩：${arrB.join('、')}，哪组成绩好（比平均数）？`,
+      better, [worse,'一样好','无法比较']);
+  }
+  let it=pick(reps); return mc(it.q, it.a, it.d);
+}
+// 注：g_app_planting 保留原实现——verify_v48.js 回归测试按函数名调用它；
+// 植树问题的正式单元是 5上·数学广角（g5_tree）与 5上·专项（g_tree_special）。
 function g_app_planting(){let g=pick([3,4,5,6,8,10]),n=ri(6,15),l=g*(n-1);return mc(`一条路长${l}米，每隔${g}米种一棵树，共几棵？`,n,[n-1,n+1,n+2])}
 // 一行 n 个小正方体（四下「观察物体」专用：只用小正方体，不引入圆柱/圆锥/棱长）
 function figCubeRow(n){

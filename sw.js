@@ -217,7 +217,7 @@
 //   C. 修复容量抖动：4·下「四则运算」原只有 1 条参数化模板，容量在 22~24 间抖动
 //      （_cap 验收时好时坏），补 8 条模板后连续三次稳定 0/131 单元低于 24。
 //   验收：_cap 0/131、_audit_cross 0 题次超纲、SCOPE=all _test_all_units 0 条问题。
-const CACHE = 'lyj-shell-v87';
+const CACHE = 'lyj-shell-v89';
 const SHELL = [
   './', './index.html', './pc.html', './manifest.webmanifest',
   './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',
