@@ -5723,6 +5723,10 @@ const KNOWLEDGE_BASE = {
       { name: '专项·百分数应用题', group: '专项', type: 'application', gen: g_app_fraction },
       { name: '专项·按比分配', group: '专项', type: 'application', gen: g_app_ratio },
       { name: '专项·展开图', group: '专项', type: 'shape', gen: g_shape_expand },
+      { name: '专项·分数与小数混合运算', group: '专项', type: 'mixed', gen: g_mix_frac_dec,
+        summary: ['分数与小数混合运算：先统一形式（都化分数或都化小数），再按运算顺序计算', '乘法：分数乘小数可把小数化成分数，分子乘分子、分母乘分母', '加减法：统一成同分母分数或同计数单位的小数后再相加减', '两步混合：先算乘除，后算加减，有括号先算括号里的', '结果能约分的要约成最简分数，能化成有限小数的也可写小数'],
+        fidx: [{ t: '小数化分数', f: '0.6=3/5、0.25=1/4、0.125=1/8' }, { t: '分数化小数', f: '3/4=0.75、5/8=0.625' }, { t: '运算顺序', f: '先乘除后加减，有括号先算括号' }],
+        method: [{ t: '统一形式', s: '分数和小数混在一起，先决定统一成分数还是小数，再计算最稳' }, { t: '易错点', s: '别把小数点和分数线搞混；结果要化成最简分数或最简小数' }] },
     ],
     2: [ // 六下 · 课本同步（人教版5单元）+ 专项练习
       { name: '负数', group: '课本', term: '下', unit: 1, type: 'basic', gen: g6_negative,
@@ -5779,6 +5783,114 @@ function fmt(n) {
   n = Number(n);
   if (isNaN(n)) return String(n);
   return Number.isInteger(n) ? n.toString() : n.toFixed(2).replace(/\.?0+$/, '');
+}
+
+// ===== 有理数工具（专项·分数与小数混合运算，v91）=====
+// 以 [n, d]（d>0，已约分）表示有理数；分母只含质因子 2/5 时可精确化为有限小数
+function rat(n, d) {
+  if (d < 0) { n = -n; d = -d; }
+  let g = gcd(Math.abs(n), d) || 1;
+  return [Math.round(n / g), Math.round(d / g)];
+}
+function ratAdd(a, b) { return rat(a[0] * b[1] + b[0] * a[1], a[1] * b[1]); }
+function ratSub(a, b) { return rat(a[0] * b[1] - b[0] * a[1], a[1] * b[1]); }
+function ratMul(a, b) { return rat(a[0] * b[0], a[1] * b[1]); }
+function ratDiv(a, b) { return b[0] === 0 ? a : rat(a[0] * b[1], a[1] * b[0]); }
+// 结果呈现：分母只含 2/5 因子（可精确化为小数）→ 给小数串；否则给最简分数串
+// 两种形态都能被 looseNumericEquals 判等（分数↔小数互化已支持）
+function ratStr(r) {
+  if (r[1] === 1) return String(r[0]);
+  let x = r[1];
+  while (x % 2 === 0) x /= 2;
+  while (x % 5 === 0) x /= 5;
+  if (x === 1) {
+    let v = r[0] / r[1];
+    let s = v.toFixed(6).replace(/0+$/, '').replace(/\.$/, '');
+    return s;
+  }
+  return r[0] + '/' + r[1];
+}
+// 分数操作数：分母 2/4/5/8/10，分子 1..分母*2，约分后展示（跳过能约成整数的，保持真/假分数形态）
+function mixPickFrac() {
+  let den, num, r;
+  do {
+    den = pick([2, 4, 5, 8, 10]);
+    num = ri(1, den * 2);
+    r = rat(num, den);
+  } while (r[1] === 1);
+  return { r: r, disp: r[0] + '/' + r[1] };
+}
+// 小数操作数：分母仅含 2/5，可精确化为有限小数；disp 为小数串
+const MIX_DEC = [
+  { n: 1, d: 5, disp: '0.2' }, { n: 1, d: 4, disp: '0.25' }, { n: 2, d: 5, disp: '0.4' },
+  { n: 1, d: 2, disp: '0.5' }, { n: 3, d: 5, disp: '0.6' }, { n: 3, d: 4, disp: '0.75' },
+  { n: 4, d: 5, disp: '0.8' }, { n: 1, d: 8, disp: '0.125' }, { n: 1, d: 10, disp: '0.1' },
+  { n: 3, d: 10, disp: '0.3' }, { n: 7, d: 10, disp: '0.7' }, { n: 9, d: 10, disp: '0.9' },
+  { n: 1, d: 20, disp: '0.05' }, { n: 3, d: 8, disp: '0.375' }, { n: 5, d: 8, disp: '0.625' },
+  { n: 5, d: 4, disp: '1.25' }, { n: 3, d: 2, disp: '1.5' }, { n: 2, d: 25, disp: '0.08' }
+];
+function mixPickDec() {
+  let o = pick(MIX_DEC);
+  return { r: [o.n, o.d], disp: o.disp };
+}
+function _mixSym(op) { return op === 'add' ? '+' : op === 'sub' ? '−' : op === 'mul' ? '×' : '÷'; }
+function _mixCalc(op, A, B) {
+  if (op === 'add') return ratAdd(A, B);
+  if (op === 'sub') return ratSub(A, B);
+  if (op === 'mul') return ratMul(A, B);
+  return ratDiv(A, B);
+}
+// 单步：一个分数 与 一个小数 做 加/减/乘/除（减法保证结果非负）
+function _mixSingle(op, decFirst) {
+  let frac = mixPickFrac(), dec = mixPickDec();
+  let A, B;
+  if (op === 'sub') {
+    let fv = frac.r[0] / frac.r[1], dv = dec.r[0] / dec.r[1];
+    if (fv < dv) { A = dec; B = frac; } else { A = frac; B = dec; }
+  } else if (decFirst) { A = dec; B = frac; }
+  else { A = frac; B = dec; }
+  let res = _mixCalc(op, A.r, B.r);
+  return mf(A.disp + ' ' + _mixSym(op) + ' ' + B.disp + ' = ？', ratStr(res));
+}
+// 两步混合（先乘除后加减，结果恒为非负）
+function _mixTwoStep(kind) {
+  let f = mixPickFrac(), d1 = mixPickDec(), d2 = mixPickDec(), f2 = mixPickFrac();
+  if (kind === 1) { let r = ratAdd(ratMul(f.r, d1.r), d2.r); return mf('( ' + f.disp + ' × ' + d1.disp + ' ) + ' + d2.disp + ' = ？', ratStr(r)); }
+  if (kind === 2) { let r = ratAdd(ratDiv(d1.r, f.r), f2.r); return mf(d1.disp + ' ÷ ' + f.disp + ' + ' + f2.disp + ' = ？', ratStr(r)); }
+  if (kind === 3) { let r = ratMul(ratAdd(f.r, d1.r), f2.r); return mf('( ' + f.disp + ' + ' + d1.disp + ' ) × ' + f2.disp + ' = ？', ratStr(r)); }
+  if (kind === 4) { let r = ratMul(f.r, ratAdd(d1.r, f2.r)); return mf(f.disp + ' × ( ' + d1.disp + ' + ' + f2.disp + ' ) = ？', ratStr(r)); }
+  if (kind === 5) { let r = ratAdd(ratDiv(f.r, d1.r), f2.r); return mf(f.disp + ' ÷ ' + d1.disp + ' + ' + f2.disp + ' = ？', ratStr(r)); }
+  let r = ratAdd(d1.r, ratMul(f.r, d2.r)); return mf(d1.disp + ' + ' + f.disp + ' × ' + d2.disp + ' = ？', ratStr(r));
+}
+// 专项·分数与小数混合运算：生成器（自动判分走 looseNumericEquals / InputKit 零打字键盘）
+function g_mix_frac_dec() {
+  let items = [
+    () => _mixSingle('add', false),
+    () => _mixSingle('add', true),
+    () => _mixSingle('sub', false),
+    () => _mixSingle('mul', false),
+    () => _mixSingle('mul', true),
+    () => _mixSingle('div', false),
+    () => _mixSingle('div', true),
+    () => _mixSingle('add', true),
+    () => _mixSingle('mul', false),
+    () => _mixSingle('div', true),
+    () => _mixTwoStep(1),
+    () => _mixTwoStep(2),
+    () => _mixTwoStep(3),
+    () => _mixTwoStep(4),
+    () => _mixTwoStep(5),
+    () => _mixTwoStep(6),
+    () => mc('3/4 化成小数是（ ）', '0.75', ['0.34', '0.25', '0.8']),
+    () => mc('1/2 化成小数是（ ）', '0.5', ['5', '0.05', '0.2']),
+    () => mc('1/4 化成小数是（ ）', '0.25', ['2.5', '0.52', '0.025']),
+    () => mc('0.6 化成分数是（ ）', '3/5', ['2/5', '1/3', '3/10']),
+    () => mc('0.8 化成分数是（ ）', '4/5', ['5/4', '2/5', '0.45']),
+    () => mc('0.125 化成分数是（ ）', '1/8', ['1/4', '1/5', '1/2']),
+    () => mc('0.375 化成分数是（ ）', '3/8', ['8/3', '3/4', '0.38']),
+    () => mc('5/8 化成小数是（ ）', '0.625', ['0.58', '0.85', '0.125'])
+  ];
+  return pick(items)();
 }
 
 // 创建选择题
@@ -8796,7 +8908,12 @@ function g_shape_symmetry(){
 
 // ===== 5年级 =====
 function g5_mul(){
-  let a=ri(12,59)/10, b=ri(2,5), m=ri(3,9), n=ri(3,9);
+  // v90：a 原为 ri(12,59)/10，取到 20/30/40/50 时变成 2.0/3.0/4.0/5.0，
+  //      fmt() 抹掉小数点后题面显示成「2×4=？」——看着像整数乘法，与本单元「小数乘法」不符。
+  //      改为保证 a 是一位小数（非整数）。
+  let a=ri(12,59)/10; while(Number.isInteger(a)) a=ri(12,59)/10;
+  let b=ri(2,5), m=ri(3,9), n=ri(3,9);
+  let a4=ri(6,29)/5;   // 步长 0.2 的一位小数（1.2~5.8），保证 ×0.25 后仍是两位小数
   let items=[
     {q:`${fmt(a)}×${b}=？`,a:fmt(+(a*b).toFixed(2))},
     {q:`${m}×0.4=？`,a:fmt(m*0.4),d:[fmt(m*0.5),String(m),String(m+1)]},
@@ -8808,7 +8925,10 @@ function g5_mul(){
     {q:'计算小数乘法，先按什么算，再点小数点？',a:'整数乘法',d:['小数加法','除法','减法']},
     {q:'一个数（0除外）乘大于1的数，积比原数？',a:'大',d:['小','相等','无法确定']},
     // —— 缺口补题：严格按人教版五上·小数乘法（小数乘小数/近似数/运算律/应用）——
-    {q:`${fmt(a)}×0.25=？`,a:fmt(+(a*0.25).toFixed(3)),d:[fmt(a*0.5),fmt(a*0.2),fmt(a)]},
+    // v90：a×0.25（=a÷4）在 a 为一位小数时会得到三位小数（如 3.9×0.25=0.975），
+    //      fmt() 内部 toFixed(2) 会把答案截成 0.97 —— 与真实结果不符。
+    //      改用 a4（步长 0.2 的一位小数），保证 ÷4 后恰是两位小数，答案精确。
+    {q:`${fmt(a4)}×0.25=？`,a:fmt(+(a4*0.25).toFixed(2)),d:[fmt(+(a4*0.5).toFixed(2)),fmt(+(a4*0.2).toFixed(2)),fmt(a4)]},
     {q:'两个因数都是小数，积的小数位数等于？',a:'两个因数小数位数之和',d:['第一个因数的小数位数','第二个因数的小数位数','两数整数位数之和']},
     {q:`${fmt(a)}×${b}的积保留一位小数约是？`,a:fmt(+(a*b).toFixed(1)),d:[fmt(+(a*b).toFixed(2)),String(Math.round(a*b)),fmt(+(a*b+0.5).toFixed(1))]},
     {q:'计算2.5×3.2，可以想成2.5×4×0.8来简便，运用的是？',a:'乘法结合律',d:['乘法交换律','乘法分配律','加法结合律']},
@@ -8818,9 +8938,17 @@ function g5_mul(){
   return it.d?mc(it.q,it.a,it.d):mf(it.q,it.a);
 }
 function g5_div(){
+  // v90：item[0] 原为 `${fmt(a)}÷${b}=？`，a=ri(5,20)、b=ri(2,5) **两个都是整数**，
+  //      出的是「16÷3=？」这类整数除法，与本单元「小数除法」不符；
+  //      也导致知识点「除数是整数的小数除法」长期 0 覆盖。
+  //      改为 c=商×除数（c 为一位/两位小数）÷ 整数除数 b，出「4.2÷3=？」，商 q 精确无误差。
   let a=ri(5,20), b=ri(2,5), m=ri(4,40), n=ri(2,9);
+  let q=ri(11,49)/10, c=+(b*q).toFixed(2);
+  // c 必须不是整数，否则题面又变回「21÷5=？」这种整数除法
+  for (let t=0; t<50 && Number.isInteger(c); t++) { q=ri(11,49)/10; c=+(b*q).toFixed(2); }
+  if (Number.isInteger(c)) { c=+(c+0.5).toFixed(2); q=+(c/b).toFixed(2); }
   let items=[
-    {q:`${fmt(a)}÷${b}=？`,a:fmt(+(a/b).toFixed(2)),d:[fmt(+(a/b+0.5).toFixed(1)),fmt(+(a/b-0.3).toFixed(1)),fmt(a*b)]},
+    {q:`${fmt(c)}÷${b}=？`,a:fmt(q),d:[fmt(+(q+0.5).toFixed(2)),fmt(+(q-0.3).toFixed(2)),fmt(+(q*2).toFixed(2))]},
     {q:`${m}÷0.5=？`,a:String(m*2),d:[fmt(m/2),String(m),String(m+5)]},
     {q:`${m}÷${n}，被除数和除数同时乘10，商？`,a:'不变',d:['扩大10倍','缩小10倍','变大一点']},
     {q:'计算0.72÷0.9时，把除数变成9，被除数要变成？',a:'7.2',d:['0.72','72','0.072']},
