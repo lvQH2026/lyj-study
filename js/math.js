@@ -5847,6 +5847,20 @@ function mixPickDec() {
   let o = pick(MIX_DEC);
   return { r: [o.n, o.d], disp: o.disp };
 }
+// v92：结果小数位 >2 时重抽操作数（拒绝采样）。
+//   实测原实现会出「5/4×(0.9+15/8)=3.46875」这类 5~6 位小数的答案——数学上正确，
+//   但远超六年级的计算与输入负担（InputKit 要按 7 次），也不符合课本「结果一般 1~2 位小数」的实际。
+//   结果为分数（分母含 2/5 以外的质因子）时 ratStr 给分数串，小数位按 0 计，正常通过。
+function _mixDecLen(s) { const i = String(s).indexOf('.'); return i < 0 ? 0 : String(s).length - i - 1; }
+// 结果的「可答性」判据：小数 ≤2 位；分数则分母 ≤24（否则会出 0.05÷15/8=2/75 这种怪答案）
+function _mixFit(s) {
+  const t = String(s);
+  const i = t.indexOf('.');
+  if (i >= 0) return t.length - i - 1 <= 2;
+  const m = t.match(/^\d+\/(\d+)$/);
+  if (m) return parseInt(m[1], 10) <= 24;
+  return true;
+}
 function _mixSym(op) { return op === 'add' ? '+' : op === 'sub' ? '−' : op === 'mul' ? '×' : '÷'; }
 function _mixCalc(op, A, B) {
   if (op === 'add') return ratAdd(A, B);
@@ -5856,25 +5870,33 @@ function _mixCalc(op, A, B) {
 }
 // 单步：一个分数 与 一个小数 做 加/减/乘/除（减法保证结果非负）
 function _mixSingle(op, decFirst) {
-  let frac = mixPickFrac(), dec = mixPickDec();
-  let A, B;
-  if (op === 'sub') {
-    let fv = frac.r[0] / frac.r[1], dv = dec.r[0] / dec.r[1];
-    if (fv < dv) { A = dec; B = frac; } else { A = frac; B = dec; }
-  } else if (decFirst) { A = dec; B = frac; }
-  else { A = frac; B = dec; }
-  let res = _mixCalc(op, A.r, B.r);
-  return mf(A.disp + ' ' + _mixSym(op) + ' ' + B.disp + ' = ？', ratStr(res));
+  let frac, dec, A, B, s;
+  for (let t = 0; t < 20; t++) {
+    frac = mixPickFrac(); dec = mixPickDec();
+    if (op === 'sub') {
+      let fv = frac.r[0] / frac.r[1], dv = dec.r[0] / dec.r[1];
+      if (fv < dv) { A = dec; B = frac; } else { A = frac; B = dec; }
+    } else if (decFirst) { A = dec; B = frac; }
+    else { A = frac; B = dec; }
+    s = ratStr(_mixCalc(op, A.r, B.r));
+    if (_mixFit(s)) break;
+  }
+  return mf(A.disp + ' ' + _mixSym(op) + ' ' + B.disp + ' = ？', s);
 }
 // 两步混合（先乘除后加减，结果恒为非负）
 function _mixTwoStep(kind) {
-  let f = mixPickFrac(), d1 = mixPickDec(), d2 = mixPickDec(), f2 = mixPickFrac();
-  if (kind === 1) { let r = ratAdd(ratMul(f.r, d1.r), d2.r); return mf('( ' + f.disp + ' × ' + d1.disp + ' ) + ' + d2.disp + ' = ？', ratStr(r)); }
-  if (kind === 2) { let r = ratAdd(ratDiv(d1.r, f.r), f2.r); return mf(d1.disp + ' ÷ ' + f.disp + ' + ' + f2.disp + ' = ？', ratStr(r)); }
-  if (kind === 3) { let r = ratMul(ratAdd(f.r, d1.r), f2.r); return mf('( ' + f.disp + ' + ' + d1.disp + ' ) × ' + f2.disp + ' = ？', ratStr(r)); }
-  if (kind === 4) { let r = ratMul(f.r, ratAdd(d1.r, f2.r)); return mf(f.disp + ' × ( ' + d1.disp + ' + ' + f2.disp + ' ) = ？', ratStr(r)); }
-  if (kind === 5) { let r = ratAdd(ratDiv(f.r, d1.r), f2.r); return mf(f.disp + ' ÷ ' + d1.disp + ' + ' + f2.disp + ' = ？', ratStr(r)); }
-  let r = ratAdd(d1.r, ratMul(f.r, d2.r)); return mf(d1.disp + ' + ' + f.disp + ' × ' + d2.disp + ' = ？', ratStr(r));
+  let q = '', a = '';
+  for (let t = 0; t < 20; t++) {
+    let f = mixPickFrac(), d1 = mixPickDec(), d2 = mixPickDec(), f2 = mixPickFrac();
+    if (kind === 1) { q = '( ' + f.disp + ' × ' + d1.disp + ' ) + ' + d2.disp + ' = ？'; a = ratStr(ratAdd(ratMul(f.r, d1.r), d2.r)); }
+    else if (kind === 2) { q = d1.disp + ' ÷ ' + f.disp + ' + ' + f2.disp + ' = ？'; a = ratStr(ratAdd(ratDiv(d1.r, f.r), f2.r)); }
+    else if (kind === 3) { q = '( ' + f.disp + ' + ' + d1.disp + ' ) × ' + f2.disp + ' = ？'; a = ratStr(ratMul(ratAdd(f.r, d1.r), f2.r)); }
+    else if (kind === 4) { q = f.disp + ' × ( ' + d1.disp + ' + ' + f2.disp + ' ) = ？'; a = ratStr(ratMul(f.r, ratAdd(d1.r, f2.r))); }
+    else if (kind === 5) { q = f.disp + ' ÷ ' + d1.disp + ' + ' + f2.disp + ' = ？'; a = ratStr(ratAdd(ratDiv(f.r, d1.r), f2.r)); }
+    else { q = d1.disp + ' + ' + f.disp + ' × ' + d2.disp + ' = ？'; a = ratStr(ratAdd(d1.r, ratMul(f.r, d2.r))); }
+    if (_mixFit(a)) break;
+  }
+  return mf(q, a);
 }
 // 专项·分数与小数混合运算：生成器（自动判分走 looseNumericEquals / InputKit 零打字键盘）
 function g_mix_frac_dec() {
@@ -9574,6 +9596,13 @@ function g6_div(){
   const divMix1=(()=>{const [mn,md]=fmd(rr,ss,1,civ2);const [an,ad]=fad(pp,qq,mn,md);return fracStr(an,ad);})();
   const divMix2=(()=>{const [mn,md]=fmd(pp,qq,ss,rr);const [an,ad]=fad(mn,md,t2,1);return fracStr(an,ad);})();
   let bp2=ri(2,4); let fr2=ri(1,bp2-1); while(gcd(fr2,bp2)>1)fr2=ri(1,bp2-1); let M2=bp2*ri(2,5);
+  // v92 修：下面两道「求单位 1（已知女生求男生）」的已知量，必须是 (bp2∓fr2) 的倍数。
+  //   原写法直接复用 M2=bp2*ri(2,5)（只是 bp2 的倍数），而答案 = M2×bp2÷(bp2∓fr2)，
+  //   分母是 (bp2∓fr2) → 除不尽，实测出过「男生 12.8 人」「5.333333333333333 人」。
+  //   正确范式与同单元「修路求全长」(rest=(bp2-fr2)*ri) 一致：已知量取 (bp2∓fr2) 的倍数。
+  let fdUM=ri(2,9), fdUP=ri(2,9);
+  let fdGM=(bp2-fr2)*fdUM;   // 女生比男生少 fr2/bp2 时的女生人数 → 男生 = fdUM*bp2（整数）
+  let fdGP=(bp2+fr2)*fdUP;   // 女生比男生多 fr2/bp2 时的女生人数 → 男生 = fdUP*bp2（整数）
   // —— 二次补题参数：求单位「1」/ 和倍差倍 / 合作完成 ——
   //  · rest：已修 fr2/bp2 后剩余的长度，取 (bp2−fr2) 的倍数保证全长为整数
   let rest=(bp2-fr2)*ri(2,9);
@@ -9601,8 +9630,10 @@ function g6_div(){
     {q:`某工厂一月份用电${M2}千瓦时，二月份比一月份节约${fr2}/${bp2}，二月份用电多少千瓦时？`,a:String(M2*(bp2-fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2+fr2)/bp2)]},
     {q:`小红有故事书${M2}本，科技书比故事书多${fr2}/${bp2}，科技书有多少本？`,a:String(M2*(bp2+fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2-fr2)/bp2)]},
     // —— 二次补题：求单位「1」 / 和倍差倍 / 合作完成（工程问题雏形）——
-    {q:`六(1)班有女生${M2}人，女生比男生少${fr2}/${bp2}，男生有多少人？`,a:String(M2*bp2/(bp2-fr2)),d:[String(M2*(bp2-fr2)/bp2),String(M2*fr2/bp2),String(M2+M2*fr2/bp2)]},
-    {q:`六(1)班有女生${M2}人，女生比男生多${fr2}/${bp2}，男生有多少人？`,a:String(M2*bp2/(bp2+fr2)),d:[String(M2*(bp2+fr2)/bp2),String(M2*fr2/bp2),String(M2-M2*fr2/bp2)]},
+    // v92：改用 fdGM/fdGP 后答案恒为整数。干扰项刻意保留三类典型错误——
+    //   ① 直接用已知量（没求单位 1）② 把「多/少」方向搞反 ③ 分母用错 / 当成 2 倍
+    {q:`六(1)班有女生${fdGM}人，女生比男生少${fr2}/${bp2}，男生有多少人？`,a:String(fdUM*bp2),d:[String(fdGM),String(Math.round(fdGM*(bp2+fr2)/bp2)),String(fdUM*bp2*2)]},
+    {q:`六(1)班有女生${fdGP}人，女生比男生多${fr2}/${bp2}，男生有多少人？`,a:String(fdUP*bp2),d:[String(fdGP),String(Math.round(fdGP*(bp2-fr2)/bp2)),String(Math.round(fdGP*bp2/fr2))]},
     {q:`修一条路，已经修了全长的${fr2}/${bp2}，还剩${rest}千米没有修，这条路全长多少千米？`,a:String(rest*bp2/(bp2-fr2)),d:[String(rest*fr2/bp2),String(rest+bp2),String(rest*bp2/fr2)]},
     {q:`甲乙两数的和是${sumAB}，甲数是乙数的${fr2}/${bp2}，乙数是多少？`,a:String(sumAB*bp2/(bp2+fr2)),d:[String(sumAB*fr2/(bp2+fr2)),String(sumAB*fr2/bp2),String(sumAB*bp2/fr2)]},
     {q:`甲乙两数的和是${sum2}，甲数是乙数的${k1}倍，乙数是多少？`,a:String(sum2/(k1+1)),d:[String(sum2*k1/(k1+1)),String(sum2/(k1-1)),String(sum2*k1)]},
