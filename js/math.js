@@ -13856,7 +13856,12 @@ function fillAnswerEquals(user, correct) {
   if (_fracRe.test(u) && _fracRe.test(c)) {
     var _uf = u.split('/').map(function(s){ return parseInt(s.trim(), 10); });
     var _cf = c.split('/').map(function(s){ return parseInt(s.trim(), 10); });
-    if (_uf[1] !== 0 && _cf[1] !== 0 && _uf[0] * _cf[1] === _cf[0] * _uf[1]) return true;
+    if (_uf[1] !== 0 && _cf[1] !== 0 && _uf[0] * _cf[1] === _cf[0] * _uf[1]) {
+      // v97.2: 正确答案是最简分数时，用户答案也必须是最简分数
+      function _gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a; }
+      if (_gcd(_cf[0], _cf[1]) === 1 && _gcd(_uf[0], _uf[1]) !== 1) return false;
+      return true;
+    }
   }
   if (typeof looseNumericEquals === 'function') {
     if (looseNumericEquals(u, c)) return true;
