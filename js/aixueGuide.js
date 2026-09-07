@@ -218,23 +218,32 @@
   }
 
   /* ---------------- 卡片 HTML 生成（PC / 手机共用类名 .aixue-card） ---------------- */
+  // 将文本中的斜杠分数转为上下堆叠竖式 HTML（与豆包爱学一致）
+  function fracToHtml(text) {
+    // 1. 带括号的分数：(分子)/(分母)，如 (3×5)/(2×2)
+    text = text.replace(/\(([^()]+)\)\s*\/\s*\(([^()]+)\)/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+    // 2. 简单分数：数字/数字，含负号、小数，如 3/2、-1/2、15/4
+    text = text.replace(/(?<![\w/])(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+    return text;
+  }
+
   function guideHtml(guide) {
     const g = guide || {};
     let h = '<div class="aixue-card show">';
     h += '<div class="ax-topic">题型：' + esc(g.topic || '综合题') + '</div>';
     if (g.key) {
-      h += '<div class="ax-key"><div class="ax-key-title">💡 解题关键</div><div class="ax-key-text">' + esc(g.key).replace(/\n/g, '<br>') + '</div></div>';
+      h += '<div class="ax-key"><div class="ax-key-title">💡 解题关键</div><div class="ax-key-text">' + fracToHtml(esc(g.key).replace(/\n/g, '<br>')) + '</div></div>';
     }
     if (g.steps && g.steps.length) {
       h += '<div class="ax-steps">';
       g.steps.forEach(function (s, si) {
         h += '<div class="ax-step"><div class="ax-step-title">' + esc(s.title || ('第' + (si + 1) + '步')) + '</div>';
-        if (s.formula) h += '<div class="ax-step-formula">' + esc(s.formula).replace(/\n/g, '<br>') + '</div>';
+        if (s.formula) h += '<div class="ax-step-formula">' + fracToHtml(esc(s.formula).replace(/\n/g, '<br>')) + '</div>';
         h += '</div>';
       });
       h += '</div>';
     }
-    if (g.summary) h += '<div class="ax-summary">' + esc(g.summary) + '</div>';
+    if (g.summary) h += '<div class="ax-summary">' + fracToHtml(esc(g.summary)) + '</div>';
     h += '</div>';
     return h;
   }
