@@ -1,362 +1,358 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<html lang="zh-CN" data-page-node-id="C6DdsxquNZp2If7DlmZYkj">
+<head data-page-node-id="LVJhhGgmShK0xz3hllgY8C">
+<meta charset="UTF-8" data-page-node-id="BjAt8hxkOcdDZ1niIBBlKb">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" data-page-node-id="L4G3CbauKOOCUasTYacbSE">
 <title>吕泳冀学习站</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#3E4A63">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest" data-page-node-id="Pos3OKD5HGv7ODQt779THX">
+<meta name="theme-color" content="#3E4A63" data-page-node-id="o0DN8RXlTOl9IoL3Z4PnNp">
+<link rel="icon" href="icons/icon-192.png" data-page-node-id="IKKWCeq4pPZETfRQjVTL0z">
+<link rel="apple-touch-icon" href="icons/icon-192.png" data-page-node-id="OylAGhilx4v8Dhe0TwiZGx">
 <script src="js/supabase-js.min.js"></script>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/english.css">
-<link rel="stylesheet" href="css/inputkit.css">
+<link rel="stylesheet" href="css/style.css" data-page-node-id="T13rzsvhy36XwyYkPXxxwn">
+<link rel="stylesheet" href="css/english.css" data-page-node-id="mCGl9rHGxkRMD1FA8fXUrY">
+<link rel="stylesheet" href="css/inputkit.css" data-page-node-id="POEx0fET1nLDteLvBzvHGo">
 </head>
-<body><div id="moduleSwitch" class="module-switch">
-  <button class="mod-btn active" data-mod="math" onclick="App.switchModule('math')">数学</button>
-  <button class="mod-btn" data-mod="chinese" onclick="App.switchModule('chinese')">语文</button>
-  <button class="mod-btn" data-mod="english" onclick="App.switchModule('english')">英语</button>
+<body data-page-node-id="1ySItUMJymZXNR8J0lVZjQ"><div id="moduleSwitch" class="module-switch" data-page-node-id="RUu5f5eqEqoxVA12eHvJBZ">
+  <button class="mod-btn active" data-mod="math" onclick="App.switchModule('math')" data-page-node-id="DDtbxBE1RpUqxF8jA1zC7f">数学</button>
+  <button class="mod-btn" data-mod="chinese" onclick="App.switchModule('chinese')" data-page-node-id="ydiSFpzd3vX33jVuiTKA9F">语文</button>
+  <button class="mod-btn" data-mod="english" onclick="App.switchModule('english')" data-page-node-id="yws6H3oad9s4uFmF7W6r1v">英语</button>
 </div>
-<div id="mathRoot">
+<div id="mathRoot" data-page-node-id="V0lnvUCmpZQQFr9GVPD93M">
 
 
 <!-- 顶部导航栏 -->
-<div class="navbar">
-  <h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.1 5-5 2.1 2.1-5z"/></svg>小学数学 · 人教版</h1>
-  <div class="nav-icons">
-    <button class="nav-icon-btn u-hide" onclick="goBack()" id="backBtn">←</button>
+<div class="navbar" data-page-node-id="7Cb2DfVOElTWNMHOZGYSQL">
+  <h1 data-page-node-id="dv0yoUZf1A5Rgon3TTxyI1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="ji9zOe7G3lHMIsJjwTD0N9"><circle cx="12" cy="12" r="9" data-page-node-id="8GGHC27HKK7FzOSNtsvdPx"/><path d="M15.5 8.5l-2.1 5-5 2.1 2.1-5z" data-page-node-id="lthlnhpXtEXFrRCozOprfz"/></svg>小学数学 · 人教版</h1>
+  <div class="nav-icons" data-page-node-id="7o0KgFSrYwOSAB8sIUxwxN">
+    <button class="nav-icon-btn u-hide" onclick="goBack()" id="backBtn" data-page-node-id="RNhc6SRFdQdGIGUPk7G9Id">←</button>
   </div>
 </div>
 
 <!-- ===== 首页 ===== -->
-<div class="page active" id="page-home">
-  <div class="welcome-banner">
-    <h2>吕泳冀学习站</h2>
-    <p>人教版 · 六年级 · 小升初冲刺</p>
+<div class="page active" id="page-home" data-page-node-id="DseqtoyTqZSupHKyDR188H">
+  <div class="welcome-banner" data-page-node-id="sIzz8Sr829yjkuSNTrvo4a">
+    <h2 data-page-node-id="1TwJapD8Qz8qOdAVfLmoLI">吕泳冀学习站</h2>
+    <p data-page-node-id="uVJd93dYMr53l4zZUw1FZh">人教版 · 六年级 · 小升初冲刺</p>
   </div>
 
   <!-- v80：今日任务驾驶舱（小升初倒计时 / 三科今日任务 / 薄弱提醒 / 本周概览） -->
-  <div id="todayPanel"></div>
+  <div id="todayPanel" data-page-node-id="uL422XNb1srCeOo9V82BFz"></div>
 
-  <div class="section-title">选择年级</div>
-  <div id="gradeCurrentHint"></div>
-  <div class="grade-grid" id="gradeGrid"></div>
+  <div class="section-title" data-page-node-id="9OtlZBRl0DfcnsZTVQl9WN">选择年级</div>
+  <div id="gradeCurrentHint" data-page-node-id="W91E2UaZBZSiJ0ENLuxxoc"></div>
+  <div class="grade-grid" id="gradeGrid" data-page-node-id="zDXZHXa0Yfg97kxBtq1CJA"></div>
 
-  <div class="section-title">快速练习</div>
-  <div class="card">
-    <div class="btn-group">
-      <button class="btn btn-outline" onclick="startQuickPractice('basic')">基础运算</button>
-      <button class="btn btn-outline" onclick="startQuickPractice('mixed')">综合练习</button>
+  <div class="section-title" data-page-node-id="SZOiWsaGFe2EDqfJRHKUuE">快速练习</div>
+  <div class="card" data-page-node-id="Pus3q6d1OpeCd6LbFcIgqX">
+    <div class="btn-group" data-page-node-id="TxNB8pwZadE51RVRtvylzf">
+      <button class="btn btn-outline" onclick="startQuickPractice('basic')" data-page-node-id="S0jmZwrgh20GGQB1aUveVk">基础运算</button>
+      <button class="btn btn-outline" onclick="startQuickPractice('mixed')" data-page-node-id="yf8BHfmmXhb2NsGcyGClro">综合练习</button>
     </div>
-    <div class="btn-group u-mt10">
-      <button class="btn btn-gold" onclick="startQuickAssess()">⚡ 快速测评（10题·5分钟）</button>
+    <div class="btn-group u-mt10" data-page-node-id="JwcjdAowFbwBYIWhGHKjKB">
+      <button class="btn btn-gold" onclick="startQuickAssess()" data-page-node-id="3KTOYxa2feFFW21MWWgDoG">⚡ 快速测评（10题·5分钟）</button>
     </div>
-    <p class="u-c-light u-fs12 u-m0-8-0">快速测出各知识点掌握情况，交卷后生成「知识点掌握度」报告，薄弱点可配套纸质同步练习巩固。</p>
+    <p class="u-c-light u-fs12 u-m0-8-0" data-page-node-id="xGN3dMlIP0e43DOfvwSiPM">快速测出各知识点掌握情况，交卷后生成「知识点掌握度」报告，薄弱点可配套纸质同步练习巩固。</p>
   </div>
 
-  <div class="section-title">专项练习</div>
-  <div class="card">
-    <div class="special-list" id="specialList"></div>
+
+  <div class="section-title" data-page-node-id="pshi8rMFIQrGHDGCNmHuLZ">拍图上传试题</div>
+  <div class="card u-tc u-p20" data-page-node-id="f5FFCtphVPrlTzQcEmOKvQ">
+    <p class="u-c-light u-fs13 u-mb12" data-page-node-id="nB6V2JFSAGtFqMjz0MVTIy">拍照或选择图片，AI 批改给分数，模拟真实老师手写批注。可下载批改后的试卷，错题自动加入错题库</p>
+    <button class="btn btn-primary u-xw200 u-m0a" onclick="showPage('upload');document.getElementById('backBtn').style.display='block';document.getElementById('backBtn').onclick=()= data-page-node-id="djKw0553HNhyEo6QIvcbJm">goHome();">拍照 / 选择图片</button>
   </div>
 
-  <div class="section-title">拍图上传试题</div>
-  <div class="card u-tc u-p20">
-    <p class="u-c-light u-fs13 u-mb12">拍照或选择图片，AI 批改给分数，模拟真实老师手写批注。可下载批改后的试卷，错题自动加入错题库</p>
-    <button class="btn btn-primary u-xw200 u-m0a" onclick="showPage('upload');document.getElementById('backBtn').style.display='block';document.getElementById('backBtn').onclick=()=>goHome();">拍照 / 选择图片</button>
-  </div>
-
-  <div class="section-title">最近练习</div>
-  <div id="recentList"></div>
+  <div class="section-title" data-page-node-id="Qjoa9gUApY4tp2NlYlJuBE">最近练习</div>
+  <div id="recentList" data-page-node-id="deHI9tkYfBd8wjhecI8ujV"></div>
 </div>
 
 
 <!-- ===== 同步学习 + 交互动画图解 ===== -->
-<div class="page" id="page-special-intro">
-  <div class="card u-p18">
-    <div class="u-flex u-ac u-g8 u-mb4">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h9a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 20a3 3 0 01-3-3"/></svg>
-      <h2 class="u-m0" id="specialIntroTitle"></h2>
+<div class="page" id="page-special-intro" data-page-node-id="ieJRnOotQ9K32wxzouiAIZ">
+  <div class="card u-p18" data-page-node-id="CnAKZYet2HrstEFGBFobed">
+    <div class="u-flex u-ac u-g8 u-mb4" data-page-node-id="NJkjoxTV2Jcbbu8V1i2BGp">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="LEX0F1jKmt0kuYDroUSe5q"><path d="M5 4h9a3 3 0 013 3v13H8a3 3 0 01-3-3z" data-page-node-id="lrviVctGDZA6N9w3y8kFzL"/><path d="M8 20a3 3 0 01-3-3" data-page-node-id="yuQAWZbTEEJmxicGvaIUA1"/></svg>
+      <h2 class="u-m0" id="specialIntroTitle" data-page-node-id="XXDdDp1RMbQIryknNzJtFW"></h2>
     </div>
-    <p class="u-c-light u-fs13 u-m0-0-14" id="specialIntroDesc">先学知识点，再开始练习。</p>
-    <div id="studyCards"></div>
-    <div class="u-hide u-tc u-mb14" id="specialIntroImgWrap">
-      <img class="u-xw100 u-r10 u-inlblk u-bd-line" id="specialIntroImg" src="" alt="">
+    <p class="u-c-light u-fs13 u-m0-0-14" id="specialIntroDesc" data-page-node-id="XFtcGaaEBGNWA14FAjXJLc">先学知识点，再开始练习。</p>
+    <div id="studyCards" data-page-node-id="DJFq5dXbd1Hl3FB2lVnseH"></div>
+    <div class="u-hide u-tc u-mb14" id="specialIntroImgWrap" data-page-node-id="L5q0pCJGO7Jl6E3acBJZPs">
+      <img class="u-xw100 u-r10 u-inlblk u-bd-line" id="specialIntroImg" src="" alt="" data-page-node-id="ah4nZBAxXNHTeckJPKRFEp">
     </div>
-    <div id="diagramCards"></div>
-    <button class="btn btn-primary u-mt18 u-xw240" id="specialIntroBtn">开始答题</button>
+    <div id="diagramCards" data-page-node-id="OaxoJ3Mk7lvo5BB8YKLUkM"></div>
+    <button class="btn btn-primary u-mt18 u-xw240" id="specialIntroBtn" data-page-node-id="u4d3nBYlgYevwhDcXtbLEX">开始答题</button>
   </div>
 </div>
 <!-- ===== 单元列表页 ===== -->
-<div class="page" id="page-units">
-  <div class="semester-btns">
-    <button class="semester-btn active" data-semester="1" onclick="switchSemester(1)">上册</button>
-    <button class="semester-btn" data-semester="2" onclick="switchSemester(2)">下册</button>
+<div class="page" id="page-units" data-page-node-id="DxAaQlYplHBQdu8ObC9tYr">
+  <div class="semester-btns" data-page-node-id="hhnsOsLEkQox5UAGGw5mLF">
+    <button class="semester-btn active" data-semester="1" onclick="switchSemester(1)" data-page-node-id="tACid9bYd1yIUnbjUUFc4P">上册</button>
+    <button class="semester-btn" data-semester="2" onclick="switchSemester(2)" data-page-node-id="A2tpQAyIlGjgBmiiLjd0i8">下册</button>
   </div>
-  <div class="section-title" id="unitsTitle">单元列表</div>
-  <div class="unit-list" id="unitList"></div>
+  <div class="section-title" id="unitsTitle" data-page-node-id="Cpmh8jx229Pxawmw3JtVBg">单元列表</div>
+  <div class="unit-list" id="unitList" data-page-node-id="y03RvxbllkCiWEYMbCAXua"></div>
 </div>
 
 <!-- ===== 答题页 ===== -->
-<div class="page" id="page-quiz">
-  <div class="exam-paper-header u-hide" id="examPaperHeader">
-    <div class="exam-title" id="examPaperTitle"></div>
-    <div class="exam-sub" id="examPaperSub"></div>
-    <div class="u-tc u-fs18 u-fw700 u-c-red2 u-mt4" id="examTimer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg> 70:00</div>
-    <div class="u-tc u-mt6"><button class="prt-trigger-btn" onclick="printCurrentPaper()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>打印本卷（A4）</button></div>
+<div class="page" id="page-quiz" data-page-node-id="8JE4a608ikhtfoLRzpDb7N">
+  <div class="exam-paper-header u-hide" id="examPaperHeader" data-page-node-id="Uo4jxgsAvXSbZo01Ac13et">
+    <div class="exam-title" id="examPaperTitle" data-page-node-id="rnXJ3G2TJuV2e76Q7zA2LS"></div>
+    <div class="exam-sub" id="examPaperSub" data-page-node-id="9kRIMFxZH2p5lk4CeCbVpA"></div>
+    <div class="u-tc u-fs18 u-fw700 u-c-red2 u-mt4" id="examTimer" data-page-node-id="uqngj8uoAFZGQ2YYWC7LLH"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="9EAUK9ORAAAHxNy3bkRm6G"><circle cx="12" cy="12" r="9" data-page-node-id="QbFrATwQHNoB7p5SYVeiIK"/><path d="M12 7v5l3.5 2" data-page-node-id="qUrBEUrPeTEFl3itZDXQ6V"/></svg> 70:00</div>
+    <div class="u-tc u-mt6" data-page-node-id="S3usiXNqt8CAX72aVPjDU9"><button class="prt-trigger-btn" onclick="printCurrentPaper()" data-page-node-id="ZowEEnWJmmiasgKQSiPsua"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="aGBV0GobMlUj8eXgv6I0El"><path d="M7 8V3h10v5" data-page-node-id="YHIJsB5UDT1IsGIz93p3Sg"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2" data-page-node-id="W5U3wGyKFERdPmeb7xmgv2"/><path d="M7 14h10v7H7z" data-page-node-id="6d09Qubj20ckCkb1kcQQIF"/></svg>打印本卷（A4）</button></div>
   </div>
-  <div class="quiz-header">
-    <div class="quiz-progress" id="quizProgress">第 1 / 10 题</div>
-    <div class="quiz-score" id="quizScore">★ 0</div>
+  <div class="quiz-header" data-page-node-id="aFpvxZlNjujsB02z0bHJx9">
+    <div class="quiz-progress" id="quizProgress" data-page-node-id="4O9GZEj1k6X6sJbvuZ5YWE">第 1 / 10 题</div>
+    <div class="quiz-score" id="quizScore" data-page-node-id="64HfdAq3bYBl4SqPcuyNg8">★ 0</div>
   </div>
-  <div class="progress-bar">
-    <div class="progress-bar-fill u-w10" id="progressFill"></div>
+  <div class="progress-bar" data-page-node-id="0CepTzv7zvHArD9hcu4tkQ">
+    <div class="progress-bar-fill u-w10" id="progressFill" data-page-node-id="hD41HPJ4FXGntQF8xBlnTj"></div>
   </div>
-  <div class="quiz-nav" id="quizNav"></div>
-  <div class="question-card" id="questionCard">
+  <div class="quiz-nav" id="quizNav" data-page-node-id="RNyzB8dF9WSMJQBFNgRI1b"></div>
+  <div class="question-card" id="questionCard" data-page-node-id="oVyGek74L4O4wqcRj9Lw71">
     <!-- 动态生成 -->
   </div>
-  <div class="quiz-bottom" id="quizBottom">
-    <div class="feedback" id="feedback"></div>
-    <div class="u-mt12" id="quizActions">
-      <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">提交答案</button>
+  <div class="quiz-bottom" id="quizBottom" data-page-node-id="kEvcInmoPmojYjoSz3LUVW">
+    <div class="feedback" id="feedback" data-page-node-id="bWwoMWdZ9JzRt5KfGu7BTs"></div>
+    <div class="u-mt12" id="quizActions" data-page-node-id="RLiwnCHwKMeqLlhSWfbS5o">
+      <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()" data-page-node-id="KVd8Bf4XfkQeYTfKmXfKQ7">提交答案</button>
     </div>
   </div>
 </div>
 
 <!-- ===== 结果页（v75：两步式 批改成绩 → 答案解析） ===== -->
-<div class="page" id="page-result">
+<div class="page" id="page-result" data-page-node-id="7Y6N0wFzghSxjLXsft6sDr">
   <!-- 第一步：批改成绩页 -->
-  <div class="card result-card" id="resultScoreCard">
-    <div class="teacher-header">
-      <div class="teacher-score">得分：<span id="resultScore">0</span><span id="resultTotal">/10</span></div>
-      <div class="teacher-level" id="teacherLevel">优秀</div>
+  <div class="card result-card" id="resultScoreCard" data-page-node-id="KoNNuCkbbIsH3j6tzRrruM">
+    <div class="teacher-header" data-page-node-id="OxKfpeUpAiBFbzYuaDZ4rX">
+      <div class="teacher-score" data-page-node-id="mLbr2twKPAPyabjsAnqvqd">得分：<span id="resultScore" data-page-node-id="ZtvOhKB5VC0sVrwZvuqMTQ">0</span><span id="resultTotal" data-page-node-id="hC6OcvdaNf6VzoOLEu3IPU">/10</span></div>
+      <div class="teacher-level" id="teacherLevel" data-page-node-id="hlbsAyDqF6vQynLD1w0vmG">优秀</div>
     </div>
-    <div class="teacher-stars" id="resultStars">★★★</div>
-    <div class="result-stats" id="resultStats">
-      <div class="result-stat"><div class="num correct" id="resultCorrect">0</div><div class="label">答对</div></div>
-      <div class="result-stat"><div class="num wrong" id="resultWrong">0</div><div class="label">答错</div></div>
-      <div class="result-stat"><div class="num u-c-primary" id="resultAccuracy">0%</div><div class="label">正确率</div></div>
-      <div class="result-stat"><div class="num" id="resultTime">0秒</div><div class="label">用时</div></div>
+    <div class="teacher-stars" id="resultStars" data-page-node-id="3eLzIJB6Nj5AX0cQt5Ge35">★★★</div>
+    <div class="result-stats" id="resultStats" data-page-node-id="v0P3vnWrP6u2hLb8IMWQiv">
+      <div class="result-stat" data-page-node-id="h1YghuHuyRmJdm8lCDAcZG"><div class="num correct" id="resultCorrect" data-page-node-id="lTUEF11ESe1VbIIvhQ6o5a">0</div><div class="label" data-page-node-id="2XFgDnClQUdlzW1hXvaPoN">答对</div></div>
+      <div class="result-stat" data-page-node-id="IU3xzZ149DAAZ4mSqU5wQl"><div class="num wrong" id="resultWrong" data-page-node-id="X5N8mXg6nbfuIUyQpbjG56">0</div><div class="label" data-page-node-id="lql0WnOpEI8CzkDOXZvFht">答错</div></div>
+      <div class="result-stat" data-page-node-id="9gqoPFSPxOetEQIfvVEfWr"><div class="num u-c-primary" id="resultAccuracy" data-page-node-id="ACOnGd878YSffbTNCpCAOQ">0%</div><div class="label" data-page-node-id="Osn1Fw6zEVGSGcvC4yNSBd">正确率</div></div>
+      <div class="result-stat" data-page-node-id="KsX0IbgjDokCmYyw0mIhvZ"><div class="num" id="resultTime" data-page-node-id="d4xDn6xymqbbEADk9rEhZH">0秒</div><div class="label" data-page-node-id="YxuXFkQLsJuQaeofjunb8j">用时</div></div>
     </div>
-    <div class="teacher-comment" id="teacherComment"></div>
-    <div class="teacher-detail">
-      <div class="detail-title">各题得分明细</div>
-      <div id="questionScoreList"></div>
+    <div class="teacher-comment" id="teacherComment" data-page-node-id="GksVA0T0a5q5uEzDXnh2tL"></div>
+    <div class="teacher-detail" data-page-node-id="UTM8RGNsWxSgqhiDIZaLfS">
+      <div class="detail-title" data-page-node-id="CPfqMFZCHlQfmpuCghCeVL">各题得分明细</div>
+      <div id="questionScoreList" data-page-node-id="SEbcoh13HfKdEDG54JPG4j"></div>
     </div>
     <!-- v84 P4：知识点掌握度报告（按错题知识点聚类，最弱排前，<60% 标红，并给出纸质联动建议） -->
-    <div class="mastery-block" id="masteryBlock"></div>
-    <div class="btn-group" id="scoreActions">
-      <button class="btn btn-primary" id="confirmScoreBtn" onclick="confirmScore()">✅ 确认成绩</button>
+    <div class="mastery-block" id="masteryBlock" data-page-node-id="99B1FcXVshQ5x15265El3E"></div>
+    <div class="btn-group" id="scoreActions" data-page-node-id="kns4MSj0JebWxFOOIS7ihN">
+      <button class="btn btn-primary" id="confirmScoreBtn" onclick="confirmScore()" data-page-node-id="7mZwIWUYjTPf1LWWYH1Mi2">✅ 确认成绩</button>
     </div>
   </div>
 
   <!-- 第二步：答案与解析页 -->
-  <div class="card result-card u-hide u-tl" id="examAnswerKey">
-    <div class="section-title">答案与解析</div>
-    <div id="examAnswerKeyBody"></div>
-    <div class="btn-group">
-      <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()">重新考试</button>
-      <button class="btn btn-outline" onclick="backToStudy()">返回单元学习</button>
-      <button class="btn btn-outline" onclick="printCurrentPaper()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>打印试卷</button>
+  <div class="card result-card u-hide u-tl" id="examAnswerKey" data-page-node-id="fV2Ed96JX6bUvSh0ZhFrNg">
+    <div class="section-title" data-page-node-id="iOCcAUqC4nFeosgGvWnW58">答案与解析</div>
+    <div id="examAnswerKeyBody" data-page-node-id="o2kFkUnOBy3WQRv1F5sClk"></div>
+    <div class="btn-group" data-page-node-id="4ltrHPQRqAmB72MZ9q8L5Y">
+      <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()" data-page-node-id="ptZuWjJB7vk2tQKGcQZCDw">重新考试</button>
+      <button class="btn btn-outline" onclick="backToStudy()" data-page-node-id="fumpvnE0BCfs0ZzobL0J2F">返回单元学习</button>
+      <button class="btn btn-outline" onclick="printCurrentPaper()" data-page-node-id="n1Q1ZCrfeqkVE0dGSjEVmr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="N5EWuHDkWvMVa1uTADR8De"><path d="M7 8V3h10v5" data-page-node-id="Kv9yGmK6GiiZLNivhFoHoG"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2" data-page-node-id="8wKvc36czsfh4B6VQU5Z6n"/><path d="M7 14h10v7H7z" data-page-node-id="CAkF7jY63a9XPY1jlKsCmA"/></svg>打印试卷</button>
     </div>
   </div>
 </div>
 
 <!-- ===== 错题库页 ===== -->
-<div class="page" id="page-wrong">
-  <div class="section-title">错题库</div>
-  <div class="btn-group u-mb16">
-    <button class="btn btn-primary" onclick="startWrongReview()">开始错题重练</button>
-    <button class="btn btn-outline" onclick="clearAllWrong()">清空错题</button>
+<div class="page" id="page-wrong" data-page-node-id="iBzEIk5Vfu9U21lRHq6M3O">
+  <div class="section-title" data-page-node-id="1hHMLvNmtEBY9iDl1fiQxJ">错题库</div>
+  <div class="btn-group u-mb16" data-page-node-id="rkupbzpQhyKcC82FJUrV4T">
+    <button class="btn btn-primary" onclick="startWrongReview()" data-page-node-id="0N0DXxcOQGgGhAOx9pQOUP">开始错题重练</button>
+    <button class="btn btn-outline" onclick="clearAllWrong()" data-page-node-id="MaYhSL27rmuVUxWdFBqyOJ">清空错题</button>
   </div>
-  <div id="wrongListContainer"></div>
+  <div id="wrongListContainer" data-page-node-id="wzMe2PoYeEZsjzc3NCGIQ5"></div>
 </div>
 
 <!-- ===== 拍图上传页（AI 批改） ===== -->
-<div class="page" id="page-upload">
-  <div class="section-title">拍图上传试题</div>
+<div class="page" id="page-upload" data-page-node-id="OZN1iLZTGxpYigV9woxaho">
+  <div class="section-title" data-page-node-id="WYCu7xaGbaBcL2rKuYPpY8">拍图上传试题</div>
 
-  <div class="card">
-    <div class="u-fs14 u-fw600 u-mb10">选择学科</div>
-    <div class="gz-subs">
-      <button class="gz-sub-btn active" data-sub="数学">数学</button>
-      <button class="gz-sub-btn" data-sub="语文">语文</button>
-      <button class="gz-sub-btn" data-sub="英语">英语</button>
+  <div class="card" data-page-node-id="tpJlaebB08mzIFeoFVvtES">
+    <div class="u-fs14 u-fw600 u-mb10" data-page-node-id="VywPYrCfOTDdcVfe9v3CW9">选择学科</div>
+    <div class="gz-subs" data-page-node-id="us134gGz3RtEw0cl2moRrY">
+      <button class="gz-sub-btn active" data-sub="数学" data-page-node-id="upJiSKxwSPncDUFcMGBSSu">数学</button>
+      <button class="gz-sub-btn" data-sub="语文" data-page-node-id="u5hJ07JegsIJk4CvnRa8fA">语文</button>
+      <button class="gz-sub-btn" data-sub="英语" data-page-node-id="VGzYYVpQ2WlYYbqUniMuzY">英语</button>
     </div>
   </div>
 
-  <div class="card u-tc">
-    <div id="uploadArea" class="gz-drop" onclick="document.getElementById('fileInput').click()">
-      <div class="gz-drop-icon">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
+  <div class="card u-tc" data-page-node-id="Pa1C6FCjIy7kPrAbpgUZ2K">
+    <div id="uploadArea" class="gz-drop" onclick="document.getElementById('fileInput').click()" data-page-node-id="GBWkI7W1xTbJ5q9R4mAG07">
+      <div class="gz-drop-icon" data-page-node-id="v1Iv5KuzBW6vgf04QU9sUh">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="fUZ59tyijYvUhMZkKwTHiC"><path d="M12 16V5M8 9l4-4 4 4" data-page-node-id="dcSgGwNJF1A7FJAkDi72Fa"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" data-page-node-id="JYsLNREUV6t1UzsZG2O4DZ"/></svg>
       </div>
-      <div class="u-fs15 u-fw600 u-c-text">拍照或选择图片</div>
-      <div class="u-fs12 u-c-lighter u-mt4">支持拍照、相册选择，拍已做完的卷子</div>
+      <div class="u-fs15 u-fw600 u-c-text" data-page-node-id="rX18uZ04CxzairryK6WPFQ">拍照或选择图片</div>
+      <div class="u-fs12 u-c-lighter u-mt4" data-page-node-id="DdBybkd0Dl9Qd4GYQuFCKR">支持拍照、相册选择，拍已做完的卷子</div>
     </div>
-    <input class="u-hide" type="file" id="fileInput" accept="image/*" capture="environment">
+    <input class="u-hide" type="file" id="fileInput" accept="image/*" capture="environment" data-page-node-id="CAGKmJsH4XFTiEHeSoq7mu">
   </div>
 
-  <div id="gradeStatus"></div>
+  <div id="gradeStatus" data-page-node-id="Gs3KesQWQ2kD2XnUNFa6LW"></div>
 
-  <div class="card u-hide u-p12" id="gradeCanvasWrap">
-    <div class="u-fs13 u-fw600 u-mb8 u-c-light">批改后的试卷</div>
-    <div id="gradeCanvasHolder"></div>
+  <div class="card u-hide u-p12" id="gradeCanvasWrap" data-page-node-id="dmTZhbtchLWOe09eEzB4K2">
+    <div class="u-fs13 u-fw600 u-mb8 u-c-light" data-page-node-id="w4noUov6pdKdQlBDEdqmFc">批改后的试卷</div>
+    <div id="gradeCanvasHolder" data-page-node-id="pISS91402zVRLMFMToLtI5"></div>
   </div>
 
-  <div id="gradeResult"></div>
+  <div id="gradeResult" data-page-node-id="V4kYXE5ErvKTU5q28Bx6Fe"></div>
 
-  <div class="card u-bg-warnpale u-bd-warnpale">
-    <div class="u-fs13 u-c-light u-lh18">
-      <strong>使用说明：</strong><br>
-      1. 先选学科，再拍下<strong>已经做完</strong>的卷子或作业<br>
-      2. AI 老师逐题批改、判分，并在图上画红勾 / 红叉 / 圈注 / 旁批<br>
-      3. 右上角是分数印章，底部是老师总评语<br>
-      4. 点「下载批改后的试卷」保存 PNG，点「加入错题库」把错题收进去<br>
-      <span class="u-c-accent">拍照小技巧：光线均匀、拍正、把整页拍全，批改更准</span>
+  <div class="card u-bg-warnpale u-bd-warnpale" data-page-node-id="T35s1CXtJZGPDnWfWgQHK2">
+    <div class="u-fs13 u-c-light u-lh18" data-page-node-id="Q2yLfTFJdH2VKw1IPHDxBZ">
+      <strong data-page-node-id="bmAcggsxNkE9U2Ko6i57MG">使用说明：</strong><br data-page-node-id="CuwRRRJqkWQD4ATzmhE9w3">
+      1. 先选学科，再拍下<strong data-page-node-id="0PUvm5bog2ra4VBuSB6kNh">已经做完</strong>的卷子或作业<br data-page-node-id="28kXUbnfrARKYqFszEL7M4">
+      2. AI 老师逐题批改、判分，并在图上画红勾 / 红叉 / 圈注 / 旁批<br data-page-node-id="DDCcOIbiVZHUp5I5Y7Dk1P">
+      3. 右上角是分数印章，底部是老师总评语<br data-page-node-id="bVrK7J9HM9RApnc1M4St0A">
+      4. 点「下载批改后的试卷」保存 PNG，点「加入错题库」把错题收进去<br data-page-node-id="tIOyzSZjeQFozvpwfZV6NH">
+      <span class="u-c-accent" data-page-node-id="8KA2xnqZGWL5tiBdGByyBG">拍照小技巧：光线均匀、拍正、把整页拍全，批改更准</span>
     </div>
   </div>
 
-  <div id="gradeHistory"></div>
+  <div id="gradeHistory" data-page-node-id="gD81EpgYzcOW5NjsCZv9QC"></div>
 </div>
 
 <!-- ===== 考试中心页 ===== -->
-<div class="page" id="page-exam">
-  <div class="section-title">考试中心</div>
+<div class="page" id="page-exam" data-page-node-id="wyOzSohTLUi2YWGL2O5u7I">
+  <div class="section-title" data-page-node-id="yItD2S5b8VpyZNGJoEUbpt">考试中心</div>
 
-  <div class="card">
-    <div class="u-fs14 u-fw600 u-mb10">选择考试类型</div>
-    <div id="examTypeList"></div>
+  <div class="card" data-page-node-id="i8LKKtup7F6PBZjAVBPd2H">
+    <div class="u-fs14 u-fw600 u-mb10" data-page-node-id="Fzn1fWTS0M6okJQ3oQrT0g">选择考试类型</div>
+    <div id="examTypeList" data-page-node-id="MC5DFlMuB9h0gacFjI8sMe"></div>
   </div>
 
-  <div class="card u-hide" id="examConfigCard">
-    <div class="u-fs14 u-fw600 u-mb10">考试设置</div>
-    <div class="field-row">
-      <span class="field-label">年级</span>
-      <div id="examGradeBtns" class="chip-group"></div>
+  <div class="card u-hide" id="examConfigCard" data-page-node-id="brC3eCytGhKKz2exuyAiTq">
+    <div class="u-fs14 u-fw600 u-mb10" data-page-node-id="zH9yGEGXSK6xsay5ojZsOg">考试设置</div>
+    <div class="field-row" data-page-node-id="fvmLgNryAE7hDNvfZ6HwDK">
+      <span class="field-label" data-page-node-id="kCNqBRy0TEblCvIo14stO8">年级</span>
+      <div id="examGradeBtns" class="chip-group" data-page-node-id="efLDtMfFwJmxi70xGYffi1"></div>
     </div>
-    <div class="field-row" id="examSemesterRow">
-      <span class="field-label">册别</span>
-      <div class="chip-group">
-        <button class="chip" data-sem="1" onclick="selectExamSemester(1)">上册</button>
-        <button class="chip" data-sem="2" onclick="selectExamSemester(2)">下册</button>
+    <div class="field-row" id="examSemesterRow" data-page-node-id="lRpzDVFXOA8NPZiUh6os6z">
+      <span class="field-label" data-page-node-id="xyv2cIxqSyBGe2y0o968h6">册别</span>
+      <div class="chip-group" data-page-node-id="wuHcyBaukx5oFaz15kBvzE">
+        <button class="chip" data-sem="1" onclick="selectExamSemester(1)" data-page-node-id="D5EOKPbStysfRGDEcWvAGG">上册</button>
+        <button class="chip" data-sem="2" onclick="selectExamSemester(2)" data-page-node-id="rFaZzSGrJQTpzMDnsZmIsY">下册</button>
       </div>
     </div>
-    <div class="field-row u-hide" id="examUnitRow">
-      <span class="field-label">单元</span>
-      <div id="examUnitBtns" class="chip-group"></div>
+    <div class="field-row u-hide" id="examUnitRow" data-page-node-id="rJh8yAd1oXFM54bMw6tL5n">
+      <span class="field-label" data-page-node-id="At4OHHfRH5FfmJra0hA1d9">单元</span>
+      <div id="examUnitBtns" class="chip-group" data-page-node-id="Q1Tm6rB8sv26eutui0E9Pl"></div>
     </div>
-    <div class="field-row u-hide" id="examMonthRow">
-      <span class="field-label">月考次数</span>
-      <div id="examMonthBtns" class="chip-group"></div>
+    <div class="field-row u-hide" id="examMonthRow" data-page-node-id="GFzjwIYkOExjQSCFA2APiN">
+      <span class="field-label" data-page-node-id="Jn7wBs6bRND2aZUD0MDrod">月考次数</span>
+      <div id="examMonthBtns" class="chip-group" data-page-node-id="dOkQaYeFyAua6T3xPOhaBO"></div>
     </div>
   </div>
 
-  <button class="btn btn-primary u-hide" id="startExamBtn" onclick="startExam()">开始考试</button>
+  <button class="btn btn-primary u-hide" id="startExamBtn" onclick="startExam()" data-page-node-id="JJ7MxXsz2vX6SCmO7yEuHf">开始考试</button>
 
-  <div class="card u-bg-ok u-bd-ok">
-    <div class="u-fs13 u-c-light u-lh18">
-      <strong>试卷说明：</strong><br>
-      • 单元考试：测一个单元，30题满分100分<br>
-      • 月考试：阶段综合（前几单元），30题满分100分<br>
-      • 期中考试：半册综合，30题满分100分<br>
-      • 期末考试：全册综合，30题满分100分<br>
-      <span class="u-c-ok">题型含填空、选择、计算、应用题，按真实试卷结构</span>
+  <div class="card u-bg-ok u-bd-ok" data-page-node-id="nHXsQXEmYP1rODbEEUWsms">
+    <div class="u-fs13 u-c-light u-lh18" data-page-node-id="mT4fYA1y6V88kMSGPtRYj6">
+      <strong data-page-node-id="KlQeDfZ1Cktr6ALtKm7Ef1">试卷说明：</strong><br data-page-node-id="P43snO5vNCjtEXOD9RmgrQ">
+      • 单元考试：测一个单元，30题满分100分<br data-page-node-id="JJr9zUeSj1Thok2lB0c7BT">
+      • 月考试：阶段综合（前几单元），30题满分100分<br data-page-node-id="gzf1vREhFQx29bjWvkSw3b">
+      • 期中考试：半册综合，30题满分100分<br data-page-node-id="mfkqOy78FJiMNKMyFGuxyi">
+      • 期末考试：全册综合，30题满分100分<br data-page-node-id="Oa5EjVZIdWhhoz25RYHE78">
+      <span class="u-c-ok" data-page-node-id="1UjWQ68NsUKxWerqM2KAHH">题型含填空、选择、计算、应用题，按真实试卷结构</span>
     </div>
   </div>
 </div>
 
 </div><!-- /mathRoot -->
-<div class="u-hide" id="englishRoot">
-  <div class="navbar eng-navbar">
-    <button class="nav-icon-btn u-hide" id="engBackBtn" onclick="engGoBack()">←</button>
-    <h1 id="engNavTitle">英语 · 人教 PEP</h1>
+<div class="u-hide" id="englishRoot" data-page-node-id="Z0l4Pebsw2xSOGHVe10oBm">
+  <div class="navbar eng-navbar" data-page-node-id="CR68GMjHcG6N1D0emHMYv2">
+    <button class="nav-icon-btn u-hide" id="engBackBtn" onclick="engGoBack()" data-page-node-id="50UCB0WKkohvAj3SDrPfA6">←</button>
+    <h1 id="engNavTitle" data-page-node-id="X68LtHLPYOrZphlyQvfn4f">英语 · 人教 PEP</h1>
   </div>
-  <div class="u-p14" id="engBody"></div>
+  <div class="u-p14" id="engBody" data-page-node-id="Fj0aUPsyemr6Z7mRRoStEK"></div>
 </div><!-- /englishRoot -->
-<div class="u-hide" id="chineseRoot">
-  <div class="navbar">
-    <button class="nav-icon-btn u-hide" id="cnBackBtn" onclick="CN.goHome()">&larr;</button>
-    <h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h9a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 20a3 3 0 01-3-3"/></svg>小学语文 · 统编版</h1>
+<div class="u-hide" id="chineseRoot" data-page-node-id="PR7Xhp9ccUZykpjMO2oNeM">
+  <div class="navbar" data-page-node-id="YcBKk4MdvQ05PI3bLhnAqu">
+    <button class="nav-icon-btn u-hide" id="cnBackBtn" onclick="CN.goHome()" data-page-node-id="xevGXMtLbQ13D40MKePo1L">&larr;</button>
+    <h1 data-page-node-id="fCbbDrfO2Ld2lP3fTdEyvJ"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="M5bA2jOge9zdy1WQ0weFVi"><path d="M5 4h9a3 3 0 013 3v13H8a3 3 0 01-3-3z" data-page-node-id="BtmAyxw5kEncMEckBQ4OoS"/><path d="M8 20a3 3 0 01-3-3" data-page-node-id="rS47YF1kDsDPC1PqhxA7aW"/></svg>小学语文 · 统编版</h1>
   </div>
 
   <!-- 首页 -->
-  <div class="page active" id="cnPageHome">
-    <div class="u-p14" id="cnHomeContent"></div>
+  <div class="page active" id="cnPageHome" data-page-node-id="7voXXGIzoRcpejemsGcFrd">
+    <div class="u-p14" id="cnHomeContent" data-page-node-id="WRYLmsbSneHMN7C2bZtrss"></div>
   </div>
 
   <!-- 同步学习页 -->
-  <div class="page" id="cnPageLearn">
-    <div class="u-p14" id="cnLearnContent"></div>
+  <div class="page" id="cnPageLearn" data-page-node-id="03QJHANIFpKMQ5QrVCIE4f">
+    <div class="u-p14" id="cnLearnContent" data-page-node-id="dUAyonLhAlpRef2liTc6Ws"></div>
   </div>
 
   <!-- 答题页 -->
-  <div class="page" id="cnPageQuiz">
-    <div class="quiz-header">
-      <div class="quiz-progress" id="cnQuizProgress">第 1 / 10 题</div>
-      <div class="quiz-score" id="cnQuizScore">★ 0</div>
+  <div class="page" id="cnPageQuiz" data-page-node-id="PAajgZi0HSRD6wiPpBD6uS">
+    <div class="quiz-header" data-page-node-id="GVYQ5LZ1qhssn4BhKTryHc">
+      <div class="quiz-progress" id="cnQuizProgress" data-page-node-id="u81PuhxJl1JHBxr4s3LJHH">第 1 / 10 题</div>
+      <div class="quiz-score" id="cnQuizScore" data-page-node-id="w18NSyq2Eazs8xMk1S5nZT">★ 0</div>
     </div>
-    <div class="progress-bar">
-      <div class="progress-bar-fill u-w10" id="cnProgressFill"></div>
+    <div class="progress-bar" data-page-node-id="dJ8HZ3aSkI2bHkVHrnwKgy">
+      <div class="progress-bar-fill u-w10" id="cnProgressFill" data-page-node-id="EuCPc1Ty0kkxeCH2CoaSKB"></div>
     </div>
-    <div class="quiz-nav" id="cnQuizNav"></div>
-    <div class="question-card" id="cnQuestionCard"></div>
-    <div class="quiz-bottom">
-      <div id="cnQuizActions"></div>
+    <div class="quiz-nav" id="cnQuizNav" data-page-node-id="FpDOAoLCqBa2j1Ll5etvyC"></div>
+    <div class="question-card" id="cnQuestionCard" data-page-node-id="P9Du8HJ4z849DXIv1eRxqM"></div>
+    <div class="quiz-bottom" data-page-node-id="wVa7bkESAbkRkABAXnd6Do">
+      <div id="cnQuizActions" data-page-node-id="ZOtxB1IiKcgMVMDiydqk0I"></div>
     </div>
   </div>
 
   <!-- 结果页（v75：两步式 批改成绩 → 答案解析） -->
-  <div class="page" id="cnPageResult">
+  <div class="page" id="cnPageResult" data-page-node-id="KuxUx2W7YbMrVRbOayiOOW">
     <!-- 第一步：批改成绩页 -->
-    <div class="card result-card" id="cnResultScoreCard">
-      <div class="teacher-header">
-        <div class="teacher-score">得分：<span id="cnResultScore">0</span><span id="cnResultTotal">/10</span></div>
-        <div class="teacher-level" id="cnTeacherLevel">优秀</div>
+    <div class="card result-card" id="cnResultScoreCard" data-page-node-id="TGsqQnBYV4RmL5gE0yzGG6">
+      <div class="teacher-header" data-page-node-id="DXExRtqJsDICOLDL8p4syI">
+        <div class="teacher-score" data-page-node-id="9qkALQZGBBButT5Dau1fq4">得分：<span id="cnResultScore" data-page-node-id="gx9ssCTPBBqHPtM7nrVcxo">0</span><span id="cnResultTotal" data-page-node-id="aVNONsEAqWzp5oQcUwnXqr">/10</span></div>
+        <div class="teacher-level" id="cnTeacherLevel" data-page-node-id="jCnEb4DomOXM2JRk9J0EkW">优秀</div>
       </div>
-      <div class="teacher-stars" id="cnResultStars">★★★</div>
-      <div class="result-stats" id="cnResultStats">
-        <div class="result-stat"><div class="num correct" id="cnResultCorrect">0</div><div class="label">答对</div></div>
-        <div class="result-stat"><div class="num wrong" id="cnResultWrong">0</div><div class="label">答错</div></div>
-        <div class="result-stat"><div class="num u-c-primary" id="cnResultAccuracy">0%</div><div class="label">正确率</div></div>
-        <div class="result-stat"><div class="num" id="cnResultTime">0秒</div><div class="label">用时</div></div>
+      <div class="teacher-stars" id="cnResultStars" data-page-node-id="u7TJAWMt4uD2tKd7BuerAt">★★★</div>
+      <div class="result-stats" id="cnResultStats" data-page-node-id="7I4e19FJL7hy7aLidVdsri">
+        <div class="result-stat" data-page-node-id="3BLDNQttCc7TLCRiVh66XX"><div class="num correct" id="cnResultCorrect" data-page-node-id="IGZniYDfnbBvp8LCfA24gU">0</div><div class="label" data-page-node-id="t2IO9s1cMtQlGN4aM2dyue">答对</div></div>
+        <div class="result-stat" data-page-node-id="ieegoJtLYixXHeAnfW4BJ6"><div class="num wrong" id="cnResultWrong" data-page-node-id="y7SdOL5Qawdmb2Q41IdEsO">0</div><div class="label" data-page-node-id="HwOHU3VJN1yhG8QJGJHJio">答错</div></div>
+        <div class="result-stat" data-page-node-id="o99T7gBJCErW6P6DlJMTVJ"><div class="num u-c-primary" id="cnResultAccuracy" data-page-node-id="r3B5gsKPlKeaB3n4tqFAD8">0%</div><div class="label" data-page-node-id="Cq19VJDQNX8O3MOCjRetTx">正确率</div></div>
+        <div class="result-stat" data-page-node-id="BKXDc7tdhD0aFvEwxXypis"><div class="num" id="cnResultTime" data-page-node-id="hwQnA7WHonTyU4bbpmyRKs">0秒</div><div class="label" data-page-node-id="s3RpTsE07qUTnIeNKh2z9u">用时</div></div>
       </div>
-      <div class="teacher-comment" id="cnTeacherComment"></div>
-      <div class="teacher-detail">
-        <div class="detail-title">各题得分明细</div>
-        <div id="cnQuestionScoreList"></div>
+      <div class="teacher-comment" id="cnTeacherComment" data-page-node-id="AOBYpNhIdmIENeebuLKapR"></div>
+      <div class="teacher-detail" data-page-node-id="GRVHNHC3aNXBebBuO57rgk">
+        <div class="detail-title" data-page-node-id="nTwWHUIoByqSu89QkflGcS">各题得分明细</div>
+        <div id="cnQuestionScoreList" data-page-node-id="Y21xgL3f1zl828V2ppEX3d"></div>
       </div>
-      <div id="cnResultExtra"></div>
-      <div class="btn-group" id="cnScoreActions">
-        <button class="btn btn-primary" id="cnConfirmScoreBtn" onclick="CN.confirmScore()">✅ 确认成绩</button>
+      <div id="cnResultExtra" data-page-node-id="sUpATECwHxusOYJYfiFH7e"></div>
+      <div class="btn-group" id="cnScoreActions" data-page-node-id="K63Qwc0N23cWZ04xXqQLkQ">
+        <button class="btn btn-primary" id="cnConfirmScoreBtn" onclick="CN.confirmScore()" data-page-node-id="ihEIJ8cXBEWLRRug6NjTHJ">✅ 确认成绩</button>
       </div>
     </div>
 
     <!-- 第二步：答案与解析页 -->
-    <div class="card result-card u-hide u-tl" id="cnExamAnswerKey">
-      <div class="section-title">答案与解析</div>
-      <div id="cnExamAnswerKeyBody"></div>
-      <div class="btn-group">
-        <button class="btn btn-primary" id="cnRetryBtn" onclick="CN.replay()">重新考试</button>
-        <button class="btn btn-outline" onclick="CN.backToStudy()">返回单元学习</button>
-        <button class="btn btn-outline" onclick="CN.printPaper()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>打印试卷</button>
+    <div class="card result-card u-hide u-tl" id="cnExamAnswerKey" data-page-node-id="ixzOOWCSPDc0Re8GuT7pFD">
+      <div class="section-title" data-page-node-id="DhvM2lI2TZoGqGqI4Ut2nB">答案与解析</div>
+      <div id="cnExamAnswerKeyBody" data-page-node-id="AQS9W3RKOm969fsCw2gQN4"></div>
+      <div class="btn-group" data-page-node-id="PQ6rEh3UanVTAEuHHhYx0C">
+        <button class="btn btn-primary" id="cnRetryBtn" onclick="CN.replay()" data-page-node-id="vt9TrHu2j7N79XWHs5ZR4E">重新考试</button>
+        <button class="btn btn-outline" onclick="CN.backToStudy()" data-page-node-id="tx8VopxrWvNq0vfsTcRBNH">返回单元学习</button>
+        <button class="btn btn-outline" onclick="CN.printPaper()" data-page-node-id="zunDEjSDgFJ1cYp1e9GUHz"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="SN6f1ARu6c9F0JKozlncIs"><path d="M7 8V3h10v5" data-page-node-id="PldnRCjhcVCrvQIlVzI2HK"/><path d="M7 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-2" data-page-node-id="wdBykNWiE9nzQ2o6sS9uf3"/><path d="M7 14h10v7H7z" data-page-node-id="llP1SgDZP04WYmf9KRCh8Q"/></svg>打印试卷</button>
       </div>
     </div>
   </div>
 
   <!-- 错题库页 -->
-  <div class="page" id="cnPageWrong">
-    <div class="section-title">语文错题库</div>
-    <div class="btn-group u-mb16">
-      <button class="btn btn-primary" onclick="CN.startWrongReview()">开始错题重练</button>
-      <button class="btn btn-outline" onclick="CN.clearWrong()">清空语文错题</button>
+  <div class="page" id="cnPageWrong" data-page-node-id="kYGvVlpPl3dlGSOFxklXFE">
+    <div class="section-title" data-page-node-id="kAR4DQA6SXK8pyDL0LnlRe">语文错题库</div>
+    <div class="btn-group u-mb16" data-page-node-id="1FLpqyEclABUzbHzi9RG2S">
+      <button class="btn btn-primary" onclick="CN.startWrongReview()" data-page-node-id="BzQ2yZUAO7hUqKdHkdUKES">开始错题重练</button>
+      <button class="btn btn-outline" onclick="CN.clearWrong()" data-page-node-id="lfvGS6xrtPxBcCqqrnFM2p">清空语文错题</button>
     </div>
-    <div id="cnWrongList"></div>
+    <div id="cnWrongList" data-page-node-id="Nwoqsyqv9wJ8XhHjKVGxfZ"></div>
   </div>
 
   <!-- 考试中心页（v79：语文接入全局「练习」tab） -->
-  <div class="page" id="cnPageExam">
-    <div class="u-p14" id="cnExamContent"></div>
+  <div class="page" id="cnPageExam" data-page-node-id="iqLFobVV5l16Q1G0n940Ts">
+    <div class="u-p14" id="cnExamContent" data-page-node-id="B4DA1I6BhivdsNFHZwoLaQ"></div>
   </div>
 </div><!-- /chineseRoot -->
 
@@ -364,48 +360,48 @@
      全局页（v79）：三科共用 —— 统计 / 家长后台
      挂在各模块 Root 之外，切到这里时三个 Root 一并隐藏。
      ============================================================ -->
-<div class="u-hide" id="globalPages">
+<div class="u-hide" id="globalPages" data-page-node-id="rKMwp81hFIRIyzE6DTViAD">
 
   <!-- 统计页 -->
-  <div class="page" id="page-stats">
-    <div class="navbar"><h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg>学习统计</h1></div>
-    <div class="section-title">学习统计</div>
-    <div class="stats-overview" id="statsOverview"></div>
-    <div class="section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>各年级详情</div>
-    <div class="card">
-      <table class="grade-stats-table" id="gradeStatsTable"></table>
+  <div class="page" id="page-stats" data-page-node-id="h0yNnwmOi3MIVg34K42Wl2">
+    <div class="navbar" data-page-node-id="x10FAXFUBzkYgzqoO0ODVe"><h1 data-page-node-id="mmhIkiNljDuczaeMBRzRLC"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="nl9PE9ztEGJctfCvushwM3"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3" data-page-node-id="mvjhpKRzj1j05dxvRFxcqE"/></svg>学习统计</h1></div>
+    <div class="section-title" data-page-node-id="oBn4us7oKNyjKMgvtqIOmn">学习统计</div>
+    <div class="stats-overview" id="statsOverview" data-page-node-id="rSjNWVqC5sypNecGdWFHIm"></div>
+    <div class="section-title" data-page-node-id="x6Ck0d1lA8A9lY6on23hoO"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="xmlfGdRQrc56cpNafQBQX9"><path d="M8 6h13M8 12h13M8 18h13" data-page-node-id="AIneUYsFfO68GjPcylWNDt"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01" data-page-node-id="nc19PQyCJfB0ULm63qwc3e"/></svg>各年级详情</div>
+    <div class="card" data-page-node-id="TspnVXzCAl4oOGuDCGTiPC">
+      <table class="grade-stats-table" id="gradeStatsTable" data-page-node-id="1dhHmZXTjwC9eltQar42f9"></table>
     </div>
-    <div class="section-title">近期成绩</div>
-    <div id="recentScores"></div>
+    <div class="section-title" data-page-node-id="hWAYvTurpsVP1uoDsJrstO">近期成绩</div>
+    <div id="recentScores" data-page-node-id="vlvxpMzce9JSMY8UxLhZcn"></div>
 
-    <div class="section-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3"/><path d="M8 14h8v7H8z"/></svg>数据备份与同步</div>
-    <div class="card">
-      <div class="u-fs13 u-c-light u-lh17 u-mb12">
-        学习记录保存在本机浏览器里。换手机或想在电脑上继续练，先在这里<strong>导出</strong>，再到另一台设备<strong>导入</strong>即可。
+    <div class="section-title" data-page-node-id="u3cZyV3aH4xdLkgEzrFzF3"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="FtP4RqGfuCUa07er7D12ve"><path d="M5 3h11l3 3v15H5z" data-page-node-id="oZgqFWMFVCSuuyI2GYTY2n"/><path d="M8 3v6h8V3" data-page-node-id="DJP2PT6NbUsjA3ZxLw0FF1"/><path d="M8 14h8v7H8z" data-page-node-id="SWec34dc5nsHUBVUX2cSZb"/></svg>数据备份与同步</div>
+    <div class="card" data-page-node-id="mSgZMnLlghYbhu9a5hz8xA">
+      <div class="u-fs13 u-c-light u-lh17 u-mb12" data-page-node-id="cWZguXmrEzpE3tfUdJXYXB">
+        学习记录保存在本机浏览器里。换手机或想在电脑上继续练，先在这里<strong data-page-node-id="Uyyc9QGZJzPt8DeY56Xpq3">导出</strong>，再到另一台设备<strong data-page-node-id="sCc22UbuwbBFuP6p0htb4C">导入</strong>即可。
       </div>
-      <button class="btn btn-primary u-mb10" onclick="exportUserData()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>导出学习数据（备份文件）</button>
-      <button class="btn btn-outline u-mb10" onclick="document.getElementById(&#39;importFile&#39;).click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17V5"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></svg>导入学习数据</button>
-      <input class="u-hide" type="file" id="importFile" accept=".json,application/json" onchange="importUserData(event)">
-      <button class="btn btn-outline" onclick="exportWrongBookText()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V9z"/><path d="M13 3v6h6"/></svg>导出错题本（文本）</button>
+      <button class="btn btn-primary u-mb10" onclick="exportUserData()" data-page-node-id="ygHZTjEGDjY7d3WqehgfCa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="7DyNKiE5fVbEODufOTx8fs"><path d="M12 3v12" data-page-node-id="QyndllFKqhHLd3fdjcaKXz"/><path d="M7 11l5 5 5-5" data-page-node-id="gg5FHBQPYmMDr1PPGIzE2a"/><path d="M4 20h16" data-page-node-id="JqAGeGXpiStlX4lDHY9hTh"/></svg>导出学习数据（备份文件）</button>
+      <button class="btn btn-outline u-mb10" onclick="document.getElementById(&#39;importFile&#39;).click()" data-page-node-id="rvmGbQrynI5HVKOYVoQlWM"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="f0Z11D7cHz1FvNPfyHVgBa"><path d="M12 17V5" data-page-node-id="YesEIIA96qtFgaML2rTfQp"/><path d="M7 9l5-5 5 5" data-page-node-id="uf4GO23bmqVL4NGTJ5AErv"/><path d="M4 20h16" data-page-node-id="pZJRKyTb2A7NVaTc3pg2R6"/></svg>导入学习数据</button>
+      <input class="u-hide" type="file" id="importFile" accept=".json,application/json" onchange="importUserData(event)" data-page-node-id="q0zYspi5qfe9nPJOg6MDhc">
+      <button class="btn btn-outline" onclick="exportWrongBookText()" data-page-node-id="MDvyDEFl7B9u5h3VXopYE0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="w6Oxc0JoOYxfsQ0wZfFqOC"><path d="M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V9z" data-page-node-id="Nek21rdBHP029JDkvwAQsA"/><path d="M13 3v6h6" data-page-node-id="UPY8nVyVNl3PulDTkxhbIS"/></svg>导出错题本（文本）</button>
     </div>
   </div>
 
   <!-- 家长后台页 -->
-  <div class="page" id="page-parent">
-    <div class="navbar"><h1>家长后台</h1></div>
-    <div class="u-p12">
-      <div class="u-bg-blue u-bd-blue u-r10 u-p12 u-mb12 u-fs13 u-c-blue" id="deviceCred">
-        <div class="u-fw700 u-mb6">吕泳冀 · 学习凭证</div>
-        <div id="deviceCredBody">…</div>
-        <div class="u-fs12 u-c-slate2 u-mt6">所有设备自动共享此身份。家长远程查看：打开本应用 → 点「家长」→ 用学习ID和口令登录。</div>
+  <div class="page" id="page-parent" data-page-node-id="GLm6XP3BwoGHfdBwjGTD7C">
+    <div class="navbar" data-page-node-id="tgnwxMkQmEfZLZvAkoN42x"><h1 data-page-node-id="dduDb3ikqlxvNJ78Rv53Mi">家长后台</h1></div>
+    <div class="u-p12" data-page-node-id="LFGcmxdgzSTPX15devQVEl">
+      <div class="u-bg-blue u-bd-blue u-r10 u-p12 u-mb12 u-fs13 u-c-blue" id="deviceCred" data-page-node-id="Q0oRglwNvHxub46L7HJTPC">
+        <div class="u-fw700 u-mb6" data-page-node-id="MGRxRbNUI7iZ5xwr2mn6pP">吕泳冀 · 学习凭证</div>
+        <div id="deviceCredBody" data-page-node-id="VN4lx3sbGBJe1ynIpDGPuR">…</div>
+        <div class="u-fs12 u-c-slate2 u-mt6" data-page-node-id="j7hSDqlsPoD8Ql3haH4iqS">所有设备自动共享此身份。家长远程查看：打开本应用 → 点「家长」→ 用学习ID和口令登录。</div>
       </div>
-      <div class="u-hide u-bg-w u-r10 u-p12 u-mb12" id="parentLogin">
-        <div class="u-fs14 u-fw700 u-mb8">查看孩子的学习情况</div>
-        <input class="u-w100 u-p8 u-mb8 u-bd u-r8 u-bbox" id="parentId" placeholder="学习ID（如 LYJ3X9ZQ）">
-        <input class="u-w100 u-p8 u-mb8 u-bd u-r8 u-bbox" id="parentPw" type="password" placeholder="口令">
-        <button class="btn btn-primary u-w100" onclick="parentLogin()">查看</button>
+      <div class="u-hide u-bg-w u-r10 u-p12 u-mb12" id="parentLogin" data-page-node-id="OpPpyK9HqD6WwosIHaEobu">
+        <div class="u-fs14 u-fw700 u-mb8" data-page-node-id="F6DIujrKwi0oQ7edM1uNAM">查看孩子的学习情况</div>
+        <input class="u-w100 u-p8 u-mb8 u-bd u-r8 u-bbox" id="parentId" placeholder="学习ID（如 LYJ3X9ZQ）" data-page-node-id="z7GNnNTbmqO1Y7asV7PsKp">
+        <input class="u-w100 u-p8 u-mb8 u-bd u-r8 u-bbox" id="parentPw" type="password" placeholder="口令" data-page-node-id="qyNX9jTSqBnXrah40BloJy">
+        <button class="btn btn-primary u-w100" onclick="parentLogin()" data-page-node-id="9ExfAxFMnkYZdiZROrhG5H">查看</button>
       </div>
-      <div id="parentResult"></div>
+      <div id="parentResult" data-page-node-id="jA9AsVqcRomwwfQrfBk5NF"></div>
     </div>
   </div>
 </div><!-- /globalPages -->
@@ -415,35 +411,36 @@
      首页 / 练习 / 错题 / 统计 / 家长
      模块页 → 分发到当前模块；统计与家长 → 全局页。
      ============================================================ -->
-<div class="bottom-nav" id="globalNav">
-  <button class="nav-tab active" data-page="home" onclick="switchTab('home')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg></span>
-    <span class="tab-label">首页</span>
+<div class="bottom-nav" id="globalNav" data-page-node-id="61kbn9P0vzQSC89KcYNaYM">
+  <button class="nav-tab active" data-page="home" onclick="switchTab('home')" data-page-node-id="k5STBOItoycHyWf9CsxXXd">
+    <span class="tab-icon" data-page-node-id="cYXcilOMmQu9NzclqWTFF9"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="lWnBHdNymL3Wt0rRKi20PM"><path d="M4 11l8-7 8 7" data-page-node-id="OglnE8L2J80AAYyi5IyhE7"/><path d="M6 10v10h12V10" data-page-node-id="CZql0BTlyg7jEPETKuMTev"/></svg></span>
+    <span class="tab-label" data-page-node-id="nMoF7BQimqRdpJwLA5brbs">首页</span>
   </button>
-  <button class="nav-tab" data-page="exam" onclick="switchTab('exam')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/></svg></span>
-    <span class="tab-label">练习</span>
+  <button class="nav-tab" data-page="exam" onclick="switchTab('exam')" data-page-node-id="gq6BJqRgKYl91JdbwHaK3i">
+    <span class="tab-icon" data-page-node-id="K8PgYLvNsDAW6JjMMtsLcQ"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="f7yfjOYou09mn69ugf3IiI"><path d="M7 3h8l4 4v14H7z" data-page-node-id="XCJe90ATGYGcE6a5Ob8ovy"/><path d="M15 3v4h4" data-page-node-id="zQzDCkbIctt9ZySfoDQfa2"/></svg></span>
+    <span class="tab-label" data-page-node-id="R6HV21a4ERcJwv2Vxa3Dyl">练习</span>
   </button>
-  <button class="nav-tab" data-page="wrong" onclick="switchTab('wrong')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a1 1 0 011 1v17l-6-4-6 4V4a1 1 0 011-1z"/></svg></span>
-    <span class="tab-label">错题</span>
+  <button class="nav-tab" data-page="wrong" onclick="switchTab('wrong')" data-page-node-id="tGzXCikrto8FlU9FQwaqIG">
+    <span class="tab-icon" data-page-node-id="o2SD2LwTIq7GjQxNA8JqYg"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="nMbWCK96bmHu7d2dC9GkBt"><path d="M7 3h10a1 1 0 011 1v17l-6-4-6 4V4a1 1 0 011-1z" data-page-node-id="uerpbPbmf47cQbpXvllK0R"/></svg></span>
+    <span class="tab-label" data-page-node-id="sevOmsBAdYE31zqJ7yKvUr">错题</span>
   </button>
-  <button class="nav-tab" data-page="stats" onclick="switchTab('stats')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></svg></span>
-    <span class="tab-label">统计</span>
+  <button class="nav-tab" data-page="stats" onclick="switchTab('stats')" data-page-node-id="nACCgunKiQetDryC4klQyb">
+    <span class="tab-icon" data-page-node-id="yk6ZDXiiDCDciusnD5Ri7W"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="SlNo3s99TVpX5ukJjvekmW"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3" data-page-node-id="qQoiTwnuo3KFuVz3c6nQ61"/></svg></span>
+    <span class="tab-label" data-page-node-id="geN9BLQudU9hpf70jI2Tay">统计</span>
   </button>
-  <button class="nav-tab" data-page="parent" onclick="switchTab('parent')">
-    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M17 4.5a3.5 3.5 0 010 6.9"/><path d="M19 20v-1a4 4 0 00-2.4-3.7"/></svg></span>
-    <span class="tab-label">家长</span>
+  <button class="nav-tab" data-page="parent" onclick="switchTab('parent')" data-page-node-id="0wEsB7yGx4J9YxXEeZBbpR">
+    <span class="tab-icon" data-page-node-id="kj6vHkwNe55Y8Hp4OUgk5u"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-page-node-id="72plbuCEHT83VGo1rxVTGN"><path d="M16 20v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1" data-page-node-id="bIJV1neajoRZA4PiVeV9DF"/><circle cx="9.5" cy="7.5" r="3.5" data-page-node-id="SoJ0mFNG50xorBkd7nnDyt"/><path d="M17 4.5a3.5 3.5 0 010 6.9" data-page-node-id="yePric3nA6sEOyYgQleYJ3"/><path d="M19 20v-1a4 4 0 00-2.4-3.7" data-page-node-id="WTh1qmsZwCVFwxpeTu3WLh"/></svg></span>
+    <span class="tab-label" data-page-node-id="zvJmikSfMSKXn2HqBaG1jb">家长</span>
   </button>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" data-page-node-id="nWBgIZxBNZ2XG0gJGcMtDz"></div>
 
 <script src="js/inputKit.js"></script>
 <script src="js/core.js"></script>
-<script src="js/math.js"></script>
+<script src="js/math.js?v=20260907b"></script>
 <script src="js/math_junior.js"></script>
+<script src="js/math_junior8.js"></script>
 <script src="js/data.js"></script>
 <script src="js/gx_real.js"></script>
 <script src="js/english.js"></script>

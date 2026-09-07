@@ -11181,7 +11181,7 @@ function renderHome() {
   }
 
   // 专项练习板块：汇总所有年级中的“专项”单元
-  renderSpecialSection();
+  // renderSpecialSection();  // v99: 专项已并入单元列表卡片
 
   // v80：今日任务驾驶舱（倒计时 / 三科任务 / 薄弱提醒 / 本周概览）
   renderTodayPanel();
@@ -11255,19 +11255,22 @@ function renderUnits() {
   let listEl = document.getElementById('unitList');
   let data = loadData();
 
-  // v49：含「课本」单元的年级（六年级）→ 课本同步 + 专项练习分区展示
+  // v99：专项合并为一张卡片，横向排列专项按钮（与 PC 端一致）
   const isTbGrade = units.some(u => u.group === '课本');
+  const _isSpec = u => u.group === '专项' || u.name.includes('专项');
+  const normalUnits = units.filter(u => !_isSpec(u));
+  const specialUnits = units.filter(_isSpec);
+  const _specIdx = {};
+  units.forEach((u, i) => { if (_isSpec(u)) _specIdx[u.name] = i; });
 
   function unitItemHTML(unit, idx) {
-    let isSpec = unit.group === '专项' || unit.name.includes('专项');
-    let cls = 'unit-item' + (isSpec ? ' special-unit' : '');
     let records = (data.history || []).filter(h => h.grade === state.currentGrade && h.unitName === unit.name);
     let bestScore = records.length > 0 ? Math.max(...records.map(r => r.accuracy)) : 0;
     let metaText = records.length > 0
       ? `<span class="unit-progress">最高正确率 ${bestScore}%</span>`
       : `<span class="u-fs12 u-c-lighter">${getTypeName(unit.type)}${unit.summary ? ' · 含同步学习' : ''}</span>`;
-    let badge = isSpec ? '专' : (unit.unit ? unit.unit : idx + 1);
-    return `<div class="${cls}" onclick="startUnitQuiz(${idx})">
+    let badge = unit.unit ? unit.unit : idx + 1;
+    return `<div class="unit-item" onclick="startUnitQuiz(${idx})">
       <div class="unit-number">${badge}</div>
       <div class="unit-info">
         <div class="unit-name">${unit.name}</div>
@@ -11277,44 +11280,37 @@ function renderUnits() {
     </div>`;
   }
 
+  function specialGroupHTML() {
+    if (!specialUnits.length) return '';
+    const chips = specialUnits.map(u =>
+      `<button class="special-chip" onclick="startUnitQuiz(${_specIdx[u.name]})">${u.name.replace(/^专项[·•]/, '')}</button>`
+    ).join('');
+    return `<div class="special-group-card">
+      <div class="special-group-header">
+        <div class="unit-number">专</div>
+        <div class="unit-info">
+          <div class="unit-name">专项练习</div>
+          <div class="unit-meta">${specialUnits.length} 个专项</div>
+        </div>
+      </div>
+      <div class="special-chips">${chips}</div>
+    </div>`;
+  }
+
   if (isTbGrade) {
     let html = '';
-    let tb = units.filter(u => u.group === '课本');
-    let sp = units.filter(u => u.group !== '课本');
+    let tb = normalUnits.filter(u => u.group === '课本');
     html += `<div class="section-title u-mt2">课本同步（${semName}）</div>`;
     tb.forEach(u => { html += unitItemHTML(u, units.indexOf(u)); });
-    if (sp.length) {
-      html += `<div class="section-title">专项练习</div>`;
-      sp.forEach(u => { html += unitItemHTML(u, units.indexOf(u)); });
-    }
+    html += specialGroupHTML();
     listEl.innerHTML = html;
     return;
   }
 
-  listEl.innerHTML = '';
-  units.forEach((unit, idx) => {
-    let item = document.createElement('div');
-    item.className = 'unit-item' + (unit.name.includes('专项') ? ' special-unit' : '');
-
-    // 查看是否有练习记录
-    let records = (data.history || []).filter(h => h.grade === state.currentGrade && h.unitName === unit.name);
-    let bestScore = records.length > 0 ? Math.max(...records.map(r => r.accuracy)) : 0;
-
-    let metaText = records.length > 0
-      ? `<span class="unit-progress">最高正确率 ${bestScore}%</span>`
-      : `<span class="u-fs12 u-c-lighter">${getTypeName(unit.type)}</span>`;
-
-    item.innerHTML = `
-      <div class="unit-number">${idx + 1}</div>
-      <div class="unit-info">
-        <div class="unit-name">${unit.name}</div>
-        <div class="unit-meta">${metaText}</div>
-      </div>
-      <div class="unit-arrow">›</div>
-    `;
-    item.onclick = () => startUnitQuiz(idx);
-    listEl.appendChild(item);
-  });
+  let html = '';
+  normalUnits.forEach(u => { html += unitItemHTML(u, units.indexOf(u)); });
+  html += specialGroupHTML();
+  listEl.innerHTML = html;
 }
 
 function getTypeName(type) {
@@ -15357,7 +15353,7 @@ function g6_app_frac(){
   if (document.getElementById('frac-style-injected')) return;
   var s = document.createElement('style');
   s.id = 'frac-style-injected';
-  s.textContent = '.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}.chip-special{background:linear-gradient(135deg,#fff3e0,#ffe0b2)!important;color:#e65100!important;border:1px solid #ffb74d!important;font-size:12px!important;margin:3px!important;}.chip-special:hover{background:linear-gradient(135deg,#ffe0b2,#ffcc80)!important;}';
+  s.textContent = '.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}.chip-special{background:linear-gradient(135deg,#fff3e0,#ffe0b2)!important;color:#e65100!important;border:1px solid #ffb74d!important;font-size:12px!important;margin:3px!important;}.chip-special:hover{background:linear-gradient(135deg,#ffe0b2,#ffcc80)!important;}.special-group-card{background:#FFF;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);}.special-group-header{display:flex;align-items:center;gap:12px;}.special-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}.special-chip{padding:8px 14px;border-radius:8px;border:1px solid #E0DCD4;background:#FFF;font-size:13px;color:#3E4A63;cursor:pointer;}.special-chip:active{background:#F7F6F2;border-color:#B4945A;}';
   document.head.appendChild(s);
 })();
 
