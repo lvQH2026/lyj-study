@@ -445,9 +445,6 @@
     h += '<div class="pc-section-title">选择年级</div><div class="pc-grade-grid">';
     for (let g = 1; g <= 9; g++) h += '<div class="pc-grade" onclick="PC.pickGrade(' + g + ')">' + g + '年级</div>';
     h += '</div>';
-    if (S.subject === 'math') {
-      h += '<div class="pc-section-title">快速练习</div><div class="pc-row"><button class="pc-btn primary" onclick="PC.startMathQuick(\'basic\')">基础运算</button><button class="pc-btn primary" onclick="PC.startMathQuick(\'mixed\')">综合练习</button></div>';
-    }
     h += '<div class="pc-section-title">最近练习（本机）</div>';
     h += recentListHtml(pcLoad().history.filter(function (r) { return r.module === modOf(S.subject); }).slice(0, 8));
     c.innerHTML = h;
