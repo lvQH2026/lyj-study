@@ -1049,15 +1049,21 @@
     }
     h += '</div>';
 
-    // 苏格拉底引导：答错不直接给答案，按知识点给 2-3 条提问式提示。
+    // 豆包爱学式引导：答错后展示完整讲题卡片（题型+解题关键+分步讲解+方法总结），
+    // 孩子看懂方法后点「我学会了，再试一次」重新作答。苏格拉底保留作为回退。
     if (inHint) {
-      const hintIdx = Math.min(res.hintStep || 0, res.hints.length - 1);
-      const hintText = res.hints[hintIdx] || '';
-      h += '<div class="pc-socratic show">';
-      h += '<div class="ps-head"><span class="ps-tag">思考提示</span><span class="ps-step">第 ' + (hintIdx + 1) + ' / ' + res.hints.length + ' 条</span></div>';
-      h += '<div class="ps-text">' + esc(hintText) + '</div>';
-      h += '<div class="ps-tip">先想一想再改答案；实在想不出可以点「看答案」揭晓。</div>';
-      h += '</div>';
+      if (res.guide && window.AixueGuide && AixueGuide.guideHtml) {
+        h += AixueGuide.guideHtml(res.guide);
+        h += '<div class="ax-retry-tip">先照着上面的解题步骤想一想，再点「我学会了，再试一次」重新作答；实在想不出可以点「看答案」。</div>';
+      } else if (res.hints && res.hints.length) {
+        const hintIdx = Math.min(res.hintStep || 0, res.hints.length - 1);
+        const hintText = res.hints[hintIdx] || '';
+        h += '<div class="pc-socratic show">';
+        h += '<div class="ps-head"><span class="ps-tag">思考提示</span><span class="ps-step">第 ' + (hintIdx + 1) + ' / ' + res.hints.length + ' 条</span></div>';
+        h += '<div class="ps-text">' + esc(hintText) + '</div>';
+        h += '<div class="ps-tip">先想一想再改答案；实在想不出可以点「看答案」揭晓。</div>';
+        h += '</div>';
+      }
     } else if (res) {
       h += '<div class="pc-feedback show ' + (res.correct ? 'ok' : 'bad') + '">';
       h += res.correct ? '✓ 回答正确' : (res.revealed ? '✗ 已揭晓答案' : '✗ 回答错误');
@@ -1071,8 +1077,7 @@
 
     if (inHint) {
       h += '<button class="pc-btn ghost" onclick="PC.revealAnswer()">看答案</button>';
-      if (res.hintStep < res.hints.length - 1) h += '<button class="pc-btn" onclick="PC.hint()">下一条提示</button>';
-      h += '<button class="pc-btn primary" onclick="PC.submit()">再试一次</button>';
+      h += '<button class="pc-btn primary" onclick="PC.submit()">我学会了，再试一次</button>';
     } else if (!res) {
       h += '<button class="pc-btn primary" onclick="PC.submit()">' + (i === total - 1 ? '提交并查看' : '提交本题') + '</button>';
     } else {
@@ -1138,9 +1143,8 @@
         q.userAnswers[i] = ua;
         renderQuiz();
       } else {
-        // 仍未答对：更新最近答案，并把提示推进到下一条；用完提示仍可再试 / 看答案。
+        // 仍未答对：更新最近答案，讲题卡片保持显示，让孩子对照方法再试。
         prev.ua = ua;
-        prev.hintStep = Math.min((prev.hintStep || 0) + 1, prev.hints.length - 1);
         q.userAnswers[i] = ua;
         renderQuiz();
       }
@@ -1163,12 +1167,14 @@
         if (!exist) q.wrongList.push({ q: item, ua: ua });
         renderQuiz();
       } else {
-        // 答错：不直接给答案，进入「苏格拉底引导」——先给第一条提示，让用户继续想。
+        // 答错：进入「豆包爱学式引导」——展示完整讲题卡片（题型+解题关键+分步+总结），
+        // 孩子看懂方法后点「我学会了，再试一次」重新作答。aixueGuide 未加载时回退苏格拉底。
         q.results[i] = {
           correct: false,
           ua: ua,
           revealed: false,
-          hints: makeSocraticHints(item),
+          guide: (window.AixueGuide && AixueGuide.makeAixueGuide) ? AixueGuide.makeAixueGuide(item, q.title) : makeSocraticHints(item),
+          hints: [],
           hintStep: 0
         };
         q.userAnswers[i] = ua;

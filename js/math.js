@@ -14075,7 +14075,12 @@ function submitAnswer() {
         fidxHtml = unitFormulaHtml(hit && hit.unit);
         if (fidxHtml) fidxHtml = `<div class="fb-fidx">${fidxHtml}</div>`;
       }
-      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}`;
+      // v90：豆包爱学式讲题卡片（答错即展示完整讲解示范，之后点「下一题」继续）
+      let aixueHtml = '';
+      if (window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
+        try { aixueHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q, state.quizTitle)); } catch (e) { aixueHtml = ''; }
+      }
+      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${aixueHtml}`;
       // 加入错题
       state.wrongMap[state.quizIndex] = {
         index: state.quizIndex,

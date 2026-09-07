@@ -2936,3 +2936,95 @@ button > svg:only-child { margin-right: 0; }
 .u-xw320{ max-width:320px; }
 .u-xw360{ max-width:360px; }
 .u-xw720{ max-width:720px; }
+
+/* ===== 豆包爱学式讲题卡片（aixueGuide.js 生成，PC 端与手机端共用类名） ===== */
+.aixue-card {
+  margin: 14px 0;
+  padding: 16px 18px;
+  background: #FFFFFF;
+  border: 1px solid #E8E6E0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.aixue-card .ax-topic {
+  font-size: 13px;
+  color: #8A8A8A;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.aixue-card .ax-key {
+  background: #FFF8E6;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-left: 3px solid #F0B429;
+}
+.aixue-card .ax-key-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #8A6D00;
+  margin-bottom: 6px;
+}
+.aixue-card .ax-key-text {
+  font-size: 14px;
+  color: #4A4A4A;
+  line-height: 1.7;
+}
+.aixue-card .ax-steps {
+  margin-bottom: 14px;
+}
+.aixue-card .ax-step {
+  margin-bottom: 12px;
+}
+.aixue-card .ax-step:last-child {
+  margin-bottom: 0;
+}
+.aixue-card .ax-step-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A1B1C;
+  margin-bottom: 6px;
+}
+.aixue-card .ax-step-formula {
+  background: #F0F4FA;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 15px;
+  color: #2C3E6B;
+  line-height: 1.8;
+  font-family: Consolas, Monaco, 'PingFang SC', monospace;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.aixue-card .ax-summary {
+  background: #EAF2FB;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: #2C5282;
+  line-height: 1.7;
+  border-left: 3px solid #4A90D9;
+}
+.ax-retry-tip {
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: #8A6E3A;
+  line-height: 1.7;
+  background: #FBF6EA;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+/* 手机端适配 */
+@media (max-width: 480px) {
+  .aixue-card { padding: 12px 14px; margin: 10px 0; }
+  .aixue-card .ax-topic { font-size: 12px; margin-bottom: 8px; }
+  .aixue-card .ax-key { padding: 10px 12px; margin-bottom: 12px; }
+  .aixue-card .ax-key-title { font-size: 14px; margin-bottom: 4px; }
+  .aixue-card .ax-key-text { font-size: 13px; }
+  .aixue-card .ax-step { margin-bottom: 10px; }
+  .aixue-card .ax-step-title { font-size: 14px; margin-bottom: 4px; }
+  .aixue-card .ax-step-formula { font-size: 13px; padding: 8px 10px; }
+  .aixue-card .ax-summary { font-size: 12.5px; padding: 8px 10px; }
+  .ax-retry-tip { font-size: 12px; }
+}

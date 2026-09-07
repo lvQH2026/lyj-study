@@ -3610,7 +3610,12 @@ function cn5x8_pool() {
         el('cnFeedback').innerHTML += ' <span class="u-c-ok u-bg-ok-s3 u-p2-8 u-r8 u-fs12 u-ml6">已掌握，自动移出错题本</span>';
       }
     } else {
-      el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>';
+      // v90：豆包爱学式讲题卡片（答错展示完整讲解示范）
+      let cnGuideHtml = '';
+      if (window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
+        try { cnGuideHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(item)); } catch (e) { cnGuideHtml = ''; }
+      }
+      el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnGuideHtml;
       // 加入错题库
       cnAddWrong(item, ans);
       // 收集本次测验错题明细（供历史记录/云端同步用）
@@ -3633,7 +3638,7 @@ function cn5x8_pool() {
       } else {
         cnRenderQuestion();
       }
-    }, correct ? 600 : 1500);
+    }, correct ? 600 : 3000);
   }
 
   // ---- 结果页（v75：两步式 批改成绩 → 答案解析）----

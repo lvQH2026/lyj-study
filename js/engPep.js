@@ -588,10 +588,15 @@
         }
       }
       if (res) {
+        let axg = '';
+        if (!res.correct && window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
+          try { axg = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q)); } catch (e) { axg = ''; }
+        }
         h += '<div class="feedback show ' + (res.correct ? 'correct' : 'wrong') + '">'
           + (res.correct ? '✓ 答对了！' : '✗ 答错了。正确答案：' + esc(q.answer))
           + (q.explain ? '<div class="correct-answer">' + esc(q.explain) + '</div>' : '')
-          + '</div>';
+          + '</div>'
+          + axg;
       }
       h += '</div>';
       h += '<div class="btn-row u-mt8">';
