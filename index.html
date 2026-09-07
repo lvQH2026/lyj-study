@@ -346,6 +346,80 @@
 </div><!-- /chineseRoot -->
 
 <!-- ============================================================
+     初中新学科 Root（物理 / 化学 / 道法 / 历史 / 地理 / 生物）
+     数据来自 js/jr_*.js（window.JR_SUBJ），渲染由 js/jr_mobile.js 完成。
+     ============================================================ -->
+<div id="jrRoot" style="display:none">
+  <div class="page active" id="jrPageHome">
+    <div class="jr-wrap">
+      <div class="jr-title">初中 · 周末任务</div>
+      <div id="jrPlan"></div>
+    </div>
+  </div>
+  <div class="page" id="jrPagePick">
+    <div class="jr-wrap">
+      <button class="jr-back" onclick="JRM.goHome()">← 返回</button>
+      <div class="jr-title">按单元练习</div>
+      <div class="jr-sec">学科</div>
+      <div class="jr-chips" id="jrSubj"></div>
+      <div class="jr-sec">年级</div>
+      <div class="jr-chips" id="jrGrade"></div>
+      <div class="jr-sec">册次</div>
+      <div class="jr-chips" id="jrTerm"></div>
+      <button class="btn btn-primary jr-block" onclick="JRM.toUnits()">进入单元列表</button>
+      <div class="jr-sec">大卷（只出已学范围）</div>
+      <button class="btn jr-block" id="jrGoUT">单元测试卷</button>
+      <button class="btn jr-block" id="jrGoMT">期中复习卷</button>
+      <button class="btn jr-block" id="jrGoFT">期末复习卷</button>
+      <div class="jr-tip" id="jrTip"></div>
+    </div>
+  </div>
+  <div class="page" id="jrPageUnits">
+    <div class="jr-wrap">
+      <button class="jr-back" onclick="JRM.goPick()">← 返回</button>
+      <div class="jr-title" id="jrUnitsTitle"></div>
+      <div id="jrUnitList"></div>
+    </div>
+  </div>
+  <div class="page" id="jrPageQuiz">
+    <div class="jr-wrap">
+      <button class="jr-back" onclick="JRM.goHome()">← 返回</button>
+      <div class="jr-title" id="jrQuizTitle">练习</div>
+      <div class="jr-quiz-top"><span id="jrProg"></span><span id="jrScore"></span></div>
+      <div class="jr-qcard" id="jrQCard"></div>
+      <div id="jrFb"></div>
+      <button class="btn btn-primary jr-block" id="jrNextBtn" onclick="JRM.next()" style="display:none">下一题</button>
+    </div>
+  </div>
+  <div class="page" id="jrPageResult">
+    <div class="jr-wrap">
+      <div class="jr-title">练习完成</div>
+      <div id="jrResult"></div>
+      <button class="btn btn-primary jr-block" onclick="JRM.goHome()">回到本周任务</button>
+      <button class="btn jr-block" onclick="JRM.goPick()">按单元练习</button>
+    </div>
+  </div>
+  <div class="page" id="jrPageProg">
+    <div class="jr-wrap">
+      <button class="jr-back" onclick="JRM.goHome()">← 返回</button>
+      <div class="jr-title">本周进度</div>
+      <div class="jr-sec">年级</div>
+      <div class="jr-chips" id="jrProgGrade"></div>
+      <div class="jr-sec">各科学到第几单元（只出已学内容）</div>
+      <div id="jrProgList"></div>
+      <div class="jr-tip">每周更新一次即可。系统只出「已学至」范围内的题，超出进度的单元不会出现。</div>
+    </div>
+  </div>
+  <div class="page" id="jrPageReport">
+    <div class="jr-wrap">
+      <button class="jr-back" onclick="JRM.goHome()">← 返回</button>
+      <div class="jr-title">本周周报</div>
+      <div id="jrReport"></div>
+    </div>
+  </div>
+</div><!-- /jrRoot -->
+
+<!-- ============================================================
      全局页（v79）：三科共用 —— 统计 / 家长后台
      挂在各模块 Root 之外，切到这里时三个 Root 一并隐藏。
      ============================================================ -->
@@ -427,17 +501,37 @@
 
 <script src="js/inputKit.js"></script>
 <script src="js/core.js"></script>
-<script src="js/math.js?v=20260907d"></script>
-<script src="js/math_junior.js"></script>
-<script src="js/math_junior8.js"></script>
-<script src="js/math_junior9.js"></script>
+<script src="js/math.js?v=v=20260908b"></script>
+<script src="js/math_junior.js?v=20260908b"></script>
+<script src="js/math_junior8.js?v=20260908b"></script>
+<script src="js/math_junior9.js?v=20260908b"></script>
 <script src="js/data.js"></script>
 <script src="js/gx_real.js"></script>
 <script src="js/english.js"></script>
 <!-- v83：PEP 教材同步库 + 练习引擎（依赖 english.js 的 setView/viewStack，须在其后加载） -->
 <script src="js/pep.js"></script>
+<script src="js/pep_junior.js"></script>
+<script src="js/pep_junior8.js"></script>
+<script src="js/pep_junior9.js"></script>
 <script src="js/engPep.js"></script>
 <script src="js/chinese.js"></script>
+<script src="js/chinese_junior7.js"></script>
+<script src="js/chinese_junior8.js"></script>
+<script src="js/chinese_junior9.js"></script>
+<script src="js/jr_fig.js"></script>
+<script src="js/jr_physics.js"></script>
+<script src="js/jr_physics9.js"></script>
+<script src="js/jr_chemistry.js"></script>
+<script src="js/jr_moral7.js"></script>
+<script src="js/jr_moral8.js"></script>
+<script src="js/jr_moral9.js"></script>
+<script src="js/jr_history7.js"></script>
+<script src="js/jr_history8.js"></script>
+<script src="js/jr_history9.js"></script>
+<script src="js/jr_geography7.js"></script>
+<script src="js/jr_geography8.js"></script>
+<script src="js/jr_biology7.js"></script>
+<script src="js/jr_biology8.js"></script>
 <script src="js/diagram.js"></script>
 
 <!-- v90：豆包爱学式讲题引导（数据 + 框架，双端共用） -->
@@ -449,6 +543,8 @@
 <script src="js/aixueGuide-liberal.js"></script>
 <script src="js/aixueGuide.js?v=20260907c"></script>
 <script src="js/aiSolve.js"></script>
+<script src="js/jr_flow.js"></script>
+<script src="js/jr_mobile.js"></script>
 <script src="js/main.js"></script>
 
 <script src="config.js?v=20260907"></script>
