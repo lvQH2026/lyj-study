@@ -39,13 +39,14 @@ window.App = (function () {
       math: document.getElementById('mathRoot'),
       chinese: document.getElementById('chineseRoot'),
       english: document.getElementById('englishRoot'),
+      jr: document.getElementById('jrRoot'),
       global: document.getElementById('globalPages')
     };
   }
 
   function hideAllRoots() {
     const r = rootEls();
-    ['math', 'chinese', 'english', 'global'].forEach(function (k) {
+    ['math', 'chinese', 'english', 'jr', 'global'].forEach(function (k) {
       if (r[k]) r[k].style.display = 'none';
     });
   }
@@ -89,6 +90,10 @@ window.App = (function () {
       if (typeof switchMain === 'function') switchMain('phonics');
     } else if (mod === 'chinese') {
       if (window.CN && typeof CN.goHome === 'function') CN.goHome();
+    } else if (mod === 'jr') {
+      // 初中新学科（物理/化学/道法/历史/地理/生物），由 js/jr_mobile.js 渲染
+      if (window.JRM && typeof JRM.goHome === 'function') JRM.goHome();
+      else if (typeof showGlobal === 'function') showGlobal('page-stats');
     } else {
       if (typeof showPage === 'function') showPage('home');
       const bb = document.getElementById('backBtn');

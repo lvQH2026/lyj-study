@@ -58,8 +58,27 @@
     t.textContent = msg; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
   }
-  function modOf(s) { return s === 'math' ? '数学' : s === 'chinese' ? '语文' : '英语'; }
-  function subjName(s) { return s === 'math' ? '数学' : s === 'chinese' ? '语文' : '英语'; }
+  // v83 初中：学科注册表（键=内部 id，名=展示名 / 错题本模块名）
+  var SUBJ_META = {
+    math: '数学', chinese: '语文', english: '英语',
+    physics: '物理', chemistry: '化学',
+    moral: '道德与法治', history: '历史',
+    geography: '地理', biology: '生物'
+  };
+  function modOf(s) { return SUBJ_META[s] || '数学'; }
+  function subjName(s) { return SUBJ_META[s] || '数学'; }
+  // v83：通用单元数据源——新学科挂在 window.JR_SUBJ[subject][grade]
+  function unitsOf() {
+    if (S.subject === 'math') return (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) || [];
+    if (S.subject === 'chinese') return (window.CN && CN.data[S.grade]) || [];
+    if (window.JR_SUBJ && window.JR_SUBJ[S.subject]) {
+      var all = window.JR_SUBJ[S.subject][S.grade] || [];
+      var term = S.semester === 1 ? '上' : '下';
+      var byTerm = all.filter(function (u) { return u.term === term; });
+      return byTerm.length ? byTerm : all;
+    }
+    return [];
+  }
 
   /* ---------------- 苏格拉底引导式提示 ----------------
    * 答错不直接给答案，先按知识点给 2-3 步引导问题，让学生自己想到答案。
@@ -338,7 +357,10 @@
     const nav = $('pcNav'); let h = '';
     if (S.role === 'student') {
       h += '<div class="pc-nav-group-label">学科</div>';
-      [['math', '数学', 'PC.setSubject(\'math\')'], ['chinese', '语文', 'PC.setSubject(\'chinese\')'], ['english', '英语', 'PC.setSubject(\'english\')']].forEach(function (p) {
+      [['math', '数学', "PC.setSubject('math')"], ['chinese', '语文', "PC.setSubject('chinese')"], ['english', '英语', "PC.setSubject('english')"],
+       ['physics', '物理', "PC.setSubject('physics')"], ['chemistry', '化学', "PC.setSubject('chemistry')"],
+       ['moral', '道法', "PC.setSubject('moral')"], ['history', '历史', "PC.setSubject('history')"],
+       ['geography', '地理', "PC.setSubject('geography')"], ['biology', '生物', "PC.setSubject('biology')"]].forEach(function (p) {
         h += navItem(S.subject === p[0] ? 'active' : '', p[1], p[2], p[0]);
       });
       h += '<div class="pc-nav-group-label">学习</div>';
@@ -391,7 +413,7 @@
   function heroUnitsCount() {
     if (S.subject === 'english') return (window.ENG_DATA && ENG_DATA.phonics && ENG_DATA.phonics.levels) ? ENG_DATA.phonics.levels.length : 0;
     if (S.subject === 'math') return (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) ? KNOWLEDGE_BASE[S.grade][S.semester].length : 0;
-    return (window.CN && CN.data[S.grade]) ? CN.data[S.grade].length : 0;
+    return unitsOf().length;
   }
   function buildHero() {
     const isP = S.role === 'parent';
@@ -460,7 +482,7 @@
     h += '</div></div>';
     let units;
     if (S.subject === 'math') units = (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) || [];
-    else if (S.subject === 'chinese') units = (window.CN && CN.data[S.grade]) || [];
+    else if (S.subject !== 'english') units = unitsOf();
     else units = (window.ENG_DATA && ENG_DATA.phonics && ENG_DATA.phonics.levels) || [];
 
     h += '<div class="pc-section-title">' + esc(subjName(S.subject)) + ' · ' + S.grade + '年级 · ' + (S.semester === 1 ? '上册' : '下册') + '</div>';
@@ -522,8 +544,8 @@
   }
   PC.startUnit = function (i) {
     if (S.subject === 'math') PC.startMathUnit(i);
-    else if (S.subject === 'chinese') PC.startCnUnit(i);
-    else startEngUnit(i);
+    else if (S.subject === 'english') startEngUnit(i);
+    else PC.startCnUnit(i);
   };
   /* v83：PC 端按 PEP 单元练习（弹难度层，30 题，与自然拼读 Level 练习分开） */
   PC.startPepUnit = function (i) {
@@ -553,7 +575,7 @@
   function getStudyUnit() {
     const i = S.studyIdx;
     if (S.subject === 'math') return (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester] && KNOWLEDGE_BASE[S.grade][S.semester][i]) || null;
-    if (S.subject === 'chinese') return (window.CN && CN.data[S.grade] && CN.data[S.grade][i]) || null;
+    if (S.subject !== 'math' && S.subject !== 'english') return unitsOf()[i] || null;
     if (S.subject === 'english') return (window.ENG_DATA && ENG_DATA.phonics && ENG_DATA.phonics.levels && ENG_DATA.phonics.levels[i]) || null;
     return null;
   }
@@ -726,7 +748,7 @@
     if (S.examType !== 'unit') { box.innerHTML = ''; return; }
     let list;
     if (S.subject === 'math') list = (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) || [];
-    else if (S.subject === 'chinese') list = (window.CN && CN.data[S.grade]) || [];
+    else if (S.subject !== 'english') list = unitsOf();
     let h = '<div class="pc-row"><span class="lab">单元</span><div class="pc-seg" id="examUnit">';
     list.forEach(function (u, i) {
       const nm = (u.name || ('第' + (i + 1) + '单元')).replace(/^(四年级|五年级|六年级).*?·/, '').slice(0, 8);
@@ -738,16 +760,33 @@
   }
   PC.runExam = function () {
     const t = S.examType || 'unit';
-    if (S.subject === 'math') {
-      if (t === 'unit') PC.startMathUnit(S.examUnitIdx || 0);
-      else startMathExam(t);
-    } else if (S.subject === 'chinese') {
-      if (t === 'unit') PC.startCnUnit(S.examUnitIdx || 0);
-      else startCnExam(t);
-    } else {
-      // v83：英语支持单元考 / 月考 / 期中 / 期末，题都从 PEP 教材库出
-      startEngExam(t);
+    if (t === 'unit') {
+      // 单元考：用户主动选了具体单元，不需要门控
+      if (S.subject === 'math') PC.startMathUnit(S.examUnitIdx || 0);
+      else if (S.subject === 'english') startEngUnit(S.examUnitIdx || 0);
+      else PC.startCnUnit(S.examUnitIdx || 0);
+      return;
     }
+    // 月考 / 期中 / 期末：初中年级走 JRF 门控（与手机端同一套口径：只出已学范围）
+    if (S.grade >= 7 && window.JRF) {
+      const jt = (t === 'final') ? 'FT' : 'MT';   // 月考 / 期中 都按 MT（每段学过的前一半）
+      try {
+        const r = window.JRF.buildExam(S.subject, S.grade, jt);
+        if (r && r.empty === 'noprog') {
+          toast('请先在手机端「初中 → 设置本周进度」勾选' + window.JRF.meta(S.subject).n + '已学到的单元');
+          return;
+        }
+        if (r && r.questions && r.questions.length) {
+          toast(r.typeName + '：' + r.n + ' 题，约 ' + r.minutes + ' 分钟');
+          beginQuiz(r.questions, 'exam', r.typeName, modOf(S.subject), S.grade, true, function () { PC.runExam(); }, 'JRF');
+          return;
+        }
+      } catch (e) { /* 退回原路径 */ }
+    }
+    // 小学或 JRF 不可用：维持原 generateExamPaper 路径
+    if (S.subject === 'math') startMathExam(t);
+    else if (S.subject === 'english') startEngExam(t);
+    else startCnExam(t);
   };
 
   /* ---------------- 学生 · 错题 / 统计 ---------------- */
@@ -864,7 +903,7 @@
   // v73：语文单元练习同样先弹「练习设置」选难度；选题复用 chinese.js 的 cnSamplePool，
   // 保证 PC 端与移动端拿到的是同一批题、同一套难度分层口径。
   PC.startCnUnit = function (idx) {
-    const units = (window.CN && CN.data[S.grade]) || [];
+    const units = unitsOf();
     const u = units[idx];
     if (!u || !u.pool) { toast('该单元暂无题目'); return; }
     if (typeof openPracticeSettings !== 'function') { startCnUnitWithDiff(idx, 0); return; }
@@ -876,18 +915,18 @@
     });
   };
   function startCnUnitWithDiff(idx, diff) {
-    const units = (window.CN && CN.data[S.grade]) || [];
+    const units = unitsOf();
     const u = units[idx];
     if (!u || !u.pool) { toast('该单元暂无题目'); return; }
     let qs = (window.CN && typeof CN.samplePool === 'function')
       ? CN.samplePool(u, 30, diff || 1)
       : shuffle(u.pool()).slice(0, 20);
     if (!qs || !qs.length) { toast('该单元暂无题目'); return; }
-    beginQuiz(qs, 'unit', u.name, '语文', S.grade, false, function () { startCnUnitWithDiff(idx, diff); });
+    beginQuiz(qs, 'unit', u.name, subjName(S.subject), S.grade, false, function () { startCnUnitWithDiff(idx, diff); });
   }
   function startCnUnit(idx) { startCnUnitWithDiff(idx, 1); }
   function startCnExam(kind) {
-    const units = (window.CN && CN.data[S.grade]) || [];
+    const units = unitsOf();
     const term = S.semester === 1 ? '上' : '下';
     let tb = units.filter(function (u) { return u.group === '课本' && u.term === term; });
     if (!tb.length) tb = units;
@@ -895,8 +934,8 @@
     let all = [];
     scope.forEach(function (u) { (u.pool() || []).forEach(function (q) { all.push(q); }); });
     const qs = shuffle(all).slice(0, 24);
-    const title = CN_NUM[S.grade] + '年级语文 ' + (S.semester === 1 ? '上册' : '下册') + (kind === 'mid' ? '期中测试' : '期末测试');
-    beginQuiz(qs, 'exam', title, '语文', S.grade, true, function () { startCnExam(kind); });
+    const title = CN_NUM[S.grade] + '年级' + subjName(S.subject) + ' ' + (S.semester === 1 ? '上册' : '下册') + (kind === 'mid' ? '期中测试' : '期末测试');
+    beginQuiz(qs, 'exam', title, subjName(S.subject), S.grade, true, function () { startCnExam(kind); });
   }
   function startEngUnit(levelIdx) {
     const lv = (window.ENG_DATA && ENG_DATA.phonics && ENG_DATA.phonics.levels[levelIdx]);
@@ -1381,6 +1420,47 @@
     h += '<div class="pc-card"><h3>薄弱点</h3>' + (st.weak.length ? st.weak.map(function (u) { return '<span class="pc-chip">' + esc(u.name) + '（' + u.acc + '%）</span>'; }).join('') : '<div class="pc-empty">暂无明显薄弱点</div>') + '</div>';
     h += '<div class="pc-card"><h3>最近练习</h3>' + recentListHtml(records.slice(0, 8)) + '</div>';
     h += '</div>';
+    // v83 初中周末运行机制：周报 + 本周进度（家长端异地辅导抓手）
+    if (window.JRF && typeof window.JRF.weekReport === 'function') {
+      let allW = [];
+      records.forEach(function (r) { (r.wrong || []).forEach(function (x) { allW.push(x); }); });
+      let rp = null;
+      try { rp = window.JRF.weekReport(records, allW); } catch (e) { rp = null; }
+      if (rp) {
+        let wh = '<div class="pc-card"><h3>本周周报（初中）</h3>';
+        wh += '<div class="pc-grid pc-metrics">' +
+          metric('本周题量', rp.total.q, 'c-blue') +
+          metric('正确率', rp.total.rate + '%', 'c-green') +
+          metric('用时', rp.total.min + ' / ' + rp.budget.cap + ' 分', 'c-gold') +
+          metric('未掌握', rp.weak.length, 'c-red') + '</div>';
+        if (rp.alert && rp.alert.length) {
+          wh += rp.alert.map(function (a) {
+            var bg = a.lv === 'red' ? '#fdf1f1' : '#fdf6ec';
+            var fg = a.lv === 'red' ? '#C0392B' : '#C77B2A';
+            return '<div style="background:' + bg + ';color:' + fg + ';padding:8px 10px;border-radius:8px;margin:6px 0;font-size:13px;line-height:1.6">' + esc(a.text) + '</div>';
+          }).join('');
+        }
+        wh += rp.weak && rp.weak.length
+          ? ('<div style="margin-top:8px">' + rp.weak.map(function (x) {
+            return '<span class="pc-chip">' + esc(x.module + '·' + x.unit) + '（' + x.n + ' 错' + (x.hard ? '，攻坚 ' + x.hard : '') + '）</span>';
+          }).join('') + '</div>')
+          : '<div class="pc-empty">本周没有新增薄弱点</div>';
+        wh += '</div>';
+
+        let pg = window.JRF.progAll() || {};
+        let pks = Object.keys(pg).filter(function (k) { return pg[k] && pg[k].idx; });
+        let ph = '<div class="pc-card"><h3>本周进度（各科学到哪）</h3>';
+        ph += pks.length ? pks.map(function (k) {
+          var m = window.JRF.meta(k), p = pg[k];
+          return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #F4F2EC;font-size:14px">' +
+            '<span style="color:#5b6273">' + esc(m.n) + '</span><b style="color:#3E4A63">' +
+            esc((p.term || '上') + '册 · 第 ' + p.idx + ' 单元') + '</b></div>';
+        }).join('') : '<div class="pc-empty">尚未设置本周进度（在手机端「初中 → 设置本周进度」里勾选）</div>';
+        ph += '</div>';
+
+        h += '<div class="pc-grid pc-two u-mt16">' + wh + ph + '</div>';
+      }
+    }
     c.innerHTML = h; mountHero(c);
   }
   async function renderRecent(c) {
@@ -1486,6 +1566,8 @@
     renderNav(); renderContent();
   }
   window.PC = PC;
+  // 暴露 S 与 PC 给 window（仅供 _pc_smoke.js 自检用，业务代码不应直接读 window.__PCS / __PC）
+  if (typeof window !== 'undefined') { window.__PCS = S; window.__PC = PC; }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

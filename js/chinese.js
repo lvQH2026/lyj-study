@@ -3024,7 +3024,8 @@ function cn5x8_pool() {
     // 年级选择
     html += '<div class="section-title">选择年级</div>';
     html += '<div class="grade-grid">';
-    [4, 5, 6].forEach(function (g) {
+    // v83：4-6 小学 + 7/8/9 初中（初中单元由 js/chinese_junior*.js 注入 CN.data[7/8/9]）
+    [4, 5, 6, 7, 8, 9].forEach(function (g) {
       // v82：选中态交给 .grade-btn.active（css/style.css 已正式定义），不再拼行内样式
       html += '<button class="grade-btn' + (g === cnState.grade ? ' active' : '') + '" onclick="CN.selectGrade(' + g + ')">' + g + '年级</button>';
     });
