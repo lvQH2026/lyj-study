@@ -774,7 +774,7 @@
         h += '<div class="pc-wrong-head"><span class="lr-name">' + _wq + '</span>'
           + '<span class="lr-meta">' + esc(w.unitName || '') + ' · 答错 ' + (w.count || 1) + ' 次</span></div>';
         h += '<div class="pc-wrong-ans">你的答案：<b class="bad">' + esc(String(ua)) + '</b>'
-          + '　正确答案：<b class="ok">' + esc(String(q.answer === undefined ? '' : q.answer)) + '</b></div>';
+          + '　正确答案：<b class="ok">' + _fracHtml(esc(String(q.answer === undefined ? '' : q.answer))) + '</b></div>';
         if (q.explain) h += '<div class="pc-wrong-explain">解析：' + esc(q.explain) + '</div>';
         if (steps && steps.length) {
           h += '<details class="pc-wrong-steps" open><summary>分步讲解（' + steps.length + ' 步）</summary><ol>';
@@ -1013,7 +1013,7 @@
       (item.options || []).forEach(function (opt, oi) {
         const txt = optText(opt);
         const sel = q.userAnswers[i] === txt;
-        h += '<button class="pc-opt ' + (sel ? 'sel' : '') + '" onclick="PC.choose(' + oi + ')"><span class="pc-opt-key">' + String.fromCharCode(65 + oi) + '</span><span class="pc-opt-txt">' + esc(txt) + '</span></button>';
+        h += '<button class="pc-opt ' + (sel ? 'sel' : '') + '" onclick="PC.choose(' + oi + ')"><span class="pc-opt-key">' + String.fromCharCode(65 + oi) + '</span><span class="pc-opt-txt">' + _fracHtml(esc(txt)) + '</span></button>';
       });
       h += '</div>';
     } else {
@@ -1066,7 +1066,7 @@
     } else if (res) {
       h += '<div class="pc-feedback show ' + (res.correct ? 'ok' : 'bad') + '">';
       h += res.correct ? '✓ 回答正确' : (res.revealed ? '✗ 已揭晓答案' : '✗ 回答错误');
-      h += '<span class="fb-ans">　正确答案：' + esc(item.answer) + '</span>';
+      h += '<span class="fb-ans">　正确答案：' + _fracHtml(esc(item.answer)) + '</span>';
       if (item.explain) h += '<span class="fb-exp">解析：' + esc(item.explain) + '</span>';
       h += '</div>';
     }

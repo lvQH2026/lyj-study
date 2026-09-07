@@ -7051,9 +7051,12 @@ function g4_angle_special(){
 // v96: 全局分数上下叠放后处理——把题目中的"数字/数字"转成上下叠放HTML
 // 只对题目question字段处理，答案和选项保持纯文本（方便判分）
 function _fracHtml(s) {
-  return String(s == null ? '' : s).replace(/(\d+)\/(\d+)/g, function(m, n, d) {
-    return '<span class="frac"><span class="num">' + n + '</span><span class="den">' + d + '</span></span>';
-  });
+  s = String(s == null ? '' : s);
+  // 带括号的分数：(a)/(b)，如 (3×5)/(2×2)
+  s = s.replace(/\(([^()]+)\)\s*\/\s*\(([^()]+)\)/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+  // 简单分数：数字/数字（含负号、小数），如 3/2、-1/2、15/4
+  s = s.replace(/(?<![\w/])(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)/g, '<span class="frac"><span class="num">$1</span><span class="den">$2</span></span>');
+  return s;
 }
 
 function mc(q,a,d){
@@ -13807,7 +13810,7 @@ function renderQuestion() {
       let label = typeof opt === 'object' ? opt.label : (labels[i] || String.fromCharCode(65 + i));
       html += `<button class="option-btn" data-idx="${i}" onclick="selectOption(${i})">
         <span class="option-label">${label}</span>
-        <span class="option-value">${val}</span>
+        <span class="option-value">${_fracHtml(val)}</span>
       </button>`;
     });
     html += `</div>`;
@@ -14077,21 +14080,21 @@ function submitAnswer() {
         try { presetHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q, state.quizTitle)); } catch (e) { presetHtml = ''; }
       }
       const _loadingHtml = (window.AixueGuide && AixueGuide.loadingHtml) ? AixueGuide.loadingHtml() : '';
-      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${_loadingHtml}`;
+      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${_loadingHtml}`;
       if (window.AiSolve && AiSolve.callSolve) {
         const _gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
         const _gr = _gradeNames[state.currentGrade] || '';
         AiSolve.callSolve(q.question, '数学', _gr, q.answer).then(function (data) {
           if (data && window.AixueGuide && AixueGuide.guideHtml) {
-            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${AixueGuide.guideHtml(data)}`;
+            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${AixueGuide.guideHtml(data)}`;
           } else if (presetHtml) {
-            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${presetHtml}`;
+            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${presetHtml}`;
           }
         }).catch(function () {
-          if (presetHtml) feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${presetHtml}`;
+          if (presetHtml) feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${presetHtml}`;
         });
       } else if (presetHtml) {
-        feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${presetHtml}`;
+        feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${presetHtml}`;
       }
       // 加入错题
       state.wrongMap[state.quizIndex] = {
