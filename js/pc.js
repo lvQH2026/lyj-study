@@ -488,15 +488,12 @@
         '<button class="pc-btn ghost sm" onclick="PC.startUnit(' + i + ')">练习</button>' +
         '</div></div>';
     });
-    // 渲染专项合并卡片
+    // 渲染专项合并卡片（专项直接横向并排展示，无折叠）
     if (_specialUnits.length) {
       h += '<div class="pc-unit"><div class="u-name">专项练习</div><div class="u-meta">' + _specialUnits.length + ' 个专项</div><span class="u-tag">专项</span>' +
-        '<div class="pc-unit-actions">' +
-        '<button class="pc-btn ghost sm" onclick="PC.toggleSpecial()">选择专项 ▾</button>' +
-        '</div>' +
-        '<div class="pc-special-list" id="specialList" style="display:none;margin-top:8px;">';
+        '<div class="pc-special-list">';
       _specialUnits.forEach(function (item) {
-        h += '<div class="pc-special-item" onclick="PC.startUnit(' + item.i + ')">' + esc(item.u.name) + ' →</div>';
+        h += '<div class="pc-special-item" onclick="PC.startUnit(' + item.i + ')">' + esc(item.u.name) + '</div>';
       });
       h += '</div></div>';
     }
@@ -1497,14 +1494,9 @@
 })();
 
 
-// ===== 专项合并入口 + 分数上下叠放样式（注入）=====
+// ===== 专项横向排列 + 分数上下叠放样式（注入）=====
 (function(){
   var style = document.createElement('style');
-  style.textContent = '.pc-special-item{padding:8px 12px;cursor:pointer;border-radius:6px;font-size:13px;color:#3E4A63;}.pc-special-item:hover{background:#f0f0f0;}.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}';
+  style.textContent = '.pc-special-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}.pc-special-item{padding:10px 16px;cursor:pointer;border-radius:8px;font-size:13px;color:#3E4A63;background:#FFF;border:1px solid #E0DCD4;transition:all .15s;}.pc-special-item:hover{background:#F7F6F2;border-color:#B4945A;}.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:0.85em;font-weight:600;}.frac .num{border-bottom:1.5px solid #333;padding:0 5px;line-height:1.3;}.frac .den{padding:0 5px;line-height:1.3;}';
   document.head.appendChild(style);
 })();
-
-PC.toggleSpecial = function(){
-  var el = document.getElementById('specialList');
-  if (el) el.style.display = (el.style.display === 'none') ? 'block' : 'none';
-};
