@@ -589,8 +589,27 @@
       }
       if (res) {
         let axg = '';
-        if (!res.correct && window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
-          try { axg = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q)); } catch (e) { axg = ''; }
+        if (!res.correct) {
+          let engAiCardId = 'eng-ai-card-' + i;
+          let engPresetHtml = '';
+          if (window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
+            try { engPresetHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q)); } catch (e) { engPresetHtml = ''; }
+          }
+          axg = '<div id="' + engAiCardId + '">' + ((window.AixueGuide && AixueGuide.loadingHtml) ? AixueGuide.loadingHtml() : '') + '</div>';
+          setTimeout(function () {
+            if (window.AiSolve && AiSolve.callSolve) {
+              AiSolve.callSolve(q.question, '英语', '', q.answer).then(function (data) {
+                var el = document.getElementById(engAiCardId);
+                if (el) el.innerHTML = (data && window.AixueGuide && AixueGuide.guideHtml) ? AixueGuide.guideHtml(data) : engPresetHtml;
+              }).catch(function () {
+                var el = document.getElementById(engAiCardId);
+                if (el) el.innerHTML = engPresetHtml;
+              });
+            } else {
+              var el = document.getElementById(engAiCardId);
+              if (el) el.innerHTML = engPresetHtml;
+            }
+          }, 0);
         }
         h += '<div class="feedback show ' + (res.correct ? 'correct' : 'wrong') + '">'
           + (res.correct ? '✓ 答对了！' : '✗ 答错了。正确答案：' + esc(q.answer))

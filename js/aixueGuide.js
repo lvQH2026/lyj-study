@@ -239,12 +239,21 @@
     return h;
   }
 
+  /* ---------------- AI 加载态 HTML ---------------- */
+  function loadingHtml() {
+    return '<div class="aixue-card show ai-loading">' +
+      '<div class="ax-loading-spinner"></div>' +
+      '<div class="ax-loading-text">AI 老师正在为你讲解这道题…</div>' +
+      '</div>';
+  }
+
   /* ---------------- 导出 ---------------- */
   w.AixueGuide = {
     CONCEPT_GUIDE: CONCEPT_GUIDE,
     detectConceptJunior: detectConceptJunior,
     genericAixueGuide: genericAixueGuide,
     makeAixueGuide: makeAixueGuide,
-    guideHtml: guideHtml
+    guideHtml: guideHtml,
+    loadingHtml: loadingHtml
   };
 })(window);

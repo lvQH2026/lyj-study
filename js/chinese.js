@@ -3610,12 +3610,23 @@ function cn5x8_pool() {
         el('cnFeedback').innerHTML += ' <span class="u-c-ok u-bg-ok-s3 u-p2-8 u-r8 u-fs12 u-ml6">已掌握，自动移出错题本</span>';
       }
     } else {
-      // v90：豆包爱学式讲题卡片（答错展示完整讲解示范）
-      let cnGuideHtml = '';
+      // v97：AI 讲题——先显示加载态，异步调 DeepSeek，失败降级预置卡片
+      let cnPresetHtml = '';
       if (window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
-        try { cnGuideHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(item)); } catch (e) { cnGuideHtml = ''; }
+        try { cnPresetHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(item)); } catch (e) { cnPresetHtml = ''; }
       }
-      el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnGuideHtml;
+      var cnLoadingHtml = (window.AixueGuide && AixueGuide.loadingHtml) ? AixueGuide.loadingHtml() : '';
+      el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnLoadingHtml;
+      if (window.AiSolve && AiSolve.callSolve) {
+        AiSolve.callSolve(item.question, '语文', '', item.answer).then(function (data) {
+          var card = (data && window.AixueGuide && AixueGuide.guideHtml) ? AixueGuide.guideHtml(data) : cnPresetHtml;
+          el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + card;
+        }).catch(function () {
+          el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnPresetHtml;
+        });
+      } else {
+        el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnPresetHtml;
+      }
       // 加入错题库
       cnAddWrong(item, ans);
       // 收集本次测验错题明细（供历史记录/云端同步用）

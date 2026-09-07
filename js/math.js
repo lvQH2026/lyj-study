@@ -14075,12 +14075,28 @@ function submitAnswer() {
         fidxHtml = unitFormulaHtml(hit && hit.unit);
         if (fidxHtml) fidxHtml = `<div class="fb-fidx">${fidxHtml}</div>`;
       }
-      // v90：豆包爱学式讲题卡片（答错即展示完整讲解示范，之后点「下一题」继续）
-      let aixueHtml = '';
+      // v97：AI 讲题——先显示加载态，异步调 DeepSeek，失败降级预置卡片
+      let presetHtml = '';
       if (window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
-        try { aixueHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q, state.quizTitle)); } catch (e) { aixueHtml = ''; }
+        try { presetHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q, state.quizTitle)); } catch (e) { presetHtml = ''; }
       }
-      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${aixueHtml}`;
+      const _loadingHtml = (window.AixueGuide && AixueGuide.loadingHtml) ? AixueGuide.loadingHtml() : '';
+      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${_loadingHtml}`;
+      if (window.AiSolve && AiSolve.callSolve) {
+        const _gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
+        const _gr = _gradeNames[state.currentGrade] || '';
+        AiSolve.callSolve(q.question, '数学', _gr, q.answer).then(function (data) {
+          if (data && window.AixueGuide && AixueGuide.guideHtml) {
+            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${AixueGuide.guideHtml(data)}`;
+          } else if (presetHtml) {
+            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${presetHtml}`;
+          }
+        }).catch(function () {
+          if (presetHtml) feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${presetHtml}`;
+        });
+      } else if (presetHtml) {
+        feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${q.answer}</span>${fidxHtml}${presetHtml}`;
+      }
       // 加入错题
       state.wrongMap[state.quizIndex] = {
         index: state.quizIndex,

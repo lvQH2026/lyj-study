@@ -1052,7 +1052,12 @@
     // 豆包爱学式引导：答错后展示完整讲题卡片（题型+解题关键+分步讲解+方法总结），
     // 孩子看懂方法后点「我学会了，再试一次」重新作答。苏格拉底保留作为回退。
     if (inHint) {
-      if (res.guide && window.AixueGuide && AixueGuide.guideHtml) {
+      if (res.aiGuide && window.AixueGuide && AixueGuide.guideHtml) {
+        h += AixueGuide.guideHtml(res.aiGuide);
+        h += '<div class="ax-retry-tip">先照着上面的解题步骤想一想，再点「我学会了，再试一次」重新作答；实在想不出可以点「看答案」。</div>';
+      } else if (res.aiLoading && window.AixueGuide && AixueGuide.loadingHtml) {
+        h += AixueGuide.loadingHtml();
+      } else if (res.guide && window.AixueGuide && AixueGuide.guideHtml) {
         h += AixueGuide.guideHtml(res.guide);
         h += '<div class="ax-retry-tip">先照着上面的解题步骤想一想，再点「我学会了，再试一次」重新作答；实在想不出可以点「看答案」。</div>';
       } else if (res.hints && res.hints.length) {
@@ -1167,18 +1172,37 @@
         if (!exist) q.wrongList.push({ q: item, ua: ua });
         renderQuiz();
       } else {
-        // 答错：进入「豆包爱学式引导」——展示完整讲题卡片（题型+解题关键+分步+总结），
-        // 孩子看懂方法后点「我学会了，再试一次」重新作答。aixueGuide 未加载时回退苏格拉底。
+        // 答错：先显示 AI 加载态，异步调 DeepSeek 生成讲题卡片；失败降级预置卡片。
+        var presetGuide = (window.AixueGuide && AixueGuide.makeAixueGuide) ? AixueGuide.makeAixueGuide(item, q.title) : makeSocraticHints(item);
         q.results[i] = {
           correct: false,
           ua: ua,
           revealed: false,
-          guide: (window.AixueGuide && AixueGuide.makeAixueGuide) ? AixueGuide.makeAixueGuide(item, q.title) : makeSocraticHints(item),
+          guide: presetGuide,
           hints: [],
-          hintStep: 0
+          hintStep: 0,
+          aiLoading: true,
+          aiGuide: null
         };
         q.userAnswers[i] = ua;
         renderQuiz();
+        if (window.AiSolve && AiSolve.callSolve) {
+          (function (resRef, itemRef) {
+            var subjMap = { math: '数学', chinese: '语文', english: '英语' };
+            var subj = subjMap[S.subject] || '数学';
+            var gr = S.grade + '年级';
+            AiSolve.callSolve(itemRef.question, subj, gr, itemRef.answer).then(function (data) {
+              if (data) resRef.aiGuide = data;
+              resRef.aiLoading = false;
+              renderQuiz();
+            }).catch(function () {
+              resRef.aiLoading = false;
+              renderQuiz();
+            });
+          })(q.results[i], item);
+        } else {
+          q.results[i].aiLoading = false;
+        }
       }
     }
   };
