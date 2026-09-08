@@ -1669,6 +1669,18 @@ input:focus,textarea:focus,select:focus{
 /* ============================================================
    v51：错题公式卡联动（答题反馈 + 错题库）
    ============================================================ */
+.fb-explain {
+  display: inline-block;
+  margin-top: 8px;
+  margin-left: 4px;
+  padding: 4px 12px;
+  background: rgba(180, 148, 90, 0.12);
+  color: #8A6428;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
 .fb-fidx {
   margin-top: 10px;
   text-align: left;

@@ -5683,6 +5683,10 @@ const KNOWLEDGE_BASE = {
       // ---- 五下 · 专项练习 ----
       { name: '专项·分数应用题', group: '专项', type: 'application', gen: g5_app_fraction },
       { name: '专项·立体图形', group: '专项', type: 'shape', gen: g_shape_3d },
+      { name: '专项·约分', group: '专项', type: 'basic', gen: g_reduce_frac, quizLength: 20,
+        summary: ['约分：把一个分数化成同它大小相等、但分子分母都比较小的分数', '约分依据：分数的基本性质——分子分母同除以一个非0数，分数大小不变', '最简分数：分子和分母只有公因数 1（即互质，约分终点）', '公因数：两个数共有的因数；最大公因数是约分时「一刀到位」的关键', '分子和分母同时除以公因数，一直除到互质为止——必要时多次约分'],
+        fidx: [{ t: '最大公因数', f: '两个数共有的因数中最大的那个' }, { t: '互质', f: '两个数的公因数只有 1' }, { t: '约分', f: '分子分母同除以最大公因数 → 最简分数' }],
+        method: [{ t: '约分三步', s: '① 看——找出分子分母的最大公因数 → ② 除——分子分母同时除以这个公因数 → ③ 检——检查是否已是最简（互质）' }, { t: '判断最简', s: '公因数只有 1 才是最简分数；不是最简就继续约，直到互质为止' }, { t: '易错点', s: '约分只动分子分母，整数部分不变；约分后是「同大小」不是「同数字」——例如 4/6 和 2/3 都对' }] },
     ]
   },
   6: {
@@ -9426,6 +9430,47 @@ function g5_factor2(){
   ];
   let it=pick(items); return mc(it.q,it.a,it.d);
 }
+// 专项·约分：人教版五下·分数的意义和性质——固定 100 题池（直接整除 40 + 提取公因数 40 + 需多次约分 20），
+// 难度分档 diff 1/2/3 与现有徽标（基础/提高/拓展）对齐。题面"把 a/b 约分成最简分数（　）"
+// 走填空+InputKit fracpad 点选分子分母，answer 为最简分数；错答 explain 给出公因数。
+const _REDUCE_POOL = (function () {
+  // 枚举 (a, b)：2 ≤ a < b ≤ 100 且 gcd(a, b) > 1，按最大公因数的「不同质因数个数」分档
+  function _pfs(n) { var p = []; for (var i = 2; i * i <= n; i++) { while (n % i === 0) { p.push(i); n /= i; } } if (n > 1) p.push(n); return p; }
+  var L1 = [], L2 = [], L3 = [];   // 三档：直接整除 / 提取公因数 / 需多次约分
+  for (var b = 3; b <= 100; b++) {
+    for (var a = 2; a < b; a++) {
+      var g = gcd(a, b);
+      if (g === 1) continue;
+      var ps = _pfs(g), npf = new Set(ps).size, mxp = Math.max.apply(null, ps);
+      // L1：公因数是单个小质数（2/3/5/7/11/13）—— 直接 ÷p 一步搞定
+      // L3：公因数有 ≥3 个不同质因数，或数值 ≥30 —— 通常需多步约分
+      // L2：其余（合数有 2 个不同质因数、或单质数 > 13、或质数的平方/立方）
+      if (npf === 1 && mxp <= 13) L1.push({ a: a, b: b, g: g });
+      else if (npf >= 3 || g >= 30) L3.push({ a: a, b: b, g: g });
+      else L2.push({ a: a, b: b, g: g });
+    }
+  }
+  // 排序让池子稳定可复现（不依赖 Math.random）
+  function _sk(p, q) { return (p.a * 1000 + p.b) - (q.a * 1000 + q.b); }
+  L1.sort(_sk); L2.sort(_sk); L3.sort(_sk);
+  var pool = [];
+  L1.slice(0, 40).forEach(function (p) { pool.push({ a: p.a, b: p.b, g: p.g, diff: 1 }); });
+  L2.slice(0, 40).forEach(function (p) { pool.push({ a: p.a, b: p.b, g: p.g, diff: 2 }); });
+  L3.slice(0, 20).forEach(function (p) { pool.push({ a: p.a, b: p.b, g: p.g, diff: 3 }); });
+  return pool;
+})();
+function g_reduce_frac() {
+  var p = pick(_REDUCE_POOL);
+  var na = p.a / p.g, nb = p.b / p.g;
+  var answer = na + '/' + nb;                              // 已是最简
+  var qText = '把 ' + p.a + '/' + p.b + ' 约分成最简分数（　）';
+  var explain = p.a + ' ÷ ' + p.g + ' = ' + na + '，' + p.b + ' ÷ ' + p.g + ' = ' + nb + '，约去的公因数是 ' + p.g;
+  var q = mf(qText, answer);
+  q.diff = p.diff;                                          // 难度徽标（基础/提高/拓展）
+  q.explain = explain;                                      // 错答时立即显示公因数
+  q.tag = '约分';
+  return q;
+}
 // 专项·立体图形：v50 扩容——固定 4 题面 → 参数化长/正方体计算 + 概念 + 识图，
 // 去重键 100+，单元卷可稳定组满 30 题。
 function g_shape_3d(){
@@ -11719,7 +11764,8 @@ function beginUnitQuiz(idx, grade, sem, diff) {
     } else {
       // v86：带上该单元的「已练题面」上下文，优先出没练过的题
       const ctx = unitSeenCtx(grade, sem, idx);
-      var _unitWant = (unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : UNIT_QUIZ_LENGTH;
+      // v99：unit.quizLength 显式优先；否则按名称兼容旧「分数应用题=20」特例；默认 UNIT_QUIZ_LENGTH
+      var _unitWant = unit.quizLength || ((unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : UNIT_QUIZ_LENGTH);
       state.quizQuestions = buildUnitQuizQuestions(unit, diff || 1, _unitWant, ctx);
     }
   }
@@ -14183,21 +14229,23 @@ function submitAnswer() {
         try { presetHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(q, state.quizTitle)); } catch (e) { presetHtml = ''; }
       }
       const _loadingHtml = (window.AixueGuide && AixueGuide.loadingHtml) ? AixueGuide.loadingHtml() : '';
-      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${_loadingHtml}`;
+      // v99：题库侧 explain（如约分「约去的公因数是 2」）立即可见，不等 AI 异步
+      const _explainHtml = q.explain ? `<div class="fb-explain">${q.explain}</div>` : '';
+      feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${_explainHtml}${fidxHtml}${_loadingHtml}`;
       if (window.AiSolve && AiSolve.callSolve) {
         const _gradeNames = {1:'一年级',2:'二年级',3:'三年级',4:'四年级',5:'五年级',6:'六年级',7:'七年级',8:'八年级',9:'九年级'};
         const _gr = _gradeNames[state.currentGrade] || '';
         AiSolve.callSolve(q.question, '数学', _gr, q.answer).then(function (data) {
           if (data && window.AixueGuide && AixueGuide.guideHtml) {
-            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${AixueGuide.guideHtml(data)}`;
+            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${_explainHtml}${fidxHtml}${AixueGuide.guideHtml(data)}`;
           } else if (presetHtml) {
-            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${presetHtml}`;
+            feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${_explainHtml}${fidxHtml}${presetHtml}`;
           }
         }).catch(function () {
-          if (presetHtml) feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${presetHtml}`;
+          if (presetHtml) feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${_explainHtml}${fidxHtml}${presetHtml}`;
         });
       } else if (presetHtml) {
-        feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${fidxHtml}${presetHtml}`;
+        feedback.innerHTML = `再想想！正确答案是：<span class="correct-answer">${_fracHtml(q.answer)}</span>${_explainHtml}${fidxHtml}${presetHtml}`;
       }
       // 加入错题
       state.wrongMap[state.quizIndex] = {
@@ -14433,15 +14481,17 @@ function retryQuiz() {
     let units = KNOWLEDGE_BASE[state.currentGrade][state.currentSemester];
     let unit = units.find(u => u.name === state.quizTitle);
     if (unit) {
+      // v99：认 unit.quizLength（默认 QUIZ_LENGTH=30），与 beginUnitQuiz 走同一份 want
+      const _retryWant = unit.quizLength || ((unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : QUIZ_LENGTH);
       state.quizQuestions = [];
-      for (let i = 0; i < QUIZ_LENGTH; i++) state.quizQuestions.push(unit.gen());
+      const ctx = unitSeenCtx(state.currentGrade, state.currentSemester, units.indexOf(unit));
+      // 走 buildUnitQuizQuestions 复用「已练题面去重 + 难度配比」逻辑
+      state.quizQuestions = buildUnitQuizQuestions(unit, 1, _retryWant, ctx);
       state.quizIndex = 0;
       state.quizScore = 0;
       state.quizCorrect = 0;
       state.quizWrong = 0;
       state.quizWrongQuestions = [];
-  state.qStatus = [];
-  state.wrongMap = {};
       state.qStatus = [];
       state.wrongMap = {};
       showPage('quiz');
