@@ -144,7 +144,8 @@ a { color: inherit; }
 .pc-nav::-webkit-scrollbar { width: 5px; }
 .pc-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 6px; }
 .pc-nav-group-label {
-  font-size: 11px; color: #808AA0; padding: 16px 12px 8px; letter-spacing: 1.5px; font-weight: 600;
+  /* v96：#808AA0 对深色侧栏仅 2.83:1（11px 小字几乎看不见）→ #B7C0D2(5.37:1)，与菜单项一致 */
+  font-size: 11px; color: #B7C0D2; padding: 16px 12px 8px; letter-spacing: 1.5px; font-weight: 600;
 }
 .pc-nav-item {
   display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
@@ -157,10 +158,10 @@ a { color: inherit; }
   box-shadow: inset 3px 0 0 #B4945A;
 }
 .pc-nav-item.active .pc-nav-icon { color: #E6CFA0; }
-.pc-nav-icon { width: 20px; height: 20px; flex-shrink: 0; color: #808AA0; transition: color .15s; }
+.pc-nav-icon { width: 20px; height: 20px; flex-shrink: 0; color: #B7C0D2; transition: color .15s; }  /* v96：#808AA0(2.83:1) → #B7C0D2(5.37:1) */
 
 .pc-side-foot {
-  font-size: 11px; color: #79839A; padding-top: 14px; margin-top: 6px;
+  font-size: 11px; color: #AEB7CC; padding-top: 14px; margin-top: 6px;   /* v96：#79839A(2.58:1) → #AEB7CC(4.88:1) */
   border-top: 1px solid rgba(255,255,255,.08); line-height: 1.7;
 }
 .pc-foot-id { color: #AEB7CC; word-break: break-all; }
@@ -578,8 +579,8 @@ a { color: inherit; }
 .diag-card-body .btn-primary:hover { background: var(--primary-700); border-color: var(--primary-700); }
 .diag-card-body .btn-submit { background: var(--success); border-color: var(--success); color: #fff; }
 .diag-card-body .btn-submit:hover { background: #3E7659; border-color: #3E7659; }
-.diag-card-body .btn-ghost { border-color: transparent; color: var(--ink-3); background: transparent; }
-.diag-card-body .btn-back { border: 0; background: #EEF1F7; color: var(--primary); padding: 7px 14px; font-size: 14px; min-height: 38px; }
+.diag-card-body .btn-ghost { border-color: transparent; color: var(--ink-2); background: transparent; }  /* v96：ink-3 #8A909C(2.96:1) → ink-2 #4A5160(7.96:1) */
+.diag-card-body .btn-back { border: 0; background: #EEF1F7; color: #2451AD; padding: 7px 14px; font-size: 14px; min-height: 38px; }  /* v96：var(--primary)=#3B6FE0(4.09:1) → #2451AD(6.49:1) */
 
 /* SVG 动画过渡（让拼角/对称/平均数等动图更顺滑） */
 .diag-card-body .ts-wedge { transition: transform .85s cubic-bezier(.34, 1.15, .64, 1); }
