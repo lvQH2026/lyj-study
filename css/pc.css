@@ -476,6 +476,10 @@ a { color: inherit; }
 
 /* ---------- 同步学习页（知识点总结 / 万能公式 / 万能答题方法 / 交互动图） ---------- */
 .pc-study-bar { margin-bottom: 16px; }
+/* 返回单元列表：箭头 + 文字加深深蓝，提升对比度，一眼能找到 */
+.pc-study-bar .pc-btn { color: var(--primary); font-weight: 600; padding: 8px 18px; border: 1px solid transparent; font-size: 13px; }
+.pc-study-bar .pc-btn:hover { background: var(--primary-50); color: var(--primary-700); border-color: var(--primary-100); }
+.pc-study-bar .pc-btn:active { background: var(--primary-100); }
 .pc-kp-card {
   background: linear-gradient(180deg, #FBFAF7, var(--bg)); border: 1px solid rgba(180,148,90,.30);
   border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: var(--shadow-1);
