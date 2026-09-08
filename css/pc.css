@@ -477,10 +477,14 @@ a { color: inherit; }
 
 /* ---------- 同步学习页（知识点总结 / 万能公式 / 万能答题方法 / 交互动图） ---------- */
 .pc-study-bar { margin-bottom: 16px; }
-/* 返回单元列表：箭头 + 文字加深深蓝，提升对比度，一眼能找到 */
-.pc-study-bar .pc-btn { color: var(--primary); font-weight: 600; padding: 8px 18px; border: 1px solid transparent; font-size: 13px; }
-.pc-study-bar .pc-btn:hover { background: var(--primary-50); color: var(--primary-700); border-color: var(--primary-100); }
-.pc-study-bar .pc-btn:active { background: var(--primary-100); }
+/* 返回单元列表：做成浅蓝底 + 黛蓝描边 + 深蓝文字的醒目返回入口（对比度 ≈ 9:1） */
+.pc-study-bar button.pc-btn {
+  color: #2A3F6B; background: #EDF1F8; border: 1px solid #C8D2E6;
+  font-weight: 700; font-size: 13.5px; padding: 9px 20px;
+  border-radius: var(--radius-xs); box-shadow: 0 1px 2px rgba(46,56,82,.06);
+}
+.pc-study-bar button.pc-btn:hover { background: #E1E8F5; border-color: #A9B8D4; color: #1E3160; }
+.pc-study-bar button.pc-btn:active { background: #D3DDEE; }
 .pc-kp-card {
   background: linear-gradient(180deg, #FBFAF7, var(--bg)); border: 1px solid rgba(180,148,90,.30);
   border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: var(--shadow-1);
