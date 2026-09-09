@@ -11,6 +11,32 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
+// 题面/选项/解析可能是含 <span class="frac">…</span> 的 HTML 字符串（_fracHtml 产出），
+// 渲染时直接走 innerHTML，但要剥掉 <script>/<iframe>/on* 事件等危险内容防止 XSS。
+function keepHtml(s) {
+  if (s == null) return '';
+  let str = String(s);
+  str = str.replace(/<\s*script\b[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '');
+  str = str.replace(/<\s*iframe\b[^>]*>[\s\S]*?<\s*\/\s*iframe\s*>/gi, '');
+  str = str.replace(/ on[a-z]+\s*=\s*"[^"]*"/gi, '');
+  str = str.replace(/ on[a-z]+\s*=\s*'[^']*'/gi, '');
+  str = str.replace(/javascript:/gi, '');
+  return str;
+}
+
+// 判断 grade 是否「可显示为 N 年级」。null/undefined/''/'undefined'/非数字都视为无年级。
+// 历史 recordHistory 可能漏存 grade，云端 records 也可能 grade=null。
+function gradeValid(g) {
+  if (g == null) return false;
+  const str = String(g).trim();
+  if (!str || str === 'undefined' || str === 'null') return false;
+  // 仅接受 1–9 年级（小学+初中），其他认为脏数据
+  return /^[1-9]$/.test(str);
+}
+function gradeLabel(g) {
+  return gradeValid(g) ? String(g).trim() + '年级' : '';
+}
+
 // ===== 同步状态码与错误提示（便于定位「家长端看不到内容」类问题）=====
 const SYNC_STATUS = {
   INIT: 'INIT',                 // 未同步
@@ -283,9 +309,9 @@ function renderDashboard(s) {
     ? s.wrong.map(w => {
         const q = w.question || {};
         return `<div class="pp-wrong-row">
-          <div class="pp-dim">${esc(w.unitName)}${w.grade ? ' · ' + esc(String(w.grade)) + '年级' : ''}</div>
+          <div class="pp-dim">${esc(w.unitName)}${gradeValid(w.grade) ? ' · ' + esc(gradeLabel(w.grade)) : ''}</div>
           ${q.passage ? `<div class="pp-passage">${esc(q.passage)}</div>` : ''}
-          <div class="pp-wrong-q">${esc(q.question)}</div>
+          <div class="pp-wrong-q">${keepHtml(q.question)}</div>
           ${q.svg ? `<div class="u-m4-0">${q.svg}</div>` : ''}
           <div class="pp-dim u-mt2">你的答案：<b class="pp-bad">${esc(w.userAnswer)}</b>　正确答案：<b class="pp-good">${esc(q.answer)}</b></div>
           ${q.explain ? `<div class="pp-dim u-mt2">解析：${esc(q.explain)}</div>` : ''}
@@ -374,7 +400,7 @@ function renderRecentPractice(source) {
     return '<div class="rp-item" onclick="showPracticeDetail(' + i + ')">' +
       '<div class="rp-subject ' + modCls + '">' + mod + (isExam ? '（考试）' : '') + '</div>' +
       '<div class="rp-main">' +
-        '<div class="rp-title">' + (h.grade ? esc(String(h.grade)) + '年级 · ' : '') + esc(h.unitName) + '</div>' +
+        '<div class="rp-title">' + (gradeValid(h.grade) ? esc(gradeLabel(h.grade)) + ' · ' : '') + esc(h.unitName) + '</div>' +
         '<div class="rp-meta">' +
           '<span class="rp-acc ' + accCls + '">' + h.accuracy + '%</span>' +
           '<span class="rp-count">' + h.total + ' 题</span>' +
@@ -415,7 +441,7 @@ function showPracticeDetail(i) {
         const explain = q.explain ? '<div class="rp-explain">解析：' + esc(q.explain) + '</div>' : '';
         return '<div class="rp-wrong-item">' +
           passage +
-          '<div class="rp-wq">' + esc(q.question || '') + '</div>' +
+          '<div class="rp-wq">' + keepHtml(q.question) + '</div>' +
           svg + opts +
           '<div class="rp-ans-row"><span class="rp-ua">你的答案：' + esc(w.userAnswer) + '</span><span class="rp-ca">正确答案：' + esc(q.answer) + '</span></div>' +
           explain +
@@ -426,7 +452,7 @@ function showPracticeDetail(i) {
   detEl.innerHTML =
     '<div class="rp-detail-head">' +
       '<button class="rp-back" onclick="hidePracticeDetail()">‹ 返回</button>' +
-      '<div class="rp-detail-title">' + (isCn ? '语文' : '数学') + (h.grade ? ' · ' + h.grade + '年级' : '') + '</div>' +
+      '<div class="rp-detail-title">' + (isCn ? '语文' : '数学') + (gradeValid(h.grade) ? ' · ' + esc(gradeLabel(h.grade)) : '') + '</div>' +
     '</div>' +
     '<div class="rp-detail-unit">' + esc(h.unitName || '') + '</div>' +
     '<div class="rp-summary">' +
