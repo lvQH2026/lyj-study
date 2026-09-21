@@ -1,4 +1,4 @@
-
+﻿
 // ============================================================
 // 知识点数据库 - 人教版小学数学1-6年级上下册
 // ============================================================
@@ -5703,6 +5703,10 @@ const KNOWLEDGE_BASE = {
         summary: ['除以一个不为0的数，等于乘这个数的倒数', '分数除法：a/b ÷ c/d = a/b × d/c', '已知一个数的几分之几是多少，求这个数：用除法（或方程）', '倒数：乘积为1的两个数互为倒数；1的倒数是1，0没有倒数'],
         fidx: [{ t: '除法法则', f: 'a/b ÷ c/d = a/b × d/c（除号变乘号，除数取倒数）' }, { t: '求单位"1"', f: '部分量 ÷ 几分之几 = 单位"1"的量' }],
         method: [{ t: '找单位"1"', s: '口诀：「是、占、比、相当于」后面的量就是单位"1"。单位"1"已知用乘法，未知用除法或方程' }, { t: '倒数判断', s: '交换分子分母即得倒数；整数n的倒数是1/n' }] },
+      { name: '四 比', group: '课本', term: '上', unit: 4, type: 'basic', gen: g6_ratio,
+        summary: ['比的意义：两个数相除又叫做两个数的比', '比的各部分名称：前项、比号、后项、比值', '比与分数、除法的关系：a:b = a÷b = a/b（b≠0）', '比的基本性质：比的前项和后项同时乘或除以相同的数（0除外），比值不变', '化简比：把比化成最简整数比；按比分配：把一个量按一定的比分成若干份'],
+        fidx: [{ t: '比的意义', f: '两个数相除 = 两个数的比' }, { t: '比的性质', f: '前项后项同乘同除（0除外），比值不变' }, { t: '化简比', f: '前项后项同除最大公因数' }, { t: '按比分配', f: '总量÷总份数×各部分份数' }],
+        method: [{ t: '化简三步', s: '① 找前项后项 → ② 同除最大公因数 → ③ 写成最简整数比' }, { t: '按比分配', s: '先算总份数 → 再算每份 → 最后算各部分' }] },
       { name: '☆ 生活中的负数', group: '课本', term: '上', unit: 4, type: 'basic', gen: g6_life_neg,
         summary: ['正负数表示意义相反的量：零上/零下、收入/支出、盈利/亏损、东/西', '0既不是正数，也不是负数，是正负数的分界', '负数的读写：负号+数，读作「负几」', '正数一定大于 0，负数一定小于 0；正数大于一切负数', '「具有相反意义的量」必须同时出现两种相反方向'],
         fidx: [{ t: '相反意义', f: '盈利 vs 亏损、零上 vs 零下、上升 vs 下降' }, { t: '读写', f: '零下 5℃ 记作 -5℃；海拔 -100m 读作「负一百米」' }],
@@ -5715,10 +5719,18 @@ const KNOWLEDGE_BASE = {
         summary: ['百分数在体育统计中的广泛应用：命中率、得分率、出勤率', '用统计图（条形/折线/扇形）描述体育成绩和赛事数据', '求一个数比另一个数多（少）百分之几：(大-小)÷基准×100%', '已知一个数增加/减少百分之几求新数：原数×(1±%)', '节能减排类应用与百分数一致——都先找单位"1"'],
         fidx: [{ t: '命中率', f: '命中数 ÷ 总数 × 100%' }, { t: '多/少百分之几', f: '(大-小) ÷ 基准 × 100%' }, { t: '增加/减少百分之几', f: '新数 = 原数 × (1±%)' }],
         method: [{ t: '找单位"1"', s: '「是、占、比、相当于」后面是单位"1"：已知用乘，未知用除' }, { t: '统计图选择', s: '看多少→条形；看变化→折线；看占比→扇形' }] },
+      { name: '七 扇形统计图', group: '课本', term: '上', unit: 7, type: 'basic', gen: g6_pie,
+        summary: ['扇形统计图：用整个圆表示总数，用圆内各个扇形的大小表示各部分数量占总数的百分数', '扇形统计图的特点：清楚地表示出各部分数量与总数之间的关系', '三种统计图的选择：表示数量多少用条形，表示增减变化用折线，表示部分与整体关系用扇形', '扇形圆心角 = 360° × 该部分占总数的百分比'],
+        fidx: [{ t: '扇形特点', f: '表示部分与整体的关系' }, { t: '圆心角', f: '圆心角 = 360° × 占比' }, { t: '统计图选择', f: '多少→条形，变化→折线，占比→扇形' }],
+        method: [{ t: '读图三步', s: '① 看标题知道统计什么 → ② 看各部分占比 → ③ 算具体数量 = 总数×占比' }] },
       { name: '五 百分数', group: '课本', term: '上', unit: 7, type: 'basic', gen: g6_percent,
         summary: ['百分数表示一个数是另一个数的百分之几，只表示倍比关系，不带单位', '百分数化小数：去掉%，小数点左移两位；小数化百分数：小数点右移两位加%', '常见互化：1/2=50%、1/4=25%、3/4=75%、1/5=20%、1/8=12.5%', '求百分率：命中率 = 命中数 ÷ 总次数 × 100%'],
         fidx: [{ t: '求百分之几', f: '比较量 ÷ 标准量 × 100%' }, { t: '求百分之几是多少', f: '这个数 × 百分率' }, { t: '已知百分之几求原数', f: '部分量 ÷ 百分率' }, { t: '多/少百分之几', f: '「多20%」= 原数×(1+20%)，「少20%」= 原数×(1−20%)' }],
         method: [{ t: '互化口诀', s: '百分数变小数，去号左移两位；小数变百分数，右移两位再添号' }, { t: '单位"1"', s: '「是、占、比、相当于」后面是标准量（单位"1"）：已知用乘，未知用除' }] },
+      { name: '八 数与形', group: '课本', term: '上', unit: 8, type: 'mixed', gen: g6_shuxing,
+        summary: ['数与形结合：从1开始的连续奇数之和 = 加数个数的平方（1+3+5+...+(2n-1)=n²）', '点阵规律：第n个正方形点阵有n²个点', '分数和极限：1/2+1/4+1/8+...=1', '等差数列求和：1+2+3+...+n = n(n+1)/2'],
+        fidx: [{ t: '奇数平方', f: '1+3+5+...+(2n-1) = n²' }, { t: '点阵', f: '第n个正方形点阵 = n²个点' }, { t: '分数和', f: '1/2+1/4+1/8+...=1' }],
+        method: [{ t: '数形结合', s: '看到连续奇数相加，直接数有几个加数，就是几的平方' }] },
       { name: '☆ 水是生命之源', group: '课本', term: '上', unit: 8, type: 'application', gen: g6_water,
         summary: ['调查与数据收集：设计调查表、逐户统计、汇总数据', '用水量统计：平均数、扇形占比可一目了然', '节水方案设计：循环用水（一水多用）+ 减少浪费', '单位换算：1 立方米 = 1000 升；1 升 = 1000 毫升'],
         fidx: [{ t: '平均数', f: '总用水量 ÷ 户数' }, { t: '占比', f: '某项用水 ÷ 总用水 × 100%' }, { t: '换算', f: '1 m³ = 1000 L；1 L = 1000 mL' }],
@@ -5815,6 +5827,22 @@ function fmt(n) {
   return Number.isInteger(n) ? n.toString() : n.toFixed(2).replace(/\.?0+$/, '');
 }
 
+
+// v98: 应用题公共场景池——全站复用，避免全是"班级男生女生"
+const APP_SCENES = [
+  {loc:'六(1)班',   a:'男生',   b:'女生',   unit:'人',  nMin:30, nMax:45},
+  {loc:'水果店',   a:'苹果',   b:'香蕉',   unit:'千克',nMin:20, nMax:80},
+  {loc:'图书馆',   a:'科技书', b:'故事书', unit:'本',  nMin:50, nMax:200},
+  {loc:'养殖场',   a:'鸡',     b:'鸭',     unit:'只',  nMin:100,nMax:500},
+  {loc:'停车场',   a:'小汽车', b:'摩托车', unit:'辆',  nMin:20, nMax:100},
+  {loc:'电影院',   a:'成人票', b:'儿童票', unit:'张',  nMin:50, nMax:200},
+  {loc:'花店',     a:'玫瑰',   b:'百合',   unit:'枝',  nMin:30, nMax:120},
+  {loc:'文具店',   a:'钢笔',   b:'铅笔',   unit:'支',  nMin:40, nMax:150},
+  {loc:'果园',     a:'桃树',   b:'梨树',   unit:'棵',  nMin:80, nMax:300},
+  {loc:'书架',     a:'上层',   b:'下层',   unit:'本',  nMin:60, nMax:200},
+];
+function pickScene() { return APP_SCENES[ri(0, APP_SCENES.length - 1)]; }
+function sceneBaseNum(sc) { return ri(sc.nMin, sc.nMax); }
 // ===== 有理数工具（专项·分数与小数混合运算，v91）=====
 // 以 [n, d]（d>0，已约分）表示有理数；分母只含质因子 2/5 时可精确化为有限小数
 function rat(n, d) {
@@ -9600,7 +9628,7 @@ function g6_mul(){
   let bb=ri(2,4), dv=ri(2,3); let baseN=bb*dv*ri(2,4);
   let ca=ri(1,bb-1); while(gcd(ca,bb)>1)ca=ri(1,bb-1);
   let cb=ri(1,dv-1); while(gcd(cb,dv)>1)cb=ri(1,dv-1);
-  let bp=ri(2,4); let fr=ri(1,bp-1); while(gcd(fr,bp)>1)fr=ri(1,bp-1); let Mnum=bp*ri(2,5);
+  let bp=ri(2,4); let fr=ri(1,bp-1); while(gcd(fr,bp)>1)fr=ri(1,bp-1); let scMul=pickScene(); let Mnum=sceneBaseNum(scMul);
   let items=[
     {t:'f',q:`${a}/${b}×${c}=？`,a:fracStr(a*c,b)},
     {t:'f',q:`${a}/${b}×${c}×${c}=？`,a:fracStr(a*c*c,b)},
@@ -9617,8 +9645,8 @@ function g6_mul(){
     {t:'f',q:`${a}/${b}×${e}+${a}/${b}×${f}=？`,a:fracStr(a*(e+f),b)},
     {t:'f',q:`${a}/${b}×${c2}/${d2}×${b}/${a}=？`,a:fracStr(c2,d2)},
     {t:'f',q:`饲养场有鸡${baseN}只，鸭的只数是鸡的${ca}/${bb}，鹅的只数是鸭的${cb}/${dv}。鹅有多少只？`,a:String(baseN*ca/bb*cb/dv)},
-    {t:'f',q:`六(1)班有男生${Mnum}人，女生比男生多${fr}/${bp}，女生有多少人？`,a:String(Mnum*(bp+fr)/bp)},
-    {t:'f',q:`六(1)班有男生${Mnum}人，女生比男生少${fr}/${bp}，女生有多少人？`,a:String(Mnum*(bp-fr)/bp)},
+    {t:'f',q:`${scMul.loc}有${scMul.a}${Mnum}${scMul.unit}，${scMul.b}比${scMul.a}多${fr}/${bp}，${scMul.b}有多少？`,a:String(Mnum*(bp+fr)/bp)},
+    {t:'f',q:`${scMul.loc}有${scMul.a}${Mnum}${scMul.unit}，${scMul.b}比${scMul.a}少${fr}/${bp}，${scMul.b}有多少？`,a:String(Mnum*(bp-fr)/bp)},
     // —— 二次补题：约分（原 0 道，属「能约分的先约分」考点）——
     {q:'计算分数乘法时，分子和分母能约分的，一般要？',a:'先约分，再计算',d:['先计算出结果再约分','不用约分','把分子分母都除以2']},
     {q:`计算 ${ca}/${bb} × ${cb}/${dv} 时，可以先把哪两个数约分？`,a:'交叉或同侧能整除的分子与分母',d:['只能把两个分子约分','只能把两个分母约分','不能约分，直接相乘']},
@@ -9655,7 +9683,7 @@ function g6_div(){
   let rr=ri(2,5),ss=ri(2,7); while(gcd(rr,ss)>1||rr===ss){rr=ri(2,5);ss=ri(2,7);}
   const divMix1=(()=>{const [mn,md]=fmd(rr,ss,1,civ2);const [an,ad]=fad(pp,qq,mn,md);return fracStr(an,ad);})();
   const divMix2=(()=>{const [mn,md]=fmd(pp,qq,ss,rr);const [an,ad]=fad(mn,md,t2,1);return fracStr(an,ad);})();
-  let bp2=ri(2,4); let fr2=ri(1,bp2-1); while(gcd(fr2,bp2)>1)fr2=ri(1,bp2-1); let M2=bp2*ri(2,5);
+  let bp2=ri(2,4); let fr2=ri(1,bp2-1); while(gcd(fr2,bp2)>1)fr2=ri(1,bp2-1); let scDiv=pickScene(); let M2=sceneBaseNum(scDiv);
   // v92 修：下面两道「求单位 1（已知女生求男生）」的已知量，必须是 (bp2∓fr2) 的倍数。
   //   原写法直接复用 M2=bp2*ri(2,5)（只是 bp2 的倍数），而答案 = M2×bp2÷(bp2∓fr2)，
   //   分母是 (bp2∓fr2) → 除不尽，实测出过「男生 12.8 人」「5.333333333333333 人」。
@@ -9687,13 +9715,13 @@ function g6_div(){
     {q:`${bn}/${bd}÷${cn}/${cd}=？`,a:fracStr(bn*cd,bd*cn),d:[fracStr(bn*cn,bd*cd),fracStr(bd*cn,bn*cd),fracStr(bn*cd+1,bd*cn)]},
     {q:`${pp}/${qq}+${rr}/${ss}÷${civ2}=？`,a:divMix1,d:[fracStr(pp+rr,qq+ss),fracStr(pp*qq+rr,qq*ss),fracStr(pp,qq)]},
     {q:`${pp}/${qq}÷${rr}/${ss}+${t2}=？`,a:divMix2,d:[fracStr(pp*ss,qq*rr),fracStr(pp,qq),fracStr(pp*ss+qq*rr,qq*rr)]},
-    {q:`某工厂一月份用电${M2}千瓦时，二月份比一月份节约${fr2}/${bp2}，二月份用电多少千瓦时？`,a:String(M2*(bp2-fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2+fr2)/bp2)]},
-    {q:`小红有故事书${M2}本，科技书比故事书多${fr2}/${bp2}，科技书有多少本？`,a:String(M2*(bp2+fr2)/bp2),d:[String(M2),String(M2*fr2/bp2),String(M2*(bp2-fr2)/bp2)]},
+    {q:`${scDiv.loc}有${scDiv.a}${M2}${scDiv.unit}，${scDiv.b}比${scDiv.a}少${fr2}/${bp2}，${scDiv.b}有多少？`,a:String(M2*(bp2-fr2)/bp2),d:[String(M2),String(Math.round(M2*fr2/bp2)),String(M2*(bp2+fr2)/bp2)]},
+    {q:`${scDiv.loc}有${scDiv.b}${M2}${scDiv.unit}，${scDiv.a}比${scDiv.b}多${fr2}/${bp2}，${scDiv.a}有多少？`,a:String(M2*(bp2+fr2)/bp2),d:[String(M2),String(Math.round(M2*fr2/bp2)),String(M2*(bp2-fr2)/bp2)]},
     // —— 二次补题：求单位「1」 / 和倍差倍 / 合作完成（工程问题雏形）——
     // v92：改用 fdGM/fdGP 后答案恒为整数。干扰项刻意保留三类典型错误——
     //   ① 直接用已知量（没求单位 1）② 把「多/少」方向搞反 ③ 分母用错 / 当成 2 倍
-    {q:`六(1)班有女生${fdGM}人，女生比男生少${fr2}/${bp2}，男生有多少人？`,a:String(fdUM*bp2),d:[String(fdGM),String(Math.round(fdGM*(bp2+fr2)/bp2)),String(fdUM*bp2*2)]},
-    {q:`六(1)班有女生${fdGP}人，女生比男生多${fr2}/${bp2}，男生有多少人？`,a:String(fdUP*bp2),d:[String(fdGP),String(Math.round(fdGP*(bp2-fr2)/bp2)),String(Math.round(fdGP*bp2/fr2))]},
+    {q:`${scDiv.loc}有${scDiv.b}${fdGM}${scDiv.unit}，${scDiv.b}比${scDiv.a}少${fr2}/${bp2}，${scDiv.a}有多少？`,a:String(fdUM*bp2),d:[String(fdGM),String(Math.round(fdGM*(bp2+fr2)/bp2)),String(fdUM*bp2*2)]},
+    {q:`${scDiv.loc}有${scDiv.b}${fdGP}${scDiv.unit}，${scDiv.b}比${scDiv.a}多${fr2}/${bp2}，${scDiv.a}有多少？`,a:String(fdUP*bp2),d:[String(fdGP),String(Math.round(fdGP*(bp2-fr2)/bp2)),String(Math.round(fdGP*bp2/fr2))]},
     {q:`修一条路，已经修了全长的${fr2}/${bp2}，还剩${rest}千米没有修，这条路全长多少千米？`,a:String(rest*bp2/(bp2-fr2)),d:[String(rest*fr2/bp2),String(rest+bp2),String(rest*bp2/fr2)]},
     {q:`甲乙两数的和是${sumAB}，甲数是乙数的${fr2}/${bp2}，乙数是多少？`,a:String(sumAB*bp2/(bp2+fr2)),d:[String(sumAB*fr2/(bp2+fr2)),String(sumAB*fr2/bp2),String(sumAB*bp2/fr2)]},
     {q:`甲乙两数的和是${sum2}，甲数是乙数的${k1}倍，乙数是多少？`,a:String(sum2/(k1+1)),d:[String(sum2*k1/(k1+1)),String(sum2/(k1-1)),String(sum2*k1)]},
@@ -9886,6 +9914,27 @@ function g6_pie(){
   ];
   if(pcts[0]-pcts[1]>=5) items.push({s:pie,q:`上图扇形统计图中，喜欢乒乓球的比喜欢足球的多百分之几？`,a:`${pcts[0]-pcts[1]}%`,d:[`${pcts[0]+pcts[1]}%`,`${pcts[0]}%`,`${pcts[0]-pcts[1]+10}%`]});
   let it=pick(items); return it.s?msc(it.q,it.s,it.a,it.d):mc(it.q,it.a,it.d);
+}
+
+// 数学广角·数与形：v98 新增——1+3+5+...=n²、点阵规律、分数和极限
+function g6_shuxing(){
+  let n = ri(3, 8);
+  let items = [
+    {q:`从1开始的${n}个连续奇数相加：1+3+5+...+${2*n-1} = ？`, a:String(n*n), d:[String(n), String(2*n), String(n*n-1)]},
+    {q:`1+3+5+7+9 = ？`, a:`25`, d:[`16`,`20`,`36`]},
+    {q:`1+3+5+...+19 = ？`, a:`100`, d:[`81`,`64`,`121`]},
+    {q:`从1开始的连续奇数相加，和等于加数个数的什么？`, a:`平方`, d:[`和`,`差`,`积`]},
+    {q:`n² = 1+3+5+...+？（最后一个奇数）`, a:`${n}`, d:[`${2*n-1}`,`${n*n}`,`${2*n+1}`]},
+    {q:`1+3+5+7 = 4的平方，这是利用什么找规律？`, a:`数与形结合`, d:[`乘法分配律`,`加法交换律`,`乘法结合律`]},
+    {q:`1/2 + 1/4 + 1/8 + 1/16 = ？`, a:`15/16`, d:[`1/2`,`1`,`3/4`]},
+    {q:`1/2 + 1/4 + 1/8 + 1/16 + ... 无限加下去，越来越接近？`, a:`1`, d:[`1/2`,`2`,`0`]},
+    {q:`1+2+3+...+10 = ？`, a:`55`, d:[`50`,`60`,`45`]},
+    {q:`1+2+3+...+100 = ？`, a:`5050`, d:[`5000`,`5100`,`4950`]},
+    {q:`点阵规律：第1个点阵1个点，第2个4个点，第3个9个点，第5个有几个点？`, a:`25`, d:[`16`,`20`,`36`]},
+    {q:`1+3+5+...+(2n-1) = ？`, a:`n²`, d:[`n`,`2n`,`n²-1`]},
+    {q:`用图形表示数的规律，这种方法叫做？`, a:`数形结合`, d:[`分类讨论`,`归纳推理`,`演绎证明`]},
+  ];
+  let it = pick(items); return mc(it.q, it.a, it.d);
 }
 function g6_negative(){
   let a=ri(2,9), k=ri(3,9), n=ri(1,4);
@@ -13470,7 +13519,9 @@ function canForceFill(q) {
 // 把「疑问句题干 + 答案」拼成一句可直接判断对错的陈述
 function judgeStatement(question, value) {
   // v96: 先stripHtml再生成判断题
-  let t = stripHtml(question || '').trim();
+  // v98: stripHtml 前先把分数 HTML 转 X/Y，避免分数线丢失（1/2 变成 12）
+  let qWithFrac = (question || "").replace(/<span class="num">(\d+)<\/span><span class="den">(\d+)<\/span>/g, "$1/$2");
+  let t = stripHtml(qWithFrac).trim();
   if (!t || value === '' || value == null) return '';
   // 「括号里填几？」「在（　）里填上合适的数」这类元描述句式，
   // 改造成陈述句后语义是断裂的（"2+3=4，括号里填几"），一律不派生。
