@@ -13403,7 +13403,8 @@ const DIFF_NAMES = { 1: '基础', 2: '提高', 3: '拓展' };
 
 // 绝对难度信号分（越大越难）：题干长度 / 策略词 / 多步运算 / 解析步骤数 / 题型
 function difficultyScore(q) {
-  let t = String((q && q.question) || '').replace(/<[^>]+>/g, '');
+  // v102：统一走 stripHtml（会先还原分数），避免分数题面被算成连续数字、长度信号失真
+  let t = stripHtml((q && q.question) || '');
   let s = Math.min(t.length / 12, 3);   // 长度信号：应用题题干长
   if (/至少|最少|保证|怎样|为什么|规律|第\s*\d+\s*个/.test(t)) s += 2;   // 策略/探究词
   if (/\d+\s*[+−-]\s*\d+\s*[+−-]\s*\d+/.test(t)) s += 1;                // 两步以上加减
@@ -13438,7 +13439,8 @@ function tagRelativeDifficulty(arr) {
 // 题目难度：显式 q.diff 优先（相对打标结果），否则退回启发式
 function questionDifficulty(q) {
   if (q && q.diff) return q.diff;
-  let t = String((q && q.question) || '').replace(/<[^>]+>/g, '');
+  // v102：同上，统一走 stripHtml
+  let t = stripHtml((q && q.question) || '');
   if (/至少|最少|最多几次|怎样|为什么|规律|第\s*\d+\s*个/.test(t)) return 3;
   let appWord = /每|一共|还剩|还差|小时|分钟|千米|公斤|千克|棵|支|块|页|天/.test(t);
   if (appWord && t.length >= 18) return 2;
@@ -13519,9 +13521,9 @@ function canForceFill(q) {
 // 把「疑问句题干 + 答案」拼成一句可直接判断对错的陈述
 function judgeStatement(question, value) {
   // v96: 先stripHtml再生成判断题
-  // v98: stripHtml 前先把分数 HTML 转 X/Y，避免分数线丢失（1/2 变成 12）
-  let qWithFrac = (question || "").replace(/<span class="num">(\d+)<\/span><span class="den">(\d+)<\/span>/g, "$1/$2");
-  let t = stripHtml(qWithFrac).trim();
+  // v98: 曾在此处手写"分数 HTML → X/Y"的补救（只认纯数字分子分母，小数/负数/繁分数仍漏）。
+  // v102: 该补救已下沉到 core.js 的 stripHtml（删标签前统一还原分数），这里直接调用即可。
+  let t = stripHtml(question || "").trim();
   if (!t || value === '' || value == null) return '';
   // 「括号里填几？」「在（　）里填上合适的数」这类元描述句式，
   // 改造成陈述句后语义是断裂的（"2+3=4，括号里填几"），一律不派生。
@@ -13988,7 +13990,7 @@ function renderQuestion() {
 
   // 题干长度自适应字号：长应用题改用小字号 + 左对齐，短算式保留大字
   let qText = String(q.question || '');
-  let plainLen = qText.replace(/<[^>]+>/g, '').length;
+  let plainLen = stripHtml(qText).length;   // v102：统一走 stripHtml（分数还原后长度才真实）
   let sizeClass = plainLen > 34 ? ' long' : (plainLen > 18 ? ' medium' : '');
   // 考试模式加题号，贴近真实卷面
   let qNo = isExam ? `<span class="q-no">${state.quizIndex + 1}.</span>` : '';

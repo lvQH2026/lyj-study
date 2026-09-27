@@ -231,7 +231,7 @@
     else if (t === 'shape_choice') d = 3;
     else if (t === 'choice') d = (q.options && q.options.length === 2) ? 1 : 2;
     var stem = String(q.question || '');
-    var len = stem.replace(/<[^>]*>/g, '').length;
+    var len = (typeof stripHtml === 'function' ? stripHtml(stem) : stem.replace(/<[^>]*>/g, '')).length;  // v102：分数还原后长度才准确
     if (len > 0 && len < 15) d = Math.max(1, d - 1);
     else if (len > 50) d = Math.min(3, d + 1);
     if (q.svg) d = Math.min(3, d + 1);

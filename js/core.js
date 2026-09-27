@@ -396,8 +396,20 @@ function questionTypeLabel(type) {
 
 // v96: 统一HTML标签去除工具函数——题目question字段可用HTML（分数上下叠放渲染），
 // 但所有纯文本处理（去重/判断题派生/知识点检测/解题步骤）必须先stripHtml。
+// v102: 删标签前先把叠放分数还原成 "分子/分母"。
+//   旧实现只删标签：<span class="num">1</span><span class="den">2</span> → "12"，
+//   1/2 被吞成 12。派生判断题因此把「1/2 + 3/5 × 4 = 29/10」渲染成「12 + 35 × 4 = 2.9」，
+//   判卷按真实算式标"正确"，孩子判"错误"反而被记成错题（P0 误判）。
 function stripHtml(text) {
-  return String(text == null ? '' : text).replace(/<[^>]+>/g, '');
+  let s = String(text == null ? '' : text);
+  // 循环处理嵌套分数（繁分数：分子或分母本身也是分数），最多 5 层防死循环。
+  // 注意：带 /g 的正则做 .test() 会推进 lastIndex，这里用无 /g 的探针判断是否需要再跑一轮。
+  for (let i = 0; i < 5 && /class="[^"]*frac[^"]*"/.test(s); i++) {
+    // 分子/分母用 [^<]*（不含标签）→ 每轮只吃掉**最内层**分数，由内向外逐层还原
+    s = s.replace(/<span[^>]*class="[^"]*frac[^"]*"[^>]*>\s*<span[^>]*class="[^"]*num[^"]*"[^>]*>([^<]*)<\/span>\s*<span[^>]*class="[^"]*den[^"]*"[^>]*>([^<]*)<\/span>\s*<\/span>/g,
+      function (_, n, d) { return String(n).trim() + '/' + String(d).trim(); });
+  }
+  return s.replace(/<[^>]+>/g, '');
 }
 
 function detectMathConcepts(text) {
