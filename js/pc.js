@@ -349,7 +349,7 @@
   }
 
   /* ---------------- 全局状态 ---------------- */
-  const S = { role: 'student', subject: 'math', grade: 6, semester: 1, view: 'home', quiz: null, activeQuiz: false, examType: 'unit', examUnitIdx: 0, studyIdx: 0 };
+  const S = { role: 'student', subject: 'math', grade: 6, semester: 1, view: 'home', quiz: null, activeQuiz: false, examType: 'unit', examUnitIdx: 0, examMonth: 1, studyIdx: 0 };
   const PC = {};
 
   /* ---------------- 导航 / 顶栏 ---------------- */
@@ -684,7 +684,8 @@
     let h = '<div class="pc-card"><div class="pc-section-title u-mt0">考试设置（' + esc(subjName(S.subject)) + '）</div>';
     h += '<div class="pc-row"><span class="lab">类型</span><div class="pc-seg" id="examType">';
     [['unit', '单元考'], ['month', '月考'], ['mid', '期中'], ['final', '期末']].forEach(function (p, i) {
-      h += '<button data-t="' + p[0] + '" class="' + (i === 0 ? 'active' : '') + '">' + p[1] + '</button>';
+      // v101：选中态按 S.examType 回显（原来硬编码 i===0，重渲染会把高亮弹回单元考）
+      h += '<button data-t="' + p[0] + '" class="' + ((S.examType || 'unit') === p[0] ? 'active' : '') + '">' + p[1] + '</button>';
     });
     h += '</div></div>';
     h += '<div class="pc-row"><span class="lab">年级</span><div class="pc-seg" id="examGrade">';
@@ -699,8 +700,8 @@
     h += '<button class="pc-btn gold" onclick="PC.runExam()">开始考试</button></div>';
     c.innerHTML = h;
     bindSeg('examType', function (t) { S.examType = t; renderExamExtra(); });
-    bindSeg('examGrade', function (g) { S.grade = +g; renderExamExtra(); });
-    bindSeg('examSem', function (s) { S.semester = +s; renderExamExtra(); });
+    bindSeg('examGrade', function (g) { S.grade = +g; S.examMonth = 1; renderExamExtra(); });   // v101：与手机端一致，切年级复位月考次数
+    bindSeg('examSem', function (s) { S.semester = +s; S.examMonth = 1; renderExamExtra(); });  // v101：切册别复位月考次数
     renderExamExtra();
   }
 
@@ -739,20 +740,72 @@
         eh += '<button data-d="' + p[0] + '" class="' + (p[0] === (S.examDiff || 2) ? 'active' : '') + '">' + p[1] + '</button>';
       });
       eh += '</div></div>';
+      // v101：月考/期中/期末补范围提示（与 startEngExam 的实际取题范围一致）
+      if (S.examType !== 'unit') {
+        const bk = pepBookOf(S.grade, S.semester);
+        const un = bk ? (bk.units || []).length : 0;
+        if (bk && un) {
+          eh += S.examType === 'month'
+            ? '<div class="pc-hint">阶段测试范围：Unit 1-' + Math.min(2, un) + '</div>'
+            : S.examType === 'mid'
+              ? '<div class="pc-hint">期中范围：Unit 1-' + Math.max(1, Math.ceil(un / 2)) + '（前半册）</div>'
+              : '<div class="pc-hint">期末范围：全册 ' + un + ' 个单元</div>';
+        }
+      }
       box.innerHTML = eh;
       const bu = $('examUnit');
       if (bu) bindSeg('examUnit', function (u) { S.examUnitIdx = +u; });
       bindSeg('examDiff', function (d) { S.examDiff = +d; });
       return;
     }
-    if (S.examType !== 'unit') { box.innerHTML = ''; return; }
+    // v101：月考/期中/期末不再清空 examExtra（原来到这里直接 box.innerHTML=''，
+    // 选中后下方一片空白、没有任何反馈，看起来像「选不了」）。
+    // 现在与手机端同构：数学月考给「第几次月考」选择器 + 范围提示；期中/期末给范围提示。
+    if (S.examType !== 'unit') {
+      if (S.subject === 'math') {
+        // 注意：KNOWLEDGE_BASE 是顶层 const，不挂 window，必须裸引用（与下方单元列表同写法）
+        const raw = (typeof KNOWLEDGE_BASE !== 'undefined' && KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) || [];
+        const tb = raw.filter(function (u) { return u.group === '课本'; });
+        const scope = tb.length ? tb : raw;
+        if (!scope.length) { box.innerHTML = '<div class="pc-hint">该年级册别暂无题库单元</div>'; return; }
+        if (S.examType === 'month') {
+          // 月考次数口径与手机端一致：每次覆盖 2 个课本单元
+          const maxMonth = Math.max(1, Math.ceil(scope.length / 2));
+          if (!S.examMonth || S.examMonth > maxMonth) S.examMonth = 1;
+          let mh = '<div class="pc-row"><span class="lab">月考次数</span><div class="pc-seg" id="examMonth">';
+          for (let m = 1; m <= maxMonth; m++) {
+            const cover = Math.min(scope.length, m * 2);
+            mh += '<button data-m="' + m + '" class="' + (m === S.examMonth ? 'active' : '') + '">第' + m + '次（1~' + cover + '单元）</button>';
+          }
+          mh += '</div></div>';
+          box.innerHTML = mh + '<div class="pc-hint">考查范围：第 1~' + Math.min(scope.length, S.examMonth * 2) + ' 单元</div>';
+          bindSeg('examMonth', function (m) { S.examMonth = +m; renderExamExtra(); });
+          return;
+        }
+        const half = Math.max(1, Math.ceil(scope.length / 2));
+        box.innerHTML = S.examType === 'mid'
+          ? '<div class="pc-hint">期中范围：第 1~' + half + ' 单元（前半册，全册共 ' + scope.length + ' 个课本单元）</div>'
+          : '<div class="pc-hint">期末范围：全册（共 ' + scope.length + ' 个课本单元）</div>';
+        return;
+      }
+      // 语文：无独立月考概念，月考按全册综合卷出题（与 startCnExam 实际行为一致）
+      const cnUnits = unitsOf();
+      let cnTb = cnUnits.filter(function (u) { return u.group === '课本' && u.term === (S.semester === 1 ? '上' : '下'); });
+      if (!cnTb.length) cnTb = cnUnits;
+      const cnHalf = Math.max(1, Math.ceil(cnTb.length / 2));
+      box.innerHTML = S.examType === 'mid'
+        ? '<div class="pc-hint">期中范围：前半册课文单元（' + cnHalf + '/' + cnTb.length + ' 个）</div>'
+        : '<div class="pc-hint">' + (S.examType === 'month' ? '阶段测试' : '期末测试') + '范围：全册综合卷（' + cnTb.length + ' 个课文单元）</div>';
+      return;
+    }
     let list;
     if (S.subject === 'math') list = (KNOWLEDGE_BASE[S.grade] && KNOWLEDGE_BASE[S.grade][S.semester]) || [];
     else if (S.subject !== 'english') list = unitsOf();
     let h = '<div class="pc-row"><span class="lab">单元</span><div class="pc-seg" id="examUnit">';
     list.forEach(function (u, i) {
       const nm = (u.name || ('第' + (i + 1) + '单元')).replace(/^(四年级|五年级|六年级).*?·/, '').slice(0, 8);
-      h += '<button data-u="' + i + '" class="' + (i === 0 ? 'active' : '') + '">' + esc(nm) + '</button>';
+      // v101：选中态按 S.examUnitIdx 回显（原来硬编码 i===0）
+      h += '<button data-u="' + i + '" class="' + (i === (S.examUnitIdx || 0) ? 'active' : '') + '">' + esc(nm) + '</button>';
     });
     h += '</div></div>';
     box.innerHTML = h;
@@ -895,7 +948,8 @@
     if (typeof examState === 'undefined' || typeof generateExamPaper !== 'function') { toast('考试功能不可用'); return; }
     examState.grade = S.grade; examState.semester = S.semester; examState.type = type;
     if (type === 'unit') examState.unitIdx = S.examUnitIdx || 0;
-    if (type === 'month') examState.month = 2;
+    // v101：月考次数跟随考试中心的选择（原来硬编码 month=2，与手机端默认第 1 次不一致）
+    if (type === 'month') examState.month = S.examMonth || 1;
     const paper = generateExamPaper();
     if (!paper || !paper.questions || !paper.questions.length) { toast('组卷失败，换个范围试试'); return; }
     beginQuiz(paper.questions, 'exam', paper.title, '数学', S.grade, true, function () { startMathExam(type); }, paper.badge);
@@ -1551,7 +1605,8 @@
         b.classList.add('active');
         // v83：补 data-d（英语考试中心的难度档）。原来只认 t/g/s/u，
         // 新增的分段如果用了别的属性名，cb 会拿到 undefined 静默失效。
-        cb(b.dataset.t || b.dataset.g || b.dataset.s || b.dataset.u || b.dataset.d);
+        // v101：再补 data-m（数学月考的「第几次」选择器）。
+        cb(b.dataset.t || b.dataset.g || b.dataset.s || b.dataset.u || b.dataset.d || b.dataset.m);
       };
     });
   }
