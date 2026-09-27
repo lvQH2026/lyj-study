@@ -12621,8 +12621,13 @@ function pickFromPool(pool, used, n, scorer, usedText, sharedTpl) {
   };
   run(false, TPL_CAPS[0]);                    // 第一轮：严格去重 + 模板上限 2
   if (out.length < n) run(false, TPL_CAPS[1]); // 第二轮：仍严格去重，模板上限放宽到 3
-  if (out.length < n) run(true, TPL_CAPS[2]);  // 第三轮：题面种类不足，放宽重复但上限 4
-  if (out.length < n) run(true, TPL_CAPS[3]);  // 第四轮：兜底凑满整卷（宁可少量重复也不缺题）
+  if (out.length < n) run(false, TPL_CAPS[2]); // 第三轮：仍严格去重，模板上限放宽到 4
+  // 第四轮：仍严格去重，只是彻底放开模板上限（等同 v102 的严格轮）。
+  // v103 初版把这一档设成 allowRepeat=true，结果偶发放进「题干+答案完全相同」的题
+  // （实测二年级下期末出现两道一模一样的「81÷9=」）——真重复比雷同严重得多，
+  // 必须先把「题干不重复」用尽，再谈凑数。
+  if (out.length < n) run(false, TPL_CAPS[3]);
+  if (out.length < n) run(true, TPL_CAPS[3]);  // 最后兜底：题面真的用尽才允许重复，保证不缺题
   return out;
 }
 
