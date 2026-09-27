@@ -408,7 +408,7 @@
       else if (S.view === 'wrong') renderWrongBank(c);
       else if (S.view === 'stats') renderStats(c);
     }
-    if (!S.activeQuiz && S.role === 'student') mountHero(c);
+    if (!S.activeQuiz && S.role === 'student') { mountHero(c); try { mountPcDraftBar(c); } catch (e) { } }
   }
   function heroUnitsCount() {
     if (S.subject === 'english') return (window.ENG_DATA && ENG_DATA.phonics && ENG_DATA.phonics.levels) ? ENG_DATA.phonics.levels.length : 0;
@@ -445,10 +445,101 @@
   PC.go = function (v) { S.activeQuiz = false; S.view = v; renderNav(); renderContent(); };
   // 返回：退出当前练习，回到进入练习前的页面（单元列表 / 考试中心 / 错题库 / 首页 / 同步学习）
   PC.back = function () {
+    // v103 P0-2：答题途中点「←」旧版直接清掉 S.quiz，作答全部作废、无任何提示，
+    // 也不入历史——点一下整场考试白做。这里补上二次确认（对齐手机端 goBack 行为）。
+    // 已交卷（_finished）时不再打扰：成绩页 / 解析页的「返回」按钮同样走这里。
+    try {
+      if (S.activeQuiz && S.quiz && !S.quiz._finished) {
+        const res = S.quiz.results || [];
+        const total = (S.quiz.questions || []).length;
+        let answered = 0;
+        for (let i = 0; i < res.length; i++) {
+          const r = res[i];
+          if (r && (String(r.ua || '') !== '' || r.correct || r.revealed)) answered++;
+        }
+        if (answered > 0) {
+          const ok = window.confirm(
+            '本次已作答 ' + answered + ' / ' + total + ' 题。\n' +
+            '现在返回，本次作答将不会保存，也不会计入练习记录。\n\n确定要返回吗？'
+          );
+          if (!ok) return;
+        }
+      }
+    } catch (e) { }
+    // v103 P1-1：确认退出后把进度存成草稿，下次打开可以接着做
+    try { savePcDraft(); } catch (e) { }
     const v = (S.quiz && S.quiz.fromView) || S.view || 'home';
     S.activeQuiz = false; S.quiz = null;
     PC.go(v === 'study' ? 'study' : v);
   };
+
+  /* ---------------- v103 P1-1：PC 端答题草稿 / 断点续答 ----------------
+   * 与手机端同口径：答题进度只活在内存里时，刷新 / 误触返回 / 断电都会整场清零。
+   * 这里每次切题落盘一次快照，重新打开时在页面顶部提示「继续作答」。
+   */
+  const PC_DRAFT_KEY = 'lyj_pc_quiz_draft_v1';
+  const PC_DRAFT_TTL = 24 * 60 * 60 * 1000;
+  const PC_DRAFT_MAX = 1800000;
+  function savePcDraft() {
+    try {
+      const q = S.quiz;
+      if (!q || !q.questions || !q.questions.length) return;
+      if (q._finished) return;                       // 已交卷不留草稿
+      const d = {
+        v: 1, at: Date.now(), subject: S.subject,
+        quiz: {
+          questions: q.questions, idx: q.idx, score: q.score, totalScore: q.totalScore,
+          startTime: q.startTime, wrongList: q.wrongList || [], userAnswers: q.userAnswers || [],
+          results: q.results || [], mode: q.mode, title: q.title, module: q.module,
+          grade: q.grade, isExam: q.isExam, fromView: q.fromView, badge: q.badge || null
+        }
+      };
+      const s = JSON.stringify(d);                   // restart 是函数，序列化时自动丢弃
+      if (s.length > PC_DRAFT_MAX) return;
+      localStorage.setItem(PC_DRAFT_KEY, s);
+    } catch (e) { }
+  }
+  function clearPcDraft() { try { localStorage.removeItem(PC_DRAFT_KEY); } catch (e) { } }
+  function loadPcDraft() {
+    try {
+      const raw = localStorage.getItem(PC_DRAFT_KEY);
+      if (!raw) return null;
+      const d = JSON.parse(raw);
+      if (!d || d.v !== 1 || !d.quiz || !Array.isArray(d.quiz.questions) || !d.quiz.questions.length) return null;
+      if (!d.at || Date.now() - d.at > PC_DRAFT_TTL) { clearPcDraft(); return null; }
+      return d;
+    } catch (e) { return null; }
+  }
+  PC.resumePcDraft = function () {
+    const d = loadPcDraft();
+    if (!d) return;
+    S.subject = d.subject || S.subject;
+    S.grade = d.quiz.grade || S.grade;
+    S.quiz = d.quiz;
+    S.quiz._finished = false;
+    S.activeQuiz = true;
+    clearPcDraft();
+    renderNav(); renderContent();
+  };
+  PC.discardPcDraft = function () { clearPcDraft(); renderContent(); };
+  function mountPcDraftBar(c) {
+    if (!c || S.role !== 'student' || S.activeQuiz) return;
+    const d = loadPcDraft();
+    if (!d) return;
+    const q = d.quiz;
+    let answered = 0;
+    (q.results || []).forEach(function (r) { if (r && (String(r.ua || '') !== '' || r.correct || r.revealed)) answered++; });
+    const safe = String(q.title || '练习').replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+    c.insertAdjacentHTML('afterbegin',
+      '<div class="pc-page-hero" style="border-left:4px solid #B4945A">' +
+      '<div><div class="ph-title">上次有一份没做完的练习</div>' +
+      '<div class="ph-sub">' + safe + ' · 已答 ' + answered + ' / ' + q.questions.length + ' 题</div></div>' +
+      '<span class="ph-badge">' +
+      '<button class="pc-btn primary" onclick="PC.resumePcDraft()">继续作答</button> ' +
+      '<button class="pc-btn ghost" onclick="PC.discardPcDraft()">放弃</button></span></div>');
+  }
   PC.pickGrade = function (g) { S.activeQuiz = false; S.grade = g; S.view = 'units'; renderNav(); renderContent(); };
   PC.refresh = function () { renderContent(); toast('已刷新'); };
   PC.merge = async function () {
@@ -1073,6 +1164,7 @@
   }
   function renderQuiz() {
     const q = S.quiz; const c = $('pcContent'); const total = q.questions.length; const i = q.idx;
+    try { savePcDraft(); } catch (e) { }   // v103 P1-1：切题即落盘草稿
     // v84 P3：数学概念/短语/多空填空在渲染前改写成可点选形态，与移动端同一套逻辑。
     if (window.InputKit && InputKit.normalizeConceptFill) {
       const nq = InputKit.normalizeConceptFill(q.questions[i], q.questions);
@@ -1325,6 +1417,11 @@
 
   function finishQuiz() {
     const q = S.quiz;
+    // v103 P0-1：交卷幂等守卫（与手机端同口径）。连点「交卷」只入库一次。
+    if (!q) return;
+    if (q._finished) return;
+    q._finished = true;
+    try { clearPcDraft(); } catch (e) { }   // v103 P1-1：已交卷，草稿作废
     const total = q.questions.length;
     // 把未作答的题目统一记为「已揭晓 / 错误」，避免明细缺项
     for (let i = 0; i < total; i++) {
@@ -1378,9 +1475,15 @@
     h += '<div class="pc-result-stats">';
     h += '<div class="rs"><div class="n good">' + correctCount + '</div><div class="l">答对</div></div>';
     h += '<div class="rs"><div class="n bad">' + wrongCount + '</div><div class="l">答错</div></div>';
-    h += '<div class="rs"><div class="n">' + acc + '%</div><div class="l">正确率</div></div>';
+    // v103 P2-1：各题分值不等的数学卷里「得分/总分」不是正确率（与手机端同口径）
+    const rateByCount = total ? Math.round(correctCount / total * 100) : 0;
+    const accLabel = (!q.isExam || rateByCount === acc) ? '正确率' : '得分率';
+    h += '<div class="rs"><div class="n">' + acc + '%</div><div class="l">' + accLabel + '</div></div>';
     h += '<div class="rs"><div class="n">' + esc(timeUsed) + '</div><div class="l">用时</div></div>';
     h += '</div>';
+    if (accLabel === '得分率') {
+      h += '<div class="pc-teacher-comment" style="background:#F7F6F2;color:#6B7280">答对率 ' + rateByCount + '%（' + correctCount + '/' + total + ' 题）；各题分值不同，得分率不等于答对率。</div>';
+    }
     h += '<div class="pc-teacher-comment"><span class="pc-tc-tag">老师批语</span>' + esc(comment) + '</div>';
     h += '<div class="pc-teacher-detail">';
     h += '<div class="pc-detail-title">各题得分明细</div>';

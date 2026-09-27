@@ -335,6 +335,7 @@ window.JRM = (function () {
     if (!qs.length) { alert('该单元暂无题目'); return; }
     S.srcUnits = [u];
     S.qs = shuffle(qs).slice(0, Math.min(PER, qs.length));
+    S._fin = false;  // v103 P0-1：新一轮重置交卷幂等守卫
     begin();
   }
 
@@ -357,6 +358,7 @@ window.JRM = (function () {
       for (var i = 0; i < all.length; i++) if (all[i].name === nm) { S.srcUnits.push(all[i]); break; }
     });
     S.qs = r.questions;
+    S._fin = false;  // v103 P0-1：新一轮重置交卷幂等守卫
     begin();
   }
 
@@ -370,6 +372,7 @@ window.JRM = (function () {
       return;
     }
     S.qs = r.questions;
+    S._fin = false;  // v103 P0-1：新一轮重置交卷幂等守卫
     S.srcUnits = F().learnedUnits(k, S.grade).slice(-3);
     begin();
   }
@@ -380,6 +383,7 @@ window.JRM = (function () {
     var r = F().buildRT(k);
     if (!r.questions.length) { alert('暂无到期错题'); return; }
     S.qs = r.questions;
+    S._fin = false;  // v103 P0-1：新一轮重置交卷幂等守卫
     S.srcUnits = [];
     begin();
   }
@@ -550,6 +554,9 @@ window.JRM = (function () {
   }
 
   function finish() {
+    // v103 P0-1：交卷幂等守卫（连点只入库一次）
+    if (S._fin) return;
+    S._fin = true;
     var ms = Date.now() - S.t0;
     addHistory(ms);
     var total = S.qs.length;

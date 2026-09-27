@@ -9,7 +9,7 @@
 <link rel="icon" href="icons/icon-192.png" data-page-node-id="IKKWCeq4pPZETfRQjVTL0z">
 <link rel="apple-touch-icon" href="icons/icon-192.png" data-page-node-id="OylAGhilx4v8Dhe0TwiZGx">
 <script src="js/supabase-js.min.js"></script>
-<link rel="stylesheet" href="css/style.css?v=v102" data-page-node-id="T13rzsvhy36XwyYkPXxxwn">
+<link rel="stylesheet" href="css/style.css?v=v103" data-page-node-id="T13rzsvhy36XwyYkPXxxwn">
 <link rel="stylesheet" href="css/english.css?v=v100" data-page-node-id="mCGl9rHGxkRMD1FA8fXUrY">
 <link rel="stylesheet" href="css/inputkit.css?v=v100" data-page-node-id="POEx0fET1nLDteLvBzvHGo">
 </head>
@@ -37,6 +37,7 @@
   </div>
 
   <!-- v80：今日任务驾驶舱（小升初倒计时 / 三科今日任务 / 薄弱提醒 / 本周概览） -->
+  <div id="draftPanel" style="display:none"></div>
   <div id="todayPanel" data-page-node-id="uL422XNb1srCeOo9V82BFz"></div>
 
   <div class="section-title" data-page-node-id="9OtlZBRl0DfcnsZTVQl9WN">选择年级</div>
@@ -121,9 +122,10 @@
     <div class="result-stats" id="resultStats" data-page-node-id="v0P3vnWrP6u2hLb8IMWQiv">
       <div class="result-stat" data-page-node-id="h1YghuHuyRmJdm8lCDAcZG"><div class="num correct" id="resultCorrect" data-page-node-id="lTUEF11ESe1VbIIvhQ6o5a">0</div><div class="label" data-page-node-id="2XFgDnClQUdlzW1hXvaPoN">答对</div></div>
       <div class="result-stat" data-page-node-id="IU3xzZ149DAAZ4mSqU5wQl"><div class="num wrong" id="resultWrong" data-page-node-id="X5N8mXg6nbfuIUyQpbjG56">0</div><div class="label" data-page-node-id="lql0WnOpEI8CzkDOXZvFht">答错</div></div>
-      <div class="result-stat" data-page-node-id="9gqoPFSPxOetEQIfvVEfWr"><div class="num u-c-primary" id="resultAccuracy" data-page-node-id="ACOnGd878YSffbTNCpCAOQ">0%</div><div class="label" data-page-node-id="Osn1Fw6zEVGSGcvC4yNSBd">正确率</div></div>
+      <div class="result-stat" data-page-node-id="9gqoPFSPxOetEQIfvVEfWr"><div class="num u-c-primary" id="resultAccuracy" data-page-node-id="ACOnGd878YSffbTNCpCAOQ">0%</div><div class="label" id="resultAccLabel" data-page-node-id="Osn1Fw6zEVGSGcvC4yNSBd">正确率</div></div>
       <div class="result-stat" data-page-node-id="KsX0IbgjDokCmYyw0mIhvZ"><div class="num" id="resultTime" data-page-node-id="d4xDn6xymqbbEADk9rEhZH">0秒</div><div class="label" data-page-node-id="YxuXFkQLsJuQaeofjunb8j">用时</div></div>
     </div>
+    <div class="u-fs12 u-c-light u-tc u-mb8" id="accNote"></div>
     <div class="teacher-comment" id="teacherComment" data-page-node-id="GksVA0T0a5q5uEzDXnh2tL"></div>
     <div class="teacher-detail" data-page-node-id="UTM8RGNsWxSgqhiDIZaLfS">
       <div class="detail-title" data-page-node-id="CPfqMFZCHlQfmpuCghCeVL">各题得分明细</div>
@@ -500,8 +502,8 @@
 <div class="toast" id="toast" data-page-node-id="nWBgIZxBNZ2XG0gJGcMtDz"></div>
 
 <script src="js/inputKit.js"></script>
-<script src="js/core.js?v=v102"></script>
-<script src="js/math.js?v=v102"></script>
+<script src="js/core.js?v=v103"></script>
+<script src="js/math.js?v=v103"></script>
 <script src="js/math_junior.js?v=20260908b"></script>
 <script src="js/math_junior8.js?v=20260908b"></script>
 <script src="js/math_junior9.js?v=20260908b"></script>
@@ -513,8 +515,8 @@
 <script src="js/pep_junior.js"></script>
 <script src="js/pep_junior8.js"></script>
 <script src="js/pep_junior9.js"></script>
-<script src="js/engPep.js"></script>
-<script src="js/chinese.js"></script>
+<script src="js/engPep.js?v=v103"></script>
+<script src="js/chinese.js?v=v103"></script>
 <script src="js/chinese_junior7.js"></script>
 <script src="js/chinese_junior8.js"></script>
 <script src="js/chinese_junior9.js"></script>
@@ -543,8 +545,8 @@
 <script src="js/aixueGuide-liberal.js"></script>
 <script src="js/aixueGuide.js?v=20260907c"></script>
 <script src="js/aiSolve.js"></script>
-<script src="js/jr_flow.js?v=v102"></script>
-<script src="js/jr_mobile.js"></script>
+<script src="js/jr_flow.js?v=v103"></script>
+<script src="js/jr_mobile.js?v=v103"></script>
 <script src="js/main.js"></script>
 
 <script src="config.js?v=20260907"></script>

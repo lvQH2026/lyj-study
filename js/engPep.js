@@ -658,6 +658,8 @@
 
   /* ---------------- 交卷：成绩页（第一段） ---------------- */
   function finish() {
+    // v103 P0-1：交卷幂等守卫（连点只入库一次）
+    if (QS.finished) return;
     const total = QS.list.length;
     let score = 0;
     QS.results.forEach(function (r) { if (r && r.correct) score++; });

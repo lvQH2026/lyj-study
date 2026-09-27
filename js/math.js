@@ -11012,6 +11012,7 @@ function goBack() {
       switchTab('exam');
       state.quizMode = null;
       state.quizQuestions = [];
+      state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
       state.quizIndex = 0;
       state.quizScore = 0;
       state.quizCorrect = 0;
@@ -11035,6 +11036,7 @@ function goBack() {
 
 function goHome() {
   state.quizQuestions = [];
+  state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
   state.quizIndex = 0;
   state.quizScore = 0;
   state.quizCorrect = 0;
@@ -11049,6 +11051,143 @@ function goHome() {
   if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
   document.getElementById('examPaperHeader').style.display = 'none';
   switchTab('home');
+}
+
+// ============================================================
+// v103 P1-1：答题草稿 / 断点续答
+// 旧版答题进度只活在内存里（state.userAnswers / qStatus / 题号），
+// 刷新页面、手机切后台被系统回收、误触下拉刷新，整场作答与计时全部清零
+// ——70 分钟的长卷尤其致命。这里在每次切题 / 作答后把进度快照写入
+// localStorage，重新打开时提示「继续上次作答」。
+// 设计取舍：只存快照不自动跳回（避免一打开就撞进上次没做完的卷子），
+// 由孩子在首页自己点「继续」或「放弃」。
+// ============================================================
+const QUIZ_DRAFT_KEY = 'lyj_quiz_draft_v1';
+const QUIZ_DRAFT_TTL = 24 * 60 * 60 * 1000;   // 草稿最多保留 24 小时
+const QUIZ_DRAFT_MAX = 1800000;               // 快照超过 ~1.8MB 就不写（配额保护）
+
+function saveQuizDraft() {
+  try {
+    if (!state.quizQuestions || !state.quizQuestions.length) return;
+    if (state._finished) return;                       // 已交卷不再留草稿
+    if (state.quizMode === 'wrong') return;            // 错题重做题量小，不占配额
+    let paper = null;
+    if (state.examPaper) {
+      paper = Object.assign({}, state.examPaper);
+      paper.questions = null;                          // 题目本身已在 questions 里，不重复存
+    }
+    const d = {
+      v: 1, at: Date.now(),
+      mode: state.quizMode, title: state.quizTitle,
+      grade: state.currentGrade, sem: state.currentSemester,
+      questions: state.quizQuestions,
+      userAnswers: state.userAnswers || [],
+      qStatus: state.qStatus || [],
+      idx: state.quizIndex || 0,
+      correct: state.quizCorrect || 0, wrong: state.quizWrong || 0, score: state.quizScore || 0,
+      start: state.quizStartTime || Date.now(),
+      endTime: state.examEndTime || 0,
+      paper: paper
+    };
+    const s = JSON.stringify(d);
+    if (s.length > QUIZ_DRAFT_MAX) return;             // 超大卷（配图极多）静默跳过
+    localStorage.setItem(QUIZ_DRAFT_KEY, s);
+  } catch (e) { /* 配额不足 / 隐私模式：静默降级，不影响答题 */ }
+}
+
+function clearQuizDraft() {
+  try { localStorage.removeItem(QUIZ_DRAFT_KEY); } catch (e) { }
+}
+
+function loadQuizDraft() {
+  try {
+    const raw = localStorage.getItem(QUIZ_DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (!d || d.v !== 1 || !Array.isArray(d.questions) || !d.questions.length) return null;
+    if (!d.at || Date.now() - d.at > QUIZ_DRAFT_TTL) { clearQuizDraft(); return null; }
+    return d;
+  } catch (e) { return null; }
+}
+
+// 续答：把草稿回填进 state，跳回上次题号
+function resumeQuizDraft() {
+  const d = loadQuizDraft();
+  if (!d) return;
+  state.quizMode = d.mode;
+  state.quizTitle = d.title;
+  state.currentGrade = d.grade;
+  state.currentSemester = d.sem;
+  state.quizQuestions = d.questions;
+  state._finished = false;
+  state.userAnswers = d.userAnswers || [];
+  state.qStatus = d.qStatus || [];
+  state.quizIndex = Math.max(0, Math.min(d.idx || 0, d.questions.length - 1));
+  state.quizCorrect = d.correct || 0;
+  state.quizWrong = d.wrong || 0;
+  state.quizScore = d.score || 0;
+  state.quizStartTime = d.start || Date.now();
+  state.wrongMap = {};
+  state.selectedAnswer = null;
+  state.answered = !!state.qStatus[state.quizIndex];
+  state.examPaper = d.paper || null;
+  if (state.examPaper) state.examPaper.questions = state.quizQuestions;
+
+  // 考试：恢复倒计时（用剩余时间接着走，而不是重新给满 70 分钟）
+  if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
+  if (d.endTime && d.endTime > Date.now()) {
+    state.examEndTime = d.endTime;
+    const hdr = document.getElementById('examPaperHeader');
+    if (hdr) hdr.style.display = 'block';
+    let t = document.getElementById('examPaperTitle');
+    if (t) t.textContent = state.examPaper ? (state.examPaper.title || state.quizTitle) : state.quizTitle;
+    state.examTimer = setInterval(function () {
+      let remain = Math.max(0, Math.ceil((state.examEndTime - Date.now()) / 1000));
+      let m = Math.floor(remain / 60), s = remain % 60;
+      let el = document.getElementById('examTimer');
+      if (el) el.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg> 剩余 ' + m + ':' + String(s).padStart(2, '0');
+      if (remain <= 0) { clearInterval(state.examTimer); state.examTimer = null; finishQuiz(); }
+    }, 1000);
+  } else {
+    state.examEndTime = 0;
+    let hdr = document.getElementById('examPaperHeader');
+    if (hdr && state.quizMode !== 'exam') hdr.style.display = 'none';
+  }
+
+  showPage('quiz');
+  const bb = document.getElementById('backBtn');
+  if (bb) { bb.style.display = 'block'; bb.onclick = function () { goBack(); }; }
+  renderQuestion();
+}
+
+function discardQuizDraft() {
+  clearQuizDraft();
+  renderDraftPanel();
+}
+
+// 首页「继续上次作答」提示条
+function renderDraftPanel() {
+  const box = document.getElementById('draftPanel');
+  if (!box) return;
+  const d = loadQuizDraft();
+  if (!d) { box.innerHTML = ''; box.style.display = 'none'; return; }
+  const answered = (d.qStatus || []).filter(function (v) { return v; }).length;
+  const total = d.questions.length;
+  const when = new Date(d.at);
+  const hh = String(when.getHours()).padStart(2, '0'), mm = String(when.getMinutes()).padStart(2, '0');
+  const safe = String(d.title || '练习').replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+  box.style.display = 'block';
+  box.innerHTML =
+    '<div class="card u-p14 u-mb14" style="border-left:4px solid #B4945A">' +
+    '<div class="u-fs14 u-fw700 u-c-primary">上次有一份没做完的练习</div>' +
+    '<div class="u-fs13 u-c-light u-mt4">' + safe +
+    ' · 已答 ' + answered + ' / ' + total + ' 题 · 保存于 ' + hh + ':' + mm + '</div>' +
+    '<div class="u-flex u-g8 u-mt10">' +
+    '<button class="btn btn-primary" style="flex:1" onclick="resumeQuizDraft()">继续作答</button>' +
+    '<button class="btn btn-outline" style="flex:0 0 auto" onclick="discardQuizDraft()">放弃</button>' +
+    '</div></div>';
 }
 
 // ============================================================
@@ -11330,6 +11469,8 @@ function renderHome() {
   // v78：pc.html 没有 #gradeGrid（年级网格属移动端首页），此处直接返回，
   // 避免 PC 端加载时抛出「Cannot set properties of null (setting 'innerHTML')」。
   if (!grid) return;
+  // v103 P1-1：首页顶部回显「上次没做完的练习」
+  try { renderDraftPanel(); } catch (e) { }
   let gradeNames = {
     1: '一年级', 2: '二年级', 3: '三年级',
     4: '四年级', 5: '五年级', 6: '六年级',
@@ -11797,6 +11938,7 @@ function beginUnitQuiz(idx, grade, sem, diff) {
   state.quizMode = 'unit';
   state.quizTitle = unit.name;
   state.quizQuestions = [];
+  state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
   if (unit.paper) {
     // v51：整卷题组也做相对难度打标（浅拷贝避免污染题池），卷面显示难度徽标
     let arr = unit.gen();
@@ -11805,17 +11947,20 @@ function beginUnitQuiz(idx, grade, sem, diff) {
       tagRelativeDifficulty(arr);
     }
     state.quizQuestions = arr;
+    state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
   } else {
     let first = unit.gen();
     if (Array.isArray(first)) {
       // gen 已返回完整题组（如角度计算：一次从题库随机抽 N 道）
       state.quizQuestions = first;
+      state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
     } else {
       // v86：带上该单元的「已练题面」上下文，优先出没练过的题
       const ctx = unitSeenCtx(grade, sem, idx);
       // v99：unit.quizLength 显式优先；否则按名称兼容旧「分数应用题=20」特例；默认 UNIT_QUIZ_LENGTH
       var _unitWant = unit.quizLength || ((unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : UNIT_QUIZ_LENGTH);
       state.quizQuestions = buildUnitQuizQuestions(unit, diff || 1, _unitWant, ctx);
+      state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
     }
   }
   // v86：本场题面入库，下一场优先避开；题面已练遍时自动清空记忆重新循环
@@ -11846,6 +11991,7 @@ function startQuickPractice(mode) {
   state.quizMode = 'quick';
   state.quizTitle = mode === 'basic' ? '基础运算' : '综合练习';
   state.quizQuestions = [];
+  state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
   let gen = mode === 'basic' ? quickBasicGen : quickMixedGen;
   for (let i = 0; i < QUIZ_LENGTH; i++) {
     state.quizQuestions.push(gen());
@@ -11893,6 +12039,7 @@ function startQuickAssess() {
   }
   if (picked.length < 10) picked = picked.concat(pool.slice(0, 10 - picked.length));
   state.quizQuestions = picked.slice(0, 10);
+  state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
   state.quizIndex = 0;
   state.quizScore = 0;
   state.quizCorrect = 0;
@@ -11926,6 +12073,7 @@ function startWrongReview() {
   let shuffled = [...wrongBank].sort(() => Math.random() - 0.5);
   let picked = shuffled.slice(0, Math.max(QUIZ_LENGTH, wrongBank.length));
   state.quizQuestions = picked.map(w => w.question);
+  state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
   state.quizWrongSourceIds = picked.map(w => w.id);
   state.quizIndex = 0;
   state.quizScore = 0;
@@ -12407,32 +12555,57 @@ function visKey(q) {
   return svg.indexOf('<') >= 0 ? (t + '||' + svg) : t;
 }
 
+// v103 P1-2：题面模板键（数字抹平为 #，用于识别「同一句话换了参数」的题）
+// 与 visKey 的区别：visKey 对带图题是「题面+图形」，同题干换图就算两道题；
+// tplKeyOf 只看题干，正是「卷面雷同题」的判据。
+function tplKeyOf(q) {
+  return stripHtml((q && q.question) || '')
+    .replace(/\d+(\.\d+)?/g, '#')
+    .replace(/(.)\1+/gu, '$1')
+    .slice(0, 20);
+}
+function hasFig(q) { return String((q && q.svg) || '').indexOf('<') >= 0; }
+
 // 从题池中挑选 n 道题：分数越高越优先，同时避免同一单元扎堆
 // v49 去重铁律：主池构建按「题面|答案」去重（保留参数化图形题的多样答案），
 // 但选题时必须再按「题面文本」严格去重——同题面、参数只在 SVG 图里的题，
 // 在卷面上就是视觉重复题（跨单元模板题同理）。严格模式凑不满时（单元卷题面
 // 种类有限），放宽允许少量重复，保证整卷题量完整。
-function pickFromPool(pool, used, n, scorer, usedText) {
+function pickFromPool(pool, used, n, scorer, usedText, sharedTpl) {
   let out = [];
   let unitCount = {};
-  let tplCount = {};
-    // v96: 先stripHtml再生成模板key——题目question字段可能含HTML（分数上下叠放渲染）
-  const tplOf = q => stripHtml((q.question || ''))
-    .replace(/\d+(\.\d+)?/g, '#')
-    .replace(/(.)\1+/gu, '$1')
-    .slice(0, 20);
-  const run = (allowRepeat) => {
+  // v103 P1-2：模板计数跨分区共享。旧版每次调用各自新建 tplCount，
+  // 于是「以中心为观测点，★在它的（）方向」这类模板在每个分区都能再出现若干次，
+  // 一份卷里堆到 4~5 道同题干的题（实测六年级上·确定位置 3/3 卷必现）。
+  let tplCount = sharedTpl || {};
+  const tplOf = tplKeyOf;
+  // v103 P1-2：同一题面模板的硬上限，分档放宽，最后一档兜底不设限（宁可少量重复也不缺题）
+  // 带图题：同题干换图就是最扎眼的雷同，上限取绝对数（2 / 3 / 4）。
+  // 纯文本题：按「占整卷比例」限流而不是绝对数——低年级情境题模板天然极少
+  // （实测一年级上·生活中的加减法整单元只有「苹果/橘子/糖果」3 种题面），
+  // 用绝对数会把卷子卡死；用占比能压住「单一模板独占三分之一卷面」的极端分布。
+  // capBase 取整卷题数（由 sharedTpl.__n 带入），避免按分区题数算出过小的上限。
+  const capBase = (sharedTpl && sharedTpl.__n) || n;
+  const TPL_CAPS = [
+    { fig: 2, txt: Math.max(3, Math.ceil(capBase / 5)) },
+    { fig: 3, txt: Math.max(4, Math.ceil(capBase / 4)) },
+    { fig: 4, txt: Math.max(6, Math.ceil(capBase / 3)) },
+    { fig: Infinity, txt: Infinity }
+  ];
+  const run = (allowRepeat, cap) => {
     while (out.length < n) {
       let best = -1, bestScore = -1;
       for (let i = 0; i < pool.length; i++) {
         if (used.has(i)) continue;
         // 视觉上已出现过的题：严格轮直接跳过（v73：带图题按「题面+图形」判重）
         if (!allowRepeat && usedText && usedText.has(visKey(pool[i]))) continue;
+        let _t = tplOf(pool[i]);
+        if ((tplCount[_t] || 0) >= (hasFig(pool[i]) ? cap.fig : cap.txt)) continue;
         let base = scorer(pool[i]);
         if (base <= 0) continue;
         if (pool[i]._core === false) base *= 0.35;   // 补充题让位于本次考查范围
         let c = unitCount[pool[i]._unitName] || 0;
-        let tc = tplCount[tplOf(pool[i])] || 0;
+        let tc = tplCount[_t] || 0;
         let s = base / (1 + 0.7 * c) / (1 + 1.1 * tc) + Math.random() * 0.8;
         if (s > bestScore) { bestScore = s; best = i; }
       }
@@ -12446,8 +12619,10 @@ function pickFromPool(pool, used, n, scorer, usedText) {
       out.push(pool[best]);
     }
   };
-  run(false);                    // 第一轮：题面文本严格去重
-  if (out.length < n) run(true); // 第二轮：题面种类不足时放宽，凑满整卷
+  run(false, TPL_CAPS[0]);                    // 第一轮：严格去重 + 模板上限 2
+  if (out.length < n) run(false, TPL_CAPS[1]); // 第二轮：仍严格去重，模板上限放宽到 3
+  if (out.length < n) run(true, TPL_CAPS[2]);  // 第三轮：题面种类不足，放宽重复但上限 4
+  if (out.length < n) run(true, TPL_CAPS[3]);  // 第四轮：兜底凑满整卷（宁可少量重复也不缺题）
   return out;
 }
 
@@ -12626,6 +12801,11 @@ function generateSteps(q, unit) {
   if (m && (m[1].indexOf('-')===0 || m[3].indexOf('-')===0)) {
     let a=+m[1], op=m[2], b=+m[3];
     if (op === '+') {
+      // v103 P3-1：互为相反数（-2 + 2）本应直接得 0，旧版却套「异号两数相加：
+      // 取绝对值较大加数的符号…」——两个加数绝对值相等，根本没有「较大」的那个，
+      // 讲解与题面自相矛盾。这里优先走「相反数」这条更直接的规则。
+      if (a + b === 0) return [`${a} 与 ${b} 互为相反数（绝对值相等、符号相反），互为相反数的两个数相加得 0`,
+        `${a} + ${b} = 0`];
       if ((a<0&&b>0)||(a>0&&b<0)) return [`异号两数相加：取绝对值较大加数的符号，用较大的绝对值减去较小的绝对值`,
         `${a} + ${b} = ${Math.abs(a)>Math.abs(b)?Math.abs(a):Math.abs(b)} - ${Math.abs(a)>Math.abs(b)?Math.abs(b):Math.abs(a)} = ${a+b}`];
       if (a<0&&b<0) return [`同号两数相加：取相同的符号（负号），并把绝对值相加`,
@@ -12845,6 +13025,19 @@ function unitMetaFor(q) {
     const hit = findUnitByName(state.currentGrade, q._unitName);
     return hit ? hit.unit : null;
   } catch (e) { return null; }
+}
+
+// v103 P3-1：题库本身不带 explain（实测 0/30），解析页因此只有「步骤」没有「为什么」。
+// 这里用单元自带的知识卡（summary：考点清单）补一条最贴题的讲解，
+// 让孩子做错时能看到「这题考的是什么」，而不只是看到一串算式。
+function explainFromUnit(q, meta) {
+  if (!q || !meta || !Array.isArray(meta.summary) || !meta.summary.length) return '';
+  const t = stripHtml(String(q.question || ''));
+  const ans = String(q.answer === undefined ? '' : q.answer);
+  let line = '';
+  try { line = pickRelevant(meta.summary, t, ans) || ''; } catch (e) { line = ''; }
+  if (!line) line = meta.summary[0];
+  return line ? ('考点：' + String(line)) : '';
 }
 
 // 提取题干中的数字（先剥掉 1:600,000 这类千分位逗号，避免被当成两个数）
@@ -13745,6 +13938,8 @@ function generateExamPaper() {
 
   let used = new Set();
   let usedText = new Set();   // 跨分区共享的题面文本去重（v49：杜绝视觉重复题）
+  let tplShared = {};         // v103 P1-2：跨分区共享的「题面模板」计数（同模板硬上限）
+  tplShared.__n = capQ;       // 整卷题数，供 pickFromPool 按比例算上限
   let questions = [];
 
   STRUCT.forEach(sec => {
@@ -13755,16 +13950,16 @@ function generateExamPaper() {
     [1, 2, 3].forEach(d => {
       if (!mix[d - 1]) return;
       let baseScorer = getSectionScorer(sec.key);
-      let sub = pickFromPool(pool, used, mix[d - 1], q => (questionDifficulty(q) === d ? baseScorer(q) : 0), usedText);
+      let sub = pickFromPool(pool, used, mix[d - 1], q => (questionDifficulty(q) === d ? baseScorer(q) : 0), usedText, tplShared);
       picked = picked.concat(sub);
     });
     if (picked.length < sec.count && sec.key === 'judge') {
       // v73：本单元一道判断题都派生不出来（全部是非数值答案的概念题）
       // ——降级为普通选择题顶上，保证分区题数不缺。
-      picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer('choice'), usedText));
+      picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer('choice'), usedText, tplShared));
     }
     if (picked.length < sec.count) {
-      picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer(sec.key), usedText));
+      picked = picked.concat(pickFromPool(pool, used, sec.count - picked.length, getSectionScorer(sec.key), usedText, tplShared));
     }
     picked.forEach((q, k) => {
       let item = Object.assign({}, q);
@@ -13800,6 +13995,8 @@ function generateExamPaper() {
   questions.forEach((q, i) => {
     q.num = i + 1;
     if (!q.steps) q.steps = generateSteps(q, unitMetaFor(q));
+    // v103 P3-1：补一条「考点」讲解，避免解析页只剩步骤
+    if (!q.explain) q.explain = explainFromUnit(q, unitMetaFor(q));
   });
 
   // 配图保底：每套卷至少含 MIN_IMG 张配图题（真实试卷均有图形/图表题）。
@@ -13820,11 +14017,21 @@ function generateExamPaper() {
     let seenQA = new Set(questions.map(q => String(q.question) + '|' + String(q.answer)));
     // 采样量放大到 200：配图题集中在少数单元（如 6 下仅 9 种），target 过小会漏捞导致保底补不满。
     let imgPool = [];
+    // v103 P1-2：配图保底同样限制「同题干」模板数量。旧版只按「题面+图形」判重，
+    // 同一句话换张图就算新题，被一路补进卷面——这是雷同题的另一个来源。
+    const tplFig = {};
+    questions.forEach(function (qq) {
+      if (!hasFig(qq)) return;
+      const t = tplKeyOf(qq);
+      tplFig[t] = (tplFig[t] || 0) + 1;
+    });
     buildQuestionPool(imgSrc, 200, new Set(), false).forEach(q => {
       if (!String(q.svg || '').includes('<')) return;
       const qa = String(q.question) + '|' + String(q.answer);
       if (seenQA.has(qa)) return;
       if (seenText.has(visKey(q))) return;
+      const _t = tplKeyOf(q);
+      if ((tplFig[_t] || 0) >= 2) return;      // 同题干带图题整卷最多 2 道
       seenQA.add(qa);
       seenText.add(visKey(q));
       imgPool.push(q);
@@ -13840,6 +14047,7 @@ function generateExamPaper() {
     while (imgNow < MIN_IMG && pi < imgPool.length && si < replSlots.length) {
       let cand = imgPool[pi++];
       let slot = replSlots[si++];
+      tplFig[tplKeyOf(cand)] = (tplFig[tplKeyOf(cand)] || 0) + 1;
       let item = Object.assign({}, cand);
       item.score = slot.q.score;
       item.sectionTitle = slot.q.sectionTitle;
@@ -13847,6 +14055,7 @@ function generateExamPaper() {
       item.forceFill = false;
       if (slot.q._section === 'choice' && (!item.options || item.options.length < 2) && canForceFill(item)) item.forceFill = true;
       if (!item.steps) item.steps = generateSteps(item, unitMetaFor(item));
+      if (!item.explain) item.explain = explainFromUnit(item, unitMetaFor(item));
       item.num = slot.q.num;
       questions[slot.i] = item;
       imgNow++;
@@ -13903,6 +14112,7 @@ function startExam() {
     state.quizTitle = paper.title;
     state.examPaper = paper;
     state.quizQuestions = paper.questions;
+    state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
     state.quizIndex = 0;
     state.quizScore = 0;
     state.quizCorrect = 0;
@@ -13919,10 +14129,17 @@ function startExam() {
     state.examTimer = setInterval(() => {
       let remain = Math.max(0, Math.ceil((state.examEndTime - Date.now()) / 1000));
       let m = Math.floor(remain / 60), s = remain % 60;
+      // v103 P2-2：旧版把「剩余时间」标成「用时」——开考就显示「用时 69:59」且越走越小，
+      // 语义与数值方向都反了。这里如实标为「剩余」并保留图标。
       let timerEl = document.getElementById('examTimer');
-      if (timerEl) timerEl.textContent = `用时 ${m}:${s.toString().padStart(2,'0')}`;
+      if (timerEl) timerEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg> 剩余 ' + m + ':' + String(s).padStart(2, '0');
       if (remain <= 0) { clearInterval(state.examTimer); state.examTimer = null; finishQuiz(); }
     }, 1000);
+    // 立刻先渲染一次，避免开考第一秒仍显示静态的「70:00」
+    (function () {
+      let timerEl = document.getElementById('examTimer');
+      if (timerEl) timerEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg> 剩余 70:00';
+    })();
 
     showPage('quiz');
     document.getElementById('backBtn').style.display = 'block';
@@ -13932,6 +14149,8 @@ function startExam() {
 }
 
 function renderQuestion() {
+  // v103 P1-1：切题即落盘草稿（刷新 / 切后台被回收后可续答）
+  try { saveQuizDraft(); } catch (e) { }
   let q = state.quizQuestions[state.quizIndex];
   // v84 P3：概念/短语/多空填空题在渲染前改写成可点选形态（选择题 / 逐空词卡），
   // 保证「任何题都不许必须打字」。幂等，改写后打 _ikNorm 标记。
@@ -14327,6 +14546,13 @@ function finishQuiz() {
   // 停止计时器
   if (state.examTimer) { clearInterval(state.examTimer); state.examTimer = null; }
 
+  // v103 P0-1：交卷幂等守卫。孩子点按钮"没反应"再点一下是极常见动作，
+  // 旧版每触发一次就再写一条练习记录、再累加一次统计、错题本二次入库
+  // （实测 30 题卷 totalDone 变 60、历史 1→2 条）。本场只允许入库一次。
+  if (state._finished) return;
+  state._finished = true;
+  try { clearQuizDraft(); } catch (e) { }   // v103 P1-1：已交卷，草稿作废
+
   const total = state.quizQuestions.length;
   const isExam = state.quizMode === 'exam';
   state.userAnswers = state.userAnswers || [];
@@ -14392,6 +14618,20 @@ function renderMobileScorePage() {
   document.getElementById('resultAccuracy').textContent = accuracy + '%';
   document.getElementById('resultTime').textContent = timeUsed;
   document.getElementById('teacherComment').textContent = comment;
+
+  // v103 P2-1：各题分值不等的数学卷里，「得分/总分」不是正确率。
+  // 旧版把 31/100 直接标成「正确率 31%」，而旁边并排写着「答对 18 / 答错 12」，
+  // 家长一眼看上去互相矛盾。这里：主数字改标「得分率」，并补一行答对率。
+  const _accLab = document.getElementById('resultAccLabel');
+  const _accNote = document.getElementById('accNote');
+  const rateByCount = total ? Math.round((state.quizCorrect || 0) / total * 100) : 0;
+  if (!isExam || rateByCount === accuracy) {
+    if (_accLab) _accLab.textContent = '正确率';
+    if (_accNote) _accNote.textContent = '';
+  } else {
+    if (_accLab) _accLab.textContent = '得分率';
+    if (_accNote) _accNote.textContent = '（答对率 ' + rateByCount + '%：' + (state.quizCorrect || 0) + '/' + total + ' 题；各题分值不同，得分率≠答对率）';
+  }
 
   // 各题得分明细
   let detailHtml = '';
@@ -14537,9 +14777,11 @@ function retryQuiz() {
       // v99：认 unit.quizLength（默认 QUIZ_LENGTH=30），与 beginUnitQuiz 走同一份 want
       const _retryWant = unit.quizLength || ((unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : QUIZ_LENGTH);
       state.quizQuestions = [];
+      state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
       const ctx = unitSeenCtx(state.currentGrade, state.currentSemester, units.indexOf(unit));
       // 走 buildUnitQuizQuestions 复用「已练题面去重 + 难度配比」逻辑
       state.quizQuestions = buildUnitQuizQuestions(unit, 1, _retryWant, ctx);
+      state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
       state.quizIndex = 0;
       state.quizScore = 0;
       state.quizCorrect = 0;
@@ -14616,6 +14858,8 @@ function renderWrongBank() {
     if (!steps || !steps.length || (steps.length === 1 && /^答案：/.test(steps[0]))) {
       steps = generateSteps(q, hit && hit.unit);
     }
+    // v103 P3-1：老错题没有 explain，这里用单元知识卡补一条「考点」
+    if (!q.explain) q.explain = explainFromUnit(q, hit && hit.unit);
     let explainBlock = q.explain
       ? `<div class="wrong-explain"><b>解析：</b>${q.explain}</div>`
       : '';
@@ -14655,6 +14899,7 @@ function retryOneWrong(id) {
   state.quizMode = 'wrong';
   state.quizTitle = '错题重做';
   state.quizQuestions = [w.question];
+  state._finished = false;  // v103 P0-1：新一轮测验重置交卷幂等守卫
   state.quizWrongSourceIds = [w.id];
   state.quizIndex = 0;
   state.quizScore = 0;

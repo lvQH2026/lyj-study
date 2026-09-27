@@ -3656,6 +3656,11 @@ function cn5x8_pool() {
   // ---- 结果页（v75：两步式 批改成绩 → 答案解析）----
   function cnShowResult() {
     const q = cnState.quiz;
+    // v103 P0-1：交卷幂等守卫。成绩页可以重复渲染（孩子想回看），
+    // 但「历史记录 + 错题入库 + 云端同步」本场只允许执行一次，
+    // 否则连点「查看结果」会写两条练习记录、统计翻倍。
+    const _alreadySaved = !!(q && q._finished);
+    if (q) q._finished = true;
     const total = q.questions.length;
     const score = q.score;
     const isExam = !!q.paper;
@@ -3728,15 +3733,18 @@ function cn5x8_pool() {
     el('cnExamAnswerKey').style.display = 'none';
 
     // 记录历史（带本次错题明细，供家长后台/云端同步）
-    if (isExam) {
-      cnRecordHistory(cnState.grade, q.paper.title, acc, 100, q.wrongs || []);
-    } else {
-      const unitName = (CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx]) ? CN_DATA[cnState.grade][cnState.unitIdx].name : '';
-      cnRecordHistory(cnState.grade, unitName, score, total, q.wrongs || []);
-    }
-    // 练习情况同步到家长后台（云端模式自动上传，本地模式仅写 localStorage）
-    if (typeof syncAfterQuiz === 'function') {
-      try { syncAfterQuiz(); } catch (e) { console.warn('cnSyncAfterQuiz', e); }
+    // v103 P0-1：本场只入库一次
+    if (!_alreadySaved) {
+      if (isExam) {
+        cnRecordHistory(cnState.grade, q.paper.title, acc, 100, q.wrongs || []);
+      } else {
+        const unitName = (CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx]) ? CN_DATA[cnState.grade][cnState.unitIdx].name : '';
+        cnRecordHistory(cnState.grade, unitName, score, total, q.wrongs || []);
+      }
+      // 练习情况同步到家长后台（云端模式自动上传，本地模式仅写 localStorage）
+      if (typeof syncAfterQuiz === 'function') {
+        try { syncAfterQuiz(); } catch (e) { console.warn('cnSyncAfterQuiz', e); }
+      }
     }
   }
 
