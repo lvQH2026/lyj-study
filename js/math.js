@@ -13880,6 +13880,14 @@ function generateExamPaper() {
   let { units, all, rangeText } = getExamUnits();
   if (!units || units.length === 0) return null;
 
+  // v103：年级上下文对齐。generateSteps / explainFromUnit 都靠 state.currentGrade
+  // 去查单元知识卡（unitMetaFor → findUnitByName），若调用方没先切年级（startExam 会切，
+  // 但直接调 generateExamPaper 的路径不一定），知识卡会查不到，解析就退回空。
+  if (typeof examState !== 'undefined' && examState && examState.grade) {
+    state.currentGrade = examState.grade;
+    if (examState.semester) state.currentSemester = examState.semester;
+  }
+
   let seen = new Set();
   // v73：候选池 90 → 120。六分区结构下每个分区都要挑 5~9 道，
   // 池子太小时严格去重轮选不满，会退到「放宽重复」轮，卷面就出现雷同题。
