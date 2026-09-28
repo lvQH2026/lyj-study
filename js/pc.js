@@ -804,6 +804,23 @@
     return PEPQ.getBook(bid) || null;
   }
 
+  // v104：把考查范围里的单元名列出来，让家长/孩子一眼看出考的是哪册的哪些单元。
+  // 之前只写「第1~N单元（前半册）」，上册/下册同为 6 单元时文案完全一致，看不出区别，
+  // 也看不出实际覆盖范围；列出单元名后上册/下册明显不同，且能直接核对范围对不对。
+  function examUnitNames(units, count) {
+    var arr = (count ? units.slice(0, count) : units).map(function (u) {
+      var nm = (u && u.name) ? String(u.name) : '';
+      nm = nm.replace(/^第[一二三四五六七八九零〇\d]+单元\s*/, '')
+             .replace(/^[\d]+\s*/, '')
+             .replace(/^[一二三四五六七八九]+\s*/, '')
+             .replace(/^☆\s*/, '')
+             .trim();
+      return nm;
+    }).filter(Boolean);
+    if (arr.length > 8) return arr.slice(0, 8).join('、') + ' 等共' + arr.length + '个单元';
+    return arr.join('、');
+  }
+
   function renderExamExtra() {
     const box = $('examExtra'); if (!box) return;
     if (S.subject === 'english') {
@@ -834,13 +851,22 @@
       // v101：月考/期中/期末补范围提示（与 startEngExam 的实际取题范围一致）
       if (S.examType !== 'unit') {
         const bk = pepBookOf(S.grade, S.semester);
-        const un = bk ? (bk.units || []).length : 0;
+        const eu = bk ? (bk.units || []) : [];
+        const un = eu.length;
         if (bk && un) {
-          eh += S.examType === 'month'
-            ? '<div class="pc-hint">阶段测试范围：Unit 1-' + Math.min(2, un) + '</div>'
-            : S.examType === 'mid'
-              ? '<div class="pc-hint">期中范围：Unit 1-' + Math.max(1, Math.ceil(un / 2)) + '（前半册）</div>'
-              : '<div class="pc-hint">期末范围：全册 ' + un + ' 个单元</div>';
+          const enNames = function (n) { return eu.slice(0, n).map(function (u) { return u.title || ('Unit ' + u.no); }).join('、'); };
+          if (S.examType === 'month') {
+            const c = Math.min(2, un);
+            eh += '<div class="pc-hint">阶段测试范围：Unit 1-' + c + '（前半册起步）</div>'
+              + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(enNames(c)) + '</div>';
+          } else if (S.examType === 'mid') {
+            const c = Math.max(1, Math.ceil(un / 2));
+            eh += '<div class="pc-hint">期中范围：Unit 1-' + c + '（前半册）</div>'
+              + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(enNames(c)) + '</div>';
+          } else {
+            eh += '<div class="pc-hint">期末范围：全册 ' + un + ' 个单元</div>'
+              + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(enNames(un)) + '</div>';
+          }
         }
       }
       box.innerHTML = eh;
@@ -869,14 +895,19 @@
             mh += '<button data-m="' + m + '" class="' + (m === S.examMonth ? 'active' : '') + '">第' + m + '次（1~' + cover + '单元）</button>';
           }
           mh += '</div></div>';
-          box.innerHTML = mh + '<div class="pc-hint">考查范围：第 1~' + Math.min(scope.length, S.examMonth * 2) + ' 单元</div>';
+          const mCover = Math.min(scope.length, S.examMonth * 2);
+          box.innerHTML = mh + '<div class="pc-hint">考查范围：第 1~' + mCover + ' 单元</div>'
+            + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(scope, mCover)) + '</div>';
           bindSeg('examMonth', function (m) { S.examMonth = +m; renderExamExtra(); });
           return;
         }
         const half = Math.max(1, Math.ceil(scope.length / 2));
+        const midN = Math.min(scope.length, half);
         box.innerHTML = S.examType === 'mid'
-          ? '<div class="pc-hint">期中范围：第 1~' + half + ' 单元（前半册，全册共 ' + scope.length + ' 个课本单元）</div>'
-          : '<div class="pc-hint">期末范围：全册（共 ' + scope.length + ' 个课本单元）</div>';
+          ? '<div class="pc-hint">期中范围：第 1~' + midN + ' 单元（前半册，全册共 ' + scope.length + ' 个课本单元）</div>'
+            + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(scope, midN)) + '</div>'
+          : '<div class="pc-hint">期末范围：全册（共 ' + scope.length + ' 个课本单元）</div>'
+            + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(scope)) + '</div>';
         return;
       }
       // 语文：无独立月考概念，月考按全册综合卷出题（与 startCnExam 实际行为一致）
@@ -884,9 +915,12 @@
       let cnTb = cnUnits.filter(function (u) { return u.group === '课本' && u.term === (S.semester === 1 ? '上' : '下'); });
       if (!cnTb.length) cnTb = cnUnits;
       const cnHalf = Math.max(1, Math.ceil(cnTb.length / 2));
+      const cnTerm = S.semester === 1 ? '上册' : '下册';
       box.innerHTML = S.examType === 'mid'
-        ? '<div class="pc-hint">期中范围：前半册课文单元（' + cnHalf + '/' + cnTb.length + ' 个）</div>'
-        : '<div class="pc-hint">' + (S.examType === 'month' ? '阶段测试' : '期末测试') + '范围：全册综合卷（' + cnTb.length + ' 个课文单元）</div>';
+        ? '<div class="pc-hint">期中范围：' + cnTerm + '前半册课文单元（' + cnHalf + '/' + cnTb.length + ' 个）</div>'
+          + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(cnTb, cnHalf)) + '</div>'
+        : '<div class="pc-hint">' + (S.examType === 'month' ? '阶段测试' : '期末测试') + '范围：' + cnTerm + '全册综合卷（' + cnTb.length + ' 个课文单元）</div>'
+          + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(cnTb)) + '</div>';
       return;
     }
     let list;

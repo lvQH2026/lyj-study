@@ -12416,6 +12416,17 @@ function startSpecialExam(specialIdx) {
 }
 
 // 根据考试类型确定考查范围
+// v104：rangeText 同时带出实际单元名，避免「上册/下册同为 6 单元时文案完全一致、看不出区别」
+function examNames(list) {
+  return list.map(function (u) {
+    var nm = (u && u.name) ? String(u.name) : '';
+    return nm.replace(/^第[一二三四五六七八九零〇\d]+单元\s*/, '')
+             .replace(/^[\d]+\s*/, '')
+             .replace(/^[一二三四五六七八九]+\s*/, '')
+             .replace(/^☆\s*/, '')
+             .trim();
+  }).filter(Boolean).join('、');
+}
 function getExamUnits() {
   let raw = (KNOWLEDGE_BASE[examState.grade] && KNOWLEDGE_BASE[examState.grade][examState.semester]) || [];
   if (raw.length === 0) return { units: [], rangeText: '' };
@@ -12431,14 +12442,14 @@ function getExamUnits() {
   }
   if (examState.type === 'month') {
     let n = Math.min(all.length, examState.month * 2);
-    return { units: all.slice(0, n), all: all, rangeText: `第1~${n}单元` };
+    return { units: all.slice(0, n), all: all, rangeText: `第1~${n}单元（${examNames(all.slice(0, n))}）` };
   }
   if (examState.type === 'mid') {
     let n = Math.max(1, Math.ceil(all.length / 2));
-    return { units: all.slice(0, n), all: all, rangeText: `第1~${n}单元（半册）` };
+    return { units: all.slice(0, n), all: all, rangeText: `第1~${n}单元（前半册：${examNames(all.slice(0, n))}）` };
   }
   // final
-  return { units: all, all: all, rangeText: `全册（共${all.length}个单元）` };
+  return { units: all, all: all, rangeText: `全册（共${all.length}个单元：${examNames(all)}）` };
 }
 
 // 判断题目是否适合"填空/计算"（答案可直接输入）
