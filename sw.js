@@ -239,11 +239,11 @@
 //   C. 修复容量抖动：4·下「四则运算」原只有 1 条参数化模板，容量在 22~24 间抖动
 //      （_cap 验收时好时坏），补 8 条模板后连续三次稳定 0/131 单元低于 24。
 //   验收：_cap 0/131、_audit_cross 0 题次超纲、SCOPE=all _test_all_units 0 条问题。
-const CACHE = 'lyj-shell-v107';
+const CACHE = 'lyj-shell-v110';
 const SHELL = [
   './', './index.html', './pc.html', './manifest.webmanifest',
   './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',
-  './js/core.js', './js/math.js', './js/pc.js', './js/inputKit.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/pep.js', './js/engPep.js', './js/chinese.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
+  './js/core.js', './js/math.js', './js/pc.js', './js/inputKit.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/pep.js', './js/engPep.js', './js/chinese.js', './js/cn_method_pool.js', './js/cn6_expand_pool.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
   './js/supabase-js.min.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'
