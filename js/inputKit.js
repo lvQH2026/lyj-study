@@ -323,19 +323,53 @@
     return a.length >= 1 && a.length <= 10;
   }
 
+  // v105：判断题答案绝不可当概念干扰项。实测六上语文《草原》"作者是___"被转成选择题后，
+  // 干扰项抓到了判断题的「错误」（孩子看到 A.错误 B.天涯碧草话斜阳 C.老舍 D.生活中解不开的愁怨）。
+  function isJudgeLike(x) {
+    return !!x && (x.type === 'judge' || !!x.judge);
+  }
+
+  // v105：同类优先——按题干提取「类别键」，同类别兄弟答案排最前，保证干扰项与考点同类
+  // （如"作者是___"优先用其他课文作者的答案，而不是诗句/词语/国家名）。
+  function siblingCatKey(item) {
+    var t = String(item && item.question || '');
+    if (/哪个国家|哪一国|哪国人/.test(t)) return 'country';   // 须先于 author（"作者X是哪个国家的诗人"两 pattern 都含）
+    if (/作者|词人|诗人|文学家|散文家/.test(t)) return 'author';
+    if (/下一句|上一句/.test(t)) return 'verse';
+    if (/出自|出处/.test(t)) return 'source';
+    return '';
+  }
+
   // 从本次测验的兄弟题里收集同单元/同类型的概念答案（排除自身与本题答案）
   function siblingConcepts(item, allItems, n) {
     var uName = item._unitName, uType = item._unitType;
+    var ans = String(item.answer == null ? '' : item.answer).trim();
     var pool = (allItems || []).filter(function (x) {
-      return x && x !== item && isConceptAnswer(x.answer);
+      if (!x || x === item) return false;
+      if (isJudgeLike(x)) return false;                    // v105：判断题不入池
+      if (!isConceptAnswer(x.answer)) return false;
+      var xa = String(x.answer).trim();
+      if (xa === ans) return false;
+      if (xa === '正确' || xa === '错误' || xa === '对' || xa === '错') return false; // v105：兜底黑名单
+      if (closedSetFor(xa)) return false;                  // v105：能/不能、是/不是等封闭集合答案不入池
+      return true;
     });
     var byUnit = uName ? pool.filter(function (x) { return x._unitName === uName; }) : [];
     var byType = (!uName && uType) ? pool.filter(function (x) { return x._unitType === uType; }) : [];
     var src = byUnit.length >= 2 ? byUnit : (byType.length >= 2 ? byType : pool);
-    var others = src.filter(function (x) {
-      return String(x.answer).trim() !== String(item.answer).trim();
-    });
-    return shuffle(others).slice(0, n).map(function (x) { return String(x.answer).trim(); });
+    var others = src.map(function (x) { return x; });
+    // v105：同类优先——同类别兄弟排最前（组内打乱），不足时才由异类补足
+    var ck = siblingCatKey(item);
+    if (ck) {
+      var same = [], rest = [];
+      others.forEach(function (x) {
+        (siblingCatKey(x) === ck ? same : rest).push(x);
+      });
+      others = shuffle(same).concat(shuffle(rest));
+    } else {
+      others = shuffle(others);
+    }
+    return others.slice(0, n).map(function (x) { return String(x.answer).trim(); });
   }
 
   // 模式变换干扰项：针对「数的组成 / 时间 / 计数」等可程序化派生的短语答案
