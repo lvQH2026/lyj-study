@@ -24,21 +24,148 @@
   }
 
   // ============================================================
-  // 万能答题公式（来源：网络搜索整理）
+  // 万能答题公式（来源：网络搜索整理 + v3 方案升级为 15 考点）
+  // v108: 补 k/grade/steps/demo 字段；demo 出处全部取自 2026 秋统编六上 26 课白名单
   // ============================================================
   const CN_FORMULAS = [
-    { t: '概括主要内容', f: '谁 + 在什么情况下 + 做了什么事 + 结果怎样（表达了……的情感）', w: ['写清楚时间、地点和天气', '把所有人物都详细介绍一遍', '按原文顺序把文章抄写一遍'] },
-    { t: '概括段落大意', f: '谁（什么事物）+ 干什么（怎么样）', w: ['把整段原封不动抄下来', '只数段落里有几个句子', '只写段落发生的季节'] },
-    { t: '概括中心思想', f: '本文通过记叙（描写）……，赞美（表达）了……，告诉我们……的道理', w: ['写出作者的姓名和生活经历', '把文章每段的大意全部罗列', '把文章题目解释一遍'] },
-    { t: '理解句子含义', f: '先答表层意思（写了什么），再答深层含义（表达的道理或情感）', w: ['只解释句子的字面意思即可', '把句子抄一遍再说"很感人"', '回答"这句话写得很好"'] },
-    { t: '某句话在文中的作用', f: '开头：开篇点题、总领全文；中间：承上启下；结尾：总结全文、点明中心、首尾呼应', w: ['分析句子有没有错别字', '评价这句话写得美不美', '数一数句子里有几个词语'] },
-    { t: '修辞手法赏析', f: '运用了……的修辞，生动形象地写出了……的特点，表达了……的情感', w: ['指出修辞手法的名称就完成', '判断这句话的对错', '把这句话改写成疑问句'] },
-    { t: '词语赏析', f: '本义 + 文中义 + 表达效果（生动形象地写出了……的特点或心情）', w: ['只查字典写出本义就完成', '给词语换一个近义词即可', '判断词语的感情色彩就结束'] },
-    { t: '人物形象分析', f: '从语言、动作、神态、心理描写入手，可见他（她）是一个……的人', w: ['评价人物的长相和穿着', '写出人物的身高和体重', '只写人物的姓名和年龄'] },
-    { t: '环境描写的作用', f: '交代背景 + 渲染气氛 + 烘托人物心情 + 推动情节发展', w: ['只要说明天气好坏就可以', '是为了让文章字数更多', '为了突出作者文笔好'] },
-    { t: '标题的含义与作用', f: '概括主要内容 + 充当文章线索 + 点明中心 + 吸引读者', w: ['标题只是随便起的，没有作用', '标题是为了读起来押韵好听', '标题用来告诉读者页码'] },
-    { t: '启示与感悟', f: '我明白了……的道理，在生活中我们应该……', w: ['把文章内容重新复述一遍', '回答"我没有任何感受"', '介绍作者的生平事迹'] },
-    { t: '说明文词语能否删去', f: '不能删。该词的意思是……，删去后变成……，体现了说明文语言的准确性', w: ['能删，删了意思也差不多', '删不删都无所谓，看喜好', '把词语换成一个反义词就行'] },
+    { t: '概括主要内容', k: 'summary', grade: [4, 5, 6],
+      f: '谁 + 在什么情况下 + 做了什么事 + 结果怎样（表达了……的情感）',
+      steps: ['找主要人物', '说清在什么情况下', '概括做了什么事', '补充结果或情感'],
+      demo: { q: '用一句话概括《穷人》的主要内容。', a: '在寒风呼啸的夜晚，渔夫的妻子桑娜发现邻居西蒙死了，就主动收养了她的两个孤儿，宁可自己吃苦也要帮助别人。', from: '六上·第四单元《穷人》' },
+      w: ['写清楚时间、地点和天气', '把所有人物都详细介绍一遍', '按原文顺序把文章抄写一遍'] },
+    { t: '概括段落大意', k: 'paragraph', grade: [4, 5, 6],
+      f: '谁（什么事物）+ 干什么（怎么样）',
+      steps: ['数一数这段话有几层意思', '找出主要人物或事物', '用「谁+干什么」一句话说清'],
+      demo: { q: '概括《草原》第一自然段的段意。', a: '作者初到草原，看到草原辽阔美丽的景色。', from: '六上·第一单元《草原》' },
+      w: ['把整段原封不动抄下来', '只数段落里有几个句子', '只写段落发生的季节'] },
+    { t: '概括中心思想', k: 'theme', grade: [5, 6],
+      f: '本文通过记叙（描写）……，赞美（表达）了……，告诉我们……的道理',
+      steps: ['说清文章写了一件什么事', '点明作者赞美或批评什么', '补上告诉我们的道理'],
+      demo: { q: '概括《狼牙山五壮士》的中心思想。', a: '本文记叙了五壮士掩护群众和连队转移、英勇跳崖的事迹，赞美了他们英勇顽强、视死如归的革命精神。', from: '六上·第二单元《狼牙山五壮士》' },
+      w: ['写出作者的姓名和生活经历', '把文章每段的大意全部罗列', '把文章题目解释一遍'] },
+    { t: '理解句子含义', k: 'sentence_meaning', grade: [5, 6],
+      f: '先答表层意思（写了什么），再答深层含义（表达的道理或情感）',
+      steps: ['解释句子字面写了什么', '联系上下文想深层意思', '点出表达的情感或道理'],
+      demo: { q: '《少年闰土》中“他们都和我一样，只看见院子里高墙上的四角的天空”是什么意思？', a: '表层意思：我和伙伴们只能看见院墙围出的一小块天空；深层含义：我们被圈在狭小的天地里，见识很少，表达了“我”对丰富生活的向往。', from: '六上·第八单元《少年闰土》' },
+      w: ['只解释句子的字面意思即可', '把句子抄一遍再说“很感人”', '回答“这句话写得很好”'] },
+    { t: '某句话在文中的作用', k: 'sentence_role', grade: [5, 6],
+      f: '开头：开篇点题、总领全文；中间：承上启下；结尾：总结全文、点明中心、首尾呼应',
+      steps: ['先判断句子在开头、中间还是结尾', '按位置说出对应作用', '结合句意具体说明'],
+      demo: { q: '《桥》结尾“他，是这座桥的党支部书记”这句话有什么作用？', a: '这句话在结尾，点明了老汉的身份，总结全文、点明中心，也照应了前文。', from: '六上·第四单元《桥》' },
+      w: ['分析句子有没有错别字', '评价这句话写得美不美', '数一数句子里有几个词语'] },
+    { t: '修辞手法赏析', k: 'rhetoric', grade: [4, 5, 6],
+      f: '运用了……的修辞，生动形象地写出了……的特点，表达了……的情感',
+      steps: ['判断用了哪种修辞', '说清写出了什么特点', '补上表达的情感'],
+      demo: { q: '赏析《草原》中“羊群一会儿上了小丘，一会儿又下来，走在哪里都像给无边的绿毯绣上了白色的大花”这句话。', a: '运用了比喻的修辞，把草原比作绿毯、羊群比作白花，生动形象地写出了草原的广阔美丽，表达了作者对草原的喜爱。', from: '六上·第一单元《草原》' },
+      w: ['指出修辞手法的名称就完成', '判断这句话的对错', '把这句话改写成疑问句'] },
+    { t: '词语赏析', k: 'word', grade: [5, 6],
+      f: '本义 + 文中义 + 表达效果（生动形象地写出了……的特点或心情）',
+      steps: ['先说出词语本来的意思', '再说在文中的意思', '最后说表达效果'],
+      demo: { q: '《少年闰土》中“一轮金黄的圆月挂在天空”的“挂”字好在哪里？', a: '“挂”本义是悬挂，这里写出圆月高高悬在空中的样子，生动形象，营造出宁静美好的画面。', from: '六上·第八单元《少年闰土》' },
+      w: ['只查字典写出本义就完成', '给词语换一个近义词即可', '判断词语的感情色彩就结束'] },
+    { t: '人物形象分析', k: 'character', grade: [4, 5, 6],
+      f: '从语言、动作、神态、心理描写入手，可见他（她）是一个……的人',
+      steps: ['找出人物描写', '说清描写表现了什么', '总结人物特点'],
+      demo: { q: '《穷人》中的桑娜是个怎样的人？', a: '从她宁可自己受苦也要收养孤儿的心理描写可以看出，桑娜是一个善良、乐于助人的人。', from: '六上·第四单元《穷人》' },
+      w: ['评价人物的长相和穿着', '写出人物的身高和体重', '只写人物的姓名和年龄'] },
+    { t: '环境描写的作用', k: 'environment', grade: [5, 6],
+      f: '交代背景 + 渲染气氛 + 烘托人物心情 + 推动情节发展',
+      steps: ['说出描写了什么环境', '判断渲染了怎样的气氛', '说明对人物或情节的作用'],
+      demo: { q: '《桥》开头描写“山洪咆哮着，像一群受惊的野马”有什么作用？', a: '交代了洪水来袭的危险背景，渲染了紧张的气氛，烘托了情况的紧急，为下文老汉指挥村民过桥作铺垫。', from: '六上·第四单元《桥》' },
+      w: ['只要说明天气好坏就可以', '是为了让文章字数更多', '为了突出作者文笔好'] },
+    { t: '标题的含义与作用', k: 'title', grade: [5, 6],
+      f: '概括主要内容 + 充当文章线索 + 点明中心 + 吸引读者',
+      steps: ['先想标题字面指什么', '再想有没有深层含义', '最后说对全文的作用'],
+      demo: { q: '《灯光》这个标题有什么含义？', a: '既指郝副营长划燃火柴点亮的灯光，也象征革命先烈的革命精神，题目充当了全文的线索。', from: '六上·第五单元《灯光》' },
+      w: ['标题只是随便起的，没有作用', '标题是为了读起来押韵好听', '标题用来告诉读者页码'] },
+    { t: '启示与感悟', k: 'insight', grade: [4, 5, 6],
+      f: '我明白了……的道理，在生活中我们应该……',
+      steps: ['从文章内容提炼道理', '联系自己的生活说做法'],
+      demo: { q: '读了《只有一个地球》，你有什么感悟？', a: '我明白了地球资源有限、我们要保护地球的道理，在生活中我们应该节约资源、爱护环境。', from: '六上·第六单元《只有一个地球》' },
+      w: ['把文章内容重新复述一遍', '回答“我没有任何感受”', '介绍作者的生平事迹'] },
+    { t: '说明文词语能否删去', k: 'exact_word', grade: [5, 6],
+      f: '不能删。该词的意思是……，删去后变成……，体现了说明文语言的准确性',
+      steps: ['先表态：不能删', '说清词语意思', '说删去后的变化', '点出准确严谨'],
+      demo: { q: '《宇宙生命之谜》中“地球之外是否有生命存在，是人类一直探索的宇宙之谜”的“一直”能否删去？', a: '不能删。“一直”意思是始终，删去后变成有时探索，体现不出人类持续探索的状态，不能体现说明文语言的准确性。', from: '六上·第三单元《宇宙生命之谜》' },
+      w: ['能删，删了意思也差不多', '删不删都无所谓，看喜好', '把词语换成一个反义词就行'] },
+    { t: '写作顺序（顺叙/倒叙/插叙）', k: 'narrate_order', grade: [5, 6],
+      f: '本文采用……的顺序（顺叙/倒叙/插叙），使文章条理清楚（突出……，增强感染力）',
+      steps: ['判断写作顺序类型', '说出这种顺序的好处', '结合文章内容举例'],
+      demo: { q: '《我的伯父鲁迅先生》先写追悼会再回忆伯父，用了什么写作顺序？有什么好处？', a: '用了倒叙。先写结果再回忆往事，能突出对伯父的怀念之情，使文章更吸引读者。', from: '六上·第八单元《我的伯父鲁迅先生》' },
+      w: ['写作文随便写就行，不分顺序', '倒叙就是把每段都倒过来写', '写作顺序只是题目的事，与内容无关'] },
+    { t: '表达方式辨析', k: 'expression', grade: [5, 6],
+      f: '这句话用了……的表达方式（记叙/描写/议论/抒情/说明），写出了……',
+      steps: ['判断用了哪种表达方式', '结合句意说明写了什么', '点出作用'],
+      demo: { q: '《开国大典》中“三十万人的目光一齐投向主席台”用了哪种表达方式？', a: '用了描写（场面描写），写出了三十万人注视主席台的场面，表现了人们激动的心情。', from: '六上·第二单元《开国大典》' },
+      w: ['表达方式就是修辞手法', '只要说出“写得好”就行', '表达方式只有记叙一种'] },
+    { t: '详略安排的作用', k: 'detail', grade: [5, 6],
+      f: '文章详写……，略写……，这样安排详略得当，能突出（中心/重点）',
+      steps: ['找出详写和略写的内容', '说清为什么这样安排', '点出对中心的作用'],
+      demo: { q: '《开国大典》为什么详写阅兵式、略写其他环节？', a: '详写阅兵式是因为它是开国大典最隆重的环节，最能表现人民军队的风采；略写其他环节是为了突出重点，详略得当。', from: '六上·第二单元《开国大典》' },
+      w: ['每件事都写一样多才好', '略写的内容可以不写', '详略安排和中心没有关系'] },
+    // ========== T18：古诗文答题模板（3 卡） ==========
+    { t: '诗意理解（画面还原）', k: 'poetry_meaning', grade: [6],
+      f: '这首诗（这句诗）写了……的画面/情景：先翻译字面意思，再想象画面',
+      steps: ['逐句翻译字面意思', '把画面组合起来描述', '点出景物的特点'],
+      demo: { q: '说说“野旷天低树，江清月近人”描绘的画面。', a: '原野空旷，远处的天幕低垂到树梢；江水清澈，明月仿佛离人很近，描绘了一幅空旷宁静的江上夜景。', from: '六上·第三单元《宿建德江》' },
+      w: ['直接写自己的感想', '只翻译一个词', '背诵整首诗代替解释'] },
+    { t: '古诗情感主旨', k: 'poetry_emotion', grade: [6],
+      f: '这首诗通过写……，表达了诗人……的情感（或说明了……的道理）',
+      steps: ['读懂诗句写了什么', '想象诗人的处境', '点出情感或道理'],
+      demo: { q: '《宿建德江》表达了诗人怎样的情感？', a: '这首诗通过写夜泊江上的景色，表达了诗人旅途中的孤寂、忧愁和思乡之情。', from: '六上·第三单元《宿建德江》' },
+      w: ['只说景色不说情感', '把作者生平背一遍', '猜一个情绪'] },
+    { t: '名句赏析（含默写运用）', k: 'poetry_famous', grade: [6],
+      f: '这句诗运用了……（修辞/写法），生动形象地写出了……，表达了……',
+      steps: ['判断修辞或写法', '说写出了什么内容', '点出表达的情感', '若是默写运用，先审语境再选句'],
+      demo: { q: '赏析“黑云翻墨未遮山，白雨跳珠乱入船”。', a: '运用比喻，把乌云比作翻墨、雨点比作跳珠，生动形象地写出了暴雨来临前乌云翻滚、雨点飞溅的场面，表达了诗人对西湖雨景的惊叹。', from: '六上·第三单元《六月二十七日望湖楼醉书》' },
+      w: ['只写“写得好”', '分析字词读音', '抄写整首诗'] },
+    // ========== T18：口语交际（3 卡） ==========
+    { t: '转述', k: 'oral_retell', grade: [6],
+      f: '把直接引语改成转述句：去引号、改人称（我→他/她）、改标点（冒号引号→逗号）',
+      steps: ['去掉引号，冒号改逗号', '把人称改对（第一人称→第三人称）', '检查语气词和句意通顺'],
+      demo: { q: '把“老师说：‘明天要交作文。’”改为转述句。', a: '老师说，明天要交作文。', from: '六上·语文园地（口语交际）' },
+      w: ['保留引号', '不改人称', '丢掉时间信息'] },
+    { t: '劝说/安慰', k: 'oral_persuade', grade: [6],
+      f: '先表达理解（共情），再讲清道理或理由，最后给出建议',
+      steps: ['先站在对方角度表示理解', '说清为什么（道理/后果）', '给出可行的建议'],
+      demo: { q: '同桌考试没考好，很沮丧，你怎么安慰他？', a: '别难过，这次没考好正好帮我们找到了漏洞，我们一起分析错题，下次一定会有进步。', from: '六上·语文园地（口语交际）' },
+      w: ['上来就批评', '只说“别哭了”', '替对方做决定'] },
+    { t: '情境应对（被误解/求助）', k: 'oral_situation', grade: [6],
+      f: '先冷静澄清事实（我没那样做，因为……），再提出解决办法或具体请求',
+      steps: ['保持冷静，不情绪化', '说清事实和原因', '提出解决办法或礼貌求助'],
+      demo: { q: '同学误会你拿了他的笔，你怎么办？', a: '我没有拿你的笔，你看我的笔和你的是不一样的；我们一起找找它可能掉在哪里了。', from: '六上·语文园地（口语交际）' },
+      w: ['发脾气反驳', '转身不理', '赌气承认'] },
+    // ========== T18：习作提纲（6 卡，轻量） ==========
+    { t: '审题抓题眼', k: 'writing_topic', grade: [6],
+      f: '圈出题目中的关键词（题眼），明确写作重点，再想写什么',
+      steps: ['读题两遍', '圈出限制词和中心词', '明确重点写什么'],
+      demo: { q: '习作《难忘的第一次》，题眼是什么？', a: '题眼是“难忘”和“第一次”：要写第一次做的事，还要写出为什么难忘。', from: '六上·习作（第X单元）' },
+      w: ['只看题目字数', '凭感觉写', '偏题写其他内容'] },
+    { t: '选材', k: 'writing_material', grade: [6],
+      f: '选最能体现中心的材料：与中心最贴切的优先，一个中心选 2-3 件典型事例',
+      steps: ['想哪些事和中心有关', '排除无关和重复的', '选最典型的一两件详写'],
+      demo: { q: '写《乐于助人的妈妈》，选哪件事最合适？', a: '选“妈妈雨天送邻居奶奶回家”这类直接体现助人的事，而不是做饭好吃等与中心无关的事。', from: '六上·习作（第X单元）' },
+      w: ['想到什么写什么', '选最长的写', '所有事平均用力'] },
+    { t: '结构排序', k: 'writing_structure', grade: [6],
+      f: '按“起因→经过→结果”（或时间/空间顺序）安排段落，经过部分写最详细',
+      steps: ['想清楚事情先后顺序', '确定详写哪一段', '开头结尾呼应主题'],
+      demo: { q: '写《第一次做饭》，段落顺序怎么排？', a: '先写为什么想学，再写做饭经过（洗菜、下锅、调味），接着写遇到的困难，最后写吃上饭的感受。', from: '六上·习作（第X单元）' },
+      w: ['想到哪写到哪', '把结果放开头当开头', '经过一笔带过'] },
+    { t: '细节描写', k: 'writing_detail', grade: [6],
+      f: '把“怎么样”写具体：用动作、神态、语言、心理等细节代替抽象概括',
+      steps: ['找抽象概括的词', '想对应的动作/神态/语言', '写出来让人“看到”画面'],
+      demo: { q: '怎么把“他很着急”写具体？', a: '他急得直跺脚，嘴里不停地说：“怎么办？怎么办？”', from: '六上·习作（第X单元）' },
+      w: ['一直说“很”', '只写结果不写过程', '堆砌好词不贴切'] },
+    { t: '好词好句', k: 'writing_words', grade: [6],
+      f: '用比喻、拟人等修辞让句子生动；用词要准确、贴切',
+      steps: ['判断修辞是否贴切', '看是否写出了特点', '读一读是否通顺'],
+      demo: { q: '写“月亮很圆”，怎么说得更生动？', a: '月亮像一个白玉盘，静静地挂在夜空。', from: '六上·习作（第X单元）' },
+      w: ['滥用成语', '修辞和对象不搭', '句子不通顺'] },
+    { t: '应用文格式', k: 'writing_format', grade: [6],
+      f: '称呼顶格加冒号→正文→结尾（此致敬礼/倡议）→右下角署名→署名下写日期',
+      steps: ['按格式写称呼', '正文写清内容', '检查落款（署名+日期）'],
+      demo: { q: '《倡议书》落款怎么写？', a: '右下角先写倡议人姓名，再在姓名下面写日期。', from: '六上·习作《学写倡议书》' },
+      w: ['称呼不顶格', '忘记署名', '日期写在署名上面'] },
   ];
   const FORMULA_QS = CN_FORMULAS.map(function (fm) {
     return mkChoice('万能答题公式：' + fm.t + '应该怎样回答？', fm.f, fm.w);
@@ -722,6 +849,19 @@
   }
 
   // ---- 阅读理解（议论文/散文） ----
+  // v108 T16：阅读公式专项题库（90 题 / 15 考点），数据在 js/cn_method_pool.js
+  // 题池按考点轮转展开，供专项单元抽样（cnSamplePool 处理去重/难度/补源）
+  function cn6_method_pool() {
+    if (!window.CN_METHOD_POOL) return [];
+    const items = window.CN_METHOD_POOL;
+    const out = [];
+    // 27 个考点（按 CN_FORMULAS k 顺序）依次排入，保证专项抽样覆盖全部考点
+    items.forEach(function (item) {
+      out.push(item);
+    });
+    return out;
+  }
+
   function cn6_reading_pool() {
     const passages = [
       {
@@ -1115,6 +1255,7 @@
       { name: '专项·古诗文鉴赏', group: '专项', type: 'poetry', pool: cn6_poetry_pool, fidx: [], summary: ['鉴赏三步：读诗句—明诗意—悟诗情', '古诗常见情感：爱国、思乡、送别、咏物言志', '名句赏析：从修辞、用字、哲理角度入手', '"诗眼"：最传神的一个字（如"春风又绿江南岸"的"绿"）', '默写不能写错别字'] },
       { name: '专项·课本综合30题', group: '专项', type: 'mixed', deck: true, quizLength: 30, pool: cn6_mixed_pool, fidx: [], summary: ['本题库依据 2026 秋统编版六年级上册逐项核对后编写，每题标注单元与课文出处', '覆盖五大题型：字词基础、古诗文默写与理解、课文内容理解、课内阅读、语言运用', '抽题规则：从题池中随机洗牌后抽取，同一轮内不重复；一轮题目全部做完自动重新洗牌', '答题后立即显示标准答案与简要解析，便于自行订正'], note: '教材已按 2026 秋统编版六上核对' },
       { name: '专项·综合运用', group: '专项', type: 'application', pool: cn6_comprehensive_pool, fidx: [10], summary: ['口语交际：称呼礼貌、语气委婉、意思清楚', '转述要点：人物、时间、地点、事情不能错', '拟标题：抓住主要内容，语言简洁', '标语广告语：简洁、醒目、有感染力', '综合性学习：调查、采访、查资料相结合'] },
+      { name: '专项·答题公式', group: '专项', type: 'reading', pool: cn6_method_pool, fidx: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], quizLength: 30, deck: true, summary: ['27 个必考考点，每个考点配答题公式（公式卡）：阅读 15 + 古诗文 3 + 口语交际 3 + 习作 6', '阅读每考点 6 题：看示范 1 题（判断公式步骤）+ 套公式 2 题 + 排序 1 题 + 换情境 2 题', '古诗文 / 口语每考点 6 题，习作每考点 3 题（轻量筛查）', '排序题：按正确顺序点选，可撤销/清空重排', '错题会挂对应公式卡，可一键按考点重练', '示范与情境短文均取自六年级课本 26 课白名单', '目标：读题见考点 → 套公式 → 得满分'] },
     ],
   };
 
@@ -1127,6 +1268,22 @@
   function cnAcc(q, ans, opts) { const o = mkChoice(q, ans, opts); o.tag = 'acc'; return o; }
   function cnAccF(q, ans) { const o = mkFill(q, ans); o.tag = 'acc'; return o; }
   function cnAccJ(q, ans) { const o = mkJudge(q, ans); o.tag = 'acc'; return o; }
+
+  // ---- T19：扩充题转换（cn6_expand_pool.js 纯数据 → 题对象） ----
+  function cnExpand(it) {
+    if (!it) return it;
+    if (it.t === 'choice') return mkChoice(it.q, it.a, it.opts);
+    if (it.t === 'fill') return mkFill(it.q, it.a);
+    if (it.t === 'read') return cnRd(it.q, it.a, it.opts, it.passage);
+    if (it.t === 'acc') return cnAcc(it.q, it.a, it.opts);
+    if (it.t === 'accJ') return cnAccJ(it.q, it.a);
+    return it;
+  }
+  function cnAppendExpand(idx, qs) {
+    const items = (window.__CN_EXPAND_POOL__ && window.__CN_EXPAND_POOL__[idx]) || [];
+    items.forEach(function (it) { qs.push(cnExpand(it)); });
+    return qs;
+  }
 
   // ---- 六上第一单元：草原 / 丁香结 / 古诗词三首 / 花之歌 ----
   function cn6t1_pool() {
@@ -1163,6 +1320,7 @@
     qs.push(mkChoice('"蒙汉情深何忍别，天涯碧草话斜阳"表达了什么？', '蒙汉两族人民的深情厚谊', ['草原景色的美丽', '旅途的劳累', '对家乡的思念']));
     qs.push(cnAcc('本单元习作《变形记》要求写成什么体裁？', '想象作文', ['写实日记', '说明文', '议论文']));
     qs.push(cnAccJ('借景抒情就是把情感直接喊出来。', false));
+    cnAppendExpand(0, qs);
     return qs;
   }
 
@@ -1201,6 +1359,7 @@
     qs.push(cnAcc('"鞠躬尽瘁"的下一句是？', '死而后已', ['死得其所', '视死如归', '宁死不屈']));
     qs.push(cnAcc('本单元口语交际的主题是？', '演讲', ['辩论', '讲故事', '朗诵']));
     qs.push(cnAccJ('演讲时语速越快越好，能让听众更兴奋。', false));
+    cnAppendExpand(1, qs);
     return qs;
   }
 
@@ -1239,6 +1398,7 @@
     qs.push(mkJudge('有目的地阅读，就是不管什么目的，都要把课文一字不落地读完。', false));
     qs.push(cnAcc('本单元习作要求写"让生活更美好"，最适合的写法是？', '围绕一个主题，写清楚它如何让生活更美好', ['只列标题不写内容', '随便写几件事，不围绕主题', '只写别人怎么生活']));
     qs.push(cnAccJ('有目的地阅读就是随便翻翻，抓到什么读什么。', false));
+    cnAppendExpand(2, qs);
     return qs;
   }
 
@@ -1277,6 +1437,7 @@
     qs.push(mkChoice('《穷人》的作者列夫·托尔斯泰是哪个国家的作家？', '俄国', ['法国', '英国', '美国']));
     qs.push(cnAcc('本单元快乐读书吧推荐阅读的主题是？', '笑与泪，经历与成长', ['科学幻想', '动物世界', '历史故事']));
     qs.push(cnAccJ('请求别人支持自己的想法时，要讲清理由，语气诚恳。', true));
+    cnAppendExpand(3, qs);
     return qs;
   }
 
@@ -1315,6 +1476,7 @@
     qs.push(cnAcc('"五彩"指的是？', '青黄赤白黑', ['金木水火土', '酸甜苦辣咸', '红橙黄绿蓝']));
     qs.push(cnAcc('"五谷"中"菽"指的是？', '豆类', ['小麦', '大米', '高粱']));
     qs.push(cnAccJ('写文章围绕中心意思写，材料越丰富越好，与中心无关的材料也可以写。', false));
+    cnAppendExpand(4, qs);
     return qs;
   }
 
@@ -1353,6 +1515,7 @@
     qs.push(mkChoice('《只有一个地球》中"我们这个地球太可爱了，同时又太容易破碎了"，"破碎"指什么？', '地球资源被破坏、生态环境被毁坏', ['地球会爆炸', '地球裂开了', '地球变小了']));
     qs.push(cnAcc('本单元习作《学写倡议书》，倡议书的开头一般先写什么？', '倡议的原因和目的', ['直接列倡议内容', '写自己的心情', '写天气']));
     qs.push(cnAccJ('《只有一个地球》告诉我们，当地球资源枯竭时，人类可以移居到别的星球去。', false));
+    cnAppendExpand(5, qs);
     return qs;
   }
 
@@ -1391,6 +1554,7 @@
     qs.push(cnRd('"太祖大悦，即施行焉"说明曹操的态度是？', '很高兴，马上照着做', ['不相信，拒绝尝试', '很生气', '犹豫不决'], '曹冲生五六岁，智意所及，有若成人之智。时孙权曾致巨象，太祖欲知其斤重，访之群下，咸莫能出其理。冲曰："置象大船之上，而刻其水痕所至，称物以载之，则校可知矣。"太祖大悦，即施行焉。'));
     qs.push(cnRd('《表里的生物》片段中，"我"产生猜想的原因是？', '凡能发出声音的，"我"都认为是活的生物', ['有人告诉"我"的', '"我"拆开过表', '书上写着'], '我那时以为凡能发出声音的，都是活的生物。哪里有死的东西会自己走动，并且能自动地发出和谐的声音呢？可是父亲的表，那秒针会自己走动，那嘀嗒的声音很好听。我想：表里一定有一个蝉或虫一类的生物吧。'));
     qs.push(cnAccJ('《两小儿辩日》中，孔子"不能决也"说明孔子知识不渊博。', false));
+    cnAppendExpand(6, qs);
     return qs;
   }
 
@@ -1429,6 +1593,7 @@
     qs.push(cnAcc('《有的人》中，纪念鲁迅的诗句"俯下身子给人民当牛马"化用了鲁迅的哪句话？', '俯首甘为孺子牛', ['横眉冷对千夫指', '我以我血荐轩辕', '寄意寒星荃不察']));
     qs.push(cnAcc('"横眉冷对千夫指"的下一句是？', '俯首甘为孺子牛', ['我以我血荐轩辕', '于无声处听惊雷', '心事浩茫连广宇']));
     qs.push(cnAccJ('《少年闰土》中的"我"是鲁迅自己小时候。', false));
+    cnAppendExpand(7, qs);
     return qs;
   }
 
@@ -1467,6 +1632,7 @@
     qs.push(cnAccF('"中庭地白树栖鸦"出自《____》。', '十五夜望月'));
     qs.push(cnAcc('《迢迢牵牛星》写的是哪个民间故事？', '牛郎织女', ['嫦娥奔月', '孟姜女', '白蛇传']));
     qs.push(cnAccJ('《北京的春节》把每一个节日都写得一样详细。', false));
+    cnAppendExpand(8, qs);
     return qs;
   }
 
@@ -1505,6 +1671,7 @@
     qs.push(cnAcc('写作品梗概时，人物对话应该？', '概括转述，不照抄', ['全部照抄', '全部删掉', '改写成人名']));
     qs.push(cnAcc('"读书破万卷"的下一句是？', '下笔如有神', ['书中自有黄金屋', '行万里路', '学海无涯苦作舟']));
     qs.push(cnAccJ('读名著只用看故事梗概就够了，不用读全文。', false));
+    cnAppendExpand(9, qs);
     return qs;
   }
 
@@ -1543,6 +1710,7 @@
     qs.push(cnAcc('朱自清的作品还有？', '《背影》', ['《草原》', '《腊八粥》', '《桥》']));
     qs.push(cnAcc('写真情实感时，最忌讳的是？', '无病呻吟、空洞抒情', ['写真实的小事', '用细节描写', '表达真实心情']));
     qs.push(cnAccJ('《匆匆》中的"匆匆"指的是时间流逝很快。', true));
+    cnAppendExpand(10, qs);
     return qs;
   }
 
@@ -1581,6 +1749,7 @@
     qs.push(cnAcc('下列诗句表达"视死如归"精神的是？', '粉骨碎身浑不怕，要留清白在人间', ['春眠不觉晓', '两个黄鹂鸣翠柳', '床前明月光']));
     qs.push(cnAcc('"何当金络脑"中"金络脑"指的是？', '贵重的马笼头', ['黄金做的脑子', '马的姓名', '金项链']));
     qs.push(cnAccJ('《马诗》《石灰吟》《竹石》都是借物来表达志向。', true));
+    cnAppendExpand(11, qs);
     return qs;
   }
 
@@ -1619,6 +1788,7 @@
     qs.push(cnAcc('"苟日新，日日新"的下一句是？', '又日新', ['日日新', '再日新', '日日旧']));
     qs.push(cnAcc('本单元口语交际的主题是？', '辩论', ['演讲', '采访', '讲故事']));
     qs.push(mkJudge('《真理诞生于一百个问号之后》告诉我们：发现真理需要善于观察、不断发问、不断探索。', true));
+    cnAppendExpand(12, qs);
     return qs;
   }
 
@@ -1735,6 +1905,7 @@
     qs.push(cnAcc('"一日为师"的下一句是？', '终身为父', ['终身为母', '一生为师', '终身为友']));
     qs.push(cnAcc('给老师写感谢信，署名应该写？', '自己的名字', ['老师的名字', '班级名称', '不写']));
     qs.push(cnAccJ('毕业赠言可以写一些开个玩笑、轻松幽默的话，只要善意得体。', true));
+    cnAppendExpand(13, qs);
     return qs;
   }
 
@@ -1742,6 +1913,8 @@
   // 渲染引擎（自包含，不依赖数学模块的全局状态）
   // ============================================================
   const PRAC_N = 30; // 每次练习题数
+  // v108：答题推进定时器句柄（BUG-02/07 去重：新提交/跳题先清旧定时器，防连点跳多题）
+  let cnPendingTimer = null;
   let cnState = {
     // v79：年级持久化——与数学共用 App.getGrade/setGrade，重开保持六年级
     grade: (window.App && typeof App.getGrade === 'function') ? App.getGrade('chinese') : 6,
@@ -3239,6 +3412,14 @@ function cn5x8_pool() {
         html += '<div class="card u-p12 u-mb10 u-bl-gold3">';
         html += '<div class="u-fs13 u-fw700 u-c-gold u-mb6">' + fm.t + '</div>';
         html += '<div class="u-fs13 u-lh18 u-bg-gold-s u-r8 u-p8-10">' + fm.f + '</div>';
+        // v108：公式卡补步骤 + 示范（demo 出处取自已核对篇目）
+        if (fm.steps && fm.steps.length) {
+          html += '<div class="u-fs12 u-lh17 u-mt6 u-c-light">答题步骤：' + fm.steps.join(' → ') + '</div>';
+        }
+        if (fm.demo) {
+          html += '<div class="u-fs12 u-lh17 u-mt6 u-c-light">示范：' + fm.demo.q + '（答案：' + fm.demo.a + '）</div>';
+          html += '<div class="u-fs11 u-mt2 u-c-gold">出处：' + fm.demo.from + '</div>';
+        }
         html += '</div>';
       });
     }
@@ -3246,12 +3427,15 @@ function cn5x8_pool() {
     // 全部公式速查
     html += '<div class="section-title">万能答题公式速查</div>';
     html += '<details class="card u-p12 u-mb12">';
-    html += '<summary class="u-fs14 u-fw600 u-cp u-c-primary">展开全部 12 个万能答题公式</summary>';
+    html += '<summary class="u-fs14 u-fw600 u-cp u-c-primary">展开全部 ' + CN_FORMULAS.length + ' 个万能答题公式</summary>';
     html += '<div class="u-mt10">';
     CN_FORMULAS.forEach(function (fm) {
       html += '<div class="u-mb10 u-p10 u-bg-gold-s06 u-r8">';
       html += '<div class="u-fs12 u-fw700 u-c-gold u-mb4">' + fm.t + '</div>';
       html += '<div class="u-fs12 u-lh17">' + fm.f + '</div>';
+      if (fm.steps && fm.steps.length) {
+        html += '<div class="u-fs11 u-lh16 u-mt2 u-c-light">答题步骤：' + fm.steps.join(' → ') + '</div>';
+      }
       html += '</div>';
     });
     html += '</div></details>';
@@ -3290,7 +3474,11 @@ function cn5x8_pool() {
   // 单元内相对打标：前 60% 基础 / 中 30% 提高 / 后 10% 拓展（与数学 tagRelativeDifficulty 同口径）
   function cnTagDifficulty(arr) {
     if (!arr || !arr.length) return arr;
-    const scored = arr.map(q => ({ q: q, s: cnDiffScore(q) + Math.random() * 0.01 }));
+    // v108 T16：公式题 diffLocked 显式标记难度（看示范1/套公式2/排序2/换情境3），
+    // 不参与 60/30/10 重打标，保持「看示范→套公式→换情境」的难度语义。
+    const free = arr.filter(q => !q.diffLocked);
+    if (!free.length) return arr;
+    const scored = free.map(q => ({ q: q, s: cnDiffScore(q) + Math.random() * 0.01 }));
     scored.sort((a, b) => a.s - b.s);
     const n = scored.length;
     const b = Math.round(n * 0.6), m = Math.round(n * 0.9);
@@ -3320,8 +3508,31 @@ function cn5x8_pool() {
     const target = Math.min(n, uniq.length);
     let out = [];
     if (!diff) diff = 1;
+    // v108 BUG-05：目标难度带优先，带内不足时按「相邻带 → 全池」补足到 target。
+    // 旧版只在目标带 slice，池子 30~32 题时拓展带只有 3 题，孩子没题可做。
     const band = (by[diff] && by[diff].length) ? by[diff] : uniq;
     out = band.slice(0, target);
+    if (out.length < target) {
+      const seenK = new Set(out.map(q => q.question + '|' + String(q.answer)));
+      const fillOrder = [diff - 1, diff + 1, diff - 2, diff + 2, diff - 3, diff + 3].filter(d => d >= 1 && d <= 3);
+      for (let di = 0; di < fillOrder.length && out.length < target; di++) {
+        for (let j = 0; j < (by[fillOrder[di]] || []).length && out.length < target; j++) {
+          const q = by[fillOrder[di]][j];
+          const k = q.question + '|' + String(q.answer);
+          if (seenK.has(k)) continue;
+          seenK.add(k);
+          out.push(q);
+        }
+      }
+      // 全池兜底
+      for (let j = 0; j < uniq.length && out.length < target; j++) {
+        const q = uniq[j];
+        const k = q.question + '|' + String(q.answer);
+        if (seenK.has(k)) continue;
+        seenK.add(k);
+        out.push(q);
+      }
+    }
     return out;
   }
 
@@ -3422,11 +3633,32 @@ function cn5x8_pool() {
       q.paperSection = null;
     });
 
-    cnState.quiz = { questions: questions, idx: 0, score: 0, userAnswers: [], results: [], paper: null, startTime: Date.now() };
-    el('cnBackBtn').style.display = 'block';
-    el('cnBackBtn').onclick = cnGoHome;
-    cnShowPage('cnPageQuiz');
-    cnRenderQuestion();
+    // v108 BUG-06：断点续答——先尝试恢复上次未完成练习
+    cnTryResume(questions, 'quiz', function (restored) {
+      if (restored) {
+        el('cnBackBtn').style.display = 'block';
+        el('cnBackBtn').onclick = cnConfirmExit;
+        cnShowPage('cnPageQuiz');
+        cnRenderQuestion();
+        return;
+      }
+      cnState.quiz = { questions: questions, idx: 0, score: 0, userAnswers: [], results: [], paper: null, startTime: Date.now() };
+      el('cnBackBtn').style.display = 'block';
+      // v108 BUG-10：答题中返回需二次确认（防误触丢整场进度）
+      el('cnBackBtn').onclick = cnConfirmExit;
+      cnShowPage('cnPageQuiz');
+      cnRenderQuestion();
+    });
+  }
+
+  // v108 BUG-10：答题页返回——已作答则 confirm 二次确认，否则直接回首页
+  function cnConfirmExit() {
+    const q = cnState.quiz;
+    const answered = q && q.results && q.results.some(function (r) { return r !== undefined; });
+    if (answered && typeof confirm === 'function') {
+      if (!confirm('\u73B0\u5728\u9000\u51FA\u5C06\u4E22\u5931\u672C\u6B21\u8FDB\u5EA6\uFF0C\u786E\u5B9A\u5417\uFF1F')) return;
+    }
+    cnGoHome();
   }
 
   // ============================================================
@@ -3569,19 +3801,78 @@ function cn5x8_pool() {
     cnState.unitIdx = typeof arg === 'number' ? arg : 0;
     window.CN._lastUnitIdx = cnState.unitIdx;
     window.CN._lastExam = { kind: kind, unitIdx: arg };
-    cnState.quiz = {
-      questions: paper.questions,
-      idx: 0, score: 0, userAnswers: [], results: [],
-      paper: { title: paper.title, kind: kind },
-      startTime: Date.now(),
-    };
-    el('cnBackBtn').style.display = 'block';
-    el('cnBackBtn').onclick = cnGoHome;
-    cnShowPage('cnPageQuiz');
-    cnRenderQuestion();
+    // v108 BUG-06：断点续答——先尝试恢复上次未完成考试（paper 结构需补齐）
+    cnTryResume(paper.questions, 'exam', function (restored) {
+      if (restored) {
+        const d = cnLoadDraft();
+        if (d && d.paper && cnState.quiz) cnState.quiz.paper = { title: d.paper.title || paper.title, kind: kind };
+        else if (cnState.quiz) cnState.quiz.paper = { title: paper.title, kind: kind };
+        el('cnBackBtn').style.display = 'block';
+        el('cnBackBtn').onclick = cnConfirmExit;
+        cnShowPage('cnPageQuiz');
+        cnRenderQuestion();
+        return;
+      }
+      cnState.quiz = {
+        questions: paper.questions,
+        idx: 0, score: 0, userAnswers: [], results: [],
+        paper: { title: paper.title, kind: kind },
+        startTime: Date.now(),
+      };
+      el('cnBackBtn').style.display = 'block';
+      // v108 BUG-10：答题中返回需二次确认
+      el('cnBackBtn').onclick = cnConfirmExit;
+      cnShowPage('cnPageQuiz');
+      cnRenderQuestion();
+    }, paper.title);
   }
 
   // ---- 渲染题目 ----
+  // v108 BUG-17：考试倒计时（60 分钟，练习模式隐藏；最后 5 分钟变红，超时自动交卷）
+  let cnExamTimer = null;
+  function cnStartExamTimer(q) {
+    const box = el('cnQuizCountdown');
+    if (!box) return;
+    if (!q || !q.paper) {
+      box.style.display = 'none';
+      if (cnExamTimer) { clearInterval(cnExamTimer); cnExamTimer = null; }
+      return;
+    }
+    box.style.display = '';
+    if (cnExamTimer) return; // 已启动
+    const deadline = (q.startTime || Date.now()) + 60 * 60 * 1000;
+    const tick = function () {
+      const left = deadline - Date.now();
+      if (left <= 0) {
+        clearInterval(cnExamTimer);
+        cnExamTimer = null;
+        box.textContent = '\u23F0 \u65F6\u95F4\u5230';
+        // 超时自动交卷：未作答按错计
+        const quiz = cnState.quiz;
+        if (quiz) {
+          quiz.questions.forEach(function (item, i) {
+            if (quiz.results[i] === undefined || quiz.results[i] === null) {
+              quiz.results[i] = false;
+              if (quiz.userAnswers[i] === undefined) quiz.userAnswers[i] = '';
+              if (!quiz.wrongs) quiz.wrongs = [];
+              const dup = quiz.wrongs.some(function (w) { return w.question === item.question; });
+              if (!dup) quiz.wrongs.push({ question: item.question, answer: item.answer, userAnswer: '', section: item.section || item.paperSection || '' });
+            }
+          });
+          if (typeof cnShowResult === 'function') cnShowResult();
+        }
+        return;
+      }
+      const m = Math.floor(left / 60000), s = Math.floor(left % 60000 / 1000);
+      const str = '\u23F0 ' + m + ':' + (s < 10 ? '0' : '') + s;
+      box.textContent = str;
+      if (left <= 5 * 60 * 1000) box.classList.add('u-c-bad');
+      else box.classList.remove('u-c-bad');
+    };
+    tick();
+    cnExamTimer = setInterval(tick, 1000);
+  }
+
   function cnRenderQuestion() {
     const q = cnState.quiz;
     const item = q.questions[q.idx];
@@ -3591,6 +3882,9 @@ function cn5x8_pool() {
     el('cnQuizProgress').textContent = (q.paper ? q.paper.title + ' · ' : '') + '第 ' + (q.idx + 1) + ' / ' + total + ' 题';
     el('cnQuizScore').textContent = '\u2605 ' + q.score;
     el('cnProgressFill').style.width = progress + '%';
+
+    // v108 BUG-17：考试倒计时（仅考试模式显示；练习模式隐藏）
+    cnStartExamTimer(q);
 
     let html = '';
     // 试卷结构横幅
@@ -3633,14 +3927,66 @@ function cn5x8_pool() {
       // 语文看拼音写词语将随 P1 批量改为「选词」，届时题库层写 input:{mode:'word',cands:[...]}，
       // 这里无需再改代码即可渲染词卡；未改造前 render 返回 ''，自动降级为原生输入。
       const ikHtml = (window.InputKit && window.InputKit.render) ? window.InputKit.render(item) : '';
-      const ikCls = ikHtml ? ' ik-target' : '';
-      const roAttr = ikHtml ? ' data-ik-ro="1"' : '';
-      html += '<input class="u-w100 u-p12 u-fs16 u-bd2 u-r10 u-outline0 u-bbox' + ikCls + '" type="text" id="cnFillInput" '
-        + 'value="' + (typeof val === 'string' ? val.replace(/"/g, '&quot;') : '') + '" '
-        + 'placeholder="' + (ikHtml ? '点下面的候选词作答' : '请输入答案') + '" '
-        + 'inputmode="' + (ikHtml ? 'none' : 'text') + '"' + roAttr + ' '
-        + 'onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'" onkeydown="if(event.key===\'Enter\')CN.submit()">';
-      if (ikHtml) html += ikHtml;
+      if (ikHtml) {
+        const ikCls = ikHtml ? ' ik-target' : '';
+        const roAttr = ikHtml ? ' data-ik-ro="1"' : '';
+        html += '<input class="u-w100 u-p12 u-fs16 u-bd2 u-r10 u-outline0 u-bbox' + ikCls + '" type="text" id="cnFillInput" '
+          + 'value="' + (typeof val === 'string' ? val.replace(/"/g, '&quot;') : '') + '" '
+          + 'placeholder="' + (ikHtml ? '点下面的候选词作答' : '请输入答案') + '" '
+          + 'inputmode="' + (ikHtml ? 'none' : 'text') + '"' + roAttr + ' '
+          + 'onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'" onkeydown="if(event.key===\'Enter\')CN.submit()">';
+        if (ikHtml) html += ikHtml;
+      } else {
+        // v108 BUG-04：无候选面板的默写填空 → 自评模式（零打字 + 保留书写形态）
+        const selfMark = (typeof val === 'string' && (val === 'self:right' || val === 'self:wrong')) ? val : '';
+        html += '<div class="u-bg-sand u-bd-mist u-r10 u-p12 u-mb10 u-fs13 u-c-mid">✍️ 先在心里默写答案（或写在本子上），再对照自评：</div>';
+        html += '<div class="u-flex u-g8 u-mb10">';
+        html += '<button class="btn cn-self-btn' + (selfMark === 'self:right' ? ' selected' : '') + '" data-self="right" onclick="CN.selfMark(\'right\')">✅ 我写对了</button>';
+        html += '<button class="btn cn-self-btn' + (selfMark === 'self:wrong' ? ' selected' : '') + '" data-self="wrong" onclick="CN.selfMark(\'wrong\')">❌ 我写错了</button>';
+        html += '</div>';
+        html += '<div class="u-fs13"><button class="btn btn-outline u-fs12 u-p4-12" id="cnShowAnsBtn" onclick="CN.showFillAnswer()">📖 查看标准答案</button>';
+        html += '<span id="cnFillAnswerBox" class="u-hide u-fs16 u-fw700 u-c-gold u-ml8">' + esc(item.answer) + '</span></div>';
+      }
+    } else if (item.type === 'order') {
+      // v108 T16：排序题——点选项追加到已选序列，可撤销/清空重排（零打字）
+      const sel = Array.isArray(q.userAnswers[q.idx]) ? q.userAnswers[q.idx] : [];
+      const remain = item.options.filter(function (o) { return sel.indexOf(o) < 0; });
+      html += '<div class="u-fs13 u-c-mid u-mb8">按正确顺序依次点选下面的选项：</div>';
+      html += '<div class="cn-order-seq u-bg-sand u-bd-mist u-r10 u-p10 u-mb10" style="min-height:44px;">';
+      if (!sel.length) {
+        html += '<span class="u-fs12 u-c-light">已选顺序（空）</span>';
+      } else {
+        sel.forEach(function (o, si) {
+          html += '<span class="cn-order-chip u-inlblk u-m4 u-p4-10 u-r8 u-bg-primary u-c-white u-fs13" style="border-radius:8px;">' + (si + 1) + '. ' + esc(o) + '</span>';
+        });
+      }
+      html += '</div>';
+      if (sel.length) {
+        html += '<div class="u-flex u-g8 u-mb8">';
+        html += '<button class="btn btn-outline u-flex1 u-fs12 u-p4-8" onclick="CN.orderUndo()">↩ 撤销</button>';
+        html += '<button class="btn btn-outline u-flex1 u-fs12 u-p4-8" onclick="CN.orderClear()">✕ 清空重排</button>';
+        html += '</div>';
+      }
+      html += '<div class="option-group">';
+      item.options.forEach(function (opt, i) {
+        const picked = sel.indexOf(opt) >= 0;
+        html += '<button class="option-btn cn-option-btn' + (picked ? ' selected' : '') + '"' + (picked ? ' disabled' : '') + ' onclick="CN.orderPick(' + i + ')">';
+        html += String.fromCharCode(65 + i) + '. ' + esc(opt);
+        html += '</button>';
+      });
+      html += '</div>';
+    } else if (item.type === 'multi') {
+      // v108 T16：多选题——点选多项，再点取消（零打字）
+      const sel = Array.isArray(q.userAnswers[q.idx]) ? q.userAnswers[q.idx] : [];
+      html += '<div class="u-fs12 u-c-mid u-mb8">可多选，再点一次可取消：</div>';
+      html += '<div class="option-group">';
+      item.options.forEach(function (opt, i) {
+        const picked = sel.indexOf(opt) >= 0;
+        html += '<button class="option-btn cn-option-btn' + (picked ? ' selected' : '') + '" onclick="CN.multiToggle(' + i + ')">';
+        html += String.fromCharCode(65 + i) + '. ' + esc(opt);
+        html += '</button>';
+      });
+      html += '</div>';
     }
 
     el('cnQuestionCard').innerHTML = html;
@@ -3653,9 +3999,17 @@ function cn5x8_pool() {
     // v73.2：题号导航（全部题号可点击跳转，不强制顺序）
     renderCnQuizNav();
 
+    // v108 BUG-06：任何渲染/切题都同步草稿（选择、跳转、自评、跳过都走这里）
+    cnSaveDraft();
+
     // 按钮区
     let btnHtml = '<div class="u-mh24 u-mb10 u-fs14" id="cnFeedback"></div>';
     btnHtml += '<button class="btn btn-primary u-w100" id="cnSubmitBtn" onclick="CN.submit()">' + (q.paper ? '交本题' : '提交答案') + '</button>';
+    // v108 BUG-14：练习模式补「跳过本题」「直接交卷」出口（不会的题不再只能靠题号导航绕开）
+    btnHtml += '<div class="u-flex u-g8 u-mt10">';
+    btnHtml += '<button class="btn btn-outline u-flex1" onclick="CN.skipQuestion()">跳过本题</button>';
+    btnHtml += '<button class="btn btn-outline u-flex1" onclick="CN.submitNow()">直接交卷</button>';
+    btnHtml += '</div>';
     el('cnQuizActions').innerHTML = btnHtml;
   }
 
@@ -3664,6 +4018,78 @@ function cn5x8_pool() {
     const item = q.questions[q.idx];
     q.userAnswers[q.idx] = item.options[i];
     cnRenderQuestion();
+  }
+
+  // v108 T16：排序题——追加/撤销/清空重排
+  function cnOrderPick(i) {
+    const q = cnState.quiz;
+    const item = q.questions[q.idx];
+    if (q.results[q.idx] !== undefined) return;
+    const sel = Array.isArray(q.userAnswers[q.idx]) ? q.userAnswers[q.idx].slice() : [];
+    const opt = item.options[i];
+    if (sel.indexOf(opt) < 0) sel.push(opt);
+    q.userAnswers[q.idx] = sel;
+    cnRenderQuestion();
+  }
+  function cnOrderUndo() {
+    const q = cnState.quiz;
+    if (q.results[q.idx] !== undefined) return;
+    const sel = Array.isArray(q.userAnswers[q.idx]) ? q.userAnswers[q.idx].slice() : [];
+    sel.pop();
+    q.userAnswers[q.idx] = sel;
+    cnRenderQuestion();
+  }
+  function cnOrderClear() {
+    const q = cnState.quiz;
+    if (q.results[q.idx] !== undefined) return;
+    q.userAnswers[q.idx] = [];
+    cnRenderQuestion();
+  }
+  // v108 T16：多选题——点选/取消
+  function cnMultiToggle(i) {
+    const q = cnState.quiz;
+    const item = q.questions[q.idx];
+    if (q.results[q.idx] !== undefined) return;
+    const sel = Array.isArray(q.userAnswers[q.idx]) ? q.userAnswers[q.idx].slice() : [];
+    const opt = item.options[i];
+    const at = sel.indexOf(opt);
+    if (at >= 0) sel.splice(at, 1); else sel.push(opt);
+    q.userAnswers[q.idx] = sel;
+    cnRenderQuestion();
+  }
+
+  // v108 BUG-04：默写填空自评模式——点「我写对了/我写错了」
+  function cnSelfMark(mark) {
+    const q = cnState.quiz;
+    if (!q || q.results[q.idx] !== undefined) return;
+    q.userAnswers[q.idx] = 'self:' + mark;
+    cnRenderQuestion();
+  }
+
+  // v108 BUG-04：显示标准答案
+  function cnShowFillAnswer() {
+    const box = el('cnFillAnswerBox');
+    if (box) box.classList.remove('u-hide');
+    const btn = el('cnShowAnsBtn');
+    if (btn) btn.style.display = 'none';
+  }
+
+  // v108 BUG-14：练习模式「跳过本题」（记为未作答，直接进下一题）
+  function cnSkipQuestion() {
+    const q = cnState.quiz;
+    if (!q) return;
+    if (cnPendingTimer) { clearTimeout(cnPendingTimer); cnPendingTimer = null; }
+    q.idx++;
+    if (q.idx >= q.questions.length) cnShowResult();
+    else cnRenderQuestion();
+  }
+
+  // v108 BUG-14：练习模式「直接交卷」（未作答按答错计）
+  function cnSubmitNow() {
+    const q = cnState.quiz;
+    if (!q) return;
+    if (cnPendingTimer) { clearTimeout(cnPendingTimer); cnPendingTimer = null; }
+    cnShowResult();
   }
 
   // v73.2：语文题号导航
@@ -3688,14 +4114,103 @@ function cn5x8_pool() {
   function cnJump(i) {
     const q = cnState.quiz;
     if (i < 0 || i >= q.questions.length) return;
+    // v108 BUG-07：跳转前取消上一题遗留的推进定时器（防跳过去又被旧定时器推走）
+    if (cnPendingTimer) { clearTimeout(cnPendingTimer); cnPendingTimer = null; }
     q.idx = i;
     cnRenderQuestion();
+  }
+
+  // v108 BUG-13：填空答案判分前归一化（去首尾空白 / 统一全半角标点 / 去句末句号 / NFC）
+  function normalizeCnAnswer(s) {
+    let t = String(s == null ? '' : s).trim();
+    // 全角 → 半角（ASCII 区）
+    t = t.replace(/[\uFF01-\uFF5E]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); });
+    t = t.replace(/\u3000/g, ' ');
+    // 去句末标点（句号/感叹号/问号/省略号）
+    t = t.replace(/[。．.!！?？…]+$/g, '');
+    try { t = t.normalize('NFC'); } catch (e) {}
+    return t;
+  }
+
+  // v108 BUG-12：HTML 转义（与 inputKit 的 esc 同实现，防注入/解析错乱）
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // ============ v108 BUG-06：语文答题断点续答草稿 ============
+  const CN_DRAFT_KEY = 'lyj_cn_draft_v1';
+  // 题目集合指纹：前 8 题「题干|答案」长度加权 + 总题数（恢复时校验题卷一致）
+  function cnQuizSig(arr) {
+    if (!Array.isArray(arr) || !arr.length) return '';
+    let s = 0;
+    (arr.slice(0, 8)).forEach(function (it) {
+      if (!it) return;
+      s = (s * 31 + String(it.question).length * 7 + String(it.answer).length) % 1000000;
+    });
+    return s + ':' + arr.length;
+  }
+  function cnSaveDraft() {
+    const q = cnState.quiz;
+    if (!q || !Array.isArray(q.questions) || !q.questions.length) return;
+    try {
+      localStorage.setItem(CN_DRAFT_KEY, JSON.stringify({
+        grade: cnState.grade,
+        unitIdx: cnState.unitIdx,
+        kind: q.paper ? 'exam' : (q.sourceIds ? 'review' : 'quiz'),
+        paper: q.paper || null,
+        questions: q.questions,   // 完整题目数组，恢复时直接沿用（保证题卷一致）
+        idx: q.idx, score: q.score,
+        userAnswers: q.userAnswers || [],
+        results: q.results || [],
+        sourceIds: q.sourceIds || null,
+        startTime: q.startTime || Date.now(),
+        wrongs: q.wrongs || [],
+        sig: cnQuizSig(q.questions),
+      }));
+    } catch (e) {}
+  }
+  function cnLoadDraft() {
+    try { return JSON.parse(localStorage.getItem(CN_DRAFT_KEY)) || null; } catch (e) { return null; }
+  }
+  function cnClearDraft() {
+    try { localStorage.removeItem(CN_DRAFT_KEY); } catch (e) {}
+  }
+  // 进入练习/考试时尝试续答：同年级同单元同题型且草稿里存有题目数组才提示（直接沿用草稿题目）
+  function cnTryResume(questions, kind, cb, paperTitle) {
+    const d = cnLoadDraft();
+    if (d && d.grade === cnState.grade && d.unitIdx === cnState.unitIdx && d.kind === kind
+        && Array.isArray(d.questions) && d.questions.length
+        && typeof d.idx === 'number' && d.idx > 0 && d.idx < d.questions.length
+        && (!paperTitle || (d.paper && d.paper.title === paperTitle))) {
+      if (typeof confirm === 'function' && confirm('上次做到第 ' + (d.idx + 1) + ' 题，是否继续？')) {
+        cnState.quiz = {
+          questions: d.questions,
+          idx: d.idx, score: d.score || 0,
+          userAnswers: d.userAnswers || [],
+          results: d.results || [],
+          paper: d.paper || null,
+          sourceIds: d.sourceIds || null,
+          startTime: d.startTime || Date.now(),
+          wrongs: d.wrongs || [],
+        };
+        cb(true);
+        return;
+      }
+      cnClearDraft();
+    }
+    cb(false);
   }
 
   // ---- 提交答案 ----
   function cnSubmit() {
     const q = cnState.quiz;
     const item = q.questions[q.idx];
+    // v108 BUG-01：已判分守卫——本题已判过分直接忽略，防等待期内连点重复计分
+    if (q.results[q.idx] !== undefined) return;
+    // v108 BUG-02/07：新提交先清掉上一题遗留的推进定时器（防连点跳多题 / 点题号后被旧定时器推走）
+    if (cnPendingTimer) { clearTimeout(cnPendingTimer); cnPendingTimer = null; }
     const userAns = q.userAnswers[q.idx];
 
     if (item.type === 'fill') {
@@ -3709,7 +4224,23 @@ function cn5x8_pool() {
       return;
     }
 
-    const correct = String(ans).trim() === String(item.answer).trim();
+    // v108 BUG-13：填空判分归一化（去首尾空白/统一全半角/去句末句号），写对不因标点判错
+    // v108 BUG-04：自评模式 self:right / self:wrong 直接映射判分结果
+    let correct;
+    if (ans === 'self:right') correct = true;
+    else if (ans === 'self:wrong') correct = false;
+    else if (item.type === 'order') {
+      // v108 T16：排序题——按正确顺序逐位比对（全对才算对）
+      const correctArr = Array.isArray(item.answer) ? item.answer : [];
+      const userArr = Array.isArray(ans) ? ans : [];
+      correct = correctArr.length === userArr.length && correctArr.every(function (a, i) { return normalizeCnAnswer(a) === normalizeCnAnswer(userArr[i]); });
+    } else if (item.type === 'multi') {
+      // v108 T16：多选题——集合相等（选对且不多选不少选）
+      const correctArr = Array.isArray(item.answer) ? item.answer : [];
+      const userArr = Array.isArray(ans) ? ans : [];
+      const norm = function (arr) { return arr.map(function (x) { return normalizeCnAnswer(String(x)); }).sort().join('|'); };
+      correct = norm(correctArr) === norm(userArr);
+    } else correct = normalizeCnAnswer(ans) === normalizeCnAnswer(item.answer);
     q.results[q.idx] = correct;
     el('cnSubmitBtn').style.display = 'none';
 
@@ -3725,10 +4256,41 @@ function cn5x8_pool() {
           b.style.background = 'rgba(194,85,79,.10)';
         }
       });
+    } else if (item.type === 'order') {
+      // v108 T16：排序题判分反馈——逐位高亮正确/错误位置
+      const seqBox = el('cnQuestionCard').querySelector('.cn-order-seq');
+      if (seqBox) {
+        const correctArr = Array.isArray(item.answer) ? item.answer : [];
+        const userArr = Array.isArray(ans) ? ans : [];
+        let seqHtml = '';
+        userArr.forEach(function (o, si) {
+          const ok = normalizeCnAnswer(o) === normalizeCnAnswer(correctArr[si]);
+          seqHtml += '<span class="cn-order-chip u-inlblk u-m4 u-p4-10 u-r8 u-fs13" style="border-radius:8px;background:' + (ok ? 'rgba(78,140,110,.18)' : 'rgba(194,85,79,.18)') + ';color:' + (ok ? 'var(--success)' : 'var(--danger)') + ';border:1px solid ' + (ok ? 'var(--success)' : 'var(--danger)') + ';">' + (si + 1) + '. ' + esc(o) + (ok ? ' ✓' : ' ✗') + '</span>';
+        });
+        seqBox.innerHTML = seqHtml || '<span class="u-fs12 u-c-light">未作答</span>';
+      }
+    } else if (item.type === 'multi') {
+      // v108 T16：多选题判分反馈——正确答案绿框、错选红框
+      const btns = el('cnQuestionCard').querySelectorAll('.option-btn');
+      const correctArr = Array.isArray(item.answer) ? item.answer : [];
+      const userArr = Array.isArray(ans) ? ans : [];
+      btns.forEach(function (b, i) {
+        const isCor = correctArr.indexOf(item.options[i]) >= 0;
+        const isSel = userArr.indexOf(item.options[i]) >= 0;
+        if (isCor) {
+          b.style.borderColor = 'var(--success)';
+          b.style.background = 'rgba(78,140,110,.10)';
+        } else if (isSel) {
+          b.style.borderColor = 'var(--danger)';
+          b.style.background = 'rgba(194,85,79,.10)';
+        }
+      });
     }
 
     if (correct) {
       q.score++;
+      // v108 BUG-11：判分后立即刷新顶部得分（不再等切题）
+      if (el('cnQuizScore')) el('cnQuizScore').textContent = '\u2605 ' + q.score;
       el('cnFeedback').innerHTML = '<span class="u-c-ok u-fw600">\u2714 回答正确！</span>';
       if (item.explain) el('cnFeedback').innerHTML += '<div class="u-fs12 u-c-light u-mt4">解析：' + item.explain + '</div>';
       // v53：错题重练答对即视为「已掌握」，自动移出错题库
@@ -3746,10 +4308,14 @@ function cn5x8_pool() {
       el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnLoadingHtml;
       if (item.explain) el('cnFeedback').innerHTML += '<div class="u-fs12 u-c-light u-mt4">解析：' + item.explain + '</div>';
       if (window.AiSolve && AiSolve.callSolve) {
+        // v108 BUG-08：闭包捕获本题 idx，AI 结果返回时若已切题则丢弃（防串台写进下一题反馈区）
+        const solvedIdx = q.idx;
         AiSolve.callSolve(item.question, '语文', '', item.answer).then(function (data) {
+          if (cnState.quiz.idx !== solvedIdx) return;
           var card = (data && window.AixueGuide && AixueGuide.guideHtml) ? AixueGuide.guideHtml(data) : cnPresetHtml;
           el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + card;
         }).catch(function () {
+          if (cnState.quiz.idx !== solvedIdx) return;
           el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnPresetHtml;
         });
       } else {
@@ -3769,8 +4335,11 @@ function cn5x8_pool() {
       });
     }
 
-    // 下一题或结束
-    setTimeout(function () {
+    // v108 BUG-06：判分后落盘草稿（防退出/刷新丢进度）
+    cnSaveDraft();
+    // v108 BUG-02：推进定时器保存句柄，新提交/跳题先 clearTimeout
+    cnPendingTimer = setTimeout(function () {
+      cnPendingTimer = null;
       q.idx++;
       if (q.idx >= q.questions.length) {
         cnShowResult();
@@ -3783,6 +4352,10 @@ function cn5x8_pool() {
   // ---- 结果页（v75：两步式 批改成绩 → 答案解析）----
   function cnShowResult() {
     const q = cnState.quiz;
+    // v108 BUG-17：交卷停止考试倒计时
+    if (cnExamTimer) { clearInterval(cnExamTimer); cnExamTimer = null; }
+    // v108 BUG-06：交卷完成清除断点草稿
+    cnClearDraft();
     // v103 P0-1：交卷幂等守卫。成绩页可以重复渲染（孩子想回看），
     // 但「历史记录 + 错题入库 + 云端同步」本场只允许执行一次，
     // 否则连点「查看结果」会写两条练习记录、统计翻倍。
@@ -3859,6 +4432,10 @@ function cn5x8_pool() {
     el('cnResultScoreCard').style.display = 'block';
     el('cnExamAnswerKey').style.display = 'none';
 
+    // v108 BUG-16：结果页按钮文案按题型切换（练习=再练一次 / 考试=重新考试）
+    const retryBtn = el('cnRetryBtn');
+    if (retryBtn) retryBtn.textContent = isExam ? '重新考试' : '再练一次';
+
     // 记录历史（带本次错题明细，供家长后台/云端同步）
     // v103 P0-1：本场只入库一次
     if (!_alreadySaved) {
@@ -3899,7 +4476,12 @@ function cn5x8_pool() {
       secs[title].forEach(function (o) {
         const i = o.idx, item = o.item;
         const correct = q.results[i] === true;
-        const ua = (q.userAnswers[i] !== undefined && q.userAnswers[i] !== null) ? String(q.userAnswers[i]) : '';
+        let ua = (q.userAnswers[i] !== undefined && q.userAnswers[i] !== null) ? String(q.userAnswers[i]) : '';
+        // v108 T16：order/multi 数组作答统一处理（用于选项高亮与答案展示）
+        const uaArr = Array.isArray(q.userAnswers[i]) ? q.userAnswers[i].map(function (x) { return String(x); }) : null;
+        // v108 BUG-04：自评模式答案显示为可读文案
+        if (ua === 'self:right') ua = '我写对了（自评）';
+        else if (ua === 'self:wrong') ua = '我写错了（自评）';
         html += '<div class="m-answer-item ' + (correct ? 'ok' : 'bad') + '">';
         html += '<div class="m-ai-head">';
         html += '<span class="m-ai-no">第' + (i + 1) + '题</span>';
@@ -3910,20 +4492,25 @@ function cn5x8_pool() {
         html += '<div class="m-ai-stem">' + item.question + '</div>';
         if (item.options && item.options.length) {
           html += '<div class="m-ai-opts">';
+          const corArr = Array.isArray(item.answer) ? item.answer.map(function (x) { return String(x); }) : [];
           item.options.forEach(function (opt, idx) {
             const txt = String(opt);
             let cls = '';
-            if (txt === String(item.answer)) cls = ' correct';
-            else if (txt === ua && !correct) cls = ' wrong';
+            if (corArr.indexOf(txt) >= 0) cls = ' correct';
+            else if (uaArr && uaArr.indexOf(txt) >= 0 && !correct) cls = ' wrong';
             html += '<div class="m-ai-opt' + cls + '">' + String.fromCharCode(65 + idx) + '. ' + txt + '</div>';
           });
           html += '</div>';
         }
         html += '<div class="m-ai-ans-row">';
-        html += '<span>你的答案：<b class="' + (correct ? 'ok' : 'bad') + '">' + (ua !== '' ? ua : '未作答') + '</b></span>';
-        html += '<span>正确答案：<b class="ok">' + item.answer + '</b></span>';
+        // v108 BUG-12：用户作答内容一律转义，防 HTML 注入/解析错乱
+        // v108 T16：order/multi 数组答案 → 转序号文本展示
+        const ansTxt = Array.isArray(item.answer) ? item.answer.map(function (x, xi) { return (item.type === 'order' ? (xi + 1) + '.' : '') + String(x); }).join('；') : String(item.answer);
+        const uaShow = (uaArr !== null && uaArr !== undefined) ? uaArr.map(function (x, xi) { return (item.type === 'order' ? (xi + 1) + '.' : '') + String(x); }).join('；') : ua;
+        html += '<span>你的答案：<b class="' + (correct ? 'ok' : 'bad') + '">' + (uaShow !== '' ? esc(uaShow) : '未作答') + '</b></span>';
+        html += '<span>正确答案：<b class="ok">' + esc(ansTxt) + '</b></span>';
         html += '</div>';
-        if (item.explain) html += '<div class="m-ai-explain"><b>解析：</b>' + item.explain + '</div>';
+        if (item.explain) html += '<div class="m-ai-explain"><b>解析：</b>' + esc(item.explain) + '</div>';
         html += '</div>';
       });
     });
@@ -3961,6 +4548,10 @@ function cn5x8_pool() {
           h += '<div class="prt-opt"><span class="prt-optlab">' + String.fromCharCode(65 + i2) + '.</span> ' + String(o) + '</div>';
         });
         h += '</div>';
+        // v108 T16：排序题打印留作答横线，不依赖按钮
+        if (item.type === 'order') {
+          h += '<div class="prt-blank">作答顺序：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</div>';
+        }
       } else {
         h += '<div class="prt-blank">答：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</div>';
       }
@@ -3968,7 +4559,11 @@ function cn5x8_pool() {
     });
     h += '<div class="prt-answers"><div class="prt-ans-title">参考答案</div><div class="prt-ans-grid">';
     q.questions.forEach(function (item, i) {
-      h += '<div class="prt-ans-item"><b>' + (i + 1) + '.</b> ' + item.answer + '</div>';
+      // v108 T16：order/multi 数组答案 → 序号文本
+      const ansTxt = Array.isArray(item.answer)
+        ? item.answer.map(function (x, xi) { return (item.type === 'order' ? (xi + 1) + '.' : '') + String(x); }).join('；')
+        : String(item.answer);
+      h += '<div class="prt-ans-item"><b>' + (i + 1) + '.</b> ' + ansTxt + '</div>';
     });
     h += '</div></div>';
     let root = document.getElementById('printRoot');
@@ -3991,14 +4586,19 @@ function cn5x8_pool() {
 
   function cnAddWrong(question, userAnswer) {
     const data = cnLoadData();
+    // v108 BUG-09：按「题干 + 答案」去重——同题干不同答案的两道题不再互相覆盖
     const existing = data.wrong.find(function (w) {
-      return w.module === '\u8BED\u6587' && w.question && w.question.question === question.question;
+      return w.module === '\u8BED\u6587' && w.question && w.question.question === question.question
+        && String(w.question.answer) === String(question.answer);
     });
     const unitName = (cnState.quiz && cnState.quiz.paper && cnState.quiz.paper.title) ||
       (question.section || (CN_DATA[cnState.grade] && CN_DATA[cnState.grade][cnState.unitIdx] ? CN_DATA[cnState.grade][cnState.unitIdx].name : ''));
     if (existing) {
       existing.count = (existing.count || 1) + 1;
       existing.lastWrong = Date.now();
+      // v108 BUG-09：命中旧记录时同步更新作答痕迹，避免「你的答案」对不上
+      existing.userAnswer = userAnswer;
+      existing.question = question;
     } else {
       data.wrong.push({
         id: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
@@ -4011,7 +4611,7 @@ function cn5x8_pool() {
         count: 1
       });
     }
-    cnSaveData(data);
+    try { cnSaveData(data); } catch (e) {}
   }
 
   function cnRemoveWrong(id) {
@@ -4028,6 +4628,78 @@ function cn5x8_pool() {
     cnRenderWrong();
   }
 
+  // v108 T15：题干 → 公式卡匹配（公式题解析考点名；普通题关键词保守匹配）
+  function cnFormulaMatch(q) {
+    if (!q) return [];
+    // v108 T16：专项题自带考点编码 k，直接精确命中对应公式卡
+    if (q.k) {
+      const ki = CN_FORMULAS.findIndex(function (fm) { return fm.k === q.k; });
+      if (ki >= 0) return [ki];
+    }
+    const text = String(q.question || '') + ' ' + String(q.answer || '');
+    const hits = [];
+    CN_FORMULAS.forEach(function (fm, i) {
+      // 公式题题干形如「万能答题公式：概括主要内容应该怎样回答？」→ 精确匹配考点名
+      if (text.indexOf('万能答题公式：' + fm.t) >= 0) { hits.push(i); return; }
+      const map = [
+        { k: ['概括主要内容', '主要内容', '用一句话概括'], i: 0 },
+        { k: ['概括段落大意', '段意', '这段写了'], i: 1 },
+        { k: ['中心思想', '中心意思', '表达了作者怎样的思想感情', '赞美', '告诉我们什么道理'], i: 2 },
+        { k: ['这句话是什么意思', '句子的含义', '句意', '这句话的含义'], i: 3 },
+        { k: ['这句话在文中有什么作用', '句子的作用', '这段的作用', '在结构上'], i: 4 },
+        { k: ['修辞', '比喻', '拟人', '排比', '夸张', '反问', '设问', '这句话运用', '赏析这句话', '赏析文中', '画线的句子'], i: 5 },
+        { k: ['词语赏析', '这个词好在哪里', '加点词', '带点词', '词语的表达效果'], i: 6 },
+        { k: ['人物形象', '人物特点', '怎样的一个人', '怎样的人', '人物品质', '人物性格'], i: 7 },
+        { k: ['环境描写', '环境的作用', '景物描写'], i: 8 },
+        { k: ['标题', '题目的含义', '题目的作用', '为什么以'], i: 9 },
+        { k: ['启示', '感悟', '明白了什么', '得到什么'], i: 10 },
+        { k: ['能否删去', '能不能删掉', '能否去掉', '可不可以删'], i: 11 },
+        { k: ['写作顺序', '叙述顺序', '倒叙', '顺叙', '插叙'], i: 12 },
+        { k: ['表达方式', '记叙', '描写', '议论', '抒情', '说明'], i: 13 },
+        { k: ['详写', '略写', '详略'], i: 14 },
+      ];
+      const m = map.find(function (x) { return x.k.some(function (kw) { return text.indexOf(kw) >= 0; }); });
+      if (m && m.i === i) hits.push(i);
+    });
+    // 去重（同一公式只挂一次）
+    return hits.filter(function (v, i) { return hits.indexOf(v) === i; });
+  }
+
+  // v108 T15：按考点重练——同考点公式题（最多2道）+ 该考点错题，组卷作答
+  function cnStartKpReview(kIdx) {
+    const fm = CN_FORMULAS[kIdx];
+    if (!fm) return;
+    // 该考点错题
+    const wrongs = cnGetWrong().filter(function (w) {
+      return cnFormulaMatch(w.question).indexOf(kIdx) >= 0;
+    });
+    // 公式题（取 2 道该考点的）
+    const fq = [];
+    FORMULA_QS.forEach(function (q, i) {
+      if (fq.length >= 2) return;
+      const t = String(q.question);
+      if (t.indexOf('万能答题公式：' + fm.t) >= 0) fq.push(q);
+    });
+    const picked = shuffle(fq.concat(wrongs.map(function (w) { return w.question; }))).slice(0, 20);
+    if (!picked.length) {
+      alert('\u8BE5\u8003\u70B9\u6682\u65E0\u53EF\u91CD\u7EC3\u9898\u76EE');
+      return;
+    }
+    cnState.quiz = {
+      questions: picked,
+      sourceIds: picked.map(function (q) {
+        const hit = wrongs.find(function (w) { return w.question === q; });
+        return hit ? hit.id : '';
+      }),
+      idx: 0, score: 0, userAnswers: [], results: [], paper: null,
+      startTime: Date.now(),
+    };
+    el('cnBackBtn').style.display = 'block';
+    el('cnBackBtn').onclick = function () { cnSwitchTab('wrong'); };
+    cnShowPage('cnPageQuiz');
+    cnRenderQuestion();
+  }
+
   function cnRenderWrong() {
     const container = el('cnWrongList');
     if (!container) return;
@@ -4039,11 +4711,37 @@ function cn5x8_pool() {
     let html = '';
     wrongs.forEach(function (w) {
       const q = w.question;
+      const ansTxt = Array.isArray(q.answer) ? q.answer.join('、') : q.answer;
       html += '<div class="card u-mb10 u-p12">';
-      html += '<div class="u-fs14 u-fw600 u-mb6">' + (q.passage ? '<span class="u-c-gold">[阅读]</span> ' : '') + q.question + '</div>';
-      html += '<div class="u-fs13 u-c-bad">你的答案：' + w.userAnswer + '</div>';
-      html += '<div class="u-fs13 u-c-ok">正确答案：' + q.answer + '</div>';
+      html += '<div class="u-fs14 u-fw600 u-mb6">' + (q.passage ? '<span class="u-c-gold">[阅读]</span> ' : '') + esc(q.question) + '</div>';
+      // v108 BUG-04/BUG-12：错题本显示转义 + 自评文案映射
+      let uaTxt = String(w.userAnswer == null ? '' : w.userAnswer);
+      if (uaTxt === 'self:right') uaTxt = '我写对了（自评）';
+      else if (uaTxt === 'self:wrong') uaTxt = '我写错了（自评）';
+      html += '<div class="u-fs13 u-c-bad">你的答案：' + esc(uaTxt) + '</div>';
+      html += '<div class="u-fs13 u-c-ok">正确答案：' + esc(ansTxt) + '</div>';
       html += '<div class="u-fs11 u-c-lighter u-mt4">' + (w.unitName || '') + ' · ' + (w.grade || '') + '\u5E74\u7EA7 · \u9519' + (w.count || 1) + '\u6B21</div>';
+      // v108 T15：错题挂公式卡（可展开步骤+示范）+ 按考点重练
+      const fmIdx = cnFormulaMatch(q);
+      if (fmIdx.length) {
+        html += '<div class="u-mt8">';
+        fmIdx.forEach(function (fi) {
+          const fm = CN_FORMULAS[fi];
+          html += '<details class="cn-formula-detail" style="border:1px solid #E8D5A0;border-radius:8px;padding:8px 10px;margin-bottom:6px;background:#FFFBF0;">';
+          html += '<summary class="u-fs12 u-fw700 u-c-gold u-cp">📐 答题公式：' + fm.t + '</summary>';
+          html += '<div class="u-fs12 u-lh17 u-mt6 u-c-dark">公式：' + fm.f + '</div>';
+          if (fm.steps && fm.steps.length) {
+            html += '<div class="u-fs12 u-lh17 u-mt4 u-c-light">步骤：' + fm.steps.join(' → ') + '</div>';
+          }
+          if (fm.demo) {
+            html += '<div class="u-fs12 u-lh17 u-mt4 u-c-light">示范：' + fm.demo.q + '（' + fm.demo.a + '）</div>';
+            html += '<div class="u-fs11 u-mt2 u-c-gold">出处：' + fm.demo.from + '</div>';
+          }
+          html += '<button class="btn btn-outline u-mt6 u-fs12 u-p4-12" onclick="CN.startKpReview(' + fi + ')">按此考点重练</button>';
+          html += '</details>';
+        });
+        html += '</div>';
+      }
       html += '<button class="btn btn-outline u-mt8 u-fs12 u-p4-12" onclick="CN.removeWrong(\'' + w.id + '\')">\u5220\u9664</button>';
       html += '</div>';
     });
@@ -4079,7 +4777,12 @@ function cn5x8_pool() {
     }
   }
   function cnSaveData(data) {
-    localStorage.setItem('math_practice_data', JSON.stringify(data));
+    // v108 BUG-03：存储写入失败静默降级（写满/隐私模式不再卡死答题）
+    try {
+      localStorage.setItem('math_practice_data', JSON.stringify(data));
+    } catch (e) {
+      // 静默：错题/历史保存失败不打断答题主流程
+    }
   }
   function cnRecordHistory(grade, unitName, score, total, wrong) {
     const data = cnLoadData();
@@ -4206,6 +4909,11 @@ function cn5x8_pool() {
     selectOption: cnSelectOption,
     jump: cnJump,                  // v73.2：题号导航跳转
     submit: cnSubmit,
+    // v108：填空自评模式 + 跳过/交卷出口
+    selfMark: cnSelfMark,
+    showFillAnswer: cnShowFillAnswer,
+    skipQuestion: cnSkipQuestion,
+    submitNow: cnSubmitNow,
     confirmScore: cnConfirmScore,  // v75：两步式第二步入口（确认成绩 → 答案解析）
     backToStudy: cnBackToStudy,    // v75：答案解析页「返回单元学习」
     printPaper: cnPrintPaper,      // v75：答案解析页「打印试卷」
@@ -4215,6 +4923,13 @@ function cn5x8_pool() {
     showExam: cnShowExam,      // v79：全局导航「练习」tab → 语文考试中心
     renderExam: cnRenderExam,
     startWrongReview: cnStartWrongReview,
+    startKpReview: cnStartKpReview,
+    formulaMatch: cnFormulaMatch,
+    // v108 T16：排序/多选题交互
+    orderPick: cnOrderPick,
+    orderUndo: cnOrderUndo,
+    orderClear: cnOrderClear,
+    multiToggle: cnMultiToggle,
     removeWrong: cnRemoveWrong,
     clearWrong: cnClearWrong,
     formulas: CN_FORMULAS,

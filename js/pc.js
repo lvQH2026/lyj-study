@@ -302,6 +302,18 @@
   }
   function pcJudge(q, ua) {
     if (ua === undefined || ua === null || ua === '') return false;
+    // v108 T16：排序题——逐位比对全对才判对；多选题——集合相等
+    if (q && q.type === 'order') {
+      const ca = Array.isArray(q.answer) ? q.answer : [];
+      const ua2 = Array.isArray(ua) ? ua : String(ua || '').split(/[,，、\/]+/).map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; });
+      return ca.length === ua2.length && ca.every(function (a, i) { return String(a).trim() === String(ua2[i]).trim(); });
+    }
+    if (q && q.type === 'multi') {
+      const ca = Array.isArray(q.answer) ? q.answer : [];
+      const ua2 = Array.isArray(ua) ? ua : String(ua || '').split(/[,，、\/]+/).map(function (s) { return s.trim(); }).filter(function (s) { return s !== ''; });
+      const norm = function (arr) { return arr.map(function (x) { return String(x).trim(); }).sort().join('|'); };
+      return norm(ca) === norm(ua2);
+    }
     // v83：英语题走宽松判分（core.js 的 engAnswerEquals：忽略大小写、句末标点、
     // 撇号写法、缩写展开）。原来的严格字符串比较会把 "Went" / "I'm tall." 判错。
     if (q && q.judge === 'eng' && typeof engAnswerEquals === 'function') {
@@ -1237,6 +1249,38 @@
         h += '<button class="pc-opt ' + (sel ? 'sel' : '') + '" onclick="PC.choose(' + oi + ')"><span class="pc-opt-key">' + String.fromCharCode(65 + oi) + '</span><span class="pc-opt-txt">' + _fracHtml(esc(txt)) + '</span></button>';
       });
       h += '</div>';
+    } else if (item.type === 'order') {
+      // v108 T16：排序题——点选追加到已选序列，可撤销/清空重排（零打字）
+      const selArr = Array.isArray(q.userAnswers[i]) ? q.userAnswers[i] : [];
+      h += '<div class="pc-order-seq" style="background:#F7F3E9;border:1px solid #EADFC4;border-radius:10px;padding:10px;margin-bottom:8px;min-height:44px;">';
+      if (!selArr.length) h += '<span style="color:#A8A49B;font-size:13px;">已选顺序（空）</span>';
+      else selArr.forEach(function (o, si) {
+        h += '<span style="display:inline-block;margin:4px;padding:4px 10px;border-radius:8px;background:#8C6D2F;color:#fff;font-size:13px;">' + (si + 1) + '. ' + esc(o) + '</span>';
+      });
+      h += '</div>';
+      if (selArr.length) {
+        h += '<div class="u-flex u-g8 u-mb8">';
+        h += '<button class="pc-btn ghost" style="flex:1;padding:4px 8px;font-size:12px;" onclick="PC.orderUndo()">↩ 撤销</button>';
+        h += '<button class="pc-btn ghost" style="flex:1;padding:4px 8px;font-size:12px;" onclick="PC.orderClear()">✕ 清空重排</button>';
+        h += '</div>';
+      }
+      h += '<div class="pc-options" id="pcOpts">';
+      (item.options || []).forEach(function (opt, oi) {
+        const txt = optText(opt);
+        const picked = selArr.indexOf(txt) >= 0;
+        h += '<button class="pc-opt ' + (picked ? 'sel' : '') + '"' + (picked ? ' disabled' : '') + ' onclick="PC.orderPick(' + oi + ')"><span class="pc-opt-key">' + String.fromCharCode(65 + oi) + '</span><span class="pc-opt-txt">' + _fracHtml(esc(txt)) + '</span></button>';
+      });
+      h += '</div>';
+    } else if (item.type === 'multi') {
+      // v108 T16：多选题——点选多项，再点取消
+      const selArr = Array.isArray(q.userAnswers[i]) ? q.userAnswers[i] : [];
+      h += '<div class="pc-options" id="pcOpts">';
+      (item.options || []).forEach(function (opt, oi) {
+        const txt = optText(opt);
+        const picked = selArr.indexOf(txt) >= 0;
+        h += '<button class="pc-opt ' + (picked ? 'sel' : '') + '" onclick="PC.multiToggle(' + oi + ')"><span class="pc-opt-key">' + String.fromCharCode(65 + oi) + '</span><span class="pc-opt-txt">' + _fracHtml(esc(txt)) + '</span></button>';
+      });
+      h += '</div>';
     } else {
       // v84：零打字输入面板。孩子不会打字，PC 上同样用鼠标点选（与移动端同一套面板）。
       // InputKit 未加载时 render 返回 ''，输入框不带 readonly —— 自动降级为原生打字。
@@ -1334,6 +1378,40 @@
     const opts = $('pcOpts').children;
     for (let k = 0; k < opts.length; k++) opts[k].classList.toggle('sel', k === oi);
   };
+  // v108 T16：排序/多选题交互（PC）
+  PC.orderPick = function (oi) {
+    const q = S.quiz; const i = q.idx; const item = q.questions[i];
+    if (q.results[i] && (q.results[i].correct || q.results[i].revealed)) return;
+    const sel = Array.isArray(q.userAnswers[i]) ? q.userAnswers[i].slice() : [];
+    const txt = optText(item.options[oi]);
+    if (sel.indexOf(txt) < 0) sel.push(txt);
+    q.userAnswers[i] = sel;
+    renderQuiz();
+  };
+  PC.orderUndo = function () {
+    const q = S.quiz; const i = q.idx;
+    if (q.results[i] && (q.results[i].correct || q.results[i].revealed)) return;
+    const sel = Array.isArray(q.userAnswers[i]) ? q.userAnswers[i].slice() : [];
+    sel.pop();
+    q.userAnswers[i] = sel;
+    renderQuiz();
+  };
+  PC.orderClear = function () {
+    const q = S.quiz; const i = q.idx;
+    if (q.results[i] && (q.results[i].correct || q.results[i].revealed)) return;
+    q.userAnswers[i] = [];
+    renderQuiz();
+  };
+  PC.multiToggle = function (oi) {
+    const q = S.quiz; const i = q.idx; const item = q.questions[i];
+    if (q.results[i] && (q.results[i].correct || q.results[i].revealed)) return;
+    const sel = Array.isArray(q.userAnswers[i]) ? q.userAnswers[i].slice() : [];
+    const txt = optText(item.options[oi]);
+    const at = sel.indexOf(txt);
+    if (at >= 0) sel.splice(at, 1); else sel.push(txt);
+    q.userAnswers[i] = sel;
+    renderQuiz();
+  };
   PC.submit = function () {
     const q = S.quiz; const i = q.idx; const item = q.questions[i];
     const prev = q.results[i];
@@ -1343,6 +1421,10 @@
     let ua;
     if (item.type === 'choice' || item.type === 'judge' || item.type === 'shape_choice') {
       ua = q.userAnswers[i]; if (ua === undefined) { toast('请先选择答案'); return; }
+    } else if (item.type === 'order' || item.type === 'multi') {
+      // v108 T16：排序/多选题答案以数组形式保存（渲染时已写入 userAnswers）
+      ua = Array.isArray(q.userAnswers[i]) ? q.userAnswers[i] : [];
+      if (!ua.length) { toast(item.type === 'order' ? '请先完成排序' : '请至少选择一项'); return; }
     } else {
       const multi = document.querySelectorAll('.pc-fill-multi');
       if (multi && multi.length) {
@@ -1563,18 +1645,27 @@
         if (item.svg) h += '<div class="pc-q-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + item.svg + '</svg></div>';
         if (item.options && item.options.length) {
           h += '<div class="pc-ai-opts">';
+          const corArr = Array.isArray(item.answer) ? item.answer.map(function (x) { return String(x); }) : [];
+          const uaArr = Array.isArray(ua) ? ua.map(function (x) { return String(x); }) : null;
           item.options.forEach(function (opt, idx) {
             const txt = optText(opt);
             let cls = '';
-            if (txt === String(item.answer)) cls = ' correct';
-            else if (txt === String(ua) && !isCorrect) cls = ' wrong';
+            if (corArr.indexOf(txt) >= 0) cls = ' correct';
+            else if (uaArr && uaArr.indexOf(txt) >= 0 && !isCorrect) cls = ' wrong';
             h += '<div class="pc-ai-opt' + cls + '">' + String.fromCharCode(65 + idx) + '. ' + esc(txt) + '</div>';
           });
           h += '</div>';
         }
         h += '<div class="pc-ai-ans-row">';
-        h += '<span>你的答案：<b class="' + (isCorrect ? 'ok' : 'bad') + '">' + (ua !== '' ? esc(ua) : '未作答') + '</b></span>';
-        h += '<span>正确答案：<b class="ok">' + esc(item.answer) + '</b></span>';
+        // v108 T16：order/multi 数组答案 → 序号文本
+        const ansShow = Array.isArray(item.answer)
+          ? item.answer.map(function (x, xi) { return (item.type === 'order' ? (xi + 1) + '.' : '') + String(x); }).join('；')
+          : String(item.answer);
+        const uaShow = (uaArr !== null && uaArr !== undefined)
+          ? uaArr.map(function (x, xi) { return (item.type === 'order' ? (xi + 1) + '.' : '') + String(x); }).join('；')
+          : String(ua == null ? '' : ua);
+        h += '<span>你的答案：<b class="' + (isCorrect ? 'ok' : 'bad') + '">' + (uaShow !== '' ? esc(uaShow) : '未作答') + '</b></span>';
+        h += '<span>正确答案：<b class="ok">' + esc(ansShow) + '</b></span>';
         h += '</div>';
         if (item.explain) h += '<div class="pc-ai-explain"><b>解析：</b>' + esc(item.explain) + '</div>';
         if (item.steps && item.steps.length) {

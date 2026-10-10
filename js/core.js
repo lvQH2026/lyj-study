@@ -390,7 +390,7 @@ function getGradeLevel(accuracy) {
 }
 
 function questionTypeLabel(type) {
-  const map = { choice: '选择', fill: '填空', judge: '判断', calc: '计算', app: '应用', operation: '操作' };
+  const map = { choice: '选择', fill: '填空', judge: '判断', calc: '计算', app: '应用', operation: '操作', order: '排序', multi: '多选' };
   return map[type] || map[String(type)] || '其它';
 }
 
