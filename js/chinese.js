@@ -3675,6 +3675,14 @@ function cn5x8_pool() {
       if (!focus) return null;
       scope = [focus];
       title += '《' + focus.name + '》测试卷';
+    } else if (kind === 'month') {
+      // v111：月考 = 阶段测试，覆盖当前学期前 cover 个课本单元（与数学月考口径一致，第N次月考覆盖前 N×2 单元）
+      const term = arg && arg.term === '下' ? '下' : '上';
+      const cover = Math.max(1, (arg && arg.cover) || 2);
+      const tb = units.filter(function (u) { return u.group === '课本' && u.term === term; });
+      if (!tb.length) return null;
+      scope = tb.slice(0, Math.min(tb.length, cover));
+      title += (term === '下' ? '下册' : '上册') + '月考测试卷';
     } else if (kind === 'mid' || kind === 'final') {
       const isTbGrade = units.some(function (u) { return u.group === '\u8BFE\u672C'; });
       if (isTbGrade) {
@@ -3719,17 +3727,17 @@ function cn5x8_pool() {
     // 此前只按 question 去重，会把它们滤得只剩 1 道，导致卷子组不满 24 题且严重偏科。
     function qkey(q) { return q.question + '|' + (q.answer == null ? '' : String(q.answer)); }
 
-    // 第一部分 · 基础知识（10题）
+    // v111：第一部分 · 基础知识（12题，对齐单元练习 30 题总量）
     let taken = 0;
     shuffle(srcBase).forEach(function (q) {
-      if (taken >= 10 || used.has(qkey(q))) return;
+      if (taken >= 12 || used.has(qkey(q))) return;
       used.add(qkey(q));
       taken++;
       q.paperSection = '\u7B2C\u4E00\u90E8\u5206 \u00B7 \u57FA\u7840\u77E5\u8BC6';
       questions.push(q);
     });
 
-    // 第二部分 · 阅读理解（2篇 × 4题）
+    // v111：第二部分 · 阅读理解（2篇 × 5题 = 10题）
     const groups = {};
     srcRead.forEach(function (q) {
       const key = q.passage || ('__p_' + (q.section || ''));
@@ -3740,7 +3748,7 @@ function cn5x8_pool() {
     keys.slice(0, 2).forEach(function (k) {
       let tk = 0;
       shuffle(groups[k]).forEach(function (q) {
-        if (tk >= 4 || used.has(qkey(q))) return;
+        if (tk >= 5 || used.has(qkey(q))) return;
         used.add(qkey(q));
         tk++;
         q.paperSection = '\u7B2C\u4E8C\u90E8\u5206 \u00B7 \u9605\u8BFB\u7406\u89E3';
@@ -3748,10 +3756,10 @@ function cn5x8_pool() {
       });
     });
     // v72：专项单元常凑不满 2 篇（分组要求 >=3 题），导致卷子只有 20 题。
-    // 这里用剩余阅读题把第二部分补到 8 题。
-    const readNow = questions.length - 10;
-    if (readNow < 8) {
-      let needR = 8 - readNow;
+    // v111：这里用剩余阅读题把第二部分补到 10 题。
+    const readNow = questions.length - 12;
+    if (readNow < 10) {
+      let needR = 10 - readNow;
       shuffle(srcRead).forEach(function (q) {
         if (needR <= 0 || used.has(qkey(q))) return;
         used.add(qkey(q));
@@ -3761,27 +3769,27 @@ function cn5x8_pool() {
       });
     }
 
-    // 第三部分 · 积累与运用（6题）
+    // v111：第三部分 · 积累与运用（8题）
     const p3 = [];
     shuffle(srcAcc).forEach(function (q) {
-      if (p3.length >= 6 || used.has(qkey(q))) return;
+      if (p3.length >= 8 || used.has(qkey(q))) return;
       used.add(qkey(q));
       p3.push(q);
     });
-    if (p3.length < 6) {
+    if (p3.length < 8) {
       shuffle(srcBase).forEach(function (q) {
-        if (p3.length >= 6 || used.has(qkey(q))) return;
+        if (p3.length >= 8 || used.has(qkey(q))) return;
         used.add(qkey(q));
         p3.push(q);
       });
     }
     p3.forEach(function (q) { q.paperSection = '\u7B2C\u4E09\u90E8\u5206 \u00B7 \u79EF\u7D2F\u4E0E\u8FD0\u7528'; questions.push(q); });
 
-    // v72：收尾补齐到 24 题。专项单元题库较薄，三个分区都可能取不满，
-    // 这里用全池未用过的题补足，避免考试卷缺题。
-    if (questions.length < 24) {
+    // v72：收尾补齐。v111：结构卷总量对齐单元练习 = 30 题，
+    // 池子较薄的单元三个分区可能取不满，用全池未用过的题补足，避免考试卷缺题。
+    if (questions.length < 30) {
       shuffle(fallback).forEach(function (q) {
-        if (questions.length >= 24 || used.has(qkey(q))) return;
+        if (questions.length >= 30 || used.has(qkey(q))) return;
         used.add(qkey(q));
         q.paperSection = '\u7B2C\u56DB\u90E8\u5206 \u00B7 \u7EFC\u5408\u7EC3\u4E60';
         questions.push(q);

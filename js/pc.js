@@ -922,16 +922,32 @@
             + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(scope)) + '</div>';
         return;
       }
-      // 语文：无独立月考概念，月考按全册综合卷出题（与 startCnExam 实际行为一致）
+      // 语文：月考按阶段范围（第N次月考覆盖前 N×2 个课本单元，与数学月考口径一致），期中/期末走试卷结构
       const cnUnits = unitsOf();
       let cnTb = cnUnits.filter(function (u) { return u.group === '课本' && u.term === (S.semester === 1 ? '上' : '下'); });
       if (!cnTb.length) cnTb = cnUnits;
       const cnHalf = Math.max(1, Math.ceil(cnTb.length / 2));
       const cnTerm = S.semester === 1 ? '上册' : '下册';
+      if (S.examType === 'month') {
+        // v111：语文月考与数学同构——给「第几次月考」选择器 + 范围提示（1~cover 单元）
+        const maxMonth = Math.max(1, Math.ceil(cnTb.length / 2));
+        if (!S.examMonth || S.examMonth > maxMonth) S.examMonth = 1;
+        let mh = '<div class="pc-row"><span class="lab">月考次数</span><div class="pc-seg" id="examMonth">';
+        for (let m = 1; m <= maxMonth; m++) {
+          const cover = Math.min(cnTb.length, m * 2);
+          mh += '<button data-m="' + m + '" class="' + (m === S.examMonth ? 'active' : '') + '">第' + m + '次（1~' + cover + '单元）</button>';
+        }
+        mh += '</div></div>';
+        const mCover = Math.min(cnTb.length, S.examMonth * 2);
+        box.innerHTML = mh + '<div class="pc-hint">考查范围：' + cnTerm + '第 1~' + mCover + ' 单元</div>'
+          + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(cnTb, mCover)) + '</div>';
+        bindSeg('examMonth', function (m) { S.examMonth = +m; renderExamExtra(); });
+        return;
+      }
       box.innerHTML = S.examType === 'mid'
         ? '<div class="pc-hint">期中范围：' + cnTerm + '前半册课文单元（' + cnHalf + '/' + cnTb.length + ' 个）</div>'
           + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(cnTb, cnHalf)) + '</div>'
-        : '<div class="pc-hint">' + (S.examType === 'month' ? '阶段测试' : '期末测试') + '范围：' + cnTerm + '全册综合卷（' + cnTb.length + ' 个课文单元）</div>'
+        : '<div class="pc-hint">期末范围：' + cnTerm + '全册综合卷（' + cnTb.length + ' 个课文单元）</div>'
           + '<div class="pc-hint" style="margin-top:4px;opacity:.85">' + esc(examUnitNames(cnTb)) + '</div>';
       return;
     }
@@ -954,7 +970,7 @@
       // 单元考：走考试模式（beginQuiz mode=exam），而非单元练习
       if (S.subject === 'math') startMathExam('unit');
       else if (S.subject === 'english') startEngExam('unit');
-      else PC.startCnUnit(S.examUnitIdx || 0);
+      else startCnExam('unit');   // v111：语文单元考改走试卷结构（基础12+阅读10+积累8=30题）
       return;
     }
     // 月考 / 期中 / 期末：初中年级走 JRF 门控（与手机端同一套口径：只出已学范围）
@@ -1121,11 +1137,22 @@
     const term = S.semester === 1 ? '上' : '下';
     let tb = units.filter(function (u) { return u.group === '课本' && u.term === term; });
     if (!tb.length) tb = units;
-    const scope = (kind === 'mid') ? tb.slice(0, Math.ceil(tb.length / 2)) : tb;
-    let all = [];
-    scope.forEach(function (u) { (u.pool() || []).forEach(function (q) { all.push(q); }); });
-    const qs = shuffle(all).slice(0, 24);
-    const title = CN_NUM[S.grade] + '年级' + subjName(S.subject) + ' ' + (S.semester === 1 ? '上册' : '下册') + (kind === 'mid' ? '期中测试' : '期末测试');
+    // v111：复用 CN 试卷结构（基础12 + 阅读10 + 积累8 = 30 题）。
+    // 单元考=单单元；月考=第N次覆盖前 N×2 单元；期中=前半册；期末=全册。
+    let paper = null;
+    if (window.CN && CN._buildExam) {
+      try {
+        if (kind === 'unit') paper = CN._buildExam('unit', S.examUnitIdx || 0);
+        else if (kind === 'month') {
+          const m = S.examMonth || 1;
+          const cover = Math.min(tb.length, m * 2);
+          paper = CN._buildExam('month', { term: term, cover: cover });
+        } else paper = CN._buildExam(kind, term);
+      } catch (e) { paper = null; }
+    }
+    let qs = (paper && paper.questions) || [];
+    if (!qs.length) { toast('该考试暂无题目'); return; }
+    const title = paper.title || (CN_NUM[S.grade] + '年级' + subjName(S.subject) + ' ' + (S.semester === 1 ? '上册' : '下册') + (kind === 'month' ? '月考测试' : kind === 'mid' ? '期中测试' : '期末测试'));
     beginQuiz(qs, 'exam', title, subjName(S.subject), S.grade, true, function () { startCnExam(kind); });
   }
   function startEngUnit(levelIdx) {
