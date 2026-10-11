@@ -447,11 +447,15 @@
 
   // 主入口：把一道「需要打字的概念/短语/多空填空」改写成可点选形态。
   // 返回改写后的题（原对象就地修改），无改写则返回原对象。
-  function normalizeConceptFill(item, allItems) {
+  // v115：opts.fillToWord=true 时（PC 端语文 fill 专用），中文答案一律转词卡而非选择题，
+  // 避免语文短词答案（作者名/选字/拼音等）被 buildChoices 从同卷其他题答案串池。
+  function normalizeConceptFill(item, allItems, opts) {
     if (!item) return item;
     if (item._ikNorm) return item;
     // 已选择题 / 判断题 / 图形选择题 / 强制数字填空（数字键盘已覆盖）：不动
-    if (item.type === 'choice' || item.type === 'shape_choice' || item.judge) return item;
+    // v115 FIX：语文/初中各科 mkJudge 只设 type:'judge'（无 judge 布尔），旧守卫漏掉它们，
+    // 导致判断题在 PC 端被误转成 4 选 1 选择题、干扰项从同卷其他题答案串池。
+    if (item.type === 'choice' || item.type === 'shape_choice' || item.judge || item.type === 'judge') return item;
     // v85 P0：forceFill 是考试组卷「把这题塞进填空题区」的标记。旧版无条件早退，
     // 于是「在计数器上拨出61…」（答案「6个十和1个一」）在考试里被渲染成纯输入框——
     // 数字键盘覆盖不到中文答案，detect 返回 none，孩子不会打字直接丢分（违反零打字铁律）。
@@ -493,7 +497,29 @@
       return item;
     }
 
-    // ③ 单概念词 / 短语 → 选择题
+    // ③ 单概念词 / 短语 → 优先选择题（数学模式变换/概念池能出同源干扰项）。
+    // v115 FIX：语文 fill（opts.fillToWord）中文答案一律转词卡——旧版直接 buildChoices，
+    // 干扰项全从同卷其他题答案串池（如判断题"正确"混进仿写题、古诗默写题的干扰项）。
+    // 数学保持原路径：短概念词走 GLOBAL 概念池、数字短语走 transformDistractors。
+    if (opts && opts.fillToWord && /[一-龥]/.test(a)) {
+      var candsC = uniqArr([a].concat(siblingConcepts(item, allItems, 6)));
+      if (candsC.length >= 2) {
+        item.input = { mode: 'word', cands: candsC };
+        item._ikNorm = true;
+        return item;
+      }
+    }
+    var td = transformDistractors(a);
+    // 中文长短语（≥5字，语文仿写/默写/作者/诗句等）或纯拼音答案 → 词卡；
+    // 短中文概念词（周长/锐角/顶点，数学）保留选择题路径（GLOBAL 概念池能出同源干扰项）。
+    if (!td.length && ( /^[a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]+$/.test(a) || (/[一-龥]/.test(a) && a.length >= 5) )) {
+      var cands2 = uniqArr([a].concat(siblingConcepts(item, allItems, 6)));
+      if (cands2.length >= 2) {
+        item.input = { mode: 'word', cands: cands2 };
+        item._ikNorm = true;
+        return item;
+      }
+    }
     var choices = buildChoices(item, a, allItems);
     if (choices) convertToChoice(item, choices);
     return item;

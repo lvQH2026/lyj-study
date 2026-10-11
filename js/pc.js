@@ -1239,8 +1239,12 @@
     const q = S.quiz; const c = $('pcContent'); const total = q.questions.length; const i = q.idx;
     try { savePcDraft(); } catch (e) { }   // v103 P1-1：切题即落盘草稿
     // v84 P3：数学概念/短语/多空填空在渲染前改写成可点选形态，与移动端同一套逻辑。
+    // v115 FIX：语文 fill 传 opts.fillToWord —— 中文答案一律转词卡（同源候选词），
+    // 不再转成 4 选 1 选择题（旧版干扰项从同卷其他题答案串池）；判断题守卫已在 InputKit 修复。
     if (window.InputKit && InputKit.normalizeConceptFill) {
-      const nq = InputKit.normalizeConceptFill(q.questions[i], q.questions);
+      const _cur = q.questions[i];
+      const _cnFill = _cur && _cur.type === 'fill' && /语文/.test(q.module);
+      const nq = InputKit.normalizeConceptFill(_cur, q.questions, _cnFill ? { fillToWord: true } : undefined);
       if (nq) q.questions[i] = nq;
     }
     const item = q.questions[i];
