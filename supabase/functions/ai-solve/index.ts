@@ -21,8 +21,17 @@
 //     或 { ok:false, degrade:true, error } —— 前端自动降级本地预置卡片（孩子无感）
 //
 // 部署（需先建表 + RPC，见 supabase/migrations/20261011_ai_solve_usage.sql）：
-//   supabase secrets set DEEPSEEK_API_KEY=sk-新的 --project-ref wrgupojuxnkgwbiddbsv
-//   supabase functions deploy ai-solve --project-ref wrgupojuxnkgwbiddbsv
+//   ① 密钥：supabase secrets set DEEPSEEK_API_KEY=sk-新的 --project-ref wrgupojuxnkgwbiddbsv
+//      （也可在后台 Edge Functions → Secrets 里填，填完无需重新部署）
+//   ② 部署：supabase functions deploy ai-solve --project-ref wrgupojuxnkgwbiddbsv
+//
+// ⚠️ 必须用 verify_jwt=false 部署！本项目用的是新版 sb_publishable_ 密钥，
+//    而网关自带的 verify_jwt 只认旧版 JWT 密钥，开着会让请求在进函数前就被
+//    判 Invalid JWT（401/403）。身份校验已在函数内部自己做（闸门②）。
+//    CLI 部署时在 supabase/config.toml 写：
+//      [functions.ai-solve]
+//      verify_jwt = false
+//    走 Management API 部署时，metadata 里带 "verify_jwt": false。
 // ============================================================
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
@@ -117,12 +126,42 @@ function normalize(res: any) {
   return { topic, key, steps, summary };
 }
 
+// ---------- 项目密钥：兼容「新版 publishable/secret key」与「旧版 JWT key」 ----------
+// 2026 起 Supabase 推新版密钥（sb_publishable_* / sb_secret_*）：
+//   - 旧变量 SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY 是字符串
+//   - 新变量 SUPABASE_PUBLISHABLE_KEYS / SUPABASE_SECRET_KEYS 是 JSON（按名字索引）
+// 网关的 verify_jwt 只认旧版 JWT，所以部署时必须 verify_jwt=false，
+// 身份校验改在函数里自己做（见下方 projectKeys）。
+function jsonVals(raw: string | undefined): string[] {
+  if (!raw) return [];
+  try {
+    const o = JSON.parse(raw);
+    if (o && typeof o === 'object') return Object.values(o).map((v) => String(v));
+  } catch (_) { /* 不是 JSON，当普通字符串处理 */ }
+  return [String(raw)];
+}
+
+function projectKeys(): string[] {
+  const e = Deno.env;
+  const set = new Set<string>();
+  [e.get('SUPABASE_ANON_KEY'), e.get('SUPABASE_SERVICE_ROLE_KEY')].forEach((v) => { if (v) set.add(v); });
+  jsonVals(e.get('SUPABASE_PUBLISHABLE_KEYS')).forEach((v) => set.add(v));
+  jsonVals(e.get('SUPABASE_SECRET_KEYS')).forEach((v) => set.add(v));
+  return Array.from(set);
+}
+
+function serviceKey(): string {
+  const e = Deno.env;
+  const news = jsonVals(e.get('SUPABASE_SECRET_KEYS'));
+  return news[0] || e.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+}
+
 // ---------- 闸门③：全局日限额（数据库计数，失败则放行，不阻断讲题） ----------
 // RPC ai_solve_tick(p_limit) 语义：返回当日累计次数；超过 p_limit 时返回 -1。
 // 这里归一化成 { over, cnt }：计数器不可用（表/RPC 未建、网络异常）一律 fail-open。
 async function tickDaily(): Promise<{ over: boolean; cnt: number }> {
   const url = Deno.env.get('SUPABASE_URL');
-  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const key = serviceKey();
   if (!url || !key) return { over: false, cnt: 0 }; // 没配 → 放行
   try {
     const resp = await fetch(url.replace(/\/+$/, '') + '/rest/v1/rpc/ai_solve_tick', {
@@ -144,10 +183,10 @@ serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (req.method !== 'POST') return json({ ok: false, error: '仅支持 POST' }, 405);
 
-  // ---- 闸门②：必须带本站 apikey（挡掉盲扫） ----
-  const anon = Deno.env.get('SUPABASE_ANON_KEY') || '';
+  // ---- 闸门②：必须带本站密钥（挡掉盲扫；网关 verify_jwt 已设为 false） ----
+  const known = projectKeys();
   const gotKey = req.headers.get('apikey') || (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-  if (anon && gotKey !== anon) {
+  if (known.length && !known.includes(gotKey)) {
     return json({ ok: false, degrade: true, error: '身份校验未通过' }, 403);
   }
 
