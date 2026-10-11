@@ -7,7 +7,11 @@ window.APP_CONFIG = {
   LEARNING_ID: "LYJ-YONGJI", // 固定学习ID（吕泳冀专属，所有设备通用）
   LEARNING_PW: "202506",     // 固定口令（家长记住，远程查看用）
   CONTENT_ROW_ID: "override",
-  DEEPSEEK_API_KEY_B64: "c2stNmRkMzE2YzdiYmMzNGZkNWI4OTM0MzUyMWM2OWIzNmQ=",  // DeepSeek 讲题 API key（base64，运行时解码）
+  // ⚠️ v112：DeepSeek 讲题 API key 已从前端移除。
+  // 旧 key 明文(base64)放在公开 GitHub Pages，2026-10-11 被扫库脚本盗刷
+  // （525 次 / 2.74 亿 tokens / 账户打欠费）。key 现在只存在于服务端：
+  //   supabase secrets set DEEPSEEK_API_KEY=sk-xxx --project-ref wrgupojuxnkgwbiddbsv
+  // 前端走 supabase/functions/ai-solve 代理，永不接触 key。
 
   // 内容更新机制（二选一）：
   // ① 本地覆盖层：把下面的 units 填上题，重新部署即生效（手机端 Service Worker 会自动更新）。

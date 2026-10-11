@@ -239,7 +239,11 @@
 //   C. 修复容量抖动：4·下「四则运算」原只有 1 条参数化模板，容量在 22~24 间抖动
 //      （_cap 验收时好时坏），补 8 条模板后连续三次稳定 0/131 单元低于 24。
 //   验收：_cap 0/131、_audit_cross 0 题次超纲、SCOPE=all _test_all_units 0 条问题。
-const CACHE = 'lyj-shell-v111';
+// v112（2026-10-11）：AI 讲题改为走服务端 Edge Function 代理。
+//   ① 前端移除 DeepSeek 明文 key（被盗刷事故）；② js/aiSolve.js 改调
+//   supabase/functions/ai-solve；③ config.js 去掉 DEEPSEEK_API_KEY_B64。
+//   未部署 ai-solve 函数前，讲题自动降级本地预置卡片，孩子侧无感。
+const CACHE = 'lyj-shell-v112';
 const SHELL = [
   './', './index.html', './pc.html', './manifest.webmanifest',
   './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',
