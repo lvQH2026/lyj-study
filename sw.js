@@ -243,7 +243,11 @@
 //   ① 前端移除 DeepSeek 明文 key（被盗刷事故）；② js/aiSolve.js 改调
 //   supabase/functions/ai-solve；③ config.js 去掉 DEEPSEEK_API_KEY_B64。
 //   未部署 ai-solve 函数前，讲题自动降级本地预置卡片，孩子侧无感。
-const CACHE = 'lyj-shell-v113';
+// v114（2026-10-11）：语文 P0/P1/P2 修复上线（chinese.js/cn_method_pool.js/pc.js v112）：
+//   ① P0 知识性错误 11 题（含五行移入六单元、五单元补 3 题保 30）；
+//   ② P1 超纲 13 题降级为小学表述；③ P2 核对 4 处（旋转读音/火星原文/病句多解）；
+//   ④ pc.js 成绩确认页 uaArr/corArr 声明提升（此前确认成绩页报错打不开）。
+const CACHE = 'lyj-shell-v114';
 const SHELL = [
   './', './index.html', './pc.html', './manifest.webmanifest',
   './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',

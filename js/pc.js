@@ -1670,10 +1670,12 @@
         var _aiq = (item.question && item.question.indexOf('class="frac"') >= 0) ? item.question : esc(item.question);
         h += '<div class="pc-ai-stem">' + _aiq + '</div>';
         if (item.svg) h += '<div class="pc-q-svg"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">' + item.svg + '</svg></div>';
+        // v112 UI实测BUG-XX：uaArr 原声明在 if 块内、却在块外使用 → ReferenceError，成绩确认页打不开。
+        // 提升声明到块外（corArr 一并提升，供块内引用不受影响）。
+        const corArr = Array.isArray(item.answer) ? item.answer.map(function (x) { return String(x); }) : [];
+        const uaArr = Array.isArray(ua) ? ua.map(function (x) { return String(x); }) : null;
         if (item.options && item.options.length) {
           h += '<div class="pc-ai-opts">';
-          const corArr = Array.isArray(item.answer) ? item.answer.map(function (x) { return String(x); }) : [];
-          const uaArr = Array.isArray(ua) ? ua.map(function (x) { return String(x); }) : null;
           item.options.forEach(function (opt, idx) {
             const txt = optText(opt);
             let cls = '';
