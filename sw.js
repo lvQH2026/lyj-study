@@ -247,7 +247,7 @@
 //   ① P0 知识性错误 11 题（含五行移入六单元、五单元补 3 题保 30）；
 //   ② P1 超纲 13 题降级为小学表述；③ P2 核对 4 处（旋转读音/火星原文/病句多解）；
 //   ④ pc.js 成绩确认页 uaArr/corArr 声明提升（此前确认成绩页报错打不开）。
-const CACHE = 'lyj-shell-v115';
+const CACHE = 'lyj-shell-v117';
 const SHELL = [
   './', './index.html', './pc.html', './manifest.webmanifest',
   './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',

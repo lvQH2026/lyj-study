@@ -452,10 +452,12 @@
   function normalizeConceptFill(item, allItems, opts) {
     if (!item) return item;
     if (item._ikNorm) return item;
-    // 已选择题 / 判断题 / 图形选择题 / 强制数字填空（数字键盘已覆盖）：不动
+    // 已选择题 / 判断题 / 图形选择题 / 排序题 / 多选题 / 强制数字填空（数字键盘已覆盖）：不动
     // v115 FIX：语文/初中各科 mkJudge 只设 type:'judge'（无 judge 布尔），旧守卫漏掉它们，
     // 导致判断题在 PC 端被误转成 4 选 1 选择题、干扰项从同卷其他题答案串池。
-    if (item.type === 'choice' || item.type === 'shape_choice' || item.judge || item.type === 'judge') return item;
+    // v117 FIX：order/multi 答案本就是数组，旧守卫漏掉它们 → 数组被 String() 拆成逗号串，
+    // 再被「多空概念」或词卡逻辑改写 → 排序题/多选题在 PC 端被降级成 4 选 1，判分永远错误。
+    if (item.type === 'choice' || item.type === 'shape_choice' || item.type === 'order' || item.type === 'multi' || item.judge || item.type === 'judge') return item;
     // v85 P0：forceFill 是考试组卷「把这题塞进填空题区」的标记。旧版无条件早退，
     // 于是「在计数器上拨出61…」（答案「6个十和1个一」）在考试里被渲染成纯输入框——
     // 数字键盘覆盖不到中文答案，detect 返回 none，孩子不会打字直接丢分（违反零打字铁律）。
