@@ -4385,27 +4385,33 @@ function cn5x8_pool() {
         el('cnFeedback').innerHTML += ' <span class="u-c-ok u-bg-ok-s3 u-p2-8 u-r8 u-fs12 u-ml6">已掌握，自动移出错题本</span>';
       }
     } else {
-      // v97：AI 讲题——先显示加载态，异步调 DeepSeek，失败降级预置卡片
+      // v114：答错【立刻】显示本地预置讲解卡（不再 spinner 干等），AI 返回后若仍在本题则原地升级为 AI 卡。
+      //       旧 bug：这里先显示「AI 正在讲解…」加载卡，而下方 3 秒自动切题定时器把反馈区整个清掉
+      //       → 手机端 AI 讲题「一闪而过」，结果被守卫丢弃（每次答错白花一次 API）。
       let cnPresetHtml = '';
       if (window.AixueGuide && AixueGuide.makeAixueGuide && AixueGuide.guideHtml) {
         try { cnPresetHtml = AixueGuide.guideHtml(AixueGuide.makeAixueGuide(item)); } catch (e) { cnPresetHtml = ''; }
       }
-      var cnLoadingHtml = (window.AixueGuide && AixueGuide.loadingHtml) ? AixueGuide.loadingHtml() : '';
-      el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnLoadingHtml;
-      if (item.explain) el('cnFeedback').innerHTML += '<div class="u-fs12 u-c-light u-mt4">解析：' + item.explain + '</div>';
+      const cnWrongHtml = function (card) {
+        let h = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + (card || '');
+        if (item.explain) h += '<div class="u-fs12 u-c-light u-mt4">解析：' + item.explain + '</div>';
+        // v114：练习模式答错不再自动切题——讲解卡需要时间读，改「下一题」按钮手动推进
+        if (!q.paper) h += '<button class="btn btn-primary u-w100 u-mt10" style="min-height:48px" onclick="CN.nextQuestion()">下一题 \u2192</button>';
+        return h;
+      };
+      el('cnFeedback').innerHTML = cnWrongHtml(cnPresetHtml);
       if (window.AiSolve && AiSolve.callSolve) {
         // v108 BUG-08：闭包捕获本题 idx，AI 结果返回时若已切题则丢弃（防串台写进下一题反馈区）
+        // v114 注：丢弃前 aiSolve 内部已写入 localStorage 缓存，错题重练同题会秒回 AI 卡，不浪费
         const solvedIdx = q.idx;
         AiSolve.callSolve(item.question, '语文', '', item.answer).then(function (data) {
           if (cnState.quiz.idx !== solvedIdx) return;
           var card = (data && window.AixueGuide && AixueGuide.guideHtml) ? AixueGuide.guideHtml(data) : cnPresetHtml;
-          el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + card;
+          el('cnFeedback').innerHTML = cnWrongHtml(card);
         }).catch(function () {
           if (cnState.quiz.idx !== solvedIdx) return;
-          el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnPresetHtml;
+          el('cnFeedback').innerHTML = cnWrongHtml(cnPresetHtml);
         });
-      } else {
-        el('cnFeedback').innerHTML = '<span class="u-c-bad u-fw600">\u2718 答错了。</span> <span class="u-c-light">正确答案：' + item.answer + '</span>' + cnPresetHtml;
       }
       // 加入错题库
       cnAddWrong(item, ans);
@@ -4423,16 +4429,26 @@ function cn5x8_pool() {
 
     // v108 BUG-06：判分后落盘草稿（防退出/刷新丢进度）
     cnSaveDraft();
-    // v108 BUG-02：推进定时器保存句柄，新提交/跳题先 clearTimeout
-    cnPendingTimer = setTimeout(function () {
-      cnPendingTimer = null;
-      q.idx++;
-      if (q.idx >= q.questions.length) {
-        cnShowResult();
-      } else {
-        cnRenderQuestion();
-      }
-    }, correct ? 600 : 3000);
+    // v114：答对 600ms 自动推进；考试模式答错保留 3s 自动推进（考试节奏优先，讲解卡已即时可见）；
+    //       练习模式答错【不自动切题】——AI/预置讲解卡需要时间读，由「下一题」按钮手动推进。
+    if (correct || q.paper) {
+      cnPendingTimer = setTimeout(function () {
+        cnPendingTimer = null;
+        cnAdvanceQuestion();
+      }, correct ? 600 : 3000);
+    }
+  }
+
+  // v114：推进到下一题（自动定时器与「下一题」按钮共用入口）
+  function cnAdvanceQuestion() {
+    const q = cnState.quiz;
+    if (cnPendingTimer) { clearTimeout(cnPendingTimer); cnPendingTimer = null; }
+    q.idx++;
+    if (q.idx >= q.questions.length) {
+      cnShowResult();
+    } else {
+      cnRenderQuestion();
+    }
   }
 
   // ---- 结果页（v75：两步式 批改成绩 → 答案解析）----
@@ -4995,6 +5011,7 @@ function cn5x8_pool() {
     selectOption: cnSelectOption,
     jump: cnJump,                  // v73.2：题号导航跳转
     submit: cnSubmit,
+    nextQuestion: cnAdvanceQuestion,   // v114：练习模式答错后手动推进（讲解卡不再被 3s 定时器冲掉）
     // v108：填空自评模式 + 跳过/交卷出口
     selfMark: cnSelfMark,
     showFillAnswer: cnShowFillAnswer,
