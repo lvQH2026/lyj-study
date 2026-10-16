@@ -822,11 +822,16 @@
   function examUnitNames(units, count) {
     var arr = (count ? units.slice(0, count) : units).map(function (u) {
       var nm = (u && u.name) ? String(u.name) : '';
-      nm = nm.replace(/^第[一二三四五六七八九零〇\d]+单元\s*/, '')
-             .replace(/^[\d]+\s*/, '')
-             .replace(/^[一二三四五六七八九]+\s*/, '')
-             .replace(/^☆\s*/, '')
-             .trim();
+      // v118 BUG-FIX：语文单元名如「四年级上册·第一单元」会被下面的汉字数字规则
+      // 误删「四」→「年级上册·第一单元」；X年级开头的名字整体保留，只对数学等
+      // 「第X单元」/纯数字序号开头的名字做清理。
+      if (!/^[一二三四五六七八九]年级/.test(nm)) {
+        nm = nm.replace(/^第[一二三四五六七八九零〇\d]+单元\s*/, '')
+               .replace(/^[\d]+\s*/, '')
+               .replace(/^[一二三四五六七八九]+\s*/, '')
+               .replace(/^☆\s*/, '')
+               .trim();
+      }
       return nm;
     }).filter(Boolean);
     if (arr.length > 8) return arr.slice(0, 8).join('、') + ' 等共' + arr.length + '个单元';
@@ -1133,6 +1138,12 @@
   }
   function startCnUnit(idx) { startCnUnitWithDiff(idx, 1); }
   function startCnExam(kind) {
+    // v118 BUG-FIX：PC 端语文组卷此前用 chinese.js 内部 cnState.grade（默认6），
+    // 而 UI 年级切换只改 PC 的 S.grade —— 四年级月考会出成六年级卷。
+    // 组卷前把 CN 内部年级同步到 S.grade（cnRenderHome 无 cnHomeContent 时安全返回）。
+    if (window.CN && typeof CN.selectGrade === 'function') {
+      try { CN.selectGrade(S.grade); } catch (e) {}
+    }
     const units = unitsOf();
     const term = S.semester === 1 ? '上' : '下';
     let tb = units.filter(function (u) { return u.group === '课本' && u.term === term; });

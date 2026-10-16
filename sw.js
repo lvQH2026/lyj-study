@@ -247,11 +247,16 @@
 //   ① P0 知识性错误 11 题（含五行移入六单元、五单元补 3 题保 30）；
 //   ② P1 超纲 13 题降级为小学表述；③ P2 核对 4 处（旋转读音/火星原文/病句多解）；
 //   ④ pc.js 成绩确认页 uaArr/corArr 声明提升（此前确认成绩页报错打不开）。
-const CACHE = 'lyj-shell-v117';
+// v118（2026-10-17）：四年级语文按六年级 v112 体系全量重做上线：
+//   ① js/cn_method_pool_4.js 新增（四年级答题公式专项 144 题/27 考点，含古诗文/口语/习作）；
+//   ② chinese.js v118：CN_FORMULAS 27 考点 grade 扩至含 4、CN_FORMULAS_DEMO4 四年级例句、
+//      cn4_method_pool() 挂载、专项体系对齐（11 专项：保留拼音/识字/词语 + 六年级 8 专项）；
+//   ③ pc.html/index.html 引用 cn_method_pool_4.js?v=v118。
+const CACHE = 'lyj-shell-v118';
 const SHELL = [
   './', './index.html', './pc.html', './manifest.webmanifest',
   './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',
-  './js/core.js', './js/math.js', './js/pc.js', './js/inputKit.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/pep.js', './js/engPep.js', './js/chinese.js', './js/cn_method_pool.js', './js/cn6_expand_pool.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
+  './js/core.js', './js/math.js', './js/pc.js', './js/inputKit.js', './js/data.js', './js/gx_real.js', './js/english.js', './js/pep.js', './js/engPep.js', './js/chinese.js', './js/cn_method_pool.js', './js/cn_method_pool_5.js', './js/cn_method_pool_4.js', './js/cn6_expand_pool.js', './js/diagram.js', './js/main.js', './js/aiAnalysis.js', './js/aiGrade.js',
   './js/supabase-js.min.js',
   './config.js', './supabase.js', './parent.js',
   './icons/icon-192.png', './icons/icon-512.png'

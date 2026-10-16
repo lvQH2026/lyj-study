@@ -233,6 +233,11 @@ function openPracticeSettings(opts) {
     mask.className = 'ps-mask';
     document.body.appendChild(mask);
   }
+  // v118 FIX：先彻底关闭上次遗留状态再打开，避免 transition 未生效导致弹窗残留遮挡答题页。
+  mask.classList.remove('show');
+  mask.style.transition = 'none';
+  mask.style.visibility = 'hidden';
+  mask.style.opacity = '0';
   _practiceDiffSel = (typeof opts.value === 'number') ? opts.value : 1;
   let h = '<div class="ps-dialog">';
   h += '<div class="ps-title">' + title + '</div>';
@@ -249,8 +254,18 @@ function openPracticeSettings(opts) {
     '<button type="button" class="ps-btn ok" data-ps="ok">' + okText + '</button></div>';
   h += '</div>';
   mask.innerHTML = h;
+  mask.style.transition = '';
   mask.classList.add('show');
-  const close = function () { mask.classList.remove('show'); };
+  mask.style.visibility = '';
+  mask.style.opacity = '';
+  const close = function () {
+    mask.classList.remove('show');
+    // v118 FIX：不依赖 CSS transition（Chrome backdrop-filter 合成层下 transition 可能冻结在起点，
+    // 导致 computed 保持 visible、弹窗视觉残留遮挡答题页），禁用过渡并内联强制隐藏兜底
+    mask.style.transition = 'none';
+    mask.style.visibility = 'hidden';
+    mask.style.opacity = '0';
+  };
   mask.querySelectorAll('.ps-opt').forEach(function (b) {
     b.addEventListener('click', function () {
       const grp = b.getAttribute('data-grp');
