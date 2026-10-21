@@ -22,6 +22,14 @@ alter table public.ai_solve_usage enable row level security;
 -- 默认全部拒绝；service_role 绕过 RLS 正常工作，前端（anon key）既读不到也改不了。
 -- 若日后要开放只读统计，再单独加一条 select policy。
 
+-- 2026-10-21 补充（应对 Supabase 2026-10-30 变更）：
+--   自该日起，public 模式新建表须经 Data API（PostgREST/GraphQL/supabase-js）访问前显式 GRANT，
+--   否则返回 "permission denied"。本表只由 service_role 经 security definer 的 ai_solve_tick 落库，
+--   故仅授予 service_role；anon/authenticated 经 RLS 默认全拒，不需直接表授权。
+grant select, insert, update, delete
+  on public.ai_solve_usage
+  to service_role;
+
 -- 2) 原子自增 + 超限判断
 --    返回：当日累计次数；超过 p_limit 返回 -1（调用方据此降级，不再花钱请求模型）
 create or replace function public.ai_solve_tick(p_limit integer default 200)
@@ -48,6 +56,13 @@ begin
   return v_cnt;
 end;
 $$;
+
+-- 2026-10-21 补充（应对 Supabase 2026-10-30 变更）：
+--   允许经 PostgREST 调用本 RPC。函数 security definer，会以定义者权限落到 ai_solve_usage，
+--   调用方无需直接表授权。service_role 供 Edge Function 使用；anon/authenticated 留作备用。
+grant execute
+  on function public.ai_solve_tick(integer)
+  to anon, authenticated, service_role;
 
 -- 3) 清理：保留最近 90 天（可选，手动执行即可）
 -- delete from public.ai_solve_usage where day < to_char((now() - interval '90 days') at time zone 'Asia/Shanghai', 'YYYY-MM-DD');
