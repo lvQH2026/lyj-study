@@ -5574,7 +5574,9 @@ function cn5x8_pool() {
   function cnBookQScore(q, qp) {
     var n = q.steps.length, ok = 0;
     for (var i = 0; i < n; i++) { var st = qp.step['' + i]; if (st && st.ok) ok++; }
-    return Math.round(ok / n * q.points);
+    if (ok === n) return q.points;                     // 全对给满分
+    if (ok === 0) return 0;                           // 全错给 0
+    return Math.floor(ok / n * q.points + 1e-9);      // 部分分向下取整，避免 3/4 误判满分（测评真实性优先）
   }
   function cnBookArticleScore(art, prog) {
     var s = 0; art.questions.forEach(function (q) { var qp = prog.qs[q.no]; if (qp && qp.done) s += cnBookQScore(q, qp); }); return s;
@@ -5670,10 +5672,13 @@ function cn5x8_pool() {
     var activeStep = (curQ && curQ.steps[cnBookState.curStep] && curQ.steps[cnBookState.curStep].type === 'locate') ? cnBookState.curStep : -1;
     if (activeStep >= 0) {
       pHtml = pHtml.split('class="cn-mk"').join('class="cn-mk cn-mk-active"');
+      // 关键修复（v122）：给画线句绑定点击，否则真实用户点文中句子没有任何反应
+      pHtml = pHtml.replace(/class="cn-mk cn-mk-active" data-mk="([^"]+)"/g,
+        'class="cn-mk cn-mk-active" data-mk="$1" onclick="CN.bookLocate(\'$1\')"');
       var st = (prog.qs[curQ.no] && prog.qs[curQ.no].step['' + activeStep]) ? prog.qs[curQ.no].step['' + activeStep].v : [];
       (st || []).forEach(function (mk) {
-        var re = new RegExp('class="cn-mk cn-mk-active" data-mk="' + mk + '"');
-        pHtml = pHtml.replace(re, 'class="cn-mk cn-mk-active cn-mk-on" data-mk="' + mk + '"');
+        var re = new RegExp('class="cn-mk cn-mk-active cn-mk-on" data-mk="' + mk + '" onclick="CN\\.bookLocate\\(\'' + mk + '\'\\)"');
+        pHtml = pHtml.replace(re, 'class="cn-mk cn-mk-active cn-mk-on" data-mk="' + mk + '" onclick="CN.bookLocate(\'' + mk + '\')"');
       });
     }
 
