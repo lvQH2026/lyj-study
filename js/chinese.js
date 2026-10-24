@@ -5396,6 +5396,9 @@ function cn5x8_pool() {
       return;
     }
     const picked = shuffle(wrongs.slice()).slice(0, 30);
+    // v119：错题重练统一洗选项——v112 前录入的旧错题选项仍是原始固定顺序（答案恒在 A 位 /
+    // 排序题同序泄露），且同一题重练时永远冻结当时顺序。每次重练重洗一次（判分按内容比对，不受影响）。
+    cnShuffleQuestionOptions(picked.map(function (w) { return w.question; }));
     cnState.quiz = {
       questions: picked.map(function (w) { return w.question; }),
       sourceIds: picked.map(function (w) { return w.id; }), // v53：错题重练记录来源 id，答对即移出
