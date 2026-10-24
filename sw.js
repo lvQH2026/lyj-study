@@ -252,7 +252,7 @@
 //   ② chinese.js v118：CN_FORMULAS 27 考点 grade 扩至含 4、CN_FORMULAS_DEMO4 四年级例句、
 //      cn4_method_pool() 挂载、专项体系对齐（11 专项：保留拼音/识字/词语 + 六年级 8 专项）；
 //   ③ pc.html/index.html 引用 cn_method_pool_4.js?v=v118。
-const CACHE = 'lyj-shell-v119';
+const CACHE = 'lyj-shell-v120';
 const SHELL = [
   './', './index.html', './pc.html', './manifest.webmanifest',
   './css/style.css', './css/english.css', './css/inputkit.css', './css/pc.css',

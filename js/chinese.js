@@ -1850,6 +1850,7 @@
       { name: '专项·课本综合30题', group: '专项', type: 'mixed', deck: true, quizLength: 30, pool: cn6_mixed_pool, fidx: [], summary: ['本题库依据 2026 秋统编版六年级上册逐项核对后编写，每题标注单元与课文出处', '覆盖五大题型：字词基础、古诗文默写与理解、课文内容理解、课内阅读、语言运用', '抽题规则：从题池中随机洗牌后抽取，同一轮内不重复；一轮题目全部做完自动重新洗牌', '答题后立即显示标准答案与简要解析，便于自行订正'], note: '教材已按 2026 秋统编版六上核对' },
       { name: '专项·综合运用', group: '专项', type: 'application', pool: cn6_comprehensive_pool, fidx: [10], summary: ['口语交际：称呼礼貌、语气委婉、意思清楚', '转述要点：人物、时间、地点、事情不能错', '拟标题：抓住主要内容，语言简洁', '标语广告语：简洁、醒目、有感染力', '综合性学习：调查、采访、查资料相结合'] },
       { name: '专项·答题公式', group: '专项', type: 'reading', pool: cn6_method_pool, fidx: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], quizLength: 30, deck: true, summary: ['27 个必考考点，每个考点配答题公式（公式卡）：阅读 15 + 古诗文 3 + 口语交际 3 + 习作 6', '阅读每考点 6 题：看示范 1 题（判断公式步骤）+ 套公式 2 题 + 排序 1 题 + 换情境 2 题', '古诗文 / 口语每考点 6 题，习作每考点 3 题（轻量筛查）', '排序题：按正确顺序点选，可撤销/清空重排', '错题会挂对应公式卡，可一键按考点重练', '示范与情境短文均取自六年级课本 26 课白名单', '目标：读题见考点 → 套公式 → 得满分'] },
+      { name: '专项·阅读实战（书本式）', group: '专项', type: 'bookread', summary: ['仿真书本整篇阅读：先练课文篇打基础，再练一篇相似文迁移', '每篇含完整文章＋可点选画线句＋①~⑤ 编号子题（试卷用语题型徽章）', '每题拆四步：认题型 → 定原文 → 组装 → 自查，做到哪步停哪步，自动续做', '零打字全点选，自动算分与即时批改，哪步对哪步缺一目了然', '覆盖六上《穷人》《桥》《月光曲》《少年闰土》《只有一个地球》5 组篇目'] },
     ],
   };
 
@@ -2527,7 +2528,7 @@
   function el(id) { return document.getElementById(id); }
 
   function cnShowPage(pageId) {
-    ['cnPageHome', 'cnPageQuiz', 'cnPageResult', 'cnPageWrong', 'cnPageLearn', 'cnPageExam'].forEach(function (pid) {
+    ['cnPageHome', 'cnPageQuiz', 'cnPageResult', 'cnPageWrong', 'cnPageLearn', 'cnPageExam', 'cnPageBook'].forEach(function (pid) {
       const p = el(pid);
       if (p) p.classList.remove('active');
     });
@@ -3892,10 +3893,15 @@ function cn5x8_pool() {
       if (u.lessons && u.lessons.length) {
         c += '<div class="u-fs11 u-c-light u-mb8 u-lh18">' + u.lessons.join('　') + '</div>';
       }
-      c += '<div class="u-flex u-g8">';
-      c += '<button class="btn btn-primary u-f1 u-p10 u-fs13" onclick="CN.showLearn(' + i + ')">同步学习</button>';
-      c += '<button class="btn btn-outline u-f1 u-p10 u-fs13" onclick="CN.beginQuiz(' + i + ')">练习 ' + PRAC_N + ' 题</button>';
-      c += '</div></div>';
+      if (u.type === 'bookread') {
+        c += '<button class="btn btn-primary u-fs14 u-p12" style="width:100%" onclick="CN.beginBook(' + i + ')">📖 开始阅读（书本式·整篇实践）</button>';
+      } else {
+        c += '<div class="u-flex u-g8">';
+        c += '<button class="btn btn-primary u-f1 u-p10 u-fs13" onclick="CN.showLearn(' + i + ')">同步学习</button>';
+        c += '<button class="btn btn-outline u-f1 u-p10 u-fs13" onclick="CN.beginQuiz(' + i + ')">练习 ' + PRAC_N + ' 题</button>';
+        c += '</div>';
+      }
+      c += '</div>';
       return c;
     }
 
@@ -4211,6 +4217,7 @@ function cn5x8_pool() {
     const units = CN_DATA[cnState.grade] || [];
     const unit = units[idx];
     if (!unit) return;
+    if (unit.type === 'bookread') { cnBeginBookReading(idx); return; }
     cnState.unitIdx = idx;
     window.CN._lastUnitIdx = idx;
     window.CN._lastUnitDiff = diff || 1;
@@ -5535,6 +5542,355 @@ function cn5x8_pool() {
   }
 
   // ---- 暴露接口 ----
+  /* ===================== 专项·阅读实战（书本式）v120 ===================== */
+  var CN_BOOK_KEY = 'lyj_cn_book_v1';
+  var cnBookState = { articleId: null, curNo: 1, curStep: 0 };
+
+  function cnBookData() { return (typeof window.CN_READING !== 'undefined' && window.CN_READING) ? window.CN_READING : []; }
+  function cnReadingById(id) { var a = cnBookData(); for (var i = 0; i < a.length; i++) { if (a[i].id === id) return a[i]; } return null; }
+  function cnBookGroups() { var seen = {}, out = []; cnBookData().forEach(function (a) { if (!seen[a.group]) { seen[a.group] = 1; out.push(a.group); } }); return out; }
+  function cnFormulaByKey(k) { for (var i = 0; i < CN_FORMULAS.length; i++) { if (CN_FORMULAS[i].k === k) return CN_FORMULAS[i]; } return null; }
+  function cnArrEq(a, b) { if (!a || !b || a.length !== b.length) return false; for (var i = 0; i < a.length; i++) { if (a[i] !== b[i]) return false; } return true; }
+  function cnSetEq(a, b) { if (!a || !b || a.length !== b.length) return false; var x = a.slice().sort(), y = b.slice().sort(); return cnArrEq(x, y); }
+  function cnBookLoad() { try { return JSON.parse(localStorage.getItem(CN_BOOK_KEY)) || {}; } catch (e) { return {}; } }
+  function cnBookSave(all) { try { localStorage.setItem(CN_BOOK_KEY, JSON.stringify(all)); } catch (e) {} }
+  function cnBookProg(id) { var all = cnBookLoad(); if (!all[id]) all[id] = { qs: {}, cur: 1, finished: false }; return all[id]; }
+  function cnBookPersist(id, prog) { var all = cnBookLoad(); all[id] = prog; cnBookSave(all); }
+  function cnBookStepHasSel(step, v) {
+    if (step.type === 'recognize') return (typeof v === 'number');
+    return (Array.isArray(v) && v.length > 0);
+  }
+  function cnBookGradeStep(step, v) {
+    if (step.type === 'recognize') return { ok: (v === step.answer), exp: step.answer };
+    if (step.type === 'locate') return { ok: cnSetEq(v || [], step.targets || []), exp: step.targets };
+    if (step.type === 'assemble') return { ok: cnArrEq(v || [], step.order || []), exp: step.order };
+    if (step.type === 'selfcheck') return { ok: (Array.isArray(v) && step.checks && v.length === step.checks.length), exp: step.checks ? step.checks.length : 0 };
+    return { ok: false, exp: null };
+  }
+  function cnBookFirstUnfinishedStep(q, qp) {
+    for (var i = 0; i < q.steps.length; i++) { var st = qp.step['' + i]; if (!st || !cnBookStepHasSel(q.steps[i], st.v)) return i; }
+    return 0;
+  }
+  function cnBookQScore(q, qp) {
+    var n = q.steps.length, ok = 0;
+    for (var i = 0; i < n; i++) { var st = qp.step['' + i]; if (st && st.ok) ok++; }
+    return Math.round(ok / n * q.points);
+  }
+  function cnBookArticleScore(art, prog) {
+    var s = 0; art.questions.forEach(function (q) { var qp = prog.qs[q.no]; if (qp && qp.done) s += cnBookQScore(q, qp); }); return s;
+  }
+  function cnBookStepLabels() { return ['认题型', '定原文', '组装', '自查']; }
+
+  function cnToast(m) {
+    var t = el('cnBookToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'cnBookToast';
+      t.style.cssText = 'position:fixed;left:50%;top:18%;transform:translateX(-50%);background:rgba(46,53,74,.92);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:99999;max-width:88%;text-align:center;pointer-events:none;transition:opacity .3s;';
+      document.body.appendChild(t);
+    }
+    t.textContent = m; t.style.opacity = '1';
+    clearTimeout(t._tm); t._tm = setTimeout(function () { t.style.opacity = '0'; }, 1800);
+  }
+
+  function cnShowBookPage() {
+    var p = el('cnPageBook'); if (!p) return;
+    if (p.classList.contains('page')) { cnShowPage('cnPageBook'); }
+    else { p.style.display = 'block'; var app = el('pcApp'); if (app) app.style.display = 'none'; }
+    window.scrollTo(0, 0);
+  }
+  function cnHideBookPage() {
+    var p = el('cnPageBook'); if (!p) return;
+    if (p.classList.contains('page')) { cnGoHome(); }
+    else { p.style.display = 'none'; var app = el('pcApp'); if (app) app.style.display = ''; }
+  }
+
+  function cnBeginBookReading(idx) {
+    cnBookState.articleId = null;
+    cnShowBookPage();
+    cnRenderBookHome();
+  }
+
+  function cnRenderBookHome() {
+    var root = el('cnPageBook'); if (!root) return;
+    var groups = cnBookGroups();
+    var h = '';
+    h += '<div class="book-top"><button class="book-back" onclick="CN.bookExit()">← 返回</button><div class="book-top-t">专项·阅读实战（书本式）</div></div>';
+    h += '<div class="book-sub">仿真书本整篇阅读：先练课文篇打基础，再练一篇相似文迁移。点选答题，做到哪步停哪步，自动续做。</div>';
+    groups.forEach(function (g) {
+      var inA = null, outA = null;
+      cnBookData().forEach(function (a) { if (a.group === g) { if (a.mode === 'in') inA = a; else outA = a; } });
+      if (!inA && !outA) return;
+      h += '<div class="book-group"><div class="book-group-t">第 ' + g.toUpperCase() + ' 组</div><div class="book-group-row">';
+      if (inA) h += cnBookArticleCard(inA);
+      if (outA) h += cnBookArticleCard(outA);
+      h += '</div></div>';
+    });
+    root.innerHTML = h;
+  }
+  function cnBookArticleCard(a) {
+    var prog = cnBookProg(a.id);
+    var totalQ = a.questions.length, doneQ = 0;
+    a.questions.forEach(function (q) { if (prog.qs[q.no] && prog.qs[q.no].done) doneQ++; });
+    var badge = doneQ === totalQ ? '<span class="book-badge ok">✓ 已完成</span>'
+      : (doneQ > 0 ? '<span class="book-badge ing">进行中 ' + doneQ + '/' + totalQ + '</span>' : '<span class="book-badge">未开始</span>');
+    var modeLabel = a.mode === 'in' ? '课文篇' : '迁移篇';
+    return '<div class="book-card" onclick="CN.bookOpenArticle(\'' + a.id + '\')">'
+      + '<div class="book-card-mode ' + (a.mode === 'in' ? 'in' : 'out') + '">' + modeLabel + '</div>'
+      + '<div class="book-card-title">' + esc(a.title) + '</div>'
+      + '<div class="book-card-meta">' + esc(a.author) + ' · 建议 ' + a.time + ' 分钟 · ' + totalQ + ' 题</div>'
+      + '<div class="book-card-foot">' + badge + '<span class="book-card-score">已得 ' + cnBookArticleScore(a, prog) + '/' + a.total + '</span></div>'
+      + '</div>';
+  }
+
+  function cnOpenArticle(id) {
+    var art = cnReadingById(id); if (!art) return;
+    var prog = cnBookProg(id);
+    cnBookState.articleId = id;
+    var firstNo = 1;
+    for (var i = 0; i < art.questions.length; i++) { var q = art.questions[i]; var qp = prog.qs[q.no]; if (!qp || !qp.done) { firstNo = q.no; break; } }
+    // 续做：若上次停留的题已完成，则跳到首个未完成题；否则停在停留处
+    var reopenNo = (prog.cur && prog.qs[prog.cur] && !prog.qs[prog.cur].done) ? prog.cur : firstNo;
+    cnBookState.curNo = reopenNo;
+    if (!prog.qs[cnBookState.curNo]) cnBookState.curNo = firstNo;
+    var cq = art.questions.filter(function (x) { return x.no === cnBookState.curNo; })[0];
+    cnBookState.curStep = cnBookFirstUnfinishedStep(cq, prog.qs[cnBookState.curNo] || { step: {} });
+    cnRenderBook(id);
+  }
+
+  function cnRenderBook(id) {
+    var art = cnReadingById(id); if (!art) return;
+    var root = el('cnPageBook'); if (!root) return;
+    var prog = cnBookProg(id);
+    var modeLabel = art.mode === 'in' ? '课文篇' : '迁移篇';
+
+    var pHtml = '';
+    art.passage.forEach(function (p) { pHtml += '<p class="book-para">' + p.html + '</p>'; });
+    var curQ = art.questions.filter(function (q) { return q.no === cnBookState.curNo; })[0];
+    var activeStep = (curQ && curQ.steps[cnBookState.curStep] && curQ.steps[cnBookState.curStep].type === 'locate') ? cnBookState.curStep : -1;
+    if (activeStep >= 0) {
+      pHtml = pHtml.split('class="cn-mk"').join('class="cn-mk cn-mk-active"');
+      var st = (prog.qs[curQ.no] && prog.qs[curQ.no].step['' + activeStep]) ? prog.qs[curQ.no].step['' + activeStep].v : [];
+      (st || []).forEach(function (mk) {
+        var re = new RegExp('class="cn-mk cn-mk-active" data-mk="' + mk + '"');
+        pHtml = pHtml.replace(re, 'class="cn-mk cn-mk-active cn-mk-on" data-mk="' + mk + '"');
+      });
+    }
+
+    var h = '';
+    h += '<div class="book-top"><button class="book-back" onclick="CN.bookBackList()">← 篇目</button><div class="book-top-t">' + modeLabel + ' · ' + esc(art.title) + '</div></div>';
+    h += '<div class="book-meta">' + esc(art.author) + ' ｜ 建议 ' + art.time + ' 分钟 ｜ 共 ' + art.questions.length + ' 题 ｜ 满分 ' + art.total + ' 分 ｜ 已得 <b>' + cnBookArticleScore(art, prog) + '</b>/' + art.total + '</div>';
+    h += '<div class="book-passage">' + pHtml + '</div>';
+    if (activeStep >= 0) h += '<div class="book-locate-hint">👆 点文中画线句，选出本题答案所在的原句（高亮的可点，再点取消）</div>';
+    (art.notes || []).forEach(function (n) {
+      h += '<details class="book-note"><summary>📌 ' + esc(n.title) + '</summary><div class="book-note-body">' + esc(n.body) + '</div></details>';
+    });
+    h += '<div class="book-qs">';
+    art.questions.forEach(function (q) { h += cnBookQuestionHTML(art, q, prog); });
+    h += '</div>';
+    h += '<div class="book-foot"><button class="btn btn-outline" onclick="CN.bookBackList()">返回篇目</button><button class="btn btn-ghost" onclick="CN.bookExit()">退出</button></div>';
+    root.innerHTML = h;
+    window.scrollTo(0, 0);
+  }
+
+  function cnBookQuestionHTML(art, q, prog) {
+    var qp = prog.qs[q.no] || { step: {}, done: false };
+    var open = (q.no === cnBookState.curNo);
+    var labels = cnBookStepLabels();
+    var h = '<div class="book-q' + (open ? ' open' : '') + '">';
+    h += '<div class="book-q-h" onclick="CN.bookOpenQ(' + q.no + ')">';
+    h += '<span class="book-q-no">' + q.no + '</span>';
+    h += '<span class="book-q-tag">' + esc(q.tag) + '</span>';
+    h += '<span class="book-q-pts">' + q.points + '分</span>';
+    h += '<span class="book-q-st">' + (qp.done ? ('<b class="ok">' + cnBookQScore(q, qp) + '/' + q.points + '</b>') : '未做') + '</span>';
+    h += '</div>';
+    if (open) {
+      h += '<div class="book-stepbar">';
+      q.steps.forEach(function (st, si) {
+        var s = qp.step['' + si];
+        var has = s && cnBookStepHasSel(st, s.v);
+        var ok = s && s.ok;
+        var cls = 'book-step' + (si === cnBookState.curStep ? ' on' : '') + (ok ? ' ok' : (has ? ' miss' : ''));
+        h += '<button class="' + cls + '" onclick="CN.bookStep(' + q.no + ',' + si + ')">' + labels[si] + (ok ? ' ✓' : (has ? ' ·' : '')) + '</button>';
+      });
+      h += '</div>';
+      h += cnBookStepPanel(art, q, qp, cnBookState.curStep);
+      var allHave = q.steps.every(function (st, si) { var s = qp.step['' + si]; return s && cnBookStepHasSel(st, s.v); });
+      if (qp.done) h += cnBookFeedback(art, q, qp);
+      else if (allHave) h += '<button class="btn btn-primary book-finish" onclick="CN.bookFinish(' + q.no + ')">完成本题 → 看批改</button>';
+      else h += '<div class="book-tip">做完 4 步（认题型→定原文→组装→自查）后即可提交批改</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function cnBookStepPanel(art, q, qp, si) {
+    var st = q.steps[si]; if (!st) return '';
+    var saved = qp.step['' + si];
+    var v = saved ? saved.v : null;
+    var h = '<div class="book-step-panel">';
+    h += '<div class="book-step-ask"><b>' + esc(st.ask) + '</b></div>';
+    if (st.type === 'recognize') {
+      h += '<div class="options-grid two-col">';
+      st.options.forEach(function (opt, oi) {
+        var sel = (typeof v === 'number' && v === oi);
+        h += '<button class="option-btn' + (sel ? ' selected' : '') + '" onclick="CN.bookRecognize(' + q.no + ',' + si + ',' + oi + ')">' + String.fromCharCode(65 + oi) + '. ' + esc(opt) + '</button>';
+      });
+      h += '</div>';
+    } else if (st.type === 'locate') {
+      var selArr = Array.isArray(v) ? v : [];
+      h += '<div class="book-locate-sel">已选：' + (selArr.length ? selArr.join('、') : '<i>未选</i>') + '</div>';
+      h += '<div class="book-tip">▲ 在上方文章中点击画线句（高亮的可点）。可改选：再点一次取消。</div>';
+    } else if (st.type === 'assemble') {
+      var seq = Array.isArray(v) ? v : [];
+      h += '<div class="book-order-seq">';
+      if (!seq.length) h += '<span class="book-order-empty">已选顺序（空）</span>';
+      else seq.forEach(function (it, idx) { h += '<span class="book-order-chip">' + (idx + 1) + '. ' + esc(st.items[it]) + '</span>'; });
+      h += '</div>';
+      if (seq.length) h += '<div class="book-order-actions"><button class="btn btn-outline sm" onclick="CN.bookAssembleUndo(' + q.no + ',' + si + ')">↩ 撤销</button><button class="btn btn-outline sm" onclick="CN.bookAssembleClear(' + q.no + ',' + si + ')">✕ 清空</button></div>';
+      h += '<div class="options-grid wide">';
+      st.items.forEach(function (it, ii) {
+        var used = seq.indexOf(ii) >= 0;
+        h += '<button class="option-btn' + (used ? ' selected' : '') + '"' + (used ? ' disabled' : '') + ' onclick="CN.bookAssemblePick(' + q.no + ',' + si + ',' + ii + ')">' + esc(it) + '</button>';
+      });
+      h += '</div>';
+    } else if (st.type === 'selfcheck') {
+      var ck = Array.isArray(v) ? v : [];
+      h += '<div class="book-checks">';
+      st.checks.forEach(function (c, ci) {
+        var on = ck.indexOf(ci) >= 0;
+        h += '<button class="book-check' + (on ? ' on' : '') + '" onclick="CN.bookSelfCheck(' + q.no + ',' + si + ',' + ci + ')"><span class="book-check-box">' + (on ? '✓' : '') + '</span>' + esc(c) + '</button>';
+      });
+      h += '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function cnBookFeedback(art, q, qp) {
+    var labels = cnBookStepLabels();
+    var h = '<div class="book-fb">';
+    h += '<div class="book-fb-head">批改结果：本题 <b>' + cnBookQScore(q, qp) + '/' + q.points + '</b> 分</div>';
+    q.steps.forEach(function (st, si) {
+      var s = qp.step['' + si]; var ok = s && s.ok;
+      h += '<div class="book-fb-row ' + (ok ? 'ok' : 'bad') + '"><span class="book-fb-ic">' + (ok ? '✓' : '✗') + '</span><div><b>' + labels[si] + '</b>：' + esc(cnBookStepGuide(art, q, si, st, s)) + '</div></div>';
+    });
+    h += '<button class="btn btn-outline sm book-redo" onclick="CN.bookRedo(' + q.no + ')">重做本题</button>';
+    h += '</div>';
+    return h;
+  }
+  function cnBookStepGuide(art, q, si, st, s) {
+    if (s && s.ok) return '做得好！';
+    var step = q.steps[si];
+    if (step.type === 'recognize') return '这题属于【' + q.tag + '】，先判断题型再套公式。';
+    if (step.type === 'locate') return '正确定位：文中 ' + (step.targets || []).join('、') + ' 句。定位要找最能支撑答案的原句。';
+    if (step.type === 'assemble') return '正确顺序：' + (step.order || []).map(function (i) { return step.items[i]; }).join(' → ');
+    if (step.type === 'selfcheck') return '还有 ' + ((step.checks ? step.checks.length : 0) - (s && s.v ? s.v.length : 0)) + ' 条没自查到，把三问都对照一遍。';
+    return '';
+  }
+
+  function cnBookOpenQ(no) {
+    var art = cnReadingById(cnBookState.articleId); if (!art) return;
+    var prog = cnBookProg(art.id);
+    cnBookState.curNo = no;
+    var q = art.questions.filter(function (x) { return x.no === no; })[0];
+    cnBookState.curStep = cnBookFirstUnfinishedStep(q, prog.qs[no] || { step: {} });
+    cnRenderBook(art.id);
+  }
+  function cnBookStep(no, si) { cnBookState.curStep = si; cnRenderBook(cnBookState.articleId); }
+  function cnBookRecognize(no, si, oi) {
+    var art = cnReadingById(cnBookState.articleId); var prog = cnBookProg(art.id);
+    var q = art.questions.filter(function (x) { return x.no === no; })[0];
+    var qp = prog.qs[no] || (prog.qs[no] = { step: {}, done: false });
+    qp.step['' + si] = { v: oi, ok: (q.steps[si].answer === oi) };
+    cnBookPersist(art.id, prog); cnRenderBook(art.id);
+  }
+  function cnBookLocate(mk) {
+    var art = cnReadingById(cnBookState.articleId); if (!art) return;
+    var q = art.questions.filter(function (x) { return x.no === cnBookState.curNo; })[0]; if (!q) return;
+    var st = q.steps[cnBookState.curStep];
+    if (!st || st.type !== 'locate') { cnToast('请先点开本题的「定原文」步骤，再点文中画线句'); return; }
+    var prog = cnBookProg(art.id);
+    var qp = prog.qs[q.no] || (prog.qs[q.no] = { step: {}, done: false });
+    var s = qp.step['' + cnBookState.curStep] || (qp.step['' + cnBookState.curStep] = { v: [], ok: false });
+    var arr = Array.isArray(s.v) ? s.v.slice() : [];
+    var at = arr.indexOf(mk); if (at >= 0) arr.splice(at, 1); else arr.push(mk);
+    s.v = arr; s.ok = cnSetEq(arr, st.targets || []);
+    cnBookPersist(art.id, prog); cnRenderBook(art.id);
+  }
+  function cnBookAssemblePick(no, si, ii) {
+    var art = cnReadingById(cnBookState.articleId); var prog = cnBookProg(art.id);
+    var q = art.questions.filter(function (x) { return x.no === no; })[0];
+    var qp = prog.qs[no] || (prog.qs[no] = { step: {}, done: false });
+    var s = qp.step['' + si] || (qp.step['' + si] = { v: [], ok: false });
+    var arr = Array.isArray(s.v) ? s.v.slice() : [];
+    if (arr.indexOf(ii) < 0) arr.push(ii);
+    s.v = arr; s.ok = cnArrEq(arr, q.steps[si].order || []);
+    cnBookPersist(art.id, prog); cnRenderBook(art.id);
+  }
+  function cnBookAssembleUndo(no, si) {
+    var art = cnReadingById(cnBookState.articleId); var prog = cnBookProg(art.id);
+    var q = art.questions.filter(function (x) { return x.no === no; })[0];
+    var qp = prog.qs[no] || (prog.qs[no] = { step: {}, done: false });
+    var s = qp.step['' + si] || (qp.step['' + si] = { v: [], ok: false });
+    var arr = Array.isArray(s.v) ? s.v.slice() : [];
+    if (arr.length) arr.pop();
+    s.v = arr; s.ok = cnArrEq(arr, q.steps[si].order || []);
+    cnBookPersist(art.id, prog); cnRenderBook(art.id);
+  }
+  function cnBookAssembleClear(no, si) {
+    var art = cnReadingById(cnBookState.articleId); var prog = cnBookProg(art.id);
+    var qp = prog.qs[no] || (prog.qs[no] = { step: {}, done: false });
+    qp.step['' + si] = { v: [], ok: false };
+    cnBookPersist(art.id, prog); cnRenderBook(art.id);
+  }
+  function cnBookSelfCheck(no, si, ci) {
+    var art = cnReadingById(cnBookState.articleId); var prog = cnBookProg(art.id);
+    var q = art.questions.filter(function (x) { return x.no === no; })[0];
+    var qp = prog.qs[no] || (prog.qs[no] = { step: {}, done: false });
+    var s = qp.step['' + si] || (qp.step['' + si] = { v: [], ok: false });
+    var arr = Array.isArray(s.v) ? s.v.slice() : [];
+    var at = arr.indexOf(ci); if (at >= 0) arr.splice(at, 1); else arr.push(ci);
+    s.v = arr; s.ok = (arr.length === (q.steps[si].checks || []).length);
+    cnBookPersist(art.id, prog); cnRenderBook(art.id);
+  }
+  function cnBookFinish(no) {
+    var art = cnReadingById(cnBookState.articleId); var prog = cnBookProg(art.id);
+    var q = art.questions.filter(function (x) { return x.no === no; })[0];
+    var qp = prog.qs[no] || (prog.qs[no] = { step: {}, done: false });
+    q.steps.forEach(function (st, si) {
+      var s = qp.step['' + si];
+      if (!s) { s = qp.step['' + si] = { v: null, ok: false }; }
+      else { s.ok = cnBookGradeStep(st, s.v).ok; }
+    });
+    qp.done = true; qp.score = cnBookQScore(q, qp);
+    var wrongSteps = [];
+    q.steps.forEach(function (st, si) { var s = qp.step['' + si]; if (!s || !s.ok) wrongSteps.push(st.type); });
+    if (wrongSteps.length) cnBookMirrorWrong(art, q, wrongSteps);
+    prog.cur = no;
+    cnBookPersist(art.id, prog);
+    cnToast('本题 ' + qp.score + '/' + q.points + ' 分');
+    cnRenderBook(art.id);
+  }
+  function cnBookRedo(no) {
+    var art = cnReadingById(cnBookState.articleId); var prog = cnBookProg(art.id);
+    prog.qs[no] = { step: {}, done: false }; cnBookPersist(art.id, prog);
+    cnBookState.curStep = 0; cnRenderBook(art.id);
+  }
+  function cnBookMirrorWrong(art, q, wrongSteps) {
+    var fm = cnFormulaByKey(q.k);
+    cnAddWrong({
+      question: art.title + ' · ' + q.tag + '（第' + q.no + '题）',
+      answer: '套公式：' + (fm ? fm.t : q.tag),
+      section: '专项·阅读实战（书本式）',
+      module: '语文',
+      group: art.group, article: art.id, qno: q.no,
+      wrongStep: wrongSteps.join(',')
+    }, '薄弱步骤：' + wrongSteps.join(','));
+  }
+  function cnBookBackList() { cnBookState.articleId = null; cnRenderBookHome(); }
+  function cnBookExit() { cnHideBookPage(); }
+
   window.CN = {
     _lastUnitIdx: 0,
     _lastUnitDiff: 0,
@@ -5577,6 +5933,21 @@ function cn5x8_pool() {
     removeWrong: cnRemoveWrong,
     clearWrong: cnClearWrong,
     formulas: CN_FORMULAS,
+    // v120：专项·阅读实战（书本式）入口与互动
+    beginBook: cnBeginBookReading,
+    bookOpenArticle: cnOpenArticle,
+    bookOpenQ: cnBookOpenQ,
+    bookStep: cnBookStep,
+    bookRecognize: cnBookRecognize,
+    bookLocate: cnBookLocate,
+    bookAssemblePick: cnBookAssemblePick,
+    bookAssembleUndo: cnBookAssembleUndo,
+    bookAssembleClear: cnBookAssembleClear,
+    bookSelfCheck: cnBookSelfCheck,
+    bookFinish: cnBookFinish,
+    bookRedo: cnBookRedo,
+    bookBackList: cnBookBackList,
+    bookExit: cnBookExit,
     data: CN_DATA,
   };
 })();

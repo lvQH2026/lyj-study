@@ -1117,6 +1117,7 @@
   PC.startCnUnit = function (idx) {
     const units = unitsOf();
     const u = units[idx];
+    if (u && u.type === 'bookread') { if (CN.beginBook) CN.beginBook(idx); return; }
     if (!u || !u.pool) { toast('该单元暂无题目'); return; }
     if (typeof openPracticeSettings !== 'function') { startCnUnitWithDiff(idx, 0); return; }
     openPracticeSettings({
