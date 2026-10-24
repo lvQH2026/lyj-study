@@ -5722,8 +5722,12 @@ function cn5x8_pool() {
       h += cnBookStepPanel(art, q, qp, cnBookState.curStep);
       var allHave = q.steps.every(function (st, si) { var s = qp.step['' + si]; return s && cnBookStepHasSel(st, s.v); });
       if (qp.done) h += cnBookFeedback(art, q, qp);
-      else if (allHave) h += '<button class="btn btn-primary book-finish" onclick="CN.bookFinish(' + q.no + ')">完成本题 → 看批改</button>';
-      else h += '<div class="book-tip">做完 4 步（认题型→定原文→组装→自查）后即可提交批改</div>';
+      else if (allHave) h += '<button class="btn btn-primary book-finish" onclick="CN.bookFinish(' + q.no + ')">✅ 提交答案 · 看批改</button>';
+      else {
+        var missLabels = [];
+        q.steps.forEach(function (st, si) { var s = qp.step['' + si]; if (!s || !cnBookStepHasSel(st, s.v)) missLabels.push(labels[si]); });
+        h += '<div class="book-tip">本题答案分 4 步作答：还差 <b>' + missLabels.join(' → ') + '</b>。4 步都选完后，点下方出现的<b>「✅ 提交答案 · 看批改」</b>按钮交卷。</div>';
+      }
     }
     h += '</div>';
     return h;
