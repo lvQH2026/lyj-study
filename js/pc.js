@@ -1086,7 +1086,10 @@
     let qs;
     if (unit.paper) { let arr = unit.gen(); qs = Array.isArray(arr) ? arr : [arr]; }
     else if (typeof buildUnitQuizQuestions === 'function') {
-      var _want = (unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : ((typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 30);
+      // v125：优先用单元显式 quizLength（与移动端 beginUnitQuiz 同口径），
+      // 否则兼容旧「分数应用题=20」特例，再退回 UNIT_QUIZ_LENGTH/默认 30。
+      // 修复 PC 端无视 quizLength 把「专项·圆的阴影部分」「专项·约分」等 20 题单元强行拉成 30 题的版本不一致。
+      var _want = unit.quizLength || ((unit.name && unit.name.indexOf('分数应用题') >= 0) ? 20 : ((typeof UNIT_QUIZ_LENGTH === 'number') ? UNIT_QUIZ_LENGTH : 30));
       qs = buildUnitQuizQuestions(unit, diff || 1, _want);
     } else {
       const first = unit.gen();
