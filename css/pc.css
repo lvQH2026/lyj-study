@@ -412,6 +412,14 @@ a { color: inherit; }
 .pc-feedback .fb-ans { font-weight: 700; }
 .pc-feedback .fb-exp { display: block; margin-top: 7px; color: var(--ink-2); font-size: 13px; }
 
+/* ---------- v126：提示模式下的题库解析（圆阴影专项等自带公式型 explain 的题） ---------- */
+.pc-fb-exp {
+  display: block; margin-top: 10px; padding: 12px 14px; border-radius: 10px;
+  background: #F7F4EC; border: 1px solid #E7DFCD; color: var(--ink-2);
+  font-size: 13px; line-height: 1.75;
+}
+.pc-fb-exp b { color: #6B4F1F; margin-right: 4px; }
+
 /* ---------- 苏格拉底引导提示（答错先引导，再揭晓） ---------- */
 .pc-socratic {
   margin-top: 20px; padding: 18px 20px; border-radius: var(--radius);

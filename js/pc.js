@@ -1374,6 +1374,9 @@
         h += '<div class="ps-tip">先想一想再改答案；实在想不出可以点「看答案」揭晓。</div>';
         h += '</div>';
       }
+      // v126：题库自带的公式型解析（如圆阴影专项）在提示模式下同样要显示——
+      //      答错那一刻，正是最需要看到「这题该套哪个公式」的时候。
+      if (res.explain) h += '<div class="pc-fb-exp"><b>📘 解析</b> ' + esc(res.explain) + '</div>';
     } else if (res) {
       h += '<div class="pc-feedback show ' + (res.correct ? 'ok' : 'bad') + '">';
       h += res.correct ? '✓ 回答正确' : (res.revealed ? '✗ 已揭晓答案' : '✗ 回答错误');
@@ -1525,7 +1528,9 @@
           hints: [],
           hintStep: 0,
           aiLoading: true,
-          aiGuide: null
+          aiGuide: null,
+          // v126：带上题库自带解析（explain），提示模式下渲染
+          explain: (item && item.explain) ? item.explain : ''
         };
         q.userAnswers[i] = ua;
         renderQuiz();
