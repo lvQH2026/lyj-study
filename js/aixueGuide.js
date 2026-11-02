@@ -27,6 +27,11 @@
   function detectConceptJunior(text) {
     const t = text || '';
 
+    /* v126：圆与组合图形的阴影面积/周长——必须排在所有检测之前。
+       专项·圆的阴影部分的题面含「半径/圆周率/三角形」等词，
+       会被后面的通用规则（circle / triangleAngle 等）抢先命中而拿不到本专项公式卡。 */
+    if (/阴影/.test(t) && /(面积|周长|平方厘米)/.test(t) && /(圆|跑道|扇环|四叶草|月牙|组合|四角)/.test(t)) return 'circle_shade';
+
     /* ===== 数学 · 七年级上 ===== */
     if (/简便运算|简便计算|简便方法|乘法交换|乘法结合|乘法分配|凑整/.test(t)) return 'rational_multiply_simple';
     if (/数轴|相反数|绝对值/.test(t)) return 'rational_basic';
@@ -169,6 +174,9 @@
     if (/图表|曲线图|坐标图/.test(t)) return 'bio_graph';
 
     /* ===== 小学（复用旧 CONCEPT_HINTS 概念） ===== */
+    // v126：圆与组合图形的阴影面积/周长必须排在通用「圆」检测之前，
+    //       否则会被下面的 半径|圆周率 抢先命中、拿不到本专项的公式卡。
+    if (/阴影/.test(t) && /(面积|周长|平方厘米)/.test(t) && /(圆|跑道|扇环|四叶草|月牙|组合|四角)/.test(t)) return 'circle_shade';
     if (/直径|半径|圆心|圆周率/.test(t)) return 'circle';
     if (/(圆面积|圆的面积)/.test(t)) return 'circleArea';
     if (/(圆周长|圆的周长|周长.*圆)/.test(t)) return 'circlePerim';
